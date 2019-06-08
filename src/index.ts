@@ -52,8 +52,7 @@ const reducer = async (event:InternalEvent, state:State): Promise<void> => {
   return Promise.resolve();
 }
 
-
-const withinConnection = async (fn: (client: PoolClient) => Promise<unknown>): ReturnType<typeof fn> => {
+const withinConnection = async <T>(fn: (client: PoolClient) => T): Promise<T> => {
   const connection = await pool.connect();
   try {
     return await fn(connection);
@@ -71,8 +70,8 @@ export const createApp = () => {
         VALUES ('${event.type}', '${JSON.stringify(event.payload)}')
         RETURNING *;
       `);
-      return result.rows[0];
-    }) as InternalEvent;
+      return result.rows[0] as InternalEvent;
+    });
 
     await reducer(internalEvent, state);
     return internalEvent.id;
