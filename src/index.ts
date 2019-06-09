@@ -1,4 +1,4 @@
-import { withinTransaction, WithinConnection } from './db';
+import { withinTransaction, WithinConnection, DBClient } from './db';
 type EventId = string;
 export type SingleEvent<Type, Payload> = {
   type: Type,
@@ -22,40 +22,48 @@ type State = {
   users: User[]
 }
 
-const reducer = async (event:InternalEvent, state:State): Promise<void> => {
+const reducer = async (event:InternalEvent, client:DBClient): Promise<void> => {
   switch (event.type) {
     case 'user/created':
-      state.users.push(event.payload);
+      await client.query({
+        text: `
+          insert into Users (id, name)
+          VALUES ($1, $2)
+        `,
+        values: [event.payload.id, event.payload.name]
+      }); break;
     case 'user/updated':
-      const updateUser = state.users.find((user) => user.id === event.payload.id);
-      if (updateUser) {
-        updateUser.name = event.payload.name
-      }
+      await client.query({
+        text: `update Users SET name = $2 where id = $1`,
+        values: [event.payload.id, event.payload.name]
+      }); break;
     case 'user/deleted':
-      const nextUsers = state.users.filter((user) => user.id === event.payload.id);
-      state.users = nextUsers;
+      await client.query({
+        text: `delete from Users where id = $1`,
+        values: [event.payload.id]
+      }); break;
   }
 
   return Promise.resolve();
 }
 
+const insertEvent = async (client: DBClient, event: AllEvents) => {
+  const result = await client.query(`
+    INSERT INTO events (type, payload)
+    VALUES ('${event.type}', '${JSON.stringify(event.payload)}')
+    RETURNING *;
+  `);
+  return result.rows[0] as InternalEvent;
+}
+
 export const createApp = (withinConnection: WithinConnection = withinTransaction) => {
   const state: State = { users: [] }
   const publish = async (event:AllEvents): Promise<EventId> => {
-    const internalEvent = await withinConnection(async ({ client }) => {
-      const result = await client.query(`
-        INSERT INTO events (type, payload)
-        VALUES ('${event.type}', '${JSON.stringify(event.payload)}')
-        RETURNING *;
-      `);
-      return result.rows[0] as InternalEvent;
+    return withinConnection(async ({ client }) => {
+      const internalEvent = await insertEvent(client, event);
+      await reducer(internalEvent, client)
+      return internalEvent.id;
     });
-
-    await withinConnection(async ({ client }) => {
-      await reducer(internalEvent, state);
-    });
-
-    return internalEvent.id;
   }
 
   const read = () => state;
