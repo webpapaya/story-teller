@@ -1,7 +1,8 @@
 import { createApp } from ".";
+import { t } from "./db";
 
-it('create user', async () => {
-  const app = createApp();
+it('create user', t(async (withinConnection) => {
+  const app = createApp(withinConnection);
   await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
-  console.log(app.read());
-})
+}))
+

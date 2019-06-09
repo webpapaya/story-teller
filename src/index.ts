@@ -1,17 +1,4 @@
-import { Pool, PoolClient, Connection } from 'pg';
-
-const pool = new Pool({
-  host: 'localhost',
-  user: 'dbuser',
-  password: 'password',
-  database: 'compup',
-  port: 5432,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
-
-
+import { withinTransaction, WithinConnection } from './db';
 type EventId = string;
 export type SingleEvent<Type, Payload> = {
   type: Type,
@@ -52,19 +39,10 @@ const reducer = async (event:InternalEvent, state:State): Promise<void> => {
   return Promise.resolve();
 }
 
-const withinConnection = async <T>(fn: (client: PoolClient) => T): Promise<T> => {
-  const connection = await pool.connect();
-  try {
-    return await fn(connection);
-  } finally {
-    await connection.release();
-  }
-}
-
-export const createApp = () => {
+export const createApp = (withinConnection: WithinConnection = withinTransaction) => {
   const state: State = { users: [] }
   const publish = async (event:AllEvents): Promise<EventId> => {
-    const internalEvent = await withinConnection(async (client) => {
+    const internalEvent = await withinConnection(async ({ client }) => {
       const result = await client.query(`
         INSERT INTO events (type, payload)
         VALUES ('${event.type}', '${JSON.stringify(event.payload)}')
@@ -73,7 +51,10 @@ export const createApp = () => {
       return result.rows[0] as InternalEvent;
     });
 
-    await reducer(internalEvent, state);
+    await withinConnection(async ({ client }) => {
+      await reducer(internalEvent, state);
+    });
+
     return internalEvent.id;
   }
 
