@@ -1,5 +1,4 @@
 import { Pool, PoolClient } from 'pg';
-import { AsyncFunc } from 'mocha';
 
 const pool = new Pool({
   host: 'localhost',

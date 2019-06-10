@@ -33,6 +33,22 @@ describe('user', () => {
   }));
 });
 
+describe('stamp', () => {
+  it('create', t(async (withinConnection) => {
+    const app = createApp(withinConnection);
+    await app.publish({ type: 'stamp/created', payload: {
+      id: 1,
+      timestamp: '2000-01-01:01:00:00+01:00',
+      type: 'Start',
+    } });
+
+    await withinConnection(async ({ client }) => {
+      const result = await client.query(`select * from Stamps where id = 1;`);
+      expect(result.rows.length).toEqual(1);
+    });
+  }));
+});
+
 it('rebuild aggregates', t(async (withinConnection) => {
   const app = createApp(withinConnection);
   await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
