@@ -30,3 +30,14 @@ it('delete user', t(async (withinConnection) => {
     expect(result.rows[0]).toEqual(undefined);
   });
 }));
+
+it('rebuild aggregates', t(async (withinConnection) => {
+  const app = createApp(withinConnection);
+  await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
+  await app.publish({ type: 'user/created', payload: { id: 2, name: 'Test'} });
+  await app.rebuildAggregates();
+  await withinConnection(async ({ client }) => {
+    const result = await client.query(`select * from Users where id = 1;`);
+    expect(result.rows[0].name).toEqual('Test');
+  });
+}));

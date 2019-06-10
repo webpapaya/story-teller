@@ -1,4 +1,5 @@
 import { withinTransaction, WithinConnection, DBClient } from './db';
+import QueryStream from 'pg-query-stream';
 type EventId = string;
 export type SingleEvent<Type, Payload> = {
   type: Type,
@@ -22,24 +23,24 @@ type State = {
   users: User[]
 }
 
-const reducer = async (event:InternalEvent, client:DBClient): Promise<void> => {
+const reducer = async (event:InternalEvent, client:DBClient, replay: boolean = false): Promise<void> => {
   switch (event.type) {
     case 'user/created':
       await client.query({
         text: `
-          insert into Users (id, name)
+          insert into Users${replay ? '_Copy' : '' } (id, name)
           VALUES ($1, $2)
         `,
         values: [event.payload.id, event.payload.name]
       }); break;
     case 'user/updated':
       await client.query({
-        text: `update Users SET name = $2 where id = $1`,
+        text: `update Users${replay ? '_Copy' : '' } SET name = $2 where id = $1`,
         values: [event.payload.id, event.payload.name]
       }); break;
     case 'user/deleted':
       await client.query({
-        text: `delete from Users where id = $1`,
+        text: `delete from Users${replay ? '_Copy' : '' } where id = $1`,
         values: [event.payload.id]
       }); break;
   }
@@ -56,6 +57,8 @@ const insertEvent = async (client: DBClient, event: AllEvents) => {
   return result.rows[0] as InternalEvent;
 }
 
+
+
 export const createApp = (withinConnection: WithinConnection = withinTransaction) => {
   const state: State = { users: [] }
   const publish = async (event:AllEvents): Promise<EventId> => {
@@ -66,7 +69,30 @@ export const createApp = (withinConnection: WithinConnection = withinTransaction
     });
   }
 
-  const read = () => state;
 
-  return { publish, read };
+
+  const read = () => state;
+  const rebuildAggregates = () => {
+    return withinConnection(async ({ client }) => {
+      client.query(`
+        CREATE TABLE Users_Copy AS
+        TABLE Users
+        WITH NO DATA;
+      `);
+      await new Promise((resolve) => {
+        const query = new QueryStream('SELECT * FROM events');
+        const stream = client.query(query);
+        stream.on('data', (event) => {
+          reducer(event as InternalEvent, client, true)
+        })
+        stream.on('end', resolve)
+      });
+
+      await client.query(`ALTER TABLE Users RENAME TO Users_Deleted`);
+      await client.query(`ALTER TABLE Users_Copy RENAME TO Users`);
+      await client.query(`DROP TABLE Users_Deleted`);
+    });
+  };
+
+  return { publish, read, rebuildAggregates };
 }
