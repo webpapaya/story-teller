@@ -1,4 +1,5 @@
-import { Pool, PoolClient } from 'pg';
+import pg, { Pool, PoolClient } from 'pg';
+import { ZonedDateTime, LocalDate, LocalTime, ZoneOffset } from 'js-joda';
 
 const pool = new Pool({
   host: 'localhost',
@@ -9,7 +10,19 @@ const pool = new Pool({
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
+
 });
+
+pg.types.setTypeParser(1184, (dateTimeAsString) => {
+  if (!dateTimeAsString) { return null; }
+  const [date, timeWithZone] = dateTimeAsString.split(' ');
+  return ZonedDateTime.of(
+    LocalDate.parse(date),
+    LocalTime.parse(timeWithZone.slice(0, 8)),
+    ZoneOffset.UTC,
+  );
+});
+
 
 export type DBClient = PoolClient;
 export type WithinConnection = <T>(fn: (deps: TransactionParams) => T) => Promise<T>;

@@ -1,4 +1,5 @@
 import QueryStream from 'pg-query-stream';
+import { ZonedDateTime } from 'js-joda';
 import { withinTransaction, WithinConnection, DBClient } from './db';
 
 type EventId = string;
@@ -20,7 +21,7 @@ type StampTypes =
 export type Stamp = {
   id: number
   type: StampTypes
-  timestamp: string
+  timestamp: ZonedDateTime,
   location?: string
   note?: string
 }

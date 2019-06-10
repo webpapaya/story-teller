@@ -1,6 +1,9 @@
 import expect from "expect";
 import { createApp } from ".";
 import { t } from "./db";
+import { ZonedDateTime } from "js-joda";
+
+
 
 describe('user', () => {
   it('create', t(async (withinConnection) => {
@@ -34,11 +37,11 @@ describe('user', () => {
 });
 
 describe('stamp', () => {
-  it('create', t(async (withinConnection) => {
+  it.only('create', t(async (withinConnection) => {
     const app = createApp(withinConnection);
     await app.publish({ type: 'stamp/created', payload: {
       id: 1,
-      timestamp: '2000-01-01:01:00:00+01:00',
+      timestamp: ZonedDateTime.parse('2000-01-01T01:00:10+10:00'),
       type: 'Start',
     } });
 
