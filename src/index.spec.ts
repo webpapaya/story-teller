@@ -3,8 +3,6 @@ import { createApp } from ".";
 import { t } from "./db";
 import { ZonedDateTime } from "js-joda";
 
-
-
 describe('user', () => {
   it('create', t(async (withinConnection) => {
     const app = createApp(withinConnection);
@@ -37,7 +35,7 @@ describe('user', () => {
 });
 
 describe('stamp', () => {
-  it.only('create', t(async (withinConnection) => {
+  it('create', t(async (withinConnection) => {
     const app = createApp(withinConnection);
     await app.publish({ type: 'stamp/created', payload: {
       id: 1,
@@ -50,9 +48,21 @@ describe('stamp', () => {
       expect(result.rows.length).toEqual(1);
     });
   }));
+
+  it('replace event', t(async (withinConnection) => {
+    const app = createApp(withinConnection);
+    const eventId = await app.publish({ type: 'stamp/created', payload: {
+      id: 1,
+      timestamp: ZonedDateTime.parse('2000-01-01T01:00:10+10:00'),
+      type: 'Start',
+      note: 'test',
+    } });
+
+    await app.replaceEvent(eventId, { note: 'updated' });
+  }));
 });
 
-it('rebuild aggregates', t(async (withinConnection) => {
+it.skip('rebuild aggregates', t(async (withinConnection) => {
   const app = createApp(withinConnection);
   await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
   await app.publish({ type: 'user/created', payload: { id: 2, name: 'Test'} });
@@ -62,3 +72,4 @@ it('rebuild aggregates', t(async (withinConnection) => {
     expect(result.rows[0].name).toEqual('Test');
   });
 }));
+

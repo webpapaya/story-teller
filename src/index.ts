@@ -100,18 +100,76 @@ export const createApp = (withinConnection: WithinConnection = withinTransaction
     });
   }
 
+  const replaceEvent = (eventId: EventId, payload: object) => {
+    return withinConnection(async ({ client }) => {
+      const eventToBeReplaced = await client.query(`
+        SELECT * FROM Events WHERE id = $1
+      `, [eventId]);
+      const event = eventToBeReplaced.rows[0];
+      const internalEvent: InternalEvent = {
+        ...event,
+        payload: { ...event.payload, ...payload }
+      };
 
+      const newEvent = await insertEvent(client, internalEvent);
+      await client.query(`
+        Update Events
+        SET payload = null, replaced_by = $1
+        WHERE id = $2
+      `, [newEvent.id, eventId]);
+
+      await rebuildAggregates();
+    });
+  }
 
   const read = () => state;
   const rebuildAggregates = () => {
     return withinConnection(async ({ client }) => {
-      client.query(`
-        CREATE TABLE Users_Copy AS
-        TABLE Users
-        WITH NO DATA;
-      `);
+      await Promise.all(['Users', 'Stamps'].map(async (schemaName) => {
+        await client.query(`
+          CREATE TABLE ${schemaName}_Copy AS
+          TABLE ${schemaName}
+          WITH NO DATA;
+        `);
+      }));
+
       await new Promise((resolve) => {
-        const query = new QueryStream('SELECT * FROM events');
+        const query = new QueryStream(`
+          WITH RECURSIVE menu_tree (
+            id,
+            type,
+            payload,
+            replaced_by,
+            created_at
+          ) AS (
+            SELECT
+              id,
+              type,
+              payload,
+              replaced_by,
+              created_at
+            FROM events
+            WHERE replaced_by is not null
+          UNION ALL
+            SELECT
+              mt.id,
+              mn.type,
+              mn.payload,
+              mn.replaced_by,
+              mn.created_at
+            FROM events mn, menu_tree mt
+            WHERE mt.replaced_by = mn.id
+          ) SELECT DISTINCT on (id)
+              id,
+              last_value(payload) OVER wnd,
+              first_value(type) OVER wnd,
+              first_value(created_at) over wnd
+            FROM menu_tree
+            WINDOW wnd AS (
+            PARTITION BY id ORDER BY created_at
+            ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+          );
+        `);
         const stream = client.query(query);
         stream.on('data', (event) => {
           reducer(event as InternalEvent, client, true)
@@ -119,11 +177,14 @@ export const createApp = (withinConnection: WithinConnection = withinTransaction
         stream.on('end', resolve)
       });
 
-      await client.query(`ALTER TABLE Users RENAME TO Users_Deleted`);
-      await client.query(`ALTER TABLE Users_Copy RENAME TO Users`);
-      await client.query(`DROP TABLE Users_Deleted`);
+
+      await Promise.all(['Users', 'Stamps'].map(async (schemaName) => {
+        await client.query(`ALTER TABLE ${schemaName} RENAME TO ${schemaName}_Deleted`);
+        await client.query(`ALTER TABLE ${schemaName}_Copy RENAME TO ${schemaName}`);
+        await client.query(`DROP TABLE ${schemaName}_Deleted`);
+      }));
     });
   };
 
-  return { publish, read, rebuildAggregates };
+  return { publish, read, rebuildAggregates, replaceEvent };
 }
