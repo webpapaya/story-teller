@@ -1,5 +1,8 @@
 import pg, { Pool, PoolClient } from 'pg';
+// @ts-ignore
+import pgCamelCase from 'pg-camelcase';
 import { ZonedDateTime, LocalDate, LocalTime, ZoneOffset } from 'js-joda';
+pgCamelCase.inject(pg);
 
 const pool = new Pool({
   host: 'localhost',
