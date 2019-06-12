@@ -81,6 +81,23 @@ export const withinRollbackTransaction: WithinConnection = async (fn) => {
   })
 }
 
+type WithinNamespace = <T>(namespace: string, client: DBClient, fn: () => T) => Promise<T>;
+export const withinNamespace: WithinNamespace = async (namespace, client, fn) => {
+  const searchPath = (await client.query('show search_path')).rows[0].searchPath;
+  try {
+    await client.query(`
+      create schema ${namespace};
+      SET search_path = ${namespace},${searchPath};
+    `);
+    return await fn();
+  } finally {
+    await client.query(`
+      SET search_path = ${searchPath};
+      drop schema if exists ${namespace};
+    `);
+  }
+}
+
 type WithinConnectionForTesting = (fn: (params: WithinConnection) => any) => () => any;
 export const t: WithinConnectionForTesting = (fn) => async () => {
   return await withinConnection(async (params) => {
