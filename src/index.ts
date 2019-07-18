@@ -1,82 +1,55 @@
 import QueryStream from 'pg-query-stream';
-import { ZonedDateTime } from 'js-joda';
 import { withinTransaction, WithinConnection, DBClient, withinNamespace } from './db';
+import { EventId } from './types';
+import { AllEvents, InternalEvent, Reducers } from './domain';
 
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
-type EventId = string;
-export type SingleEvent<Type, Payload> = {
-  type: Type,
-  payload: Payload,
-  replacedBy?: number
-}
-
-export type User = {
-  id: number,
-  name: string
-}
-
-type StampTypes =
-  | 'Start'
-  | 'Break'
-  | 'Stop'
-
-export type Stamp = {
-  id: number
-  type: StampTypes
-  timestamp: ZonedDateTime,
-  location?: string
-  note?: string
-}
-
-type AllEvents =
-  | SingleEvent<'stamp/created', Omit<Stamp, 'id'>>
-  | SingleEvent<'user/created', User>
-  | SingleEvent<'user/updated', User>
-  | SingleEvent<'user/deleted', Pick<User, 'id'>>
-
-type InternalEvent = { id: EventId } & AllEvents;
-
-type Events = AllEvents[]
-type State = {
-  users: User[]
-}
-
-const reducer = async (event:InternalEvent, client:DBClient, replay: boolean = false): Promise<void> => {
-  if(!event.payload) { return; }
-  switch (event.type) {
-    case 'user/created':
-      await client.query({
-        text: `
-          insert into Users (id, name)
-          VALUES ($1, $2)
-        `,
-        values: [event.payload.id, event.payload.name]
-      }); break;
-    case 'user/updated':
-      await client.query({
-        text: `update Users SET name = $2 where id = $1`,
-        values: [event.payload.id, event.payload.name]
-      }); break;
-    case 'user/deleted':
-      await client.query({
-        text: `delete from Users where id = $1`,
-        values: [event.payload.id]
-      }); break;
-    case 'stamp/created':
+const reducers:Reducers = {
+  users: async (event, client) => {
+    switch (event.type) {
+      case 'user/created':
         await client.query({
           text: `
-            insert into Stamps
-            (type, timestamp, location, note)
-            VALUES ($1, $2, $3, $4)
+            insert into Users (id, name)
+            VALUES ($1, $2)
           `,
-          values: [
-            event.payload.type,
-            event.payload.timestamp,
-            event.payload.location,
-            event.payload.note
-          ]
+          values: [event.payload.id, event.payload.name]
         }); break;
+      case 'user/updated':
+        await client.query({
+          text: `update Users SET name = $2 where id = $1`,
+          values: [event.payload.id, event.payload.name]
+        }); break;
+      case 'user/deleted':
+        await client.query({
+          text: `delete from Users where id = $1`,
+          values: [event.payload.id]
+        }); break;
+    }
+  },
+  stamps: async (event, client) => {
+    switch (event.type) {
+      case 'stamp/created':
+          await client.query({
+            text: `
+              insert into Stamps
+              (type, timestamp, location, note)
+              VALUES ($1, $2, $3, $4)
+            `,
+            values: [
+              event.payload.type,
+              event.payload.timestamp,
+              event.payload.location,
+              event.payload.note
+            ]
+          }); break;
+    }
   }
+}
+
+const reducer = async (event:InternalEvent, client:DBClient): Promise<void> => {
+  await Promise.all(Object.keys(reducers).map((name) => {
+    return reducers[name](event, client);
+  }));
 }
 
 const insertEvent = async (client: DBClient, event: AllEvents) => {
@@ -85,11 +58,11 @@ const insertEvent = async (client: DBClient, event: AllEvents) => {
     VALUES ('${event.type}', '${JSON.stringify(event.payload)}')
     RETURNING *;
   `);
+
   return result.rows[0] as InternalEvent;
 }
 
 export const createApp = (withinConnection: WithinConnection = withinTransaction) => {
-  const state: State = { users: [] }
   const publish = async (event:AllEvents): Promise<EventId> => {
     return withinConnection(async ({ client }) => {
       const internalEvent = await insertEvent(client, event);
@@ -112,7 +85,7 @@ export const createApp = (withinConnection: WithinConnection = withinTransaction
         Update Events
         SET payload = null, replaced_by = $1
         WHERE id = $2
-        returning *
+        RETURNING *
       `, [newEvent.id, eventId]);
 
       await rebuildAggregates();
@@ -123,7 +96,7 @@ export const createApp = (withinConnection: WithinConnection = withinTransaction
   const rebuildAggregates = () => {
     return withinConnection(async ({ client }) => {
       return withinNamespace('rebuild_aggregates', client, async () => {
-        await Promise.all(['Users', 'Stamps'].map(async (schemaName) => {
+        await Promise.all(Object.keys(reducers).map(async (schemaName) => {
           await client.query(`
             CREATE TABLE ${schemaName} AS
             TABLE ${schemaName}
@@ -169,10 +142,10 @@ export const createApp = (withinConnection: WithinConnection = withinTransaction
 
         const stream = client.query(query);
         for await (const event of stream) {
-          await reducer(event as InternalEvent, client, true)
+          await reducer(event as InternalEvent, client)
         }
 
-        await Promise.all(['Users', 'Stamps'].map(async (tableName) => {
+        await Promise.all(Object.keys(reducers).map(async (tableName) => {
           await client.query(`
             ALTER TABLE ${tableName} RENAME TO ${tableName}_copy;
             ALTER TABLE ${tableName}_copy SET SCHEMA public;
