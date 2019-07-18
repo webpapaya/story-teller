@@ -1,78 +1,37 @@
 import QueryStream from 'pg-query-stream';
 import { withinTransaction, WithinConnection, DBClient, withinNamespace } from './db';
-import { EventId } from './types';
-import { AllEvents, InternalEvent, Reducers } from './domain';
+import { EventId, GenericEvent, UnboundReducers, Config } from './types';
 
-const reducers:Reducers = {
-  users: async (event, client) => {
-    switch (event.type) {
-      case 'user/created':
-        await client.query({
-          text: `
-            insert into Users (id, name)
-            VALUES ($1, $2)
-          `,
-          values: [event.payload.id, event.payload.name]
-        }); break;
-      case 'user/updated':
-        await client.query({
-          text: `update Users SET name = $2 where id = $1`,
-          values: [event.payload.id, event.payload.name]
-        }); break;
-      case 'user/deleted':
-        await client.query({
-          text: `delete from Users where id = $1`,
-          values: [event.payload.id]
-        }); break;
-    }
-  },
-  stamps: async (event, client) => {
-    switch (event.type) {
-      case 'stamp/created':
-          await client.query({
-            text: `
-              insert into Stamps
-              (type, timestamp, location, note)
-              VALUES ($1, $2, $3, $4)
-            `,
-            values: [
-              event.payload.type,
-              event.payload.timestamp,
-              event.payload.location,
-              event.payload.note
-            ]
-          }); break;
-    }
+export function createApp<T extends GenericEvent>(config: Config<T>) {
+  type InternalEvent = T & { id: string }
+
+
+  const insertEvent = async (client: DBClient, event: GenericEvent) => {
+    const result = await client.query(`
+      INSERT INTO events (type, payload)
+      VALUES ('${event.type}', '${JSON.stringify(event.payload)}')
+      RETURNING *;
+    `);
+
+    return result.rows[0] as InternalEvent;
   }
-}
 
-const reducer = async (event:InternalEvent, client:DBClient): Promise<void> => {
-  await Promise.all(Object.keys(reducers).map((name) => {
-    return reducers[name](event, client);
-  }));
-}
+  const reducer = async (event:InternalEvent, client:DBClient): Promise<void> => {
+    await Promise.all(Object.keys(config.reducers).map((name) => {
+      return config.reducers[name](event, client);
+    }));
+  }
 
-const insertEvent = async (client: DBClient, event: AllEvents) => {
-  const result = await client.query(`
-    INSERT INTO events (type, payload)
-    VALUES ('${event.type}', '${JSON.stringify(event.payload)}')
-    RETURNING *;
-  `);
-
-  return result.rows[0] as InternalEvent;
-}
-
-export const createApp = (withinConnection: WithinConnection = withinTransaction) => {
-  const publish = async (event:AllEvents): Promise<EventId> => {
-    return withinConnection(async ({ client }) => {
+  const publish = async (event:GenericEvent): Promise<EventId> => {
+    return config.withinConnection(async ({ client }) => {
       const internalEvent = await insertEvent(client, event);
-      await reducer(internalEvent, client)
+      await reducer(internalEvent as InternalEvent, client)
       return internalEvent.id;
     });
   }
 
   const replaceEvent = (eventId: EventId, payload: object) => {
-    return withinConnection(async ({ client }) => {
+    return config.withinConnection(async ({ client }) => {
       const result = await client.query(`
         INSERT INTO events (type, payload)
         SELECT type, (payload::jsonb || '${JSON.stringify(payload)}'::jsonb) as payload
@@ -94,9 +53,9 @@ export const createApp = (withinConnection: WithinConnection = withinTransaction
   }
 
   const rebuildAggregates = () => {
-    return withinConnection(async ({ client }) => {
+    return config.withinConnection(async ({ client }) => {
       return withinNamespace('rebuild_aggregates', client, async () => {
-        await Promise.all(Object.keys(reducers).map(async (schemaName) => {
+        await Promise.all(Object.keys(config.reducers).map(async (schemaName) => {
           await client.query(`
             CREATE TABLE ${schemaName} AS
             TABLE ${schemaName}
@@ -142,10 +101,10 @@ export const createApp = (withinConnection: WithinConnection = withinTransaction
 
         const stream = client.query(query);
         for await (const event of stream) {
-          await reducer(event as InternalEvent, client)
+          await reducer(event, client)
         }
 
-        await Promise.all(Object.keys(reducers).map(async (tableName) => {
+        await Promise.all(Object.keys(config.reducers).map(async (tableName) => {
           await client.query(`
             ALTER TABLE ${tableName} RENAME TO ${tableName}_copy;
             ALTER TABLE ${tableName}_copy SET SCHEMA public;

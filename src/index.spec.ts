@@ -2,6 +2,7 @@ import expect from "expect";
 import { createApp } from ".";
 import { t } from "./db";
 import { ZonedDateTime } from "js-joda";
+import { reducers, AllEvents } from "./domain";
 
 const toThrow = async (fn: () => Promise<unknown>) => {
   let error;
@@ -16,7 +17,7 @@ const toThrow = async (fn: () => Promise<unknown>) => {
 
 describe('user', () => {
   it('create', t(async (withinConnection) => {
-    const app = createApp(withinConnection);
+    const app = createApp({withinConnection, reducers});
     await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
     await withinConnection(async ({ client }) => {
       const result = await client.query(`select * from Users where id = 1;`);
@@ -25,7 +26,7 @@ describe('user', () => {
   }));
 
   it('update', t(async (withinConnection) => {
-    const app = createApp(withinConnection);
+    const app = createApp({withinConnection, reducers});
     await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
     await app.publish({ type: 'user/updated', payload: { id: 1, name: 'Updated'} });
     await withinConnection(async ({ client }) => {
@@ -35,7 +36,7 @@ describe('user', () => {
   }));
 
   it('delete', t(async (withinConnection) => {
-    const app = createApp(withinConnection);
+    const app = createApp({withinConnection, reducers});
     await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
     await app.publish({ type: 'user/deleted', payload: { id: 1} });
     await withinConnection(async ({ client }) => {
@@ -47,7 +48,7 @@ describe('user', () => {
 
 describe('stamp', () => {
   it('create', t(async (withinConnection) => {
-    const app = createApp(withinConnection);
+    const app = createApp({withinConnection, reducers});
     await app.publish({ type: 'stamp/created', payload: {
       timestamp: ZonedDateTime.parse('2000-01-01T01:00:10+10:00'),
       type: 'Start',
@@ -60,7 +61,7 @@ describe('stamp', () => {
   }));
 
   it('replace event', t(async (withinConnection) => {
-    const app = createApp(withinConnection);
+    const app = createApp({withinConnection, reducers});
     const eventId = await app.publish({ type: 'stamp/created', payload: {
       timestamp: ZonedDateTime.parse('2000-01-01T01:00:10+10:00'),
       type: 'Start',
@@ -75,7 +76,7 @@ describe('stamp', () => {
   }));
 
   it('replaces multiple events', t(async (withinConnection) => {
-    const app = createApp(withinConnection);
+    const app = createApp({withinConnection, reducers});
     const eventId = await app.publish({ type: 'stamp/created', payload: {
       timestamp: ZonedDateTime.parse('2000-01-01T01:00:10+10:00'),
       type: 'Start',
@@ -94,7 +95,7 @@ describe('stamp', () => {
 
 
   it('can not replace same event twice', t(async (withinConnection) => {
-    const app = createApp(withinConnection);
+    const app = createApp({withinConnection, reducers});
     const eventId = await app.publish({ type: 'stamp/created', payload: {
       timestamp: ZonedDateTime.parse('2000-01-01T01:00:10+10:00'),
       type: 'Start',
@@ -109,7 +110,7 @@ describe('stamp', () => {
 });
 
 it('rebuild aggregates', t(async (withinConnection) => {
-  const app = createApp(withinConnection);
+  const app = createApp({withinConnection, reducers});
   await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
   await app.publish({ type: 'user/created', payload: { id: 2, name: 'Testt'} });
   await app.rebuildAggregates();
