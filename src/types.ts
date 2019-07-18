@@ -20,9 +20,12 @@ export type UnboundReducers<DomainEvents> = {
   [table: string]: (event:UnboundInternalEvent<DomainEvents>, client:DBClient) => Promise<void>
 }
 
+
 export type Config<DomainEvents> = {
   reducers: UnboundReducers<DomainEvents>,
   withinConnection: WithinConnection,
+  tableName?: string,
+  rebuildSchemaName?: string,
 }
 
 

@@ -1,14 +1,16 @@
 import QueryStream from 'pg-query-stream';
-import { withinTransaction, WithinConnection, DBClient, withinNamespace } from './db';
-import { EventId, GenericEvent, UnboundReducers, Config } from './types';
-
-export function createApp<T extends GenericEvent>(config: Config<T>) {
-  type InternalEvent = T & { id: string }
+import { DBClient, withinNamespace } from './db';
+import { EventId, GenericEvent, Config } from './types';
 
 
-  const insertEvent = async (client: DBClient, event: GenericEvent) => {
+export function createApp<DomainEvent extends GenericEvent>(config: Config<DomainEvent>) {
+  type InternalEvent = DomainEvent & { id: string }
+  const tableName = config.tableName || 'events'
+  const rebuildSchemaName = config.rebuildSchemaName || 'rebuild_aggregates'
+
+  const insertEvent = async (client: DBClient, event: DomainEvent) => {
     const result = await client.query(`
-      INSERT INTO events (type, payload)
+      INSERT INTO ${tableName} (type, payload)
       VALUES ('${event.type}', '${JSON.stringify(event.payload)}')
       RETURNING *;
     `);
@@ -22,7 +24,7 @@ export function createApp<T extends GenericEvent>(config: Config<T>) {
     }));
   }
 
-  const publish = async (event:GenericEvent): Promise<EventId> => {
+  const publish = async (event:DomainEvent): Promise<EventId> => {
     return config.withinConnection(async ({ client }) => {
       const internalEvent = await insertEvent(client, event);
       await reducer(internalEvent as InternalEvent, client)
@@ -33,15 +35,15 @@ export function createApp<T extends GenericEvent>(config: Config<T>) {
   const replaceEvent = (eventId: EventId, payload: object) => {
     return config.withinConnection(async ({ client }) => {
       const result = await client.query(`
-        INSERT INTO events (type, payload)
+        INSERT INTO ${tableName} (type, payload)
         SELECT type, (payload::jsonb || '${JSON.stringify(payload)}'::jsonb) as payload
-        FROM Events WHERE id = $1
+        FROM ${tableName} WHERE id = $1
         RETURNING *;
       `, [eventId]);
 
       const newEvent = result.rows[0] as InternalEvent;
       await client.query(`
-        Update Events
+        Update ${tableName}
         SET payload = null, replaced_by = $1
         WHERE id = $2
         RETURNING *
@@ -54,7 +56,7 @@ export function createApp<T extends GenericEvent>(config: Config<T>) {
 
   const rebuildAggregates = () => {
     return config.withinConnection(async ({ client }) => {
-      return withinNamespace('rebuild_aggregates', client, async () => {
+      return withinNamespace(rebuildSchemaName, client, async () => {
         await Promise.all(Object.keys(config.reducers).map(async (schemaName) => {
           await client.query(`
             CREATE TABLE ${schemaName} AS
@@ -77,7 +79,7 @@ export function createApp<T extends GenericEvent>(config: Config<T>) {
               payload,
               replaced_by,
               created_at
-            FROM events
+            FROM ${tableName}
           UNION ALL
             SELECT
               mt.id,
@@ -85,7 +87,7 @@ export function createApp<T extends GenericEvent>(config: Config<T>) {
               mn.payload,
               mn.replaced_by,
               mn.created_at
-            FROM events mn, menu_tree mt
+            FROM ${tableName} mn, menu_tree mt
             WHERE mt.replaced_by = mn.id
           ) SELECT DISTINCT on (id)
               id,
@@ -108,9 +110,9 @@ export function createApp<T extends GenericEvent>(config: Config<T>) {
           await client.query(`
             ALTER TABLE ${tableName} RENAME TO ${tableName}_copy;
             ALTER TABLE ${tableName}_copy SET SCHEMA public;
-            ALTER TABLE ${tableName} RENAME TO ${tableName}_Deleted;
-            ALTER TABLE ${tableName}_Copy RENAME TO ${tableName};
-            DROP TABLE ${tableName}_Deleted;
+            ALTER TABLE ${tableName} RENAME TO ${tableName}_deleted;
+            ALTER TABLE ${tableName}_copy RENAME TO ${tableName};
+            DROP TABLE ${tableName}_deleted;
           `);
         }));
       });

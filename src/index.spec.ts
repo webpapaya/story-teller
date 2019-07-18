@@ -2,7 +2,7 @@ import expect from "expect";
 import { createApp } from ".";
 import { t } from "./db";
 import { ZonedDateTime } from "js-joda";
-import { reducers, AllEvents } from "./domain";
+import { reducers } from "./domain";
 
 const toThrow = async (fn: () => Promise<unknown>) => {
   let error;
@@ -34,6 +34,8 @@ describe('user', () => {
       expect(result.rows[0].name).toEqual('Updated');
     });
   }));
+
+
 
   it('delete', t(async (withinConnection) => {
     const app = createApp({withinConnection, reducers});

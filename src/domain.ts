@@ -25,7 +25,6 @@ export type AllEvents =
   | SingleEvent<'user/updated', User>
   | SingleEvent<'user/deleted', Pick<User, 'id'>>
 
-
 export const reducers:UnboundReducers<AllEvents> = {
   users: async (event, client) => {
     switch (event.type) {
