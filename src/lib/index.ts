@@ -3,6 +3,7 @@ import { DBClient, withinNamespace } from './db';
 import { EventId, GenericEvent, Config } from './types';
 
 
+
 export function createApp<DomainEvent extends GenericEvent>(config: Config<DomainEvent>) {
   type InternalEvent = DomainEvent & { id: string }
   const tableName = config.tableName || 'events'
@@ -119,5 +120,15 @@ export function createApp<DomainEvent extends GenericEvent>(config: Config<Domai
     });
   };
 
-  return { publish, rebuildAggregates, replaceEvent };
+  const query = async ({ type }: { type: string }) => {
+    return config.withinConnection(async ({ client }) => {
+      if (config.queries[type]) {
+        return config.queries[type](client);
+      } else {
+        return []
+      }
+    });
+  }
+
+  return { publish, rebuildAggregates, replaceEvent, query };
 }

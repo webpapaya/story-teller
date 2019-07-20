@@ -2,7 +2,8 @@ import expect from "expect";
 import { createApp } from "./lib";
 import { t } from "./lib/db";
 import { ZonedDateTime } from "js-joda";
-import { reducers } from "./reducers";
+import { reducers, queries } from "./reducers";
+import { Title } from "./domain";
 
 const toThrow = async (fn: () => Promise<unknown>) => {
   let error;
@@ -17,7 +18,7 @@ const toThrow = async (fn: () => Promise<unknown>) => {
 
 describe('user', () => {
   it('create', t(async (withinConnection) => {
-    const app = createApp({withinConnection, reducers});
+    const app = createApp({withinConnection, reducers, queries: {}});
     await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
     await withinConnection(async ({ client }) => {
       const result = await client.query(`select * from Users where id = 1;`);
@@ -26,7 +27,7 @@ describe('user', () => {
   }));
 
   it('update', t(async (withinConnection) => {
-    const app = createApp({withinConnection, reducers});
+    const app = createApp({withinConnection, reducers, queries: {}});
     await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
     await app.publish({ type: 'user/updated', payload: { id: 1, name: 'Updated'} });
     await withinConnection(async ({ client }) => {
@@ -38,7 +39,7 @@ describe('user', () => {
 
 
   it('delete', t(async (withinConnection) => {
-    const app = createApp({withinConnection, reducers});
+    const app = createApp({withinConnection, reducers, queries: {}});
     await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
     await app.publish({ type: 'user/deleted', payload: { id: 1} });
     await withinConnection(async ({ client }) => {
@@ -50,7 +51,7 @@ describe('user', () => {
 
 describe('stamp', () => {
   it('create', t(async (withinConnection) => {
-    const app = createApp({withinConnection, reducers});
+    const app = createApp({withinConnection, reducers, queries: {}});
     await app.publish({ type: 'stamp/created', payload: {
       timestamp: ZonedDateTime.parse('2000-01-01T01:00:10+10:00'),
       type: 'Start',
@@ -63,7 +64,7 @@ describe('stamp', () => {
   }));
 
   it('replace event', t(async (withinConnection) => {
-    const app = createApp({withinConnection, reducers});
+    const app = createApp({withinConnection, reducers, queries: {}});
     const eventId = await app.publish({ type: 'stamp/created', payload: {
       timestamp: ZonedDateTime.parse('2000-01-01T01:00:10+10:00'),
       type: 'Start',
@@ -78,7 +79,7 @@ describe('stamp', () => {
   }));
 
   it('replaces multiple events', t(async (withinConnection) => {
-    const app = createApp({withinConnection, reducers});
+    const app = createApp({withinConnection, reducers, queries: {} });
     const eventId = await app.publish({ type: 'stamp/created', payload: {
       timestamp: ZonedDateTime.parse('2000-01-01T01:00:10+10:00'),
       type: 'Start',
@@ -97,7 +98,7 @@ describe('stamp', () => {
 
 
   it('can not replace same event twice', t(async (withinConnection) => {
-    const app = createApp({withinConnection, reducers});
+    const app = createApp({withinConnection, reducers, queries: {}});
     const eventId = await app.publish({ type: 'stamp/created', payload: {
       timestamp: ZonedDateTime.parse('2000-01-01T01:00:10+10:00'),
       type: 'Start',
@@ -112,7 +113,7 @@ describe('stamp', () => {
 });
 
 it('rebuild aggregates', t(async (withinConnection) => {
-  const app = createApp({withinConnection, reducers});
+  const app = createApp({withinConnection, reducers, queries: {}});
   await app.publish({ type: 'user/created', payload: { id: 1, name: 'Test'} });
   await app.publish({ type: 'user/created', payload: { id: 2, name: 'Testt'} });
   await app.rebuildAggregates();
@@ -121,3 +122,15 @@ it('rebuild aggregates', t(async (withinConnection) => {
     expect(result.rows[0].name).toEqual('Test');
   });
 }));
+
+describe('title', () => {
+  it('title/created', t(async (withinConnection) => {
+    const app = createApp({withinConnection, reducers, queries });
+    await app.publish({ type: 'title/created', payload: {
+      name: 'DDr.',
+      userId: 1
+    } });
+    const result = await app.query({ type: 'titles' }) as Title[];
+    expect(result[0]).toHaveProperty('name', 'DDr.');
+  }));
+});

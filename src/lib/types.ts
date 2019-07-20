@@ -16,12 +16,20 @@ export type SingleEvent<Type, Payload> = GenericEvent & {
 }
 
 type UnboundInternalEvent<DomainEvents> = { id: EventId, payload: unknown } & DomainEvents;
+
 export type UnboundReducers<DomainEvents> = {
+  [table: string]: (event:UnboundInternalEvent<DomainEvents>, client:DBClient) => Promise<void>
+}
+
+export type UnboundQueries<DomainEvents> = {
   [table: string]: (event:UnboundInternalEvent<DomainEvents>, client:DBClient) => Promise<void>
 }
 
 export type Config<DomainEvents> = {
   reducers: UnboundReducers<DomainEvents>,
+  queries: {
+    [table: string]: (client:DBClient) => Promise<unknown>
+  },
   withinConnection: WithinConnection,
   tableName?: string,
   rebuildSchemaName?: string,

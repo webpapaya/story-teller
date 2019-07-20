@@ -1,5 +1,6 @@
 import { UnboundReducers } from './lib/types';
-import { AllEvents } from './domain'
+import { AllEvents, AllQueries, UnverifiedTitle, VerifiedTitle, Title } from './domain'
+import { DBClient } from './lib/db';
 
 export const reducers:UnboundReducers<AllEvents> = {
   users: async (event, client) => {
@@ -41,5 +42,39 @@ export const reducers:UnboundReducers<AllEvents> = {
             ]
           }); break;
     }
+  },
+  titles: async (event, client) => {
+    switch (event.type) {
+      case 'title/created':
+        await client.query({
+          text: `
+            insert into Titles (name, userId)
+            VALUES ($1, $2)
+          `,
+          values: [event.payload.name, event.payload.userId]
+        }); break;
+
+    }
+  },
+}
+
+export const queries:AllQueries = {
+  titles: async (client) => {
+    const result = await client.query(`select * from titles`)
+
+    return result.rows.map((row) => {
+      if(row.userId) {
+        return {
+          ...row,
+          kind: 'unverified'
+        } as UnverifiedTitle
+      } else {
+        return {
+          id: row.id,
+          name: row.name,
+          kind: 'verified'
+        } as VerifiedTitle
+      }
+    });
   }
 }
