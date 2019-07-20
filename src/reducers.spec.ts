@@ -1,8 +1,8 @@
 import expect from "expect";
-import { createApp } from ".";
-import { t } from "./db";
+import { createApp } from "./lib";
+import { t } from "./lib/db";
 import { ZonedDateTime } from "js-joda";
-import { reducers } from "./domain";
+import { reducers } from "./reducers";
 
 const toThrow = async (fn: () => Promise<unknown>) => {
   let error;
