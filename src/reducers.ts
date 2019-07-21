@@ -1,97 +1,73 @@
+import sql from "sql-template-tag";
 import { UnboundReducers } from './lib/types';
-import { AllEvents, AllQueries, UnverifiedTitle, VerifiedTitle, User } from './domain'
+import { AllEvents, AllQueries, UnverifiedTitle, VerifiedTitle } from './domain'
 
 export const reducers:UnboundReducers<AllEvents> = {
   users: async (event, client) => {
     switch (event.type) {
       case 'user/created':
-        await client.query({
-          text: `
-            insert into Users (id, name)
-            VALUES ($1, $2)
-          `,
-          values: [event.payload.id, event.payload.name]
-        }); break;
+        await client.query(sql`
+          INSERT INTO Users (id, name)
+          VALUES (${event.payload.id}, ${event.payload.name})
+        `); break;
       case 'user/updated':
-        await client.query({
-          text: `update Users SET name = $2 where id = $1`,
-          values: [event.payload.id, event.payload.name]
-        }); break;
+        await client.query(sql`
+          UPDATE Users SET name = ${event.payload.name}
+          where id = ${event.payload.id}
+        `); break;
       case 'user/deleted':
-        await client.query({
-          text: `delete from Users where id = $1`,
-          values: [event.payload.id]
-        }); break;
+        await client.query(sql`
+          DELETE from Users
+          where id = ${event.payload.id}
+        `); break;
     }
   },
   stamps: async (event, client) => {
     switch (event.type) {
       case 'stamp/created':
-          await client.query({
-            text: `
-              insert into Stamps
-              (type, timestamp, location, note)
-              VALUES ($1, $2, $3, $4)
-            `,
-            values: [
-              event.payload.type,
-              event.payload.timestamp,
-              event.payload.location,
-              event.payload.note
-            ]
-          }); break;
+          await client.query(sql`
+            INSERT INTO Stamps
+            (type, timestamp, location, note)
+            VALUES (
+              ${event.payload.type},
+              ${event.payload.timestamp},
+              ${event.payload.location},
+              ${event.payload.note}
+            )
+          `); break;
     }
   },
   titles: async (event, client) => {
     switch (event.type) {
       case 'title/created':
-        await client.query({
-          text: `
-            insert into Titles (id, name, user_id)
-            VALUES ($1, $2, $3)
-          `,
-          values: [event.payload.id, event.payload.name, event.payload.userId]
-        }); break;
-
+        await client.query(sql`
+            INSERT INTO Titles (id, name, user_id)
+            VALUES (${event.payload.id}, ${event.payload.name}, ${event.payload.userId})
+        `); break;
       case 'title/notVerified':
-        await client.query({
-          text: `
-            delete from Titles
-            where id = $1
-          `,
-          values: [event.payload.id]
-        }); break;
-
+        await client.query(sql`
+          DELETE from Titles
+          where id = ${event.payload.id}
+        `); break;
         case 'title/verified':
-          const titles = await client.query({
-            text: `
-              select * from titles
-              where id = $1
-            `,
-            values: [event.payload.id]
-          });
-
+          const titles = await client.query(sql`
+            select * from titles
+            where id = ${event.payload.id}
+          `);
 
           await Promise.all([
-            client.query({
-              text: `
-                update Titles
-                set user_id = null
-                where id = $1
-              `,
-              values: [event.payload.id]
-            }),
-            client.query({
-              text: `
-                update Users
-                set title = '${JSON.stringify(titles.rows.map((title) => title.name))}'
-                where id = $1
-              `,
-              values: [titles.rows[0].userId]
-            }),
+            client.query(`
+              UPDATE Titles
+              set user_id = null
+              where id = ${event.payload.id}
+            `),
+            client.query(sql`
+              UPDATE Users
+              set title = ${JSON.stringify(titles.rows.map((title) => title.name))}::JSONB
+              where id = ${titles.rows[0].userId}
+            `),
           ]);
           break;
-
     }
   },
 }
