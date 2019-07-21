@@ -38,7 +38,7 @@ export type Title =
   | UnverifiedTitle
 
 export type AllEvents =
-  | SingleEvent<'title/created', Pick<UnverifiedTitle, 'name' | 'userId'>>
+  | SingleEvent<'title/created', Pick<UnverifiedTitle, 'id' | 'name' | 'userId'>>
   | SingleEvent<'title/verified', Pick<Title, 'id'>>
   | SingleEvent<'title/notVerified', Pick<Title, 'id'>>
 
@@ -49,5 +49,6 @@ export type AllEvents =
   | SingleEvent<'user/deleted', Pick<User, 'id'>>
 
 export type AllQueries = {
-  titles: (client:DBClient) => Promise<Title[]>
+  titles: (client:DBClient) => Promise<Title[]>,
+  users: (client:DBClient) => Promise<User[]>,
 }

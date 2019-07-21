@@ -1,6 +1,5 @@
 import { UnboundReducers } from './lib/types';
-import { AllEvents, AllQueries, UnverifiedTitle, VerifiedTitle, Title } from './domain'
-import { DBClient } from './lib/db';
+import { AllEvents, AllQueries, UnverifiedTitle, VerifiedTitle, User } from './domain'
 
 export const reducers:UnboundReducers<AllEvents> = {
   users: async (event, client) => {
@@ -48,11 +47,50 @@ export const reducers:UnboundReducers<AllEvents> = {
       case 'title/created':
         await client.query({
           text: `
-            insert into Titles (name, userId)
-            VALUES ($1, $2)
+            insert into Titles (id, name, user_id)
+            VALUES ($1, $2, $3)
           `,
-          values: [event.payload.name, event.payload.userId]
+          values: [event.payload.id, event.payload.name, event.payload.userId]
         }); break;
+
+      case 'title/notVerified':
+        await client.query({
+          text: `
+            delete from Titles
+            where id = $1
+          `,
+          values: [event.payload.id]
+        }); break;
+
+        case 'title/verified':
+          const titles = await client.query({
+            text: `
+              select * from titles
+              where id = $1
+            `,
+            values: [event.payload.id]
+          });
+
+
+          await Promise.all([
+            client.query({
+              text: `
+                update Titles
+                set user_id = null
+                where id = $1
+              `,
+              values: [event.payload.id]
+            }),
+            client.query({
+              text: `
+                update Users
+                set title = '${JSON.stringify(titles.rows.map((title) => title.name))}'
+                where id = $1
+              `,
+              values: [titles.rows[0].userId]
+            }),
+          ]);
+          break;
 
     }
   },
@@ -61,7 +99,6 @@ export const reducers:UnboundReducers<AllEvents> = {
 export const queries:AllQueries = {
   titles: async (client) => {
     const result = await client.query(`select * from titles`)
-
     return result.rows.map((row) => {
       if(row.userId) {
         return {
@@ -75,6 +112,12 @@ export const queries:AllQueries = {
           kind: 'verified'
         } as VerifiedTitle
       }
+    });
+  },
+  users: async (client) => {
+    const users = (await client.query(`select * from users`)).rows
+    return users.map((user) => {
+      return { ...user, title: user.title ? user.title.join(',') : null }
     });
   }
 }

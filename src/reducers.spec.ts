@@ -1,9 +1,9 @@
 import expect from "expect";
 import { createApp } from "./lib";
-import { t } from "./lib/db";
+import { t, DBClient, WithinConnection } from "./lib/db";
 import { ZonedDateTime } from "js-joda";
 import { reducers, queries } from "./reducers";
-import { Title } from "./domain";
+import { Title, User } from "./domain";
 
 const toThrow = async (fn: () => Promise<unknown>) => {
   let error;
@@ -127,10 +127,60 @@ describe('title', () => {
   it('title/created', t(async (withinConnection) => {
     const app = createApp({withinConnection, reducers, queries });
     await app.publish({ type: 'title/created', payload: {
+      id: 1,
       name: 'DDr.',
       userId: 1
     } });
+
     const result = await app.query({ type: 'titles' }) as Title[];
     expect(result[0]).toHaveProperty('name', 'DDr.');
   }));
+
+  it('title/notVerified', t(async (withinConnection) => {
+    const app = createApp({withinConnection, reducers, queries });
+    await app.publish({ type: 'title/created', payload: {
+      id: 1,
+      name: 'DDr.',
+      userId: 1
+    } });
+    await app.publish({ type: 'title/notVerified', payload: { id: 1 } });
+    const result = await app.query({ type: 'titles' }) as Title[];
+
+    expect(result).toHaveProperty('length', 0);
+  }));
+
+  describe('title/verified', () => {
+    const verifyTitle = async (withinConnection: WithinConnection) => {
+      const app = createApp({withinConnection, reducers, queries });
+      await app.publish({ type: 'user/created', payload: {
+        id: 1,
+        name: 'Hallo'
+      }});
+      await app.publish({ type: 'title/created', payload: {
+        id: 1,
+        name: 'DDr.',
+        userId: 1
+      } });
+
+      const unverifiedTitles = await app.query({ type: 'titles' }) as Title[];
+      await app.publish({
+        type: 'title/verified',
+        payload: { id: unverifiedTitles[0].id }
+      });
+
+      return app;
+    }
+
+    it('sets title to verified', t(async (withinConnection) => {
+      const app = await verifyTitle(withinConnection)
+      const verifiedTitles = await app.query({ type: 'titles' }) as Title[];
+      expect(verifiedTitles[0]).toHaveProperty('kind', 'verified');
+    }));
+
+    it('adds title to user', t(async (withinConnection) => {
+      const app = await verifyTitle(withinConnection)
+      const users = await app.query({ type: 'users' }) as User[];
+      expect(users[0]).toHaveProperty('title', 'DDr.');
+    }));
+  });
 });
