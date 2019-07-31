@@ -124,8 +124,6 @@ export function createApp<DomainEvent extends GenericEvent, DomainQueries extend
         return config.withinConnection(async ({ client }) => {
           return obj[prop](client)
         })
-      } else {
-        throw new TypeError('Unknown query')
       }
     }
   }) as ExecutableQueries<DomainQueries>
