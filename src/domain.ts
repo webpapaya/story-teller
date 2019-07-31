@@ -1,6 +1,5 @@
 import { Omit, SingleEvent } from './lib/types'
 import { ZonedDateTime } from 'js-joda'
-import { DBClient } from './lib/db'
 
 export interface User {
   id: number
@@ -49,6 +48,6 @@ export type AllEvents =
   | SingleEvent<'user/deleted', Pick<User, 'id'>>
 
 export type AllQueries = {
-  titles: (client: DBClient) => Promise<Title[]>
-  users: (client: DBClient) => Promise<User[]>
+  titles: Title
+  users: User
 }

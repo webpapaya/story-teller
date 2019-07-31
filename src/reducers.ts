@@ -1,5 +1,5 @@
 import sql from 'sql-template-tag'
-import { UnboundReducers } from './lib/types'
+import { UnboundReducers, UnboundQueries } from './lib/types'
 import { AllEvents, AllQueries, UnverifiedTitle, VerifiedTitle } from './domain'
 
 export const reducers: UnboundReducers<AllEvents> = {
@@ -73,7 +73,7 @@ export const reducers: UnboundReducers<AllEvents> = {
   }
 }
 
-export const queries: AllQueries = {
+export const queries: UnboundQueries<AllQueries> = {
   titles: async (client) => {
     const result = await client.query(`select * from titles`)
     return result.rows.map((row) => {

@@ -1,8 +1,8 @@
 import QueryStream from 'pg-query-stream'
 import { DBClient, withinNamespace } from './db'
-import { EventId, GenericEvent, Config } from './types'
+import { EventId, GenericEvent, GenericQueries, Config, ExecutableQueries } from './types'
 
-export function createApp<DomainEvent extends GenericEvent> (config: Config<DomainEvent>) {
+export function createApp<DomainEvent extends GenericEvent, DomainQueries extends GenericQueries> (config: Config<DomainEvent, DomainQueries>) {
   type InternalEvent = DomainEvent & { id: string }
   const tableName = config.tableName || 'events'
   const rebuildSchemaName = config.rebuildSchemaName || 'rebuild_aggregates'
@@ -118,15 +118,17 @@ export function createApp<DomainEvent extends GenericEvent> (config: Config<Doma
     })
   }
 
-  const query = async ({ type }: { type: string }) => {
-    return config.withinConnection(async ({ client }) => {
-      if (config.queries[type]) {
-        return config.queries[type](client)
+  const queries = new Proxy(config.queries, {
+    get: (obj, prop) => () => {
+      if (prop in obj && typeof prop === 'string') {
+        return config.withinConnection(async ({ client }) => {
+          return obj[prop](client)
+        })
       } else {
-        return []
+        throw new TypeError('Unknown query')
       }
-    })
-  }
+    }
+  }) as ExecutableQueries<DomainQueries>
 
-  return { publish, rebuildAggregates, replaceEvent, query }
+  return { publish, rebuildAggregates, replaceEvent, queries }
 }

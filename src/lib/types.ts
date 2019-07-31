@@ -21,15 +21,21 @@ export type UnboundReducers<DomainEvents> = {
   [table: string]: (event: UnboundInternalEvent<DomainEvents>, client: DBClient) => Promise<void>
 }
 
-export type UnboundQueries<DomainEvents> = {
-  [table: string]: (event: UnboundInternalEvent<DomainEvents>, client: DBClient) => Promise<void>
+export type GenericQueries = {
+  [table: string]: unknown
 }
 
-export type Config<DomainEvents> = {
+export type UnboundQueries<T> = {
+  [P in keyof T]: (client: DBClient) => Promise<Array<T[P]>>
+}
+
+export type ExecutableQueries<T> = {
+  [P in keyof T]: () => Promise<Array<T[P]>>
+}
+
+export type Config<DomainEvents, DomainQueries> = {
   reducers: UnboundReducers<DomainEvents>
-  queries: {
-    [table: string]: (client: DBClient) => Promise<unknown>
-  }
+  queries: UnboundQueries<DomainQueries>
   withinConnection: WithinConnection
   tableName?: string
   rebuildSchemaName?: string

@@ -3,7 +3,6 @@ import { createApp } from './lib'
 import { t, WithinConnection } from './lib/db'
 import { ZonedDateTime } from 'js-joda'
 import { reducers, queries } from './reducers'
-import { Title, User } from './domain'
 
 const toThrow = async (fn: () => Promise<unknown>) => {
   let error
@@ -134,7 +133,7 @@ describe('title', () => {
         userId: 1
       } })
 
-    const result = await app.query({ type: 'titles' }) as Title[]
+    const result = await app.queries.titles()
     expect(result[0]).toHaveProperty('name', 'DDr.')
   }))
 
@@ -147,7 +146,7 @@ describe('title', () => {
         userId: 1
       } })
     await app.publish({ type: 'title/notVerified', payload: { id: 1 } })
-    const result = await app.query({ type: 'titles' }) as Title[]
+    const result = await app.queries.titles()
 
     expect(result).toHaveProperty('length', 0)
   }))
@@ -167,7 +166,7 @@ describe('title', () => {
           userId: 1
         } })
 
-      const unverifiedTitles = await app.query({ type: 'titles' }) as Title[]
+      const unverifiedTitles = await app.queries.titles()
       await app.publish({
         type: 'title/verified',
         payload: { id: unverifiedTitles[0].id }
@@ -178,13 +177,13 @@ describe('title', () => {
 
     it('sets title to verified', t(async (withinConnection) => {
       const app = await verifyTitle(withinConnection)
-      const verifiedTitles = await app.query({ type: 'titles' }) as Title[]
+      const verifiedTitles = await app.queries.titles()
       expect(verifiedTitles[0]).toHaveProperty('kind', 'verified')
     }))
 
     it('adds title to user', t(async (withinConnection) => {
       const app = await verifyTitle(withinConnection)
-      const users = await app.query({ type: 'users' }) as User[]
+      const users = await app.queries.users()
       expect(users[0]).toHaveProperty('title', 'DDr.')
     }))
   })
