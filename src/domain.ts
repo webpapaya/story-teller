@@ -48,7 +48,7 @@ export type AllEvents =
   | SingleEvent<'user/updated', User>
   | SingleEvent<'user/deleted', Pick<User, 'id'>>
 
-export interface AllQueries {
+export type AllQueries = {
   titles: (client: DBClient) => Promise<Title[]>
   users: (client: DBClient) => Promise<User[]>
 }

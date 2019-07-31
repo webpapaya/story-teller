@@ -3,7 +3,7 @@ import { DBClient, WithinConnection } from './db'
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 export type EventId = string;
 
-export interface GenericEvent {
+export type GenericEvent = {
   type: string
   payload: unknown
   replacedBy?: number
@@ -17,15 +17,15 @@ export type SingleEvent<Type, Payload> = GenericEvent & {
 
 type UnboundInternalEvent<DomainEvents> = { id: EventId, payload: unknown } & DomainEvents;
 
-export interface UnboundReducers<DomainEvents> {
-  [table: string]: (event: UnboundInternalEvent<DomainEvents>, client: DBClient) => Promise<unknown>
-}
-
-export interface UnboundQueries<DomainEvents> {
+export type UnboundReducers<DomainEvents> = {
   [table: string]: (event: UnboundInternalEvent<DomainEvents>, client: DBClient) => Promise<void>
 }
 
-export interface Config<DomainEvents> {
+export type UnboundQueries<DomainEvents> = {
+  [table: string]: (event: UnboundInternalEvent<DomainEvents>, client: DBClient) => Promise<void>
+}
+
+export type Config<DomainEvents> = {
   reducers: UnboundReducers<DomainEvents>
   queries: {
     [table: string]: (client: DBClient) => Promise<unknown>
