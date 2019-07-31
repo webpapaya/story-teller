@@ -1,10 +1,8 @@
-import QueryStream from 'pg-query-stream';
-import { DBClient, withinNamespace } from './db';
-import { EventId, GenericEvent, Config } from './types';
+import QueryStream from 'pg-query-stream'
+import { DBClient, withinNamespace } from './db'
+import { EventId, GenericEvent, Config } from './types'
 
-
-
-export function createApp<DomainEvent extends GenericEvent>(config: Config<DomainEvent>) {
+export function createApp<DomainEvent extends GenericEvent> (config: Config<DomainEvent>) {
   type InternalEvent = DomainEvent & { id: string }
   const tableName = config.tableName || 'events'
   const rebuildSchemaName = config.rebuildSchemaName || 'rebuild_aggregates'
@@ -14,48 +12,48 @@ export function createApp<DomainEvent extends GenericEvent>(config: Config<Domai
       INSERT INTO ${tableName} (type, payload)
       VALUES ('${event.type}', '${JSON.stringify(event.payload)}')
       RETURNING *;
-    `);
+    `)
 
-    return result.rows[0] as InternalEvent;
+    return result.rows[0] as InternalEvent
   }
 
-  const reducer = async (event:InternalEvent, client:DBClient): Promise<void> => {
-    await Promise.all(Object.keys(config.reducers).map((name) => {
-      return config.reducers[name](event, client);
-    }));
+  const reducer = async (event: InternalEvent, client: DBClient): Promise<void> => {
+    await Promise.all(Object.keys(config.reducers).map(async (name) => {
+      return config.reducers[name](event, client)
+    }))
   }
 
-  const publish = async (event:DomainEvent): Promise<EventId> => {
+  const publish = async (event: DomainEvent): Promise<EventId> => {
     return config.withinConnection(async ({ client }) => {
-      const internalEvent = await insertEvent(client, event);
-      await reducer(internalEvent as InternalEvent, client)
-      return internalEvent.id;
-    });
+      const internalEvent = await insertEvent(client, event)
+      await reducer(internalEvent, client)
+      return internalEvent.id
+    })
   }
 
-  const replaceEvent = (eventId: EventId, payload: object) => {
+  const replaceEvent = async (eventId: EventId, payload: object) => {
     return config.withinConnection(async ({ client }) => {
       const result = await client.query(`
         INSERT INTO ${tableName} (type, payload)
         SELECT type, (payload::jsonb || '${JSON.stringify(payload)}'::jsonb) as payload
         FROM ${tableName} WHERE id = $1
         RETURNING *;
-      `, [eventId]);
+      `, [eventId])
 
-      const newEvent = result.rows[0] as InternalEvent;
+      const newEvent = result.rows[0] as InternalEvent
       await client.query(`
         Update ${tableName}
         SET payload = null, replaced_by = $1
         WHERE id = $2
         RETURNING *
-      `, [newEvent.id, eventId]);
+      `, [newEvent.id, eventId])
 
-      await rebuildAggregates();
-      return newEvent.id;
-    });
+      await rebuildAggregates()
+      return newEvent.id
+    })
   }
 
-  const rebuildAggregates = () => {
+  const rebuildAggregates = async () => {
     return config.withinConnection(async ({ client }) => {
       return withinNamespace(rebuildSchemaName, client, async () => {
         await Promise.all(Object.keys(config.reducers).map(async (schemaName) => {
@@ -63,8 +61,8 @@ export function createApp<DomainEvent extends GenericEvent>(config: Config<Domai
             CREATE TABLE ${schemaName} AS
             TABLE ${schemaName}
             WITH NO DATA;
-          `);
-        }));
+          `)
+        }))
 
         const query = new QueryStream(`
           WITH RECURSIVE menu_tree (
@@ -100,9 +98,9 @@ export function createApp<DomainEvent extends GenericEvent>(config: Config<Domai
             PARTITION BY id ORDER BY created_at
             ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
           );
-        `);
+        `)
 
-        const stream = client.query(query);
+        const stream = client.query(query)
         for await (const event of stream) {
           await reducer(event, client)
         }
@@ -114,21 +112,21 @@ export function createApp<DomainEvent extends GenericEvent>(config: Config<Domai
             ALTER TABLE ${tableName} RENAME TO ${tableName}_deleted;
             ALTER TABLE ${tableName}_copy RENAME TO ${tableName};
             DROP TABLE ${tableName}_deleted;
-          `);
-        }));
-      });
-    });
-  };
+          `)
+        }))
+      })
+    })
+  }
 
   const query = async ({ type }: { type: string }) => {
     return config.withinConnection(async ({ client }) => {
       if (config.queries[type]) {
-        return config.queries[type](client);
+        return config.queries[type](client)
       } else {
         return []
       }
-    });
+    })
   }
 
-  return { publish, rebuildAggregates, replaceEvent, query };
+  return { publish, rebuildAggregates, replaceEvent, query }
 }

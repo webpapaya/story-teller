@@ -1,9 +1,9 @@
-import { Omit, SingleEvent, UnboundReducers } from './lib/types';
-import { ZonedDateTime } from 'js-joda';
-import { DBClient } from './lib/db';
+import { Omit, SingleEvent } from './lib/types'
+import { ZonedDateTime } from 'js-joda'
+import { DBClient } from './lib/db'
 
-export type User = {
-  id: number,
+export interface User {
+  id: number
   name: string
 }
 
@@ -12,24 +12,24 @@ type StampTypes =
   | 'Break'
   | 'Stop'
 
-export type Stamp = {
+export interface Stamp {
   id: number
   type: StampTypes
-  timestamp: ZonedDateTime,
+  timestamp: ZonedDateTime
   location?: string
   note?: string
 }
 
-export type VerifiedTitle = {
-  id: number,
-  name: string,
+export interface VerifiedTitle {
+  id: number
+  name: string
   kind: 'verified'
 }
 
-export type UnverifiedTitle = {
-  id: number,
-  name: string,
-  userId: number,
+export interface UnverifiedTitle {
+  id: number
+  name: string
+  userId: number
   kind: 'unverified'
 }
 
@@ -48,7 +48,7 @@ export type AllEvents =
   | SingleEvent<'user/updated', User>
   | SingleEvent<'user/deleted', Pick<User, 'id'>>
 
-export type AllQueries = {
-  titles: (client:DBClient) => Promise<Title[]>,
-  users: (client:DBClient) => Promise<User[]>,
+export interface AllQueries {
+  titles: (client: DBClient) => Promise<Title[]>
+  users: (client: DBClient) => Promise<User[]>
 }
