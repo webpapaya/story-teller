@@ -1,6 +1,6 @@
 create table if not exists
 public.users (
-  id           serial PRIMARY KEY,
+  id           uuid PRIMARY KEY DEFAULT uuid_generate_v1(),
   name         text NOT NULL,
   title        json
 );

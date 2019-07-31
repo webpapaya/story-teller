@@ -1,8 +1,10 @@
 import { Omit, SingleEvent } from './lib/types'
 import { ZonedDateTime } from 'js-joda'
+import uuid from 'uuid'
 
+type ID = ReturnType<typeof uuid>
 export interface User {
-  id: number
+  id: ID
   name: string
 }
 
@@ -12,7 +14,7 @@ type StampTypes =
   | 'Stop'
 
 export interface Stamp {
-  id: number
+  id: ID
   type: StampTypes
   timestamp: ZonedDateTime
   location?: string
@@ -20,15 +22,15 @@ export interface Stamp {
 }
 
 export interface VerifiedTitle {
-  id: number
+  id: ID
   name: string
   kind: 'verified'
 }
 
 export interface UnverifiedTitle {
-  id: number
+  id: ID
   name: string
-  userId: number
+  userId: ID
   kind: 'unverified'
 }
 
@@ -37,12 +39,12 @@ export type Title =
   | UnverifiedTitle
 
 export type AllEvents =
-  | SingleEvent<'title/created', Pick<UnverifiedTitle, 'id' | 'name' | 'userId'>>
+  | SingleEvent<'title/created', Omit<UnverifiedTitle, 'kind'>>
   | SingleEvent<'title/verified', Pick<Title, 'id'>>
   | SingleEvent<'title/notVerified', Pick<Title, 'id'>>
 
-  | SingleEvent<'stamp/created', Omit<Stamp, 'id'>>
-  | SingleEvent<'stamp/created', Omit<Stamp, 'id'>>
+  | SingleEvent<'stamp/created', Stamp>
+  | SingleEvent<'stamp/created', Stamp>
   | SingleEvent<'user/created', User>
   | SingleEvent<'user/updated', User>
   | SingleEvent<'user/deleted', Pick<User, 'id'>>

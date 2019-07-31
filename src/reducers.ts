@@ -27,8 +27,9 @@ export const reducers: UnboundReducers<AllEvents> = {
       case 'stamp/created':
         await client.query(sql`
             INSERT INTO Stamps
-            (type, timestamp, location, note)
+            (id, type, timestamp, location, note)
             VALUES (
+              ${event.payload.id},
               ${event.payload.type},
               ${event.payload.timestamp},
               ${event.payload.location},
@@ -51,13 +52,14 @@ export const reducers: UnboundReducers<AllEvents> = {
         `); break
       case 'title/verified':
         const titleRecords = await client.query(sql`
-            select * from titles
-            WHERE id = ${event.payload.id}
-          `)
+          select * from titles
+          WHERE id = ${event.payload.id}
+        `)
 
         const titles = titleRecords.rows.map((title) => title.name)
+
         await Promise.all([
-          client.query(`
+          client.query(sql`
               UPDATE Titles
               set user_id = null
               WHERE id = ${event.payload.id}
@@ -68,6 +70,7 @@ export const reducers: UnboundReducers<AllEvents> = {
               WHERE id = ${titleRecords.rows[0].userId}
             `)
         ])
+
         break
     }
   }

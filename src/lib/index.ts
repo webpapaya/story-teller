@@ -1,6 +1,7 @@
 import QueryStream from 'pg-query-stream'
 import { DBClient, withinNamespace } from './db'
 import { EventId, GenericEvent, GenericQueries, Config, ExecutableQueries } from './types'
+import uuid = require('uuid');
 
 export function createApp<DomainEvent extends GenericEvent, DomainQueries extends GenericQueries> (config: Config<DomainEvent, DomainQueries>) {
   type InternalEvent = DomainEvent & { id: string }
@@ -9,8 +10,8 @@ export function createApp<DomainEvent extends GenericEvent, DomainQueries extend
 
   const insertEvent = async (client: DBClient, event: DomainEvent) => {
     const result = await client.query(`
-      INSERT INTO ${tableName} (type, payload)
-      VALUES ('${event.type}', '${JSON.stringify(event.payload)}')
+      INSERT INTO ${tableName} (id, type, payload)
+      VALUES ('${uuid()}', '${event.type}', '${JSON.stringify(event.payload)}')
       RETURNING *;
     `)
 
