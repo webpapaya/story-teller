@@ -1,6 +1,6 @@
 import sql from 'sql-template-tag'
-import { UnboundReducers, UnboundQueries } from './lib/types'
-import { AllEvents, AllQueries, UnverifiedTitle, VerifiedTitle } from './domain'
+import { UnboundReducers } from './lib/types'
+import { AllEvents } from './domain'
 
 export const reducers: UnboundReducers<AllEvents> = {
   users: async (event, client) => {
@@ -70,31 +70,5 @@ export const reducers: UnboundReducers<AllEvents> = {
         ])
         break
     }
-  }
-}
-
-export const queries: UnboundQueries<AllQueries> = {
-  titles: async (client) => {
-    const result = await client.query(`select * from titles`)
-    return result.rows.map((row) => {
-      if (row.userId) {
-        return {
-          ...row,
-          kind: 'unverified'
-        } as unknown as UnverifiedTitle
-      } else {
-        return {
-          id: row.id,
-          name: row.name,
-          kind: 'verified'
-        } as unknown as VerifiedTitle
-      }
-    })
-  },
-  users: async (client) => {
-    const users = (await client.query(`select * from users`)).rows
-    return users.map((user) => {
-      return { ...user, title: user.title ? user.title.join(',') : null }
-    })
   }
 }

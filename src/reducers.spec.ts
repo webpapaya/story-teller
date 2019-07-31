@@ -2,7 +2,8 @@ import expect from 'expect'
 import { createApp } from './lib'
 import { t, WithinConnection } from './lib/db'
 import { ZonedDateTime } from 'js-joda'
-import { reducers, queries } from './reducers'
+import { reducers } from './reducers'
+import { queries } from './queries'
 
 const toThrow = async (fn: () => Promise<unknown>) => {
   let error
