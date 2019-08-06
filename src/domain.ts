@@ -8,7 +8,7 @@ export interface User {
   name: string
 }
 
-type StampTypes =
+export type StampTypes =
   | 'Start'
   | 'Break'
   | 'Stop'
@@ -19,6 +19,18 @@ export interface Stamp {
   timestamp: ZonedDateTime
   location?: string
   note?: string
+}
+
+export type BookingTypes =
+ | 'Work'
+ | 'Break'
+
+export type Booking = {
+  id?: ID
+  type: BookingTypes
+  from: ZonedDateTime
+  until: ZonedDateTime
+  origin: Stamp[]
 }
 
 export interface VerifiedTitle {
