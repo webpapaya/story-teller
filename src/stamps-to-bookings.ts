@@ -1,4 +1,4 @@
-import { Stamp, Booking, Config } from './domain'
+import { Stamp, Booking, Config, CorrelationDatePosition } from './domain'
 import { Duration } from 'js-joda'
 
 const areStampsClose = (threshold: Duration, previousStamp: Stamp, currentStamp: Stamp) => {
@@ -10,24 +10,40 @@ const areStampsClose = (threshold: Duration, previousStamp: Stamp, currentStamp:
     timePrevious.equals(timeCurrent)
 }
 
-const combineWhenClose = (threshold: Duration, stamps: Stamp[], index: number) => {
+const combineWhenClose = (options: { threshold: Duration, position: CorrelationDatePosition }, stamps: Stamp[], index: number) => {
+  const stampChain = []
+
   for (let i = index; i >= 0; i--) {
     const currentStamp = stamps[i]
     const previousStamp = stamps[i - 1]
-
-    if (!previousStamp || previousStamp.type !== 'Stop') { continue }
-    if (areStampsClose(threshold, previousStamp, currentStamp)) { continue }
-
-    return currentStamp.timestamp.toLocalDate()
+    stampChain.unshift(currentStamp)
+    if (previousStamp && previousStamp.type === 'Stop' && !areStampsClose(options.threshold, previousStamp, currentStamp)) { break }
   }
-  return stamps[0].timestamp.toLocalDate()
+
+  const firstTimestamp = stampChain[0].timestamp
+  const lastTimestamp = stampChain[stampChain.length - 1].timestamp
+  if (options.position === 'center') {
+    const duration = Duration.between(firstTimestamp, lastTimestamp)
+    // @ts-ignore
+    return firstTimestamp.plus(duration).toLocalDate()
+  } else if (options.position === 'end') {
+    return lastTimestamp.toLocalDate()
+  } else {
+    return firstTimestamp.toLocalDate()
+  }
 }
 
 const calculateCorrelationDate = (config: Config, stamps: Stamp[], index: number) => {
-  if (config.correlationDate.kind === 'combineIntersection') {
-    return combineWhenClose(Duration.ZERO, stamps, index)
+  if (config.correlationDateStrategy.kind === 'combineIntersection') {
+    return combineWhenClose({
+      threshold: Duration.ZERO,
+      position: config.correlationDatePosition
+    }, stamps, index)
   } else {
-    return combineWhenClose(config.correlationDate.threshold, stamps, index)
+    return combineWhenClose({
+      threshold: config.correlationDateStrategy.threshold,
+      position: config.correlationDatePosition
+    }, stamps, index)
   }
 }
 

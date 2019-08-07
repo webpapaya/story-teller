@@ -34,8 +34,13 @@ export type Booking = {
   origin: Stamp[]
 }
 
+export type CorrelationDatePosition =
+| 'start'
+| 'center'
+| 'end'
 export type Config = {
-  correlationDate:
+  correlationDatePosition: CorrelationDatePosition
+  correlationDateStrategy:
   | { kind: 'combineIntersection' }
   | { kind: 'combineWhenClose', threshold: Duration }
 }
