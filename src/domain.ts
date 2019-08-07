@@ -1,5 +1,5 @@
 import { Omit, SingleEvent } from './lib/types'
-import { ZonedDateTime } from 'js-joda'
+import { ZonedDateTime, LocalDate, Duration } from 'js-joda'
 import uuid from 'uuid'
 
 type ID = ReturnType<typeof uuid>
@@ -30,8 +30,45 @@ export type Booking = {
   type: BookingTypes
   from: ZonedDateTime
   until: ZonedDateTime
+  correlationDate: LocalDate
   origin: Stamp[]
 }
+
+export type Config = {
+  correlationDate:
+  | { kind: 'combineIntersection' }
+  | { kind: 'combineWhenClose', threshold: Duration }
+}
+
+type DayOffset =
+  | 0
+  | 2
+  | 4
+
+export type MultiDayAbsence = {
+  from: LocalDate
+  until: LocalDate
+  morningOffset: DayOffset
+  eveningOffset: DayOffset
+  kind: 'multiday'
+}
+
+export type SingleDayMorningAbsence = {
+  date: LocalDate
+  offset: DayOffset
+  kind: 'singleDayMorning'
+}
+
+export type SingleDayEveningAbsence = {
+  date: LocalDate
+  offset: DayOffset
+  kind: 'singleDayEvening'
+}
+
+export type Absence =
+  | SingleDayMorningAbsence
+  | SingleDayEveningAbsence
+  | MultiDayAbsence
 
 export interface VerifiedTitle {
   id: ID
