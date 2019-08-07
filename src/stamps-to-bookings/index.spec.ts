@@ -1,9 +1,9 @@
 // @ts-ignore
 import { assertThat, hasProperties, hasProperty } from 'hamjest'
 import * as Factory from 'factory.ts'
-import { Stamp, Config } from './domain'
-import { ZonedDateTime, Duration } from 'js-joda'
-import { stampsToBookings } from './stamps-to-bookings'
+import { Stamp, Config } from '../domain'
+import { ZonedDateTime, Duration, LocalTime, LocalDate } from 'js-joda'
+import { stampsToBookings } from '.'
 
 const stampFactory = Factory.Sync.makeFactory<Stamp>({
   id: Factory.each(i => `${i}`),
@@ -12,8 +12,8 @@ const stampFactory = Factory.Sync.makeFactory<Stamp>({
 })
 
 const configFactory = Factory.Sync.makeFactory<Config>({
+  correlationDateStartOfDay: LocalTime.MIDNIGHT,
   correlationDateThreshold: Duration.ZERO,
-  correlationDateStrategy: { kind: 'combineIntersection' },
   correlationDatePosition: 'start'
 })
 
@@ -162,7 +162,7 @@ describe('stampsToBooking', () => {
     })
   })
 
-  describe('correlationDateStrategy: combineIntersecting', () => {
+  describe('correlationDate threshold', () => {
     it('all stamps are on same day (date of first stamp)', () => {
       const stamps = [
         stampFactory.build({
@@ -201,9 +201,7 @@ describe('stampsToBooking', () => {
         1: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate())
       }))
     })
-  })
 
-  describe('correlationDateStrategy: combineWhenClose', () => {
     it('with small gap below threshold (date of first stamp)', () => {
       const stamps = [
         stampFactory.build({
@@ -226,8 +224,7 @@ describe('stampsToBooking', () => {
       ]
 
       assertThat(stampsToBookings(configFactory.build({
-        correlationDateThreshold: Duration.ofMinutes(1),
-        correlationDateStrategy: { kind: 'combineWhenClose' }
+        correlationDateThreshold: Duration.ofMinutes(1)
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate()),
         1: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate())
@@ -255,8 +252,7 @@ describe('stampsToBooking', () => {
       ]
 
       assertThat(stampsToBookings(configFactory.build({
-        correlationDateThreshold: Duration.ofMinutes(1),
-        correlationDateStrategy: { kind: 'combineWhenClose' }
+        correlationDateThreshold: Duration.ofMinutes(1)
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate()),
         1: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate())
@@ -284,14 +280,14 @@ describe('stampsToBooking', () => {
       ]
 
       assertThat(stampsToBookings(configFactory.build({
-        correlationDateThreshold: Duration.ofMinutes(1),
-        correlationDateStrategy: { kind: 'combineWhenClose' }
+        correlationDateThreshold: Duration.ofMinutes(1)
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate()),
         1: hasProperty('correlationDate', stamps[2].timestamp.toLocalDate())
       }))
     })
   })
+
   describe('correlationDatePosition:', () => {
     const stamps = [
       stampFactory.build({
@@ -311,6 +307,7 @@ describe('stampsToBooking', () => {
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate())
       }))
     })
+
     it('middle', () => {
       assertThat(stampsToBookings(configFactory.build({
         correlationDatePosition: 'center'
@@ -318,11 +315,34 @@ describe('stampsToBooking', () => {
         0: hasProperty('correlationDate', stamps[1].timestamp.toLocalDate())
       }))
     })
+
     it('end', () => {
       assertThat(stampsToBookings(configFactory.build({
         correlationDatePosition: 'end'
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[1].timestamp.toLocalDate())
+      }))
+    })
+  })
+
+  describe('correlationDate: startOfDay', () => {
+    const stamps = [
+      stampFactory.build({
+        timestamp: ZonedDateTime.parse('2000-01-02T00:00:00Z'),
+        type: 'Start'
+      }),
+      stampFactory.build({
+        timestamp: ZonedDateTime.parse('2000-01-02T01:00:00Z'),
+        type: 'Stop'
+      })
+    ]
+
+    it('when day starts at noon, times will be shifted to previous day', () => {
+      assertThat(stampsToBookings(configFactory.build({
+        correlationDateStartOfDay: LocalTime.NOON,
+        correlationDatePosition: 'start'
+      }), stamps), hasProperties({
+        0: hasProperty('correlationDate', LocalDate.parse('2000-01-01'))
       }))
     })
   })

@@ -40,12 +40,10 @@ export type CorrelationDatePosition =
 | 'end'
 
 export type Config = {
+  correlationDateStartOfDay: LocalTime
   correlationDateThreshold: Duration
   correlationDatePosition: CorrelationDatePosition
-  correlationDateStrategy:
-  | { kind: 'combineIntersection' }
-  | { kind: 'combineWhenClose' }
-  | { kind: 'timeshift', time: LocalTime }
+
 }
 
 type DayOffset =
