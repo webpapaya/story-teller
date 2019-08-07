@@ -202,7 +202,7 @@ describe('stampsToBooking', () => {
   })
 
   describe('correlationDate: combineWhenClose', () => {
-    it('when small gap on next day (date of first stamp)', () => {
+    it('with small gap below threshold (date of first stamp)', () => {
       const stamps = [
         stampFactory.build({
           timestamp: ZonedDateTime.parse('2000-01-01T23:00:00Z'),
@@ -234,6 +234,38 @@ describe('stampsToBooking', () => {
       }))
     })
 
+    it('with small gap exactly on threshold (date of first stamp)', () => {
+      const stamps = [
+        stampFactory.build({
+          timestamp: ZonedDateTime.parse('2000-01-01T23:00:00Z'),
+          type: 'Start'
+        }),
+        stampFactory.build({
+          timestamp: ZonedDateTime.parse('2000-01-02T01:00:00Z'),
+          type: 'Stop'
+        }),
+        stampFactory.build({
+          timestamp: ZonedDateTime.parse('2000-01-02T01:01:00Z'),
+          type: 'Start'
+        }),
+        stampFactory.build({
+          timestamp: ZonedDateTime.parse('2000-01-02T02:00:00Z'),
+          type: 'Stop'
+        })
+      ]
+
+      assertThat(stampsToBookings(configFactory.build({
+        correlationDate: {
+          kind: 'combineWhenClose',
+          threshold: Duration.ofMinutes(1)
+        }
+      }), stamps), hasProperties({
+        0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate()),
+        1: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate())
+      }))
+    })
+
+
     it('when big gap on next day (date of start stamp)', () => {
       const stamps = [
         stampFactory.build({
@@ -252,7 +284,6 @@ describe('stampsToBooking', () => {
           timestamp: ZonedDateTime.parse('2000-01-02T03:00:00Z'),
           type: 'Stop'
         })
-
       ]
 
       assertThat(stampsToBookings(configFactory.build({
