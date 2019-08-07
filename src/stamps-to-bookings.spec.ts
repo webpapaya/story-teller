@@ -12,6 +12,7 @@ const stampFactory = Factory.Sync.makeFactory<Stamp>({
 })
 
 const configFactory = Factory.Sync.makeFactory<Config>({
+  correlationDateThreshold: Duration.ZERO,
   correlationDateStrategy: { kind: 'combineIntersection' },
   correlationDatePosition: 'start'
 })
@@ -225,11 +226,8 @@ describe('stampsToBooking', () => {
       ]
 
       assertThat(stampsToBookings(configFactory.build({
-        correlationDateStrategy: {
-          kind: 'combineWhenClose',
-          threshold: Duration.ofMinutes(1)
-        },
-        correlationDatePosition: 'start'
+        correlationDateThreshold: Duration.ofMinutes(1),
+        correlationDateStrategy: { kind: 'combineWhenClose' }
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate()),
         1: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate())
@@ -257,10 +255,8 @@ describe('stampsToBooking', () => {
       ]
 
       assertThat(stampsToBookings(configFactory.build({
-        correlationDateStrategy: {
-          kind: 'combineWhenClose',
-          threshold: Duration.ofMinutes(1)
-        }
+        correlationDateThreshold: Duration.ofMinutes(1),
+        correlationDateStrategy: { kind: 'combineWhenClose' }
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate()),
         1: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate())
@@ -288,11 +284,8 @@ describe('stampsToBooking', () => {
       ]
 
       assertThat(stampsToBookings(configFactory.build({
-        correlationDateStrategy: {
-          kind: 'combineWhenClose',
-          threshold: Duration.ofMinutes(1)
-        },
-        correlationDatePosition: 'start'
+        correlationDateThreshold: Duration.ofMinutes(1),
+        correlationDateStrategy: { kind: 'combineWhenClose' }
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate()),
         1: hasProperty('correlationDate', stamps[2].timestamp.toLocalDate())

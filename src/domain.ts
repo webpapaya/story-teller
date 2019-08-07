@@ -1,5 +1,5 @@
 import { Omit, SingleEvent } from './lib/types'
-import { ZonedDateTime, LocalDate, Duration } from 'js-joda'
+import { ZonedDateTime, LocalDate, Duration, LocalTime } from 'js-joda'
 import uuid from 'uuid'
 
 type ID = ReturnType<typeof uuid>
@@ -38,11 +38,14 @@ export type CorrelationDatePosition =
 | 'start'
 | 'center'
 | 'end'
+
 export type Config = {
+  correlationDateThreshold: Duration
   correlationDatePosition: CorrelationDatePosition
   correlationDateStrategy:
   | { kind: 'combineIntersection' }
-  | { kind: 'combineWhenClose', threshold: Duration }
+  | { kind: 'combineWhenClose' }
+  | { kind: 'timeshift', time: LocalTime }
 }
 
 type DayOffset =

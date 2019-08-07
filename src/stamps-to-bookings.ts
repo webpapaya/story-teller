@@ -34,17 +34,10 @@ const combineWhenClose = (options: { threshold: Duration, position: CorrelationD
 }
 
 const calculateCorrelationDate = (config: Config, stamps: Stamp[], index: number) => {
-  if (config.correlationDateStrategy.kind === 'combineIntersection') {
-    return combineWhenClose({
-      threshold: Duration.ZERO,
-      position: config.correlationDatePosition
-    }, stamps, index)
-  } else {
-    return combineWhenClose({
-      threshold: config.correlationDateStrategy.threshold,
-      position: config.correlationDatePosition
-    }, stamps, index)
-  }
+  return combineWhenClose({
+    threshold: config.correlationDateThreshold,
+    position: config.correlationDatePosition
+  }, stamps, index)
 }
 
 export const stampsToBookings = (config: Config, stamps: Stamp[]) => {
