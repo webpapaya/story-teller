@@ -50,24 +50,15 @@ const calculateCorrelationDate = (config: Config, stamps: Stamp[], index: number
 export const stampsToBookings = (config: Config, stamps: Stamp[]) => {
   return stamps.reduce((result, currentStamp, index) => {
     const previousStamp = stamps[index - 1]
+    if (!previousStamp || previousStamp.type === 'Stop') { return result }
 
-    if (previousStamp && previousStamp.type === 'Start') {
-      result.push({
-        type: 'Work',
-        correlationDate: calculateCorrelationDate(config, stamps, index),
-        from: previousStamp.timestamp,
-        until: currentStamp.timestamp,
-        origin: [previousStamp, currentStamp]
-      })
-    } else if (previousStamp && previousStamp.type === 'Break') {
-      result.push({
-        type: 'Break',
-        correlationDate: calculateCorrelationDate(config, stamps, index),
-        from: previousStamp.timestamp,
-        until: currentStamp.timestamp,
-        origin: [previousStamp, currentStamp]
-      })
-    }
+    result.push({
+      type: previousStamp.type === 'Start' ? 'Work' : 'Break',
+      correlationDate: calculateCorrelationDate(config, stamps, index),
+      from: previousStamp.timestamp,
+      until: currentStamp.timestamp,
+      origin: [previousStamp, currentStamp]
+    })
 
     return result
   }, [] as Booking[])
