@@ -34,16 +34,17 @@ export type Booking = {
   origin: Stamp[]
 }
 
-export type CorrelationDatePosition =
-| 'start'
-| 'center'
-| 'end'
+export type CorrelationDateConfig = {
+  startOfDay: LocalTime
+  threshold: Duration
+  position:
+  | 'start'
+  | 'center'
+  | 'end'
+}
 
 export type Config = {
-  correlationDateStartOfDay: LocalTime
-  correlationDateThreshold: Duration
-  correlationDatePosition: CorrelationDatePosition
-
+  correlationDate: CorrelationDateConfig
 }
 
 type DayOffset =

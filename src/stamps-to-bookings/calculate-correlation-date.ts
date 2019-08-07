@@ -1,4 +1,4 @@
-import { Stamp, Config } from '../domain'
+import { Stamp, CorrelationDateConfig as Config } from '../domain'
 import { Duration, ChronoUnit, LocalTime, LocalDateTime } from 'js-joda'
 
 const areStampsClose = (threshold: Duration, previousStamp: Stamp, currentStamp: Stamp) => {
@@ -16,7 +16,7 @@ const buildStampChain = (config: Config, stamps: Stamp[], index: number) => {
     const currentStamp = stamps[i]
     const previousStamp = stamps[i - 1]
     stampChain.unshift(currentStamp)
-    if (previousStamp && previousStamp.type === 'Stop' && !areStampsClose(config.correlationDateThreshold, previousStamp, currentStamp)) { break }
+    if (previousStamp && previousStamp.type === 'Stop' && !areStampsClose(config.threshold, previousStamp, currentStamp)) { break }
   }
   return stampChain
 }
@@ -24,11 +24,11 @@ const buildStampChain = (config: Config, stamps: Stamp[], index: number) => {
 const applyDatePosition = (config: Config, stampChain: Stamp[]) => {
   const firstTimestamp = stampChain[0].timestamp
   const lastTimestamp = stampChain[stampChain.length - 1].timestamp
-  if (config.correlationDatePosition === 'center') {
+  if (config.position === 'center') {
     const duration = Duration.between(firstTimestamp, lastTimestamp)
     // @ts-ignore
     return firstTimestamp.plus(duration)
-  } else if (config.correlationDatePosition === 'end') {
+  } else if (config.position === 'end') {
     return lastTimestamp
   } else {
     return firstTimestamp
@@ -37,7 +37,7 @@ const applyDatePosition = (config: Config, stampChain: Stamp[]) => {
 
 const applyTimeshift = (config: Config, correlationTimestamp: LocalDateTime) => {
   const offset = LocalTime.MIDNIGHT
-    .until(config.correlationDateStartOfDay, ChronoUnit.MICROS)
+    .until(config.startOfDay, ChronoUnit.MICROS)
 
   return correlationTimestamp.minus(offset, ChronoUnit.MICROS).toLocalDate()
 }

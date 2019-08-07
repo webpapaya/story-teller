@@ -8,7 +8,7 @@ export const stampsToBookings = (config: Config, stamps: Stamp[]) => {
 
     result.push({
       type: previousStamp.type === 'Start' ? 'Work' : 'Break',
-      correlationDate: calculateCorrelationDate(config, stamps, index),
+      correlationDate: calculateCorrelationDate(config.correlationDate, stamps, index),
       from: previousStamp.timestamp,
       until: currentStamp.timestamp,
       origin: [previousStamp, currentStamp]

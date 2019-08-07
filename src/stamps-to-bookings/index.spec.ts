@@ -12,9 +12,11 @@ const stampFactory = Factory.Sync.makeFactory<Stamp>({
 })
 
 const configFactory = Factory.Sync.makeFactory<Config>({
-  correlationDateStartOfDay: LocalTime.MIDNIGHT,
-  correlationDateThreshold: Duration.ZERO,
-  correlationDatePosition: 'start'
+  correlationDate: {
+    startOfDay: LocalTime.MIDNIGHT,
+    threshold: Duration.ZERO,
+    position: 'start'
+  }
 })
 
 describe('stampsToBooking', () => {
@@ -224,7 +226,7 @@ describe('stampsToBooking', () => {
       ]
 
       assertThat(stampsToBookings(configFactory.build({
-        correlationDateThreshold: Duration.ofMinutes(1)
+        correlationDate: { threshold: Duration.ofMinutes(1) }
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate()),
         1: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate())
@@ -252,7 +254,7 @@ describe('stampsToBooking', () => {
       ]
 
       assertThat(stampsToBookings(configFactory.build({
-        correlationDateThreshold: Duration.ofMinutes(1)
+        correlationDate: { threshold: Duration.ofMinutes(1) }
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate()),
         1: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate())
@@ -280,7 +282,7 @@ describe('stampsToBooking', () => {
       ]
 
       assertThat(stampsToBookings(configFactory.build({
-        correlationDateThreshold: Duration.ofMinutes(1)
+        correlationDate: { threshold: Duration.ofMinutes(1) }
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate()),
         1: hasProperty('correlationDate', stamps[2].timestamp.toLocalDate())
@@ -302,7 +304,7 @@ describe('stampsToBooking', () => {
 
     it('start', () => {
       assertThat(stampsToBookings(configFactory.build({
-        correlationDatePosition: 'start'
+        correlationDate: { position: 'start' }
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[0].timestamp.toLocalDate())
       }))
@@ -310,7 +312,7 @@ describe('stampsToBooking', () => {
 
     it('middle', () => {
       assertThat(stampsToBookings(configFactory.build({
-        correlationDatePosition: 'center'
+        correlationDate: { position: 'center' }
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[1].timestamp.toLocalDate())
       }))
@@ -318,7 +320,7 @@ describe('stampsToBooking', () => {
 
     it('end', () => {
       assertThat(stampsToBookings(configFactory.build({
-        correlationDatePosition: 'end'
+        correlationDate: { position: 'end' }
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', stamps[1].timestamp.toLocalDate())
       }))
@@ -339,8 +341,7 @@ describe('stampsToBooking', () => {
 
     it('when day starts at noon, times will be shifted to previous day', () => {
       assertThat(stampsToBookings(configFactory.build({
-        correlationDateStartOfDay: LocalTime.NOON,
-        correlationDatePosition: 'start'
+        correlationDate: { startOfDay: LocalTime.NOON }
       }), stamps), hasProperties({
         0: hasProperty('correlationDate', LocalDate.parse('2000-01-01'))
       }))
