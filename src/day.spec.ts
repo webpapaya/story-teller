@@ -5,16 +5,16 @@ import { Day } from './domain'
 
 const sortDayPoints = (dayPoints: Day[]) => {
   return dayPoints.sort((a, b) => {
-    return b.offset - a.offset || b.priority - a.priority
+    return a.offset - b.offset || a.priority - b.priority
   })
 }
 
 const calculateDayKind = (days: Day[]) => {
-  const dayPoints = [...days]
+  const dayPoints = sortDayPoints([...days])
   const result: Day[] = []
 
   let currentDayPoint: Day | undefined
-  while (currentDayPoint = dayPoints.pop()) { // eslint-disable-line no-cond-assign
+  while (currentDayPoint = dayPoints.shift()) { // eslint-disable-line no-cond-assign
     const currentDay = currentDayPoint
     const previousDay = result[result.length - 1]
     const needsToBeReplaced = previousDay && currentDay.offset === previousDay.offset
@@ -31,15 +31,10 @@ const calculateDayKind = (days: Day[]) => {
     const currentDayEnd = currentDay.offset + currentDay.duration
     const previousDayEnd = previousDay.offset + previousDay.duration
     const nextDuration = previousDayEnd - currentDayEnd
-
     previousDay.duration = currentDayPoint.offset - previousDay.offset
 
-    if (previousDayEnd > currentDayEnd || currentDay.offset === previousDay.offset) {
-      dayPoints.push({
-        ...previousDay,
-        offset: currentDayEnd,
-        duration: nextDuration
-      })
+    if (previousDayEnd > currentDayEnd) {
+      dayPoints.push({ ...previousDay, offset: currentDayEnd, duration: nextDuration })
       sortDayPoints(dayPoints)
     }
   }
@@ -55,43 +50,52 @@ const dayFactory = Factory.Sync.makeFactory<Day>({
 })
 
 describe('calculateDayKind', () => {
-  it('with one day given returns one day', () => {
+  it('single full day is returned as is', () => {
     assertThat(calculateDayKind([dayFactory.build()]),
       hasProperty('length', 1))
   })
 
-  it('full day, different priority', () => {
+  it('two full days, returns 1 day part', () => {
     assertThat(calculateDayKind([
-      dayFactory.build({ priority: 0 }),
-      dayFactory.build({ priority: 2 })
+      dayFactory.build({ }),
+      dayFactory.build({ }),
     ]), hasProperty('length', 1))
   })
 
-  it('full day, different wtf', () => {
+  it('half day (prio 0) and full day (prio 1), returns 2 day parts', () => {
     assertThat(calculateDayKind([
       dayFactory.build({ priority: 0 }),
-      dayFactory.build({ priority: 2, duration: 0.5 })
+      dayFactory.build({ priority: 1, duration: 0.5 })
     ]), hasProperty('length', 2))
   })
 
-  it('with one full day and one half day', () => {
+  it('half day (prio 1) and full day (prio 0), returns 1 day part', () => {
     assertThat(calculateDayKind([
-      dayFactory.build({ priority: 2, offset: 0.5, duration: 0.5, type: 'second' }),
-      dayFactory.build({ priority: 0, type: 'first' })
+      dayFactory.build({ priority: 1 }),
+      dayFactory.build({ priority: 0, duration: 0.5 })
+    ]), hasProperty('length', 1))
+  })
+
+  it('full day (prio 0) and half day (prio 1) at the end, returns 2 day parts', () => {
+    assertThat(calculateDayKind([
+      dayFactory.build({ priority: 1, offset: 0.5, duration: 0.5, type: 'B' }),
+      dayFactory.build({ priority: 0, offset: 0, type: 'A' })
     ]), hasProperties({
-      0: hasProperties({ type: 'first', offset: 0, duration: 0.5 }),
-      1: hasProperties({ type: 'second', offset: 0.5, duration: 0.5 })
+      length: 2,
+      0: hasProperties({ type: 'A', offset: 0, duration: 0.5 }),
+      1: hasProperties({ type: 'B', offset: 0.5, duration: 0.5 })
     }))
   })
 
-  it('with one full day and half day in middle', () => {
+  it('full day (prio 0) and half day (prio 1) in the middle, returns 3 day parts', () => {
     assertThat(calculateDayKind([
-      dayFactory.build({ priority: 2, offset: 0.25, duration: 0.5, type: 'second' }),
-      dayFactory.build({ priority: 0, type: 'first' })
+      dayFactory.build({ priority: 1, offset: 0.25, duration: 0.5, type: 'B' }),
+      dayFactory.build({ priority: 0, type: 'A' })
     ]), hasProperties({
-      0: hasProperties({ type: 'first', offset: 0, duration: 0.25 }),
-      1: hasProperties({ type: 'second', offset: 0.25, duration: 0.5 }),
-      2: hasProperties({ type: 'first', offset: 0.75, duration: 0.25 })
+      length: 3,
+      0: hasProperties({ type: 'A', offset: 0, duration: 0.25 }),
+      1: hasProperties({ type: 'B', offset: 0.25, duration: 0.5 }),
+      2: hasProperties({ type: 'A', offset: 0.75, duration: 0.25 })
     }))
   })
 })
