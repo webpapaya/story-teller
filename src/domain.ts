@@ -8,6 +8,18 @@ export interface User {
   name: string
 }
 
+export type Versioned<T> = {
+  validFrom: LocalDate | null
+  validUntil: LocalDate | null
+} & T
+
+export type Day = {
+  priority: number
+  offset: number
+  duration: number
+  type: string
+}
+
 export type StampTypes =
   | 'Start'
   | 'Break'

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node-dev --respawn --transpileOnly ./src/index.ts",
     "lint": "eslint --ext js,ts .",
-    "test": "mocha -r ts-node/register --timeout 500000 --inspect-brk --watch-extensions ts src/**/*.spec.ts",
+    "test": "mocha -r ts-node/register --timeout 500000 --inspect-brk --watch-extensions ts $(find src -name '*.spec.ts')",
     "db:migrate": "docker-compose run flyway -url=jdbc:postgresql://db:5432/compup -user=dbuser -password=password migrate",
     "tsc": "tsc"
   },
