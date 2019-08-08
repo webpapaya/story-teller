@@ -1,13 +1,13 @@
 import { DayPart } from './domain'
 
-const sortDayPoints = (dayPoints: DayPart[]) => {
+const sortDayParts = (dayPoints: DayPart[]) => {
   return dayPoints.sort((a, b) => {
     return a.offset - b.offset || a.priority - b.priority
   })
 }
 
 export const combineDayParts = (days: DayPart[]) => {
-  const dayPoints = sortDayPoints([...days])
+  const dayPoints = sortDayParts([...days])
   const result: DayPart[] = []
 
   let currentDayPoint: DayPart | undefined
@@ -32,7 +32,7 @@ export const combineDayParts = (days: DayPart[]) => {
 
     if (previousDayEnd > currentDayEnd) {
       dayPoints.push({ ...previousDay, offset: currentDayEnd, duration: nextDuration })
-      sortDayPoints(dayPoints)
+      sortDayParts(dayPoints)
     }
   }
 

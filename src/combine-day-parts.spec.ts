@@ -11,7 +11,7 @@ const dayFactory = Factory.Sync.makeFactory<DayPart>({
   priority: 0
 })
 
-describe('calculateDayKind', () => {
+describe('combineDayParts', () => {
   it('single full day is returned as is', () => {
     assertThat(combineDayParts([dayFactory.build()]),
       hasProperty('length', 1))
