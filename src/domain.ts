@@ -13,7 +13,7 @@ export type Versioned<T> = {
   validUntil: LocalDate | null
 } & T
 
-export type Day = {
+export type DayPart = {
   priority: number
   offset: number
   duration: number
