@@ -3,43 +3,42 @@ import { assertThat, hasProperties, hasProperty } from 'hamjest'
 import * as Factory from 'factory.ts'
 import { Day } from './domain'
 
-type DayPoint = {
-  value: number
-  day: Day
-}
-
-const sortDayPoints = (dayPoints: DayPoint[]) => {
+const sortDayPoints = (dayPoints: Day[]) => {
   return dayPoints.sort((a, b) => {
-    return b.value - a.value || b.day.priority - a.day.priority
+    return b.offset - a.offset || b.priority - a.priority
   })
 }
 
 const calculateDayKind = (days: Day[]) => {
-  const dayPoints = sortDayPoints(days.reduce((result, day) => {
-    result.push({ value: day.offset, day })
-    return result
-  }, [] as DayPoint[]))
-
+  const dayPoints = [...days]
   const result: Day[] = []
 
-  let currentDayPoint: DayPoint | undefined
+  let currentDayPoint: Day | undefined
   while (currentDayPoint = dayPoints.pop()) { // eslint-disable-line no-cond-assign
-    const currentDay = currentDayPoint.day
+    const currentDay = currentDayPoint
     const previousDay = result[result.length - 1]
-    result.push(currentDayPoint.day)
-    if (!previousDay) { continue }
+    const needsToBeReplaced = previousDay && currentDay.offset === previousDay.offset
+
+    if (!previousDay) {
+      result.push(currentDay)
+      continue
+    } else if (needsToBeReplaced) {
+      result[result.length - 1] = currentDay
+    } else if (currentDay.duration > 0) {
+      result.push(currentDay)
+    }
 
     const currentDayEnd = currentDay.offset + currentDay.duration
     const previousDayEnd = previousDay.offset + previousDay.duration
-    previousDay.duration = currentDayPoint.day.offset - previousDay.offset
-    if (previousDayEnd > currentDayEnd) {
+    const nextDuration = previousDayEnd - currentDayEnd
+
+    previousDay.duration = currentDayPoint.offset - previousDay.offset
+
+    if (previousDayEnd > currentDayEnd || currentDay.offset === previousDay.offset) {
       dayPoints.push({
-        value: previousDayEnd,
-        day: {
-          ...previousDay,
-          offset: currentDayEnd,
-          duration: previousDayEnd - currentDayEnd
-        }
+        ...previousDay,
+        offset: currentDayEnd,
+        duration: nextDuration
       })
       sortDayPoints(dayPoints)
     }
@@ -59,6 +58,20 @@ describe('calculateDayKind', () => {
   it('with one day given returns one day', () => {
     assertThat(calculateDayKind([dayFactory.build()]),
       hasProperty('length', 1))
+  })
+
+  it('full day, different priority', () => {
+    assertThat(calculateDayKind([
+      dayFactory.build({ priority: 0 }),
+      dayFactory.build({ priority: 2 })
+    ]), hasProperty('length', 1))
+  })
+
+  it('full day, different wtf', () => {
+    assertThat(calculateDayKind([
+      dayFactory.build({ priority: 0 }),
+      dayFactory.build({ priority: 2, duration: 0.5 })
+    ]), hasProperty('length', 2))
   })
 
   it('with one full day and one half day', () => {
