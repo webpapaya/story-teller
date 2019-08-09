@@ -2,7 +2,7 @@
 import { assertThat, hasProperties, hasProperty } from 'hamjest'
 import * as Factory from 'factory.ts'
 import { DayPart } from './domain'
-import { combineDayParts } from './combine-day-parts'
+import { combineTimeFrames } from './combine-time-frames'
 
 const dayFactory = Factory.Sync.makeFactory<DayPart>({
   offset: 0,
@@ -11,7 +11,23 @@ const dayFactory = Factory.Sync.makeFactory<DayPart>({
   priority: 0
 })
 
-describe('combineDayParts', () => {
+const combineDayParts = combineTimeFrames<DayPart>({
+  getOffset: (dayPart) => dayPart.offset,
+  setOffset: (dayPart, value) => {
+    dayPart.offset = value
+    return dayPart
+  },
+
+  getDuration: (dayPart) => dayPart.duration,
+  setDuration: (dayPart, value) => {
+    dayPart.duration = value
+    return dayPart
+  },
+
+  orderFn: (a, b) => a.offset - b.offset || a.priority - b.priority
+})
+
+describe('combineTimeFrames', () => {
   it('single full day is returned as is', () => {
     assertThat(combineDayParts([dayFactory.build()]),
       hasProperty('length', 1))
