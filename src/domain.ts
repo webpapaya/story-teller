@@ -8,17 +8,31 @@ export interface User {
   name: string
 }
 
-export type Versioned<T> = {
-  validFrom: LocalDate | null
-  validUntil: LocalDate | null
-} & T
-
 export type DayPart = {
   priority: number
   offset: number
   duration: number
   type: string
 }
+
+export type DayPartOnDate = {
+  date: LocalDate
+  parts: DayPart[]
+}
+
+export type Versioned<T> = {
+  validFrom: LocalDate | null
+} & T
+
+export type WorkTimeModel = Versioned<{
+  MONDAY: Duration | null
+  TUESDAY: Duration | null
+  WEDNESDAY: Duration | null
+  THURSDAY: Duration | null
+  FRIDAY: Duration | null
+  SATURDAY: Duration | null
+  SUNDAY: Duration | null
+}>
 
 export type StampTypes =
   | 'Start'
