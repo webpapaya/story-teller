@@ -28,7 +28,10 @@ export const combineDayParts = (days: DayPart[]) => {
     const currentDayEnd = currentDay.offset + currentDay.duration
     const previousDayEnd = previousDay.offset + previousDay.duration
     const nextDuration = previousDayEnd - currentDayEnd
-    previousDay.duration = currentDayPoint.offset - previousDay.offset
+
+    if (previousDayEnd > currentDay.offset) {
+      previousDay.duration = currentDayPoint.offset - previousDay.offset
+    }
 
     if (previousDayEnd > currentDayEnd) {
       dayPoints.push({ ...previousDay, offset: currentDayEnd, duration: nextDuration })

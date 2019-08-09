@@ -49,6 +49,17 @@ describe('combineDayParts', () => {
     }))
   })
 
+  it('first quarter (prio 0) and last quarter (prio 0) of day, returns 2 day parts', () => {
+    assertThat(combineDayParts([
+      dayFactory.build({ priority: 0, offset: 0, duration: 0.25, type: 'A' }),
+      dayFactory.build({ priority: 0, offset: 0.75, duration: 0.25, type: 'B' })
+    ]), hasProperties({
+      length: 2,
+      0: hasProperties({ type: 'A', offset: 0, duration: 0.25 }),
+      1: hasProperties({ type: 'B', offset: 0.75, duration: 0.25 })
+    }))
+  })
+
   it('full day (prio 0) and half day (prio 1) in the middle, returns 3 day parts', () => {
     assertThat(combineDayParts([
       dayFactory.build({ priority: 1, offset: 0.25, duration: 0.5, type: 'B' }),
