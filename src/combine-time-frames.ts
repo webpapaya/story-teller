@@ -37,8 +37,9 @@ export const combineTimeFrames = <T>(c: DayPartSettings<T>) => (timeFrames: T[])
 
     if (previousFrameEnd > currentFrameEnd) {
       const nextDayPart = { ...previousFrame }
-      c.setDuration(nextDayPart, nextDuration)
       c.setOffset(nextDayPart, currentFrameEnd)
+      c.setDuration(nextDayPart, nextDuration)
+
       frames.push(nextDayPart)
       frames.sort(c.orderFn)
     }
