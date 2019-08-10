@@ -73,34 +73,23 @@ export type Config = {
   correlationDate: CorrelationDateConfig
 }
 
-type DayOffset =
-  | 0
-  | 2
-  | 4
-
 export type MultiDayAbsence = {
   from: LocalDate
   until: LocalDate
-  morningOffset: DayOffset
-  eveningOffset: DayOffset
+  morningOffset: number
+  eveningOffset: number
   kind: 'multiday'
 }
 
-export type SingleDayMorningAbsence = {
+export type SingleDayAbsence = {
   date: LocalDate
-  offset: DayOffset
-  kind: 'singleDayMorning'
-}
-
-export type SingleDayEveningAbsence = {
-  date: LocalDate
-  offset: DayOffset
-  kind: 'singleDayEvening'
+  duration: number
+  offset: number
+  kind: 'singleDay'
 }
 
 export type Absence =
-  | SingleDayMorningAbsence
-  | SingleDayEveningAbsence
+  | SingleDayAbsence
   | MultiDayAbsence
 
 export interface VerifiedTitle {

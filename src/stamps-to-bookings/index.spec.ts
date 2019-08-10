@@ -1,23 +1,8 @@
 // @ts-ignore
 import { assertThat, hasProperties, hasProperty } from 'hamjest'
-import * as Factory from 'factory.ts'
-import { Stamp, Config } from '../domain'
 import { ZonedDateTime, Duration, LocalTime, LocalDate } from 'js-joda'
 import { stampsToBookings } from '.'
-
-const stampFactory = Factory.Sync.makeFactory<Stamp>({
-  id: Factory.each(i => `${i}`),
-  type: 'Start',
-  timestamp: ZonedDateTime.parse('2000-01-01T00:00:00Z')
-})
-
-const configFactory = Factory.Sync.makeFactory<Config>({
-  correlationDate: {
-    startOfDay: LocalTime.MIDNIGHT,
-    threshold: Duration.ZERO,
-    position: 'start'
-  }
-})
+import { stampFactory, configFactory } from '../factories'
 
 describe('stampsToBooking', () => {
   describe('generats bookings correctly with stamps:', () => {
