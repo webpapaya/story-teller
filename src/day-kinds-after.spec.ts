@@ -42,7 +42,8 @@ describe('dayTypeOnDate', () => {
 
   it('returns rest day without work time model', () => {
     const dayTypesGenerator = dayKindsAfter({
-      workTimeModels: []
+      workTimeModels: [],
+      absences: []
     }, LocalDate.parse('2000-01-01'))
 
     assertThat(dayTypesGenerator.next().value, hasProperties({
@@ -53,7 +54,8 @@ describe('dayTypeOnDate', () => {
 
   it('single day absences are taken into account', () => {
     const dayTypesGenerator = dayKindsAfter({
-      absences: singleDayAbsences
+      absences: singleDayAbsences,
+      workTimeModels: []
     }, LocalDate.parse('2000-01-01'))
 
     const dayTypes = Array
@@ -78,7 +80,8 @@ describe('dayTypeOnDate', () => {
 
   it('multiday absences are taken into account', () => {
     const dayTypesGenerator = dayKindsAfter({
-      absences: multiDayAbsences
+      absences: multiDayAbsences,
+      workTimeModels: []
     }, LocalDate.parse('2000-01-01'))
 
     const dayTypes = Array
@@ -111,6 +114,7 @@ describe('dayTypeOnDate', () => {
 
   it('versioning in work time models are taken into account', () => {
     const dayTypesGenerator = dayKindsAfter({
+      absences: [],
       workTimeModels: [...workTimeModels].reverse()
     }, LocalDate.parse('2000-01-01'))
 
