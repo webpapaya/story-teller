@@ -1,12 +1,12 @@
 // @ts-ignore
 import { assertThat, hasProperties, contains } from 'hamjest'
 import { LocalDate, Duration } from 'js-joda'
-import { dayKindsAfter } from './day-kinds-after'
+import { dayKindsAfter } from '.'
 import {
   workTimeModelFactory,
   multiDayAbsenceFactory,
   singleDayAbsenceFactory
-} from './factories'
+} from '../factories'
 
 describe('dayTypeOnDate', () => {
   const workTimeModels = [
