@@ -1,6 +1,6 @@
 // @ts-ignore
 import { LocalDate } from 'js-joda'
-import { Weekday } from './types'
+import { Weekday } from '../domain'
 
 // Credits to: https://gist.github.com/johndyer/0dffbdd98c2046f41180c051f378f343
 export const calculateCatholicEasterSunday = (year: number) => {

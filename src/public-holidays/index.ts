@@ -8,7 +8,7 @@ import {
   WeekdayOnOrBeforeDate,
   WeekdayOnOrAfterDate,
   PublicHolidayConfig
-} from './types'
+} from '../domain'
 import { LocalDate } from 'js-joda'
 import {
   calculateCatholicEasterSunday,
