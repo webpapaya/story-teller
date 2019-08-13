@@ -9,19 +9,33 @@ export const fixedDateHolidayFactory = Factory.Sync.makeFactory<FixedDate>({
   month: 1,
   day: 1,
   name: 'New Year',
-  kind: 'fixedDate'
+  kind: 'fixedDate',
+  offset: 0,
+  duration: 0,
+  validFrom: null,
+  validUntil: null
 })
 
 export const catholicEasterHolidayFactory = Factory.Sync.makeFactory<CatholicEasterBased>({
   easterOffset: 0,
   name: 'Easter Sunday',
-  kind: 'catholicEasterBased'
+  kind: 'catholicEasterBased',
+  offset: 0,
+  duration: 0,
+  validFrom: null,
+  validUntil: null
+
 })
 
 export const orthodoxEasterHolidayFactory = Factory.Sync.makeFactory<OrthodoxEasterBased>({
   easterOffset: 0,
   name: 'Easter Sunday',
-  kind: 'orthodoxEasterBased'
+  kind: 'orthodoxEasterBased',
+  offset: 0,
+  duration: 0,
+  validFrom: null,
+  validUntil: null
+
 })
 
 export const firstWeekdayInMonthHolidayFactory = Factory.Sync.makeFactory<FirstWeekdayInMonth>({
@@ -29,7 +43,12 @@ export const firstWeekdayInMonthHolidayFactory = Factory.Sync.makeFactory<FirstW
   weekday: 'MONDAY',
   ordinalOffset: 0,
   name: 'Easter Sunday',
-  kind: 'firstWeekdayInMonth'
+  kind: 'firstWeekdayInMonth',
+  offset: 0,
+  duration: 0,
+  validFrom: null,
+  validUntil: null
+
 })
 
 export const lastWeekdayInMonthHolidayFactory = Factory.Sync.makeFactory<LastWeekdayInMonth>({
@@ -37,7 +56,12 @@ export const lastWeekdayInMonthHolidayFactory = Factory.Sync.makeFactory<LastWee
   weekday: 'MONDAY',
   ordinalOffset: 0,
   name: 'Easter Sunday',
-  kind: 'lastWeekdayInMonth'
+  kind: 'lastWeekdayInMonth',
+  offset: 0,
+  duration: 0,
+  validFrom: null,
+  validUntil: null
+
 })
 
 export const weekdayOnOrBeforeHolidayFactory = Factory.Sync.makeFactory<WeekdayOnOrBeforeDate>({
@@ -45,7 +69,12 @@ export const weekdayOnOrBeforeHolidayFactory = Factory.Sync.makeFactory<WeekdayO
   day: 1,
   weekday: 'MONDAY',
   name: 'Easter Sunday',
-  kind: 'weekdayOnOrBeforeDate'
+  kind: 'weekdayOnOrBeforeDate',
+  offset: 0,
+  duration: 0,
+  validFrom: null,
+  validUntil: null
+
 })
 
 export const weekdayOnOrAfterHolidayFactory = Factory.Sync.makeFactory<WeekdayOnOrAfterDate>({
@@ -53,7 +82,11 @@ export const weekdayOnOrAfterHolidayFactory = Factory.Sync.makeFactory<WeekdayOn
   day: 1,
   weekday: 'MONDAY',
   name: 'Easter Sunday',
-  kind: 'weekdayOnOrAfterDate'
+  kind: 'weekdayOnOrAfterDate',
+  offset: 0,
+  duration: 0,
+  validFrom: null,
+  validUntil: null
 })
 
 describe('fixedDate', () => {
