@@ -32,12 +32,20 @@ export type OrthodoxEasterBased = {
   kind: 'orthodoxEasterBased'
 }
 
-export type OrdinalWeekdayInMonth = {
+export type FirstWeekdayInMonth = {
   name: string
   weekday: Weekday
   month: number
   ordinalOffset: number
-  kind: 'ordinalWeekdayInMonth'
+  kind: 'firstWeekdayInMonth'
+}
+
+export type LastWeekdayInMonth = {
+  name: string
+  weekday: Weekday
+  month: number
+  ordinalOffset: number
+  kind: 'lastWeekdayInMonth'
 }
 
 export type WeekdayOnOrBeforeDate = {
@@ -52,7 +60,8 @@ export type PublicHolidayConfig = BoxedVersioned<
 | FixedDate
 | CatholicEasterBased
 | OrthodoxEasterBased
-| OrdinalWeekdayInMonth
+| FirstWeekdayInMonth
+| LastWeekdayInMonth
 | WeekdayOnOrBeforeDate
 >
 
