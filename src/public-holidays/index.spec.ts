@@ -3,15 +3,7 @@ import { assertThat, hasProperties } from 'hamjest'
 import * as Factory from 'factory.ts'
 import { FixedDate, CatholicEasterBased, OrthodoxEasterBased, FirstWeekdayInMonth, Weekday, LastWeekdayInMonth, WeekdayOnOrAfterDate, WeekdayOnOrBeforeDate } from './types'
 import { LocalDate } from 'js-joda'
-import {
-  resolveFixedDate,
-  resolveCatholicEaster,
-  resolveOrthodoxEaster,
-  resolveFirstWeekdayInMonth,
-  resolveLastWeekdayInMonth,
-  resolveWeekdayOnOrBeforeDate,
-  resolveWeekdayOnOrAfterDate
-} from './index'
+import { resolveHoliday } from './index'
 
 export const fixedDateHolidayFactory = Factory.Sync.makeFactory<FixedDate>({
   month: 1,
@@ -67,7 +59,7 @@ export const weekdayOnOrAfterHolidayFactory = Factory.Sync.makeFactory<WeekdayOn
 describe('fixedDate', () => {
   it('New Year in 2000 is on 2000-01-01', () => {
     const holiday = fixedDateHolidayFactory.build()
-    assertThat(resolveFixedDate(holiday, 2000), hasProperties({
+    assertThat(resolveHoliday(holiday, 2000), hasProperties({
       name: holiday.name,
       date: LocalDate.of(2000, holiday.month, holiday.day)
     }))
@@ -82,7 +74,7 @@ describe('catholicEasterBased', () => {
   ].forEach(({ year, easterOffset, date }) => {
     it(`in year ${year} with easterOffset ${easterOffset}, returns ${date}`, () => {
       const holiday = catholicEasterHolidayFactory.build({ easterOffset })
-      assertThat(resolveCatholicEaster(holiday, year), hasProperties({
+      assertThat(resolveHoliday(holiday, year), hasProperties({
         date: LocalDate.parse(date)
       }))
     })
@@ -90,7 +82,7 @@ describe('catholicEasterBased', () => {
 
   it('uses correct name', () => {
     const holiday = catholicEasterHolidayFactory.build()
-    assertThat(resolveCatholicEaster(holiday, 2000), hasProperties({
+    assertThat(resolveHoliday(holiday, 2000), hasProperties({
       name: holiday.name
     }))
   })
@@ -104,7 +96,7 @@ describe('orthodoxEasterBased', () => {
   ].forEach(({ year, easterOffset, date }) => {
     it(`in year ${year} with easterOffset ${easterOffset}, returns ${date}`, () => {
       const holiday = orthodoxEasterHolidayFactory.build({ easterOffset })
-      assertThat(resolveOrthodoxEaster(holiday, year), hasProperties({
+      assertThat(resolveHoliday(holiday, year), hasProperties({
         date: LocalDate.parse(date)
       }))
     })
@@ -112,7 +104,7 @@ describe('orthodoxEasterBased', () => {
 
   it('uses correct name', () => {
     const holiday = orthodoxEasterHolidayFactory.build()
-    assertThat(resolveOrthodoxEaster(holiday, 2000), hasProperties({
+    assertThat(resolveHoliday(holiday, 2000), hasProperties({
       name: holiday.name
     }))
   })
@@ -130,7 +122,7 @@ describe('firstWeekdayInMonth', () => {
         weekday: weekday as Weekday,
         ordinalOffset
       })
-      assertThat(resolveFirstWeekdayInMonth(holiday, year), hasProperties({
+      assertThat(resolveHoliday(holiday, year), hasProperties({
         date: LocalDate.parse(date)
       }))
     })
@@ -138,7 +130,7 @@ describe('firstWeekdayInMonth', () => {
 
   it('uses correct name', () => {
     const holiday = firstWeekdayInMonthHolidayFactory.build()
-    assertThat(resolveFirstWeekdayInMonth(holiday, 2000), hasProperties({
+    assertThat(resolveHoliday(holiday, 2000), hasProperties({
       name: holiday.name
     }))
   })
@@ -156,7 +148,7 @@ describe('lastWeekdayInMonth', () => {
         weekday: weekday as Weekday,
         ordinalOffset
       })
-      assertThat(resolveLastWeekdayInMonth(holiday, year), hasProperties({
+      assertThat(resolveHoliday(holiday, year), hasProperties({
         date: LocalDate.parse(date)
       }))
     })
@@ -164,7 +156,7 @@ describe('lastWeekdayInMonth', () => {
 
   it('uses correct name', () => {
     const holiday = lastWeekdayInMonthHolidayFactory.build()
-    assertThat(resolveLastWeekdayInMonth(holiday, 2000), hasProperties({
+    assertThat(resolveHoliday(holiday, 2000), hasProperties({
       name: holiday.name
     }))
   })
@@ -180,7 +172,7 @@ describe('resolveWeekdayOnOrBeforeDate', () => {
         month,
         weekday: weekday as Weekday
       })
-      assertThat(resolveWeekdayOnOrBeforeDate(holiday, year), hasProperties({
+      assertThat(resolveHoliday(holiday, year), hasProperties({
         date: LocalDate.parse(date)
       }))
     })
@@ -188,7 +180,7 @@ describe('resolveWeekdayOnOrBeforeDate', () => {
 
   it('uses correct name', () => {
     const holiday = weekdayOnOrBeforeHolidayFactory.build()
-    assertThat(resolveWeekdayOnOrBeforeDate(holiday, 2000), hasProperties({
+    assertThat(resolveHoliday(holiday, 2000), hasProperties({
       name: holiday.name
     }))
   })
@@ -204,7 +196,7 @@ describe('resolveWeekdayOnOrAfterDate', () => {
         month,
         weekday: weekday as Weekday
       })
-      assertThat(resolveWeekdayOnOrAfterDate(holiday, year), hasProperties({
+      assertThat(resolveHoliday(holiday, year), hasProperties({
         date: LocalDate.parse(date)
       }))
     })
@@ -212,7 +204,7 @@ describe('resolveWeekdayOnOrAfterDate', () => {
 
   it('uses correct name', () => {
     const holiday = weekdayOnOrAfterHolidayFactory.build()
-    assertThat(resolveWeekdayOnOrAfterDate(holiday, 2000), hasProperties({
+    assertThat(resolveHoliday(holiday, 2000), hasProperties({
       name: holiday.name
     }))
   })

@@ -64,14 +64,14 @@ export type WeekdayOnOrAfterDate = {
   kind: 'weekdayOnOrAfterDate'
 }
 
-export type PublicHolidayConfig = BoxedVersioned<
+export type PublicHolidayConfig =
 | FixedDate
 | CatholicEasterBased
 | OrthodoxEasterBased
 | FirstWeekdayInMonth
 | LastWeekdayInMonth
 | WeekdayOnOrBeforeDate
->
+| WeekdayOnOrAfterDate
 
 export type PublicHoliday = {
   date: LocalDate
