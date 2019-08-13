@@ -15,12 +15,12 @@ const getDayPartOffset = (absence: Absence, date: LocalDate) => {
 }
 export const convertAbsences = (absence: Absence[], date: LocalDate) => {
   return absence.reduce((result, absence) => {
-    const x = getDayPartOffset(absence, date)
-    if (x) {
+    const dayPartOffset = getDayPartOffset(absence, date)
+    if (dayPartOffset) {
       result.push({
         type: 'absence',
-        offset: x.offset,
-        duration: x.duration
+        offset: dayPartOffset.offset,
+        duration: dayPartOffset.duration
       })
     }
     return result
