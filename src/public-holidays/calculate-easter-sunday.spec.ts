@@ -22,6 +22,7 @@ describe('calculateCatholicEasterSunday', () => {
 
 describe('calculateOrthodoxEasterSunday', () => {
   [
+    { year: 2000, date: '2000-04-30' },
     { year: 2020, date: '2020-04-19' },
     { year: 2024, date: '2024-05-05' },
     { year: 2029, date: '2029-04-08' }

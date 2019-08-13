@@ -1,11 +1,17 @@
-type FixedDate = {
+import { LocalDate } from 'js-joda'
+type BoxedVersioned<Record> = {
+  validFrom: LocalDate | null
+  validUntil: LocalDate | null
+} & Record
+
+export type FixedDate = {
   name: string
   month: number
   day: number
   kind: 'fixedDate'
 }
 
-type Weekday =
+export type Weekday =
 | 'MONDAY'
 | 'TUESDAY'
 | 'WEDNESDAY'
@@ -14,20 +20,43 @@ type Weekday =
 | 'SATURDAY'
 | 'SUNDAY'
 
-type EasterBased = {
+export type CatholicEasterBased = {
   name: string
   easterOffset: number
-  kind: 'easterBased'
+  kind: 'catholicEasterBased'
 }
 
-type OrdinalWeekdayInMonth = {
+export type OrthodoxEasterBased = {
+  name: string
+  easterOffset: number
+  kind: 'orthodoxEasterBased'
+}
+
+export type OrdinalWeekdayInMonth = {
   name: string
   weekday: Weekday
   month: number
   ordinalOffset: number
+  kind: 'ordinalWeekdayInMonth'
 }
 
-type PublicHoliday =
-  | FixedDate
-  | EasterBased
-  | OrdinalWeekdayInMonth
+export type WeekdayOnOrBeforeDate = {
+  name: string
+  weekday: Weekday
+  month: number
+  day: number
+  kind: 'weekdayOnOrBeforeDate'
+}
+
+export type PublicHolidayConfig = BoxedVersioned<
+| FixedDate
+| CatholicEasterBased
+| OrthodoxEasterBased
+| OrdinalWeekdayInMonth
+| WeekdayOnOrBeforeDate
+>
+
+export type PublicHoliday = {
+  date: LocalDate
+  name: string
+}
