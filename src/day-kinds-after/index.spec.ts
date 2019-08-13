@@ -5,7 +5,8 @@ import { dayKindsAfter } from '.'
 import {
   workTimeModelFactory,
   multiDayAbsenceFactory,
-  singleDayAbsenceFactory
+  singleDayAbsenceFactory,
+  fixedDateHolidayFactory
 } from '../factories'
 
 describe('dayTypeOnDate', () => {
@@ -43,7 +44,8 @@ describe('dayTypeOnDate', () => {
   it('returns rest day without work time model', () => {
     const dayTypesGenerator = dayKindsAfter({
       workTimeModels: [],
-      absences: []
+      absences: [],
+      holidays: []
     }, LocalDate.parse('2000-01-01'))
 
     assertThat(dayTypesGenerator.next().value, hasProperties({
@@ -55,7 +57,8 @@ describe('dayTypeOnDate', () => {
   it('single day absences are taken into account', () => {
     const dayTypesGenerator = dayKindsAfter({
       absences: singleDayAbsences,
-      workTimeModels: []
+      workTimeModels: [],
+      holidays: []
     }, LocalDate.parse('2000-01-01'))
 
     const dayTypes = Array
@@ -81,7 +84,8 @@ describe('dayTypeOnDate', () => {
   it('multiday absences are taken into account', () => {
     const dayTypesGenerator = dayKindsAfter({
       absences: multiDayAbsences,
-      workTimeModels: []
+      workTimeModels: [],
+      holidays: []
     }, LocalDate.parse('2000-01-01'))
 
     const dayTypes = Array
@@ -115,7 +119,8 @@ describe('dayTypeOnDate', () => {
   it('versioning in work time models are taken into account', () => {
     const dayTypesGenerator = dayKindsAfter({
       absences: [],
-      workTimeModels: [...workTimeModels].reverse()
+      workTimeModels: [...workTimeModels].reverse(),
+      holidays: []
     }, LocalDate.parse('2000-01-01'))
 
     const dayTypes = Array
@@ -130,6 +135,34 @@ describe('dayTypeOnDate', () => {
       1: hasProperties({
         date: LocalDate.parse('2000-01-02'),
         parts: contains(hasProperties({ type: 'workday' }))
+      })
+    }))
+  })
+
+  it('public holidays are taken into account', () => {
+    const dayTypesGenerator = dayKindsAfter({
+      absences: [],
+      workTimeModels: [],
+      holidays: [
+        fixedDateHolidayFactory.build({
+          day: 1,
+          month: 1
+        })
+      ]
+    }, LocalDate.parse('2000-01-01'))
+
+    const dayTypes = Array
+      .from({ length: 2 })
+      .map(() => dayTypesGenerator.next().value)
+
+    assertThat(dayTypes, hasProperties({
+      0: hasProperties({
+        date: LocalDate.parse('2000-01-01'),
+        parts: contains(hasProperties({ type: 'holiday' }))
+      }),
+      1: hasProperties({
+        date: LocalDate.parse('2000-01-02'),
+        parts: contains(hasProperties({ type: 'restday' }))
       })
     }))
   })

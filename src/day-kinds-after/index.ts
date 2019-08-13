@@ -1,9 +1,10 @@
-import { WorkTimeModel, DayPart, Absence } from '../domain'
+import { WorkTimeModel, DayPart, Absence, PublicHolidayConfig } from '../domain'
 import { LocalDate } from 'js-joda'
 import { combineDayParts } from '../combine-day-parts'
 import { sortAbsences, cleanAbsences, convertAbsences } from './absences'
 import { sortWorkTimeModels, cleanWorkTimeModels, convertWorkTimeModels } from './work-time-models'
 import { Omit } from '../types'
+import { sortHolidays, cleanHolidays, convertHolidays } from './holidays'
 
 type ModelConfig<T> = {
   sort: (values: T) => T
@@ -15,6 +16,7 @@ type ModelConfig<T> = {
 type Models = {
   workTimeModels: WorkTimeModel[]
   absences: Absence[]
+  holidays: PublicHolidayConfig[]
 }
 
 type Config = {
@@ -61,5 +63,11 @@ export const dayKindsAfter = buildDayKindsAfter({
     clean: cleanAbsences,
     priority: 2,
     convert: convertAbsences
+  },
+  holidays: {
+    sort: sortHolidays,
+    clean: cleanHolidays,
+    priority: 3,
+    convert: convertHolidays
   }
 })

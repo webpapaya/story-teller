@@ -134,7 +134,7 @@ export type Weekday =
 | 'SATURDAY'
 | 'SUNDAY'
 
-type BoxedVersioned<Record> = {
+export type BoxedVersioned<Record> = {
   validFrom: LocalDate | null
   validUntil: LocalDate | null
 } & Record
