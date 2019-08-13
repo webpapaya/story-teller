@@ -1,5 +1,6 @@
 // @ts-ignore
 import { LocalDate } from 'js-joda'
+import { Weekday } from './types'
 
 // Credits to: https://gist.github.com/johndyer/0dffbdd98c2046f41180c051f378f343
 export const calculateCatholicEasterSunday = (year: number) => {
@@ -30,4 +31,26 @@ export const calculateOrthodoxEasterSunday = (year: number) => {
   const day = (key > 30) ? key - 30 : key
 
   return LocalDate.of(year, month, day)
+}
+
+export const firstWeekdayOnOrAfter = (date: LocalDate, weekday: Weekday) => {
+  let mutableDate = date
+
+  for (let i = 0; i < 7; i++) {
+    if (mutableDate.dayOfWeek().name() === weekday) { break }
+    mutableDate = mutableDate.plusDays(1)
+  }
+
+  return mutableDate
+}
+
+export const firstWeekdayOnOrBefore = (date: LocalDate, weekday: Weekday) => {
+  let mutableDate = date
+
+  for (let i = 0; i < 7; i++) {
+    if (mutableDate.dayOfWeek().name() === weekday) { break }
+    mutableDate = mutableDate.minusDays(1)
+  }
+
+  return mutableDate
 }

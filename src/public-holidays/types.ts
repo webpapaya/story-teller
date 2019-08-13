@@ -56,6 +56,14 @@ export type WeekdayOnOrBeforeDate = {
   kind: 'weekdayOnOrBeforeDate'
 }
 
+export type WeekdayOnOrAfterDate = {
+  name: string
+  weekday: Weekday
+  month: number
+  day: number
+  kind: 'weekdayOnOrAfterDate'
+}
+
 export type PublicHolidayConfig = BoxedVersioned<
 | FixedDate
 | CatholicEasterBased

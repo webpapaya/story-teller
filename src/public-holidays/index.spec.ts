@@ -1,14 +1,16 @@
 // @ts-ignore
 import { assertThat, hasProperties } from 'hamjest'
 import * as Factory from 'factory.ts'
-import { FixedDate, CatholicEasterBased, OrthodoxEasterBased, FirstWeekdayInMonth, Weekday, LastWeekdayInMonth } from './types'
+import { FixedDate, CatholicEasterBased, OrthodoxEasterBased, FirstWeekdayInMonth, Weekday, LastWeekdayInMonth, WeekdayOnOrAfterDate, WeekdayOnOrBeforeDate } from './types'
 import { LocalDate } from 'js-joda'
 import {
   resolveFixedDate,
   resolveCatholicEaster,
   resolveOrthodoxEaster,
   resolveFirstWeekdayInMonth,
-  resolveLastWeekdayInMonth
+  resolveLastWeekdayInMonth,
+  resolveWeekdayOnOrBeforeDate,
+  resolveWeekdayOnOrAfterDate
 } from './index'
 
 export const fixedDateHolidayFactory = Factory.Sync.makeFactory<FixedDate>({
@@ -44,6 +46,22 @@ export const lastWeekdayInMonthHolidayFactory = Factory.Sync.makeFactory<LastWee
   ordinalOffset: 0,
   name: 'Easter Sunday',
   kind: 'lastWeekdayInMonth'
+})
+
+export const weekdayOnOrBeforeHolidayFactory = Factory.Sync.makeFactory<WeekdayOnOrBeforeDate>({
+  month: 1,
+  day: 1,
+  weekday: 'MONDAY',
+  name: 'Easter Sunday',
+  kind: 'weekdayOnOrBeforeDate'
+})
+
+export const weekdayOnOrAfterHolidayFactory = Factory.Sync.makeFactory<WeekdayOnOrAfterDate>({
+  month: 1,
+  day: 1,
+  weekday: 'MONDAY',
+  name: 'Easter Sunday',
+  kind: 'weekdayOnOrAfterDate'
 })
 
 describe('fixedDate', () => {
@@ -145,8 +163,56 @@ describe('lastWeekdayInMonth', () => {
   })
 
   it('uses correct name', () => {
-    const holiday = firstWeekdayInMonthHolidayFactory.build()
-    assertThat(resolveFirstWeekdayInMonth(holiday, 2000), hasProperties({
+    const holiday = lastWeekdayInMonthHolidayFactory.build()
+    assertThat(resolveLastWeekdayInMonth(holiday, 2000), hasProperties({
+      name: holiday.name
+    }))
+  })
+})
+
+describe('resolveWeekdayOnOrBeforeDate', () => {
+  [
+    { year: 2000, month: 1, day: 10, weekday: 'SUNDAY', date: '2000-01-09' }
+  ].forEach(({ year, month, day, weekday, date }) => {
+    it(`first ${weekday} before ${year}-${month}-${day} is ${date}`, () => {
+      const holiday = weekdayOnOrBeforeHolidayFactory.build({
+        day,
+        month,
+        weekday: weekday as Weekday
+      })
+      assertThat(resolveWeekdayOnOrBeforeDate(holiday, year), hasProperties({
+        date: LocalDate.parse(date)
+      }))
+    })
+  })
+
+  it('uses correct name', () => {
+    const holiday = weekdayOnOrBeforeHolidayFactory.build()
+    assertThat(resolveWeekdayOnOrBeforeDate(holiday, 2000), hasProperties({
+      name: holiday.name
+    }))
+  })
+})
+
+describe('resolveWeekdayOnOrAfterDate', () => {
+  [
+    { year: 2000, month: 1, day: 10, weekday: 'SUNDAY', date: '2000-01-16' }
+  ].forEach(({ year, month, day, weekday, date }) => {
+    it(`first ${weekday} after ${year}-${month}-${day} is ${date}`, () => {
+      const holiday = weekdayOnOrAfterHolidayFactory.build({
+        day,
+        month,
+        weekday: weekday as Weekday
+      })
+      assertThat(resolveWeekdayOnOrAfterDate(holiday, year), hasProperties({
+        date: LocalDate.parse(date)
+      }))
+    })
+  })
+
+  it('uses correct name', () => {
+    const holiday = weekdayOnOrAfterHolidayFactory.build()
+    assertThat(resolveWeekdayOnOrAfterDate(holiday, 2000), hasProperties({
       name: holiday.name
     }))
   })

@@ -4,7 +4,7 @@ import { LocalDate } from 'js-joda'
 import {
   calculateCatholicEasterSunday,
   calculateOrthodoxEasterSunday
-} from './calculate-easter-sunday'
+} from './calendar-utils'
 
 describe('calculateCatholicEasterSunday', () => {
   [

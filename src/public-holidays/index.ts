@@ -1,9 +1,11 @@
-import { FixedDate, PublicHoliday, CatholicEasterBased, OrthodoxEasterBased, FirstWeekdayInMonth, LastWeekdayInMonth } from './types'
+import { FixedDate, PublicHoliday, CatholicEasterBased, OrthodoxEasterBased, FirstWeekdayInMonth, LastWeekdayInMonth, WeekdayOnOrBeforeDate, WeekdayOnOrAfterDate } from './types'
 import { LocalDate } from 'js-joda'
 import {
   calculateCatholicEasterSunday,
-  calculateOrthodoxEasterSunday
-} from './calculate-easter-sunday'
+  calculateOrthodoxEasterSunday,
+  firstWeekdayOnOrAfter,
+  firstWeekdayOnOrBefore
+} from './calendar-utils'
 
 type Resolve<Holiday> = (holiday: Holiday, year: number) => PublicHoliday
 
@@ -33,32 +35,33 @@ export const resolveOrthodoxEaster: Resolve<OrthodoxEasterBased> = (holiday, yea
 }
 
 export const resolveFirstWeekdayInMonth: Resolve<FirstWeekdayInMonth> = (holiday, year) => {
-  let date = LocalDate.of(year, holiday.month, 1)
+  const firstOfMonth = LocalDate.of(year, holiday.month, 1)
+  const date = firstWeekdayOnOrAfter(firstOfMonth, holiday.weekday)
+    .plusDays(DAYS_OF_WEEK * holiday.ordinalOffset)
 
-  for (let i = 0; i < DAYS_OF_WEEK; i++) {
-    if (date.dayOfWeek().name() === holiday.weekday) { break }
-    date = date.plusDays(1)
-  }
-
-  return {
-    date: date.plusDays(DAYS_OF_WEEK * holiday.ordinalOffset),
-    name: holiday.name
-  }
+  return { date, name: holiday.name }
 }
 
 export const resolveLastWeekdayInMonth: Resolve<LastWeekdayInMonth> = (holiday, year) => {
-  let date = LocalDate
+  const lastOfMonth = LocalDate
     .of(year, holiday.month, 1)
     .plusMonths(1)
     .minusDays(1)
 
-  for (let i = 0; i < DAYS_OF_WEEK; i++) {
-    if (date.dayOfWeek().name() === holiday.weekday) { break }
-    date = date.minusDays(1)
-  }
+  const date = firstWeekdayOnOrBefore(lastOfMonth, holiday.weekday)
+    .minusDays(DAYS_OF_WEEK * holiday.ordinalOffset)
 
-  return {
-    date: date.minusDays(DAYS_OF_WEEK * holiday.ordinalOffset),
-    name: holiday.name
-  }
+  return { date, name: holiday.name }
+}
+
+export const resolveWeekdayOnOrBeforeDate: Resolve<WeekdayOnOrBeforeDate> = (holiday, year) => {
+  const initialDate = LocalDate.of(year, holiday.month, holiday.day)
+  const date = firstWeekdayOnOrBefore(initialDate, holiday.weekday)
+  return { date, name: holiday.name }
+}
+
+export const resolveWeekdayOnOrAfterDate: Resolve<WeekdayOnOrAfterDate> = (holiday, year) => {
+  const initialDate = LocalDate.of(year, holiday.month, holiday.day)
+  const date = firstWeekdayOnOrAfter(initialDate, holiday.weekday)
+  return { date, name: holiday.name }
 }
