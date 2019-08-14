@@ -29,6 +29,12 @@ export type PrioritizedDayPart = {
 } & DayPart
 
 // -----
+export type PublicHoliday = {
+  date: LocalDate
+  offset: number
+  duration: number
+  name: string
+}
 
 export interface User {
   id: ID
