@@ -1,16 +1,15 @@
-import { WorkTimeModel, DayPart, Absence, PublicHolidayConfig } from '../domain'
+import { WorkTimeModel, PrioritizedDayPart, Absence, PublicHolidayConfig, DayPart } from '../domain'
 import { LocalDate } from 'js-joda'
 import { combineDayParts } from '../combine-day-parts'
 import { sortAbsences, cleanAbsences, convertAbsences } from './absences'
 import { sortWorkTimeModels, cleanWorkTimeModels, convertWorkTimeModels } from './work-time-models'
-import { Omit } from '../types'
 import { sortHolidays, cleanHolidays, convertHolidays } from './holidays'
 
 type ModelConfig<T> = {
   sort: (values: T) => T
   clean: (values: T, date: LocalDate) => void
   priority: number
-  convert: (values: T, date: LocalDate) => Array<Omit<DayPart, 'priority'> | undefined>
+  convert: (values: T, date: LocalDate) => Array<DayPart | undefined>
 }
 
 type Models = {
@@ -32,7 +31,7 @@ const buildDayKindsAfter = (config: Config) => function * (models: Models, from:
 
   for (let i = 0; ; i++) {
     const date = from.plusDays(i)
-    const dayParts: DayPart[] = [
+    const dayParts: PrioritizedDayPart[] = [
       { type: 'restday', priority: 0, offset: 0, duration: 1 }
     ]
 

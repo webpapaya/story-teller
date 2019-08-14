@@ -1,7 +1,7 @@
-import { DayPart } from './domain'
+import { PrioritizedDayPart } from './domain'
 import { combineTimeFrames } from './combine-time-frames'
 
-export const combineDayParts = combineTimeFrames<DayPart>({
+export const combineDayParts = combineTimeFrames<PrioritizedDayPart>({
   getOffset: (dayPart) => dayPart.offset,
   setOffset: (dayPart, value) => {
     dayPart.offset = value

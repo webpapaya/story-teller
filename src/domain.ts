@@ -3,26 +3,42 @@ import { ZonedDateTime, LocalDate, Duration, LocalTime } from 'js-joda'
 import uuid from 'uuid'
 
 type ID = ReturnType<typeof uuid>
-export interface User {
-  id: ID
-  name: string
-}
+
+export type Versioned<Record> = {
+  validFrom: LocalDate | null
+} & Record
+
+export type BoxedVersioned<Record> = {
+  validFrom: LocalDate | null
+  validUntil: LocalDate | null
+} & Record
+
+export type DayPartProps<Record> = {
+  offset: number
+  duration: number
+} & Record
 
 export type DayPart = {
-  priority: number
   offset: number
   duration: number
   type: string
 }
 
-export type DayPartOnDate = {
-  date: LocalDate
-  parts: DayPart[]
+export type PrioritizedDayPart = {
+  priority: number
+} & DayPart
+
+// -----
+
+export interface User {
+  id: ID
+  name: string
 }
 
-export type Versioned<T> = {
-  validFrom: LocalDate | null
-} & T
+export type DayPartOnDate = {
+  date: LocalDate
+  parts: PrioritizedDayPart[]
+}
 
 export type WorkTimeModel = Versioned<{
   MONDAY: Duration | null
@@ -134,16 +150,6 @@ export type Weekday =
 | 'SATURDAY'
 | 'SUNDAY'
 
-export type BoxedVersioned<Record> = {
-  validFrom: LocalDate | null
-  validUntil: LocalDate | null
-} & Record
-
-type DayPartProps<Record> = {
-  offset: number
-  duration: number
-} & Record
-
 type PublicHolidayMeta<T> = BoxedVersioned<DayPartProps<T>>
 
 export type FixedDate = PublicHolidayMeta<{
@@ -205,8 +211,3 @@ export type PublicHolidayConfig =
 | LastWeekdayInMonth
 | WeekdayOnOrBeforeDate
 | WeekdayOnOrAfterDate
-
-export type PublicHoliday = DayPartProps<{
-  date: LocalDate
-  name: string
-}>

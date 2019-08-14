@@ -1,13 +1,13 @@
 import {
   FixedDate,
-  PublicHoliday,
   CatholicEasterBased,
   OrthodoxEasterBased,
   FirstWeekdayInMonth,
   LastWeekdayInMonth,
   WeekdayOnOrBeforeDate,
   WeekdayOnOrAfterDate,
-  PublicHolidayConfig
+  PublicHolidayConfig,
+  DayPart
 } from '../domain'
 import { LocalDate } from 'js-joda'
 import {
@@ -17,13 +17,13 @@ import {
   firstWeekdayOnOrBefore
 } from './calendar-utils'
 
-type Resolve<Holiday> = (holiday: Holiday, year: number) => PublicHoliday
+type Resolve<Holiday> = (holiday: Holiday, year: number) => DayPart
 
 const DAYS_OF_WEEK = 7
 
 const resolveFixedDate: Resolve<FixedDate> = (holiday, year) => {
   return {
-    name: holiday.name,
+    type: holiday.name,
     date: LocalDate.of(year, holiday.month, holiday.day),
     offset: holiday.offset,
     duration: holiday.duration
@@ -34,7 +34,7 @@ const resolveCatholicEaster: Resolve<CatholicEasterBased> = (holiday, year) => {
   const easterSunday = calculateCatholicEasterSunday(year)
 
   return {
-    name: holiday.name,
+    type: holiday.name,
     date: easterSunday.plusDays(holiday.easterOffset),
     offset: holiday.offset,
     duration: holiday.duration
@@ -45,7 +45,7 @@ const resolveOrthodoxEaster: Resolve<OrthodoxEasterBased> = (holiday, year) => {
   const easterSunday = calculateOrthodoxEasterSunday(year)
 
   return {
-    name: holiday.name,
+    type: holiday.name,
     date: easterSunday.plusDays(holiday.easterOffset),
     offset: holiday.offset,
     duration: holiday.duration
@@ -59,7 +59,7 @@ const resolveFirstWeekdayInMonth: Resolve<FirstWeekdayInMonth> = (holiday, year)
 
   return {
     date,
-    name: holiday.name,
+    type: holiday.name,
     offset: holiday.offset,
     duration: holiday.duration
   }
@@ -76,7 +76,7 @@ const resolveLastWeekdayInMonth: Resolve<LastWeekdayInMonth> = (holiday, year) =
 
   return {
     date,
-    name: holiday.name,
+    type: holiday.name,
     offset: holiday.offset,
     duration: holiday.duration
   }
@@ -88,7 +88,7 @@ const resolveWeekdayOnOrBeforeDate: Resolve<WeekdayOnOrBeforeDate> = (holiday, y
 
   return {
     date,
-    name: holiday.name,
+    type: holiday.name,
     offset: holiday.offset,
     duration: holiday.duration
   }
@@ -100,7 +100,7 @@ const resolveWeekdayOnOrAfterDate: Resolve<WeekdayOnOrAfterDate> = (holiday, yea
 
   return {
     date,
-    name: holiday.name,
+    type: holiday.name,
     offset: holiday.offset,
     duration: holiday.duration
   }

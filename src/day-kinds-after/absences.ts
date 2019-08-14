@@ -1,6 +1,5 @@
 import { LocalDate } from 'js-joda'
-import { DayPart, Absence } from '../domain'
-import { Omit } from '../types'
+import { Absence, DayPart } from '../domain'
 
 const getDayPartOffset = (absence: Absence, date: LocalDate) => {
   if (absence.kind === 'singleDay' && absence.date.equals(date)) {
@@ -24,7 +23,7 @@ export const convertAbsences = (absence: Absence[], date: LocalDate) => {
       })
     }
     return result
-  }, [] as Array<Omit<DayPart, 'priority'>>)
+  }, [] as DayPart[])
 }
 
 export const sortAbsences = (absences: Absence[]) => {

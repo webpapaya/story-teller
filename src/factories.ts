@@ -3,7 +3,7 @@ import {
   WorkTimeModel,
   SingleDayAbsence,
   MultiDayAbsence,
-  DayPart,
+  PrioritizedDayPart,
   Booking,
   Config,
   Stamp,
@@ -43,7 +43,7 @@ export const multiDayAbsenceFactory = Factory.Sync.makeFactory<MultiDayAbsence>(
   eveningOffset: 0
 })
 
-export const dayPartFactory = Factory.Sync.makeFactory<DayPart>({
+export const dayPartFactory = Factory.Sync.makeFactory<PrioritizedDayPart>({
   offset: 0,
   duration: 1,
   type: 'daykind',

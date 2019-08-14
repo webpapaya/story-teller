@@ -52,5 +52,5 @@ export const convertHolidays = (holidaysConfig: PublicHolidayConfig[], date: Loc
         })
       }
       return result
-    }, [] as Array<Omit<DayPart, 'priority'>>)
+    }, [] as DayPart[])
 }
