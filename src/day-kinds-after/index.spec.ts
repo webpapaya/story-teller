@@ -166,4 +166,34 @@ describe('dayTypeOnDate', () => {
       })
     }))
   })
+
+  it('versioning public holidays are taken into account', () => {
+    const dayTypesGenerator = dayKindsAfter({
+      absences: [],
+      workTimeModels: [],
+      holidays: [
+        fixedDateHolidayFactory.build({
+          day: 1,
+          month: 1,
+          validFrom: LocalDate.parse('2000-01-02'),
+          validUntil: LocalDate.parse('2001-01-02')
+        })
+      ]
+    }, LocalDate.parse('2000-01-01'))
+
+    const dayTypes = Array
+      .from({ length: 2 })
+      .map(() => dayTypesGenerator.next().value)
+
+    assertThat(dayTypes, hasProperties({
+      0: hasProperties({
+        date: LocalDate.parse('2000-01-01'),
+        parts: contains(hasProperties({ type: 'restday' }))
+      }),
+      1: hasProperties({
+        date: LocalDate.parse('2000-01-02'),
+        parts: contains(hasProperties({ type: 'restday' }))
+      })
+    }))
+  })
 })
