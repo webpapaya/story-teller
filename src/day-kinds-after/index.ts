@@ -5,17 +5,17 @@ import { sortAbsences, cleanAbsences, convertAbsences } from './absences'
 import { sortWorkTimeModels, cleanWorkTimeModels, convertWorkTimeModels } from './work-time-models'
 import { sortHolidays, cleanHolidays, convertHolidays } from './holidays'
 
+type Models = {
+  workTimeModels: WorkTimeModel[]
+  absences: Absence[]
+  holidays: PublicHolidayConfig[]
+}
+
 type ModelConfig<T> = {
   sort: (values: T) => T
   clean: (values: T, date: LocalDate) => void
   priority: number
   convert: (values: T, date: LocalDate) => Array<DayPart | undefined>
-}
-
-type Models = {
-  workTimeModels: WorkTimeModel[]
-  absences: Absence[]
-  holidays: PublicHolidayConfig[]
 }
 
 type Config = {

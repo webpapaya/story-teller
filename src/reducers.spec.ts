@@ -1,10 +1,9 @@
 import expect from 'expect'
 import uuid from 'uuid'
 import { createApp } from './lib'
-import { t, WithinConnection } from './lib/db'
+import { t } from './lib/db'
 import { ZonedDateTime } from 'js-joda'
 import { reducers } from './reducers'
-import { queries } from './queries'
 
 const toThrow = async (fn: () => Promise<unknown>) => {
   let error
@@ -132,71 +131,3 @@ it.skip('rebuild aggregates', t(async (withinConnection) => {
     expect(result.rows.length).toEqual(2)
   })
 }))
-
-describe('title', () => {
-  it('title/created', t(async (withinConnection) => {
-    const app = createApp({ withinConnection, reducers, queries })
-    await app.publish({ type: 'title/created',
-      payload: {
-        id: uuid(),
-        name: 'DDr.',
-        userId: uuid()
-      } })
-
-    const result = await app.queries.titles()
-    expect(result[0]).toHaveProperty('name', 'DDr.')
-  }))
-
-  it('title/notVerified', t(async (withinConnection) => {
-    const app = createApp({ withinConnection, reducers, queries })
-    const id = uuid()
-    await app.publish({ type: 'title/created',
-      payload: {
-        id,
-        name: 'DDr.',
-        userId: uuid()
-      } })
-    await app.publish({ type: 'title/notVerified', payload: { id } })
-    const result = await app.queries.titles()
-
-    expect(result).toHaveProperty('length', 0)
-  }))
-
-  describe('title/verified', () => {
-    const verifyTitle = async (withinConnection: WithinConnection) => {
-      const app = createApp({ withinConnection, reducers, queries })
-      const userId = uuid()
-      await app.publish({ type: 'user/created',
-        payload: {
-          id: userId,
-          name: 'Hallo'
-        } })
-      await app.publish({ type: 'title/created',
-        payload: {
-          id: uuid(),
-          name: 'DDr.',
-          userId: userId
-        } })
-
-      const unverifiedTitles = await app.queries.titles()
-      await app.publish({
-        type: 'title/verified',
-        payload: { id: unverifiedTitles[0].id }
-      })
-
-      return app
-    }
-
-    it('sets title to verified', t(async (withinConnection) => {
-      const app = await verifyTitle(withinConnection)
-      const verifiedTitles = await app.queries.titles()
-      expect(verifiedTitles[0]).toHaveProperty('kind', 'verified')
-    }))
-
-    it('adds title to user', t(async (withinConnection) => {
-      const app = await verifyTitle(withinConnection)
-      const users = await app.queries.users()
-      expect(users[0]).toHaveProperty('title', 'DDr.')
-    }))
-  })
-})
