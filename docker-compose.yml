@@ -8,11 +8,3 @@ services:
       POSTGRES_DB: ${PG_NAME}
       POSTGRES_USER: ${PG_USER}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
-
-  # flyway:
-  #   image: boxfuse/flyway
-  #   command: -url=jdbc:postgresql://db:5432/compup -user=dbuser -password=password migrate
-  #   volumes:
-  #     - ./migrations:/flyway/sql
-  #   depends_on:
-  #     - db

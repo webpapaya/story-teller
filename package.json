@@ -4,16 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "infrastructure:up": "env $(cat $ENV_FILE | sed '/^#/ d') docker-compose -p $ENV_FILE up -d",
-    "infrastructure:down": "env $(cat $ENV_FILE | sed '/^#/ d') docker-compose -p $ENV_FILE down -v",
-    "db:migrate:create": "env $(cat $ENV_FILE | sed '/^#/ d') db-migrate create",
-    "db:migrate:up": "env $(cat $ENV_FILE | sed '/^#/ d') db-migrate up",
-    "db:migrate:down": "env $(cat $ENV_FILE | sed '/^#/ d') db-migrate down",
+    "env": "env $(cat $ENV_FILE | sed '/^#/ d')",
+    "infrastructure:up": "npm run env -- docker-compose -p $ENV_FILE up -d",
+    "infrastructure:down": "npm run env -- docker-compose -p $ENV_FILE down -v",
+    "db:migrate:create": "npm run env -- db-migrate create",
+    "db:migrate:up": "npm run env -- db-migrate up",
+    "db:migrate:down": "npm run env -- db-migrate down",
 
     "start": "ts-node-dev --respawn --transpileOnly ./src/index.ts",
     "lint": "eslint --ext js,ts .",
     "test": "mocha -r ts-node/register --timeout 500000 --inspect-brk --watch-extensions ts $(find src -name '*.spec.ts')",
-    "db:migrate": "docker-compose run flyway -url=jdbc:postgresql://db:5432/compup -user=dbuser -password=password migrate",
     "tsc": "tsc"
   },
   "pre-commit": [
