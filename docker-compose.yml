@@ -3,16 +3,16 @@ services:
   db:
     image: postgres
     ports:
-      - "5432:5432"
+      - ${PG_PORT}:5432
     environment:
-      POSTGRES_DB: compup
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${PG_NAME}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
 
-  flyway:
-    image: boxfuse/flyway
-    command: -url=jdbc:postgresql://db:5432/compup -user=dbuser -password=password migrate
-    volumes:
-      - ./migrations:/flyway/sql
-    depends_on:
-      - db
+  # flyway:
+  #   image: boxfuse/flyway
+  #   command: -url=jdbc:postgresql://db:5432/compup -user=dbuser -password=password migrate
+  #   volumes:
+  #     - ./migrations:/flyway/sql
+  #   depends_on:
+  #     - db
