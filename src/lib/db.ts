@@ -5,15 +5,10 @@ import { ZonedDateTime, LocalDate, LocalTime, ZoneOffset } from 'js-joda'
 pgCamelCase.inject(pg)
 
 const pool = new Pool({
-  host: 'localhost',
-  user: 'dbuser',
-  password: 'password',
-  database: 'compup',
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000
-
 })
 
 pg.types.setTypeParser(1184, (dateTimeAsString) => {

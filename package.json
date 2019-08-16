@@ -13,7 +13,7 @@
 
     "start": "ts-node-dev --respawn --transpileOnly ./src/index.ts",
     "lint": "eslint --ext js,ts .",
-    "test": "mocha -r ts-node/register --timeout 500000 --inspect-brk --watch-extensions ts $(find src -name '*.spec.ts')",
+    "test": "ENV_FILE=.env.test npm run env -- mocha -r ts-node/register --timeout 500000 --inspect-brk --watch-extensions ts $(find src -name '*.spec.ts')",
     "tsc": "tsc"
   },
   "pre-commit": [
