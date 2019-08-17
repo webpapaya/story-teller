@@ -1,0 +1,15 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    ports:
+      - ${PG_PORT}:5432
+    environment:
+      POSTGRES_DB: ${PG_NAME}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+  mail:
+    image: dockage/mailcatcher
+    ports:
+      - ${MAIL_WEB_UI}:1080
+      - ${SMTP_PORT}:1025
