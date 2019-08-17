@@ -80,7 +80,8 @@ export const fixedDateHolidayFactory = Factory.Sync.makeFactory<FixedDate>({
   offset: 0,
   duration: 1,
   validFrom: null,
-  validUntil: null
+  validUntil: null,
+  counties: null
 })
 
 export const catholicEasterHolidayFactory = Factory.Sync.makeFactory<CatholicEasterBased>({
@@ -90,8 +91,8 @@ export const catholicEasterHolidayFactory = Factory.Sync.makeFactory<CatholicEas
   offset: 0,
   duration: 1,
   validFrom: null,
-  validUntil: null
-
+  validUntil: null,
+  counties: null
 })
 
 export const orthodoxEasterHolidayFactory = Factory.Sync.makeFactory<OrthodoxEasterBased>({
@@ -101,8 +102,8 @@ export const orthodoxEasterHolidayFactory = Factory.Sync.makeFactory<OrthodoxEas
   offset: 0,
   duration: 1,
   validFrom: null,
-  validUntil: null
-
+  validUntil: null,
+  counties: null
 })
 
 export const firstWeekdayInMonthHolidayFactory = Factory.Sync.makeFactory<FirstWeekdayInMonth>({
@@ -114,8 +115,8 @@ export const firstWeekdayInMonthHolidayFactory = Factory.Sync.makeFactory<FirstW
   offset: 0,
   duration: 1,
   validFrom: null,
-  validUntil: null
-
+  validUntil: null,
+  counties: null
 })
 
 export const lastWeekdayInMonthHolidayFactory = Factory.Sync.makeFactory<LastWeekdayInMonth>({
@@ -127,8 +128,8 @@ export const lastWeekdayInMonthHolidayFactory = Factory.Sync.makeFactory<LastWee
   offset: 0,
   duration: 1,
   validFrom: null,
-  validUntil: null
-
+  validUntil: null,
+  counties: null
 })
 
 export const weekdayOnOrBeforeHolidayFactory = Factory.Sync.makeFactory<WeekdayOnOrBeforeDate>({
@@ -140,8 +141,8 @@ export const weekdayOnOrBeforeHolidayFactory = Factory.Sync.makeFactory<WeekdayO
   offset: 0,
   duration: 1,
   validFrom: null,
-  validUntil: null
-
+  validUntil: null,
+  counties: null
 })
 
 export const weekdayOnOrAfterHolidayFactory = Factory.Sync.makeFactory<WeekdayOnOrAfterDate>({
@@ -153,5 +154,6 @@ export const weekdayOnOrAfterHolidayFactory = Factory.Sync.makeFactory<WeekdayOn
   offset: 0,
   duration: 1,
   validFrom: null,
-  validUntil: null
+  validUntil: null,
+  counties: null
 })

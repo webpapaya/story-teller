@@ -156,7 +156,9 @@ export type Weekday =
 | 'SATURDAY'
 | 'SUNDAY'
 
-type PublicHolidayMeta<T> = BoxedVersioned<DayPartProps<T>>
+type PublicHolidayMeta<T> = BoxedVersioned<DayPartProps<T>> & {
+  counties: string[] | null
+}
 
 export type FixedDate = PublicHolidayMeta<{
   name: string
