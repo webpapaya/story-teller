@@ -1,7 +1,7 @@
 // @ts-ignore
 import { assertThat, hasProperties, hasProperty } from 'hamjest'
 import { ZonedDateTime, Duration, LocalTime, LocalDate } from 'js-joda'
-import { stampsToBookings } from '.'
+import { stampsToBookings } from '../stamps-to-bookings'
 import { stampFactory, configFactory } from '../factories'
 
 describe('stampsToBooking', () => {
