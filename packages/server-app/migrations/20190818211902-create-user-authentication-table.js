@@ -4,9 +4,11 @@ exports.up = function (db) {
   return db.runSql(`
     create table if not exists
     public.user_authentication (
-      id                uuid PRIMARY KEY DEFAULT uuid_generate_v1(),
-      user_identifier   text,
-      password          text
+      id                       uuid PRIMARY KEY DEFAULT uuid_generate_v1(),
+      user_identifier          text UNIQUE,
+      password                 text,
+      password_reset_token     text,
+      password_reset_sent_at   timestamp without time zone
     );
   `)
 }

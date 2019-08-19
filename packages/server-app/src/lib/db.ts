@@ -1,7 +1,7 @@
 import pg, { Pool, PoolClient } from 'pg'
 // @ts-ignore
 import pgCamelCase from 'pg-camelcase'
-import { ZonedDateTime, LocalDate, LocalTime, ZoneOffset } from 'js-joda'
+import { ZonedDateTime, LocalDate, LocalTime, ZoneOffset, LocalDateTime } from 'js-joda'
 pgCamelCase.inject(pg)
 
 const pool = new Pool({
@@ -11,6 +11,11 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000
 })
 
+pg.types.setTypeParser(1082, (date) => {
+  if (!date) { return null }
+  return LocalDate.parse(date)
+})
+
 pg.types.setTypeParser(1184, (dateTimeAsString) => {
   if (!dateTimeAsString) { return null }
   const [date, timeWithZone] = dateTimeAsString.split(' ')
@@ -18,6 +23,15 @@ pg.types.setTypeParser(1184, (dateTimeAsString) => {
     LocalDate.parse(date),
     LocalTime.parse(timeWithZone.slice(0, 8)),
     ZoneOffset.UTC
+  )
+})
+
+pg.types.setTypeParser(1114, (dateTimeAsString) => {
+  if (!dateTimeAsString) { return null }
+  const [date, timeWithZone] = dateTimeAsString.split(' ')
+  return LocalDateTime.of(
+    LocalDate.parse(date),
+    LocalTime.parse(timeWithZone.slice(0, 8))
   )
 })
 
