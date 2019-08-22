@@ -4,6 +4,17 @@ import crypto from 'crypto'
 import sql from 'sql-template-tag'
 import { LocalDateTime, nativeJs } from 'js-joda'
 
+type Result<Body> = {
+  body: Body,
+  isSuccess: boolean
+}
+const success = <T>(body: T): Result<T> =>
+  ({ isSuccess: true, body })
+
+const failure = <T>(body: T): Result<T> =>
+  ({ isSuccess: true, body })
+
+
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 
 export const hashPassword = async (password: string) =>
@@ -38,25 +49,36 @@ export const validatePassword: ValidatePassword = async (dependencies, params) =
   })
 }
 
+type RegisterErrors =
+| 'User Identifier already taken'
+
 type Register = (
   deps: { withinConnection: WithinConnection },
   params: { userIdentifier: string, password: string}
-) => Promise<void>
+) => Promise<Result<void | RegisterErrors>>
 
 export const register: Register = async (dependencies, params) => {
   const passwordHash = await hashPassword(params.password)
   return dependencies.withinConnection(async ({ client }) => {
-    await client.query(sql`
-      INSERT into user_authentication (user_identifier, password)
-      VALUES (${params.userIdentifier}, ${passwordHash})
-    `)
+    try {
+      await client.query(sql`
+        INSERT into user_authentication (user_identifier, password)
+        VALUES (${params.userIdentifier}, ${passwordHash})
+      `)
+      return success(void 0)
+    } catch (e) {
+      if (e.code === '23505') {
+        return failure<RegisterErrors>('User Identifier already taken')
+      }
+      throw e;
+    }
   })
 }
 
 type RequestPasswordReset = (
   deps: { withinConnection: WithinConnection },
   params: { userIdentifier: string}
-) => Promise<{ userIdentifier: string, token: string }>
+) => Promise<Result<{ userIdentifier: string, token: string }>>
 
 export const requestPasswordReset: RequestPasswordReset = async (dependencies, params) => {
   const token = await crypto.randomBytes(50).toString('hex')
@@ -70,20 +92,24 @@ export const requestPasswordReset: RequestPasswordReset = async (dependencies, p
       WHERE user_identifier=${params.userIdentifier}
     `)
 
-    return { userIdentifier: params.userIdentifier, token }
+    return success({ userIdentifier: params.userIdentifier, token })
   })
 }
+
+type ResetPasswordErrors =
+| 'Token too old'
+| 'Token not found'
 
 type ResetPasswordByToken = (
   deps: { withinConnection: WithinConnection },
   params: { userIdentifier: string, token: string, newPassword: string }
-) => Promise<boolean>
+) => Promise<Result<void | ResetPasswordErrors>>
 
 export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, params) => {
   return dependencies.withinConnection(async ({ client }) => {
     const record = await findUserByIdentifier({ client }, params)
     if (!record || !await comparePassword(params.token, record.passwordResetToken)) {
-      return false
+      return failure<ResetPasswordErrors>('Token not found')
     }
 
     const isTokenToOld = LocalDateTime.from(nativeJs(new Date()))
@@ -98,7 +124,7 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
             password_reset_sent_at=null
         WHERE id=${record.id}
       `)
-      return false
+      return failure<ResetPasswordErrors>('Token not found')
     }
 
     const hashedPassword = await hashPassword(params.newPassword)
@@ -110,6 +136,6 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
       WHERE id=${record.id}
     `)
 
-    return true
+    return success(void 0)
   })
 }

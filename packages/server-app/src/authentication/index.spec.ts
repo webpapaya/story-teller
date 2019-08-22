@@ -36,6 +36,20 @@ describe('comparePassword', () => {
 })
 
 describe('user/register', () => {
+  it('when identifier is used twice, returns error', t(async (withinConnection) => {
+    await register({ withinConnection }, {
+      userIdentifier: 'sepp',
+      password: 'huber'
+    })
+    const result = await register({ withinConnection }, {
+      userIdentifier: 'sepp',
+      password: 'huber'
+    })
+    assertThat(result.body, equalTo('User Identifier already taken'))
+  }))
+})
+
+describe('user/validate', () => {
   it('when passwords match, returns true', t(async (withinConnection) => {
     await register({ withinConnection }, {
       userIdentifier: 'sepp',
@@ -72,7 +86,7 @@ describe('user/requestPasswordReset', () => {
 
   it('returns token', t(async (withinConnection) => {
     const response = await registerAndRequestPWReset(withinConnection)
-    assertThat(response, hasProperty('token'))
+    assertThat(response.body, hasProperty('token'))
   }))
 
   it('sets passwordResetSentAt', t(async (withinConnection) => {
@@ -98,17 +112,17 @@ describe('user/resetPasswordByToken', () => {
       password: 'huber'
     })
 
-    const { token } = await requestPasswordReset({ withinConnection }, {
+    const pwResetResult = await requestPasswordReset({ withinConnection }, {
       userIdentifier
     })
 
     await resetPasswordByToken({ withinConnection }, {
       userIdentifier,
-      token,
+      token: pwResetResult.body.token,
       newPassword
     })
 
-    return { userIdentifier, token, newPassword }
+    return { userIdentifier, token: pwResetResult.body.token, newPassword }
   }
 
   it('after success, user can sign in with new password', t(async (withinConnection) => {
@@ -139,7 +153,7 @@ describe('user/resetPasswordByToken', () => {
     })
 
     await withMockedDate('2000-01-01', async (remockDate) => {
-      const { token } = await requestPasswordReset({ withinConnection }, {
+      const result = await requestPasswordReset({ withinConnection }, {
         userIdentifier
       })
 
@@ -147,7 +161,7 @@ describe('user/resetPasswordByToken', () => {
 
       await resetPasswordByToken({ withinConnection }, {
         userIdentifier,
-        token,
+        token: result.body.token,
         newPassword
       })
 
