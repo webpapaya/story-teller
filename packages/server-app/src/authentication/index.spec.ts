@@ -12,10 +12,10 @@ import {
 } from './index'
 import { LocalDateTime, nativeJs } from 'js-joda'
 
-const withMockedDate = async <T>(date: string, fn: () => T) => {
+const withMockedDate = async <T>(date: string, fn: (remock: typeof mockdate.set) => T) => {
   try {
     mockdate.set(date)
-    return await fn()
+    return await fn(mockdate.set)
   } finally {
     mockdate.reset()
   }
@@ -127,6 +127,34 @@ describe('user/resetPasswordByToken', () => {
         passwordResetSentAt: null,
         passwordResetToken: null
       }))
+    })
+  }))
+
+  it('after token expired, pw is not resetted', t(async (withinConnection) => {
+    const userIdentifier = 'sepp'
+    const newPassword = 'new password'
+    await register({ withinConnection }, {
+      userIdentifier,
+      password: 'huber'
+    })
+
+    await withMockedDate('2000-01-01', async (remockDate) => {
+      const { token } = await requestPasswordReset({ withinConnection }, {
+        userIdentifier
+      })
+
+      remockDate('2000-01-02')
+
+      await resetPasswordByToken({ withinConnection }, {
+        userIdentifier,
+        token,
+        newPassword
+      })
+
+      assertThat(await validatePassword({ withinConnection }, {
+        userIdentifier,
+        password: newPassword
+      }), equalTo(false))
     })
   }))
 })

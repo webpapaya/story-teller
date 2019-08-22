@@ -1,14 +1,30 @@
-import { WithinConnection } from '../lib/db'
+import { WithinConnection, DBClient } from '../lib/db'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import sql from 'sql-template-tag'
+import { LocalDateTime, nativeJs } from 'js-joda'
 
-const SALT_ROUNDS = 10
+const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
+
 export const hashPassword = async (password: string) =>
   bcrypt.hash(password, SALT_ROUNDS)
 
 export const comparePassword = async (password: string, passwordHash: string) =>
   bcrypt.compare(password, passwordHash)
+
+type FindUserByIdentifier = (
+  deps: { client: DBClient },
+  params: { userIdentifier: string }
+) => Promise<any>
+
+const findUserByIdentifier: FindUserByIdentifier = async (dependencies, params) => {
+  const records = await dependencies.client.query(sql`
+      SELECT * FROM user_authentication
+      WHERE user_identifier=${params.userIdentifier}
+      LIMIT 1
+  `)
+  return records.rows[0]
+}
 
 type ValidatePassword = (
   deps: { withinConnection: WithinConnection },
@@ -17,17 +33,8 @@ type ValidatePassword = (
 
 export const validatePassword: ValidatePassword = async (dependencies, params) => {
   return dependencies.withinConnection(async ({ client }) => {
-    const result = await client.query(sql`
-      SELECT * FROM user_authentication
-      WHERE user_identifier = ${params.userIdentifier}
-    `)
-
-    for (let user of result.rows) {
-      if (await comparePassword(params.password, user.password)) {
-        return true
-      }
-    }
-    return false
+    const user = await findUserByIdentifier({ client }, params)
+    return user && await comparePassword(params.password, user.password)
   })
 }
 
@@ -74,13 +81,23 @@ type ResetPasswordByToken = (
 
 export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, params) => {
   return dependencies.withinConnection(async ({ client }) => {
-    const records = await client.query(sql`
-      SELECT * FROM user_authentication
-      WHERE user_identifier=${params.userIdentifier}
-    `)
+    const record = await findUserByIdentifier({ client }, params)
+    if (!record || !await comparePassword(params.token, record.passwordResetToken)) {
+      return false
+    }
 
-    const record = records.rows[0]
-    if (!record && await comparePassword(params.token, record.passwordResetToken)) {
+    const isTokenToOld = LocalDateTime.from(nativeJs(new Date()))
+      .minusDays(1)
+      .plusSeconds(1)
+      .isAfter(record.passwordResetSentAt)
+
+    if (isTokenToOld) {
+      await client.query(sql`
+        UPDATE user_authentication
+        SET password_reset_token=null,
+            password_reset_sent_at=null
+        WHERE id=${record.id}
+      `)
       return false
     }
 
