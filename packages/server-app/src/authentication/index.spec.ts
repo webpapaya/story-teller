@@ -64,6 +64,13 @@ describe('user/register', () => {
   }))
 })
 
+
+describe('user/confirm', () => {
+  it('implement me', t(async (withinConnection) => {
+    throw new Error('Implement ME')
+  }))
+})
+
 describe('user/validate', () => {
   it('when passwords match, returns true', t(async (withinConnection) => {
     await register({ withinConnection, sendMail }, {

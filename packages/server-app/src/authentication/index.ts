@@ -60,20 +60,31 @@ type Register = (
 
 export const register: Register = async (dependencies, params) => {
   const passwordHash = await hashPassword(params.password)
-  const token = await crypto.randomBytes(50).toString('hex')
+  const confirmationToken = await crypto.randomBytes(50).toString('hex')
+  const hashedConfirmationToken = await hashPassword(confirmationToken)
 
   return dependencies.withinConnection(async ({ client }) => {
     try {
       await client.query(sql`
-        INSERT into user_authentication (user_identifier, password)
-        VALUES (${params.userIdentifier}, ${passwordHash})
+        INSERT into user_authentication (
+          user_identifier,
+          password,
+          created_at,
+          confirmation_token
+        )
+        VALUES (
+          ${params.userIdentifier},
+          ${passwordHash},
+          ${new Date()},
+          ${hashedConfirmationToken}
+        )
       `)
 
       await dependencies.sendMail({
         type: 'RegisterEmail',
         to: params.userIdentifier,
         language: 'en',
-        payload: { token }
+        payload: { token: confirmationToken }
       })
 
       return success(void 0)

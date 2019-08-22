@@ -6,8 +6,13 @@ exports.up = function (db) {
     public.user_authentication (
       id                       uuid PRIMARY KEY DEFAULT uuid_generate_v1(),
       user_identifier          text UNIQUE,
+      created_at               timestamp without time zone NOT NULL,
+
+      confirmation_token       text,
+      confirmed_at             timestamp without time zone,
+
       password                 text,
-      password_reset_token     text,
+      password_reset_token     text UNIQUE,
       password_reset_sent_at   timestamp without time zone
     );
   `)
