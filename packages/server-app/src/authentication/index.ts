@@ -3,10 +3,10 @@ import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import sql from 'sql-template-tag'
 import { LocalDateTime, nativeJs } from 'js-joda'
-import { SendMail, sendMail } from './emails';
+import { SendMail } from './emails'
 
 type Result<Body> = {
-  body: Body,
+  body: Body
   isSuccess: boolean
 }
 const success = <T>(body: T): Result<T> =>
@@ -14,7 +14,6 @@ const success = <T>(body: T): Result<T> =>
 
 const failure = <T>(body: T): Result<T> =>
   ({ isSuccess: true, body })
-
 
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 
@@ -46,7 +45,8 @@ type ValidatePassword = (
 export const validatePassword: ValidatePassword = async (dependencies, params) => {
   return dependencies.withinConnection(async ({ client }) => {
     const user = await findUserByIdentifier({ client }, params)
-    return user && await comparePassword(params.password, user.password)
+    // eslint-disable-next-line no-return-await
+    return user && (await comparePassword(params.password, user.password))
   })
 }
 
@@ -81,7 +81,7 @@ export const register: Register = async (dependencies, params) => {
       if (e.code === '23505') {
         return failure<RegisterErrors>('User Identifier already taken')
       }
-      throw e;
+      throw e
     }
   })
 }

@@ -1,5 +1,5 @@
 // @ts-ignore
-import { assertThat, equalTo, hasProperty, hasProperties, string } from 'hamjest'
+import { assertThat, equalTo, hasProperty, hasProperties } from 'hamjest'
 import mockdate from 'mockdate'
 import { t, WithinConnection } from '../lib/db'
 import {
@@ -59,7 +59,7 @@ describe('user/register', () => {
 
     assertThat(sendMail.lastCall.args[0], hasProperties({
       type: 'RegisterEmail',
-      to: 'sepp',
+      to: 'sepp'
     }))
   }))
 })
@@ -104,13 +104,13 @@ describe('user/requestPasswordReset', () => {
     await registerAndRequestPWReset(withinConnection, sendMail)
     assertThat(sendMail.lastCall.args[0], hasProperties({
       type: 'PasswordResetRequestEmail',
-      to: 'sepp',
+      to: 'sepp'
     }))
   }))
 
   it('does not send an email on unknown user', t(async (withinConnection) => {
     const sendMail = sinon.spy()
-    await requestPasswordReset({withinConnection, sendMail}, {
+    await requestPasswordReset({ withinConnection, sendMail }, {
       userIdentifier: 'unknown'
     })
     assertThat(sendMail.callCount, equalTo(0))
