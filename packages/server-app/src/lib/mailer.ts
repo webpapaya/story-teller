@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-type SendMail = (options: {
+export type SendMail = (options: {
   to: string
   subject: string
   html: string

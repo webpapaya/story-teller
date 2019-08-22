@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import sql from 'sql-template-tag'
 import { LocalDateTime, nativeJs } from 'js-joda'
+import { SendMail, sendMail } from './emails';
 
 type Result<Body> = {
   body: Body,
@@ -53,18 +54,28 @@ type RegisterErrors =
 | 'User Identifier already taken'
 
 type Register = (
-  deps: { withinConnection: WithinConnection },
+  deps: { withinConnection: WithinConnection, sendMail: SendMail },
   params: { userIdentifier: string, password: string}
 ) => Promise<Result<void | RegisterErrors>>
 
 export const register: Register = async (dependencies, params) => {
   const passwordHash = await hashPassword(params.password)
+  const token = await crypto.randomBytes(50).toString('hex')
+
   return dependencies.withinConnection(async ({ client }) => {
     try {
       await client.query(sql`
         INSERT into user_authentication (user_identifier, password)
         VALUES (${params.userIdentifier}, ${passwordHash})
       `)
+
+      await dependencies.sendMail({
+        type: 'RegisterEmail',
+        to: params.userIdentifier,
+        language: 'en',
+        payload: { token }
+      })
+
       return success(void 0)
     } catch (e) {
       if (e.code === '23505') {
@@ -76,7 +87,7 @@ export const register: Register = async (dependencies, params) => {
 }
 
 type RequestPasswordReset = (
-  deps: { withinConnection: WithinConnection },
+  deps: { withinConnection: WithinConnection, sendMail: SendMail },
   params: { userIdentifier: string}
 ) => Promise<Result<{ userIdentifier: string, token: string }>>
 
@@ -85,12 +96,22 @@ export const requestPasswordReset: RequestPasswordReset = async (dependencies, p
   const hashedToken = await hashPassword(token)
 
   return dependencies.withinConnection(async ({ client }) => {
-    await client.query(sql`
+    const result = await client.query(sql`
       UPDATE user_authentication
       SET password_reset_token=(${hashedToken}),
           password_reset_sent_at=${new Date()}
       WHERE user_identifier=${params.userIdentifier}
+      RETURNING *
     `)
+    const record = result.rows[0]
+    if (record) {
+      await dependencies.sendMail({
+        type: 'PasswordResetRequestEmail',
+        to: record.userIdentifier,
+        language: 'de',
+        payload: { token }
+      })
+    }
 
     return success({ userIdentifier: params.userIdentifier, token })
   })

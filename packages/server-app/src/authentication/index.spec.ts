@@ -1,5 +1,5 @@
 // @ts-ignore
-import { assertThat, equalTo, hasProperty, hasProperties } from 'hamjest'
+import { assertThat, equalTo, hasProperty, hasProperties, string } from 'hamjest'
 import mockdate from 'mockdate'
 import { t, WithinConnection } from '../lib/db'
 import {
@@ -11,7 +11,9 @@ import {
   resetPasswordByToken
 } from './index'
 import { LocalDateTime, nativeJs } from 'js-joda'
+import sinon from 'ts-sinon'
 
+const sendMail = sinon.spy()
 const withMockedDate = async <T>(date: string, fn: (remock: typeof mockdate.set) => T) => {
   try {
     mockdate.set(date)
@@ -37,21 +39,34 @@ describe('comparePassword', () => {
 
 describe('user/register', () => {
   it('when identifier is used twice, returns error', t(async (withinConnection) => {
-    await register({ withinConnection }, {
+    await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
-    const result = await register({ withinConnection }, {
+    const result = await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
     assertThat(result.body, equalTo('User Identifier already taken'))
   }))
+
+  it('sends a registration email', t(async (withinConnection) => {
+    const sendMail = sinon.spy()
+    await register({ withinConnection, sendMail }, {
+      userIdentifier: 'sepp',
+      password: 'huber'
+    })
+
+    assertThat(sendMail.lastCall.args[0], hasProperties({
+      type: 'RegisterEmail',
+      to: 'sepp',
+    }))
+  }))
 })
 
 describe('user/validate', () => {
   it('when passwords match, returns true', t(async (withinConnection) => {
-    await register({ withinConnection }, {
+    await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
@@ -62,7 +77,7 @@ describe('user/validate', () => {
   }))
 
   it('when passwords do NOT match, returns false', t(async (withinConnection) => {
-    await register({ withinConnection }, {
+    await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
@@ -74,15 +89,32 @@ describe('user/validate', () => {
 })
 
 describe('user/requestPasswordReset', () => {
-  const registerAndRequestPWReset = async (withinConnection: WithinConnection) => {
-    await register({ withinConnection }, {
+  const registerAndRequestPWReset = async (withinConnection: WithinConnection, sendMail = sinon.spy()) => {
+    await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
-    return requestPasswordReset({ withinConnection }, {
+    return requestPasswordReset({ withinConnection, sendMail }, {
       userIdentifier: 'sepp'
     })
   }
+
+  it('sends a pw reset email', t(async (withinConnection) => {
+    const sendMail = sinon.spy()
+    await registerAndRequestPWReset(withinConnection, sendMail)
+    assertThat(sendMail.lastCall.args[0], hasProperties({
+      type: 'PasswordResetRequestEmail',
+      to: 'sepp',
+    }))
+  }))
+
+  it('does not send an email on unknown user', t(async (withinConnection) => {
+    const sendMail = sinon.spy()
+    await requestPasswordReset({withinConnection, sendMail}, {
+      userIdentifier: 'unknown'
+    })
+    assertThat(sendMail.callCount, equalTo(0))
+  }))
 
   it('returns token', t(async (withinConnection) => {
     const response = await registerAndRequestPWReset(withinConnection)
@@ -103,16 +135,17 @@ describe('user/requestPasswordReset', () => {
 })
 
 describe('user/resetPasswordByToken', () => {
+  const sendMail = async () => {}
   const resetPassword = async (withinConnection: WithinConnection) => {
     const userIdentifier = 'sepp'
     const newPassword = 'new password'
 
-    await register({ withinConnection }, {
+    await register({ withinConnection, sendMail }, {
       userIdentifier,
       password: 'huber'
     })
 
-    const pwResetResult = await requestPasswordReset({ withinConnection }, {
+    const pwResetResult = await requestPasswordReset({ withinConnection, sendMail }, {
       userIdentifier
     })
 
@@ -145,15 +178,16 @@ describe('user/resetPasswordByToken', () => {
   }))
 
   it('after token expired, pw is not resetted', t(async (withinConnection) => {
+    const sendMail = async () => {}
     const userIdentifier = 'sepp'
     const newPassword = 'new password'
-    await register({ withinConnection }, {
+    await register({ withinConnection, sendMail }, {
       userIdentifier,
       password: 'huber'
     })
 
     await withMockedDate('2000-01-01', async (remockDate) => {
-      const result = await requestPasswordReset({ withinConnection }, {
+      const result = await requestPasswordReset({ withinConnection, sendMail }, {
         userIdentifier
       })
 
