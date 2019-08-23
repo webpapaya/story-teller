@@ -13,7 +13,7 @@ const success = <T>(body: T): Result<T> =>
   ({ isSuccess: true, body })
 
 const failure = <T>(body: T): Result<T> =>
-  ({ isSuccess: true, body })
+  ({ isSuccess: false, body })
 
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 
@@ -94,6 +94,32 @@ export const register: Register = async (dependencies, params) => {
       }
       throw e
     }
+  })
+}
+
+type ConfirmErrors =
+| 'Token not found'
+
+type Confirm = (
+  deps: { withinConnection: WithinConnection },
+  params: { userIdentifier: string, token: string }
+) => Promise<Result<void | ConfirmErrors>>
+
+export const confirm: Confirm = async (dependencies, params) => {
+  return dependencies.withinConnection(async ({ client }) => {
+    const record = await findUserByIdentifier({ client }, params)
+    if (!record || !await comparePassword(params.token, record.confirmationToken)) {
+      return failure<ConfirmErrors>('Token not found')
+    }
+
+    await client.query(sql`
+      UPDATE user_authentication
+      SET confirmation_token=null,
+          confirmed_at=${new Date()}
+      WHERE user_identifier=${params.userIdentifier}
+      RETURNING *
+    `)
+    return success(void 0)
   })
 }
 

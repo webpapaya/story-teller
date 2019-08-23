@@ -1,5 +1,5 @@
 // @ts-ignore
-import { assertThat, equalTo, hasProperty, hasProperties } from 'hamjest'
+import { assertThat, equalTo, hasProperty, hasProperties, everyItem, truthy as present } from 'hamjest'
 import mockdate from 'mockdate'
 import { t, WithinConnection } from '../lib/db'
 import {
@@ -8,7 +8,8 @@ import {
   register,
   validatePassword,
   requestPasswordReset,
-  resetPasswordByToken
+  resetPasswordByToken,
+  confirm
 } from './index'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import sinon from 'ts-sinon'
@@ -64,10 +65,56 @@ describe('user/register', () => {
   }))
 })
 
-
 describe('user/confirm', () => {
-  it('implement me', t(async (withinConnection) => {
-    throw new Error('Implement ME')
+  it('when token was found, sets confirmationToken to null', t(async (withinConnection) => {
+    const sendMail = sinon.spy()
+    await register({ withinConnection, sendMail }, {
+      userIdentifier: 'sepp',
+      password: 'huber'
+    })
+
+    await confirm({ withinConnection }, {
+      userIdentifier: 'sepp',
+      token: sendMail.lastCall.args[0].payload.token
+    })
+
+    return withinConnection(async ({ client }) => {
+      const result = await client.query('select * from user_authentication')
+      assertThat(result.rows, everyItem(hasProperties({
+        confirmationToken: null,
+        confirmedAt: present()
+      })))
+    })
+  }))
+
+  it('when token was NOT found, returns token not found error', t(async (withinConnection) => {
+    const sendMail = sinon.spy()
+    await register({ withinConnection, sendMail }, {
+      userIdentifier: 'sepp',
+      password: 'huber'
+    })
+
+    const result = await confirm({ withinConnection }, {
+      userIdentifier: 'sepp',
+      token: 'invalid token'
+    })
+
+    assertThat(result, hasProperties({
+      isSuccess: false,
+      body: 'Token not found'
+    }))
+  }))
+
+  it('when user was not found', t(async (withinConnection) => {
+    const result = await confirm({ withinConnection }, {
+      userIdentifier: 'unknown user',
+      token: 'invalid token'
+    })
+
+    assertThat(result, hasProperties({
+      isSuccess: false,
+      body: 'Token not found'
+    }))
   }))
 })
 
