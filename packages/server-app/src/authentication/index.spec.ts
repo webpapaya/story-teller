@@ -1,7 +1,15 @@
+import {
+  assertThat,
+  equalTo,
+  hasProperties,
+  everyItem,
+  truthy as present
 // @ts-ignore
-import { assertThat, equalTo, hasProperty, hasProperties, everyItem, truthy as present } from 'hamjest'
+} from 'hamjest'
 import mockdate from 'mockdate'
-import { t, WithinConnection } from '../lib/db'
+import { LocalDateTime, nativeJs } from 'js-joda'
+import sinon from 'ts-sinon'
+import { t } from '../lib/db'
 import {
   hashPassword,
   comparePassword,
@@ -11,8 +19,13 @@ import {
   resetPasswordByToken,
   confirm
 } from './index'
-import { LocalDateTime, nativeJs } from 'js-joda'
-import sinon from 'ts-sinon'
+import {
+  create as createUserAuthenticationFactory,
+  userAuthenticationFactory,
+  requestedPasswordReset,
+  DUMMY_TOKEN,
+  unconfirmed
+} from './factories'
 
 const sendMail = sinon.spy()
 const withMockedDate = async <T>(date: string, fn: (remock: typeof mockdate.set) => T) => {
@@ -67,15 +80,12 @@ describe('user/register', () => {
 
 describe('user/confirm', () => {
   it('when token was found, sets confirmationToken to null', t(async (withinConnection) => {
-    const sendMail = sinon.spy()
-    await register({ withinConnection, sendMail }, {
-      userIdentifier: 'sepp',
-      password: 'huber'
-    })
+    const auth = await createUserAuthenticationFactory({ withinConnection },
+      userAuthenticationFactory.build(unconfirmed))
 
     await confirm({ withinConnection }, {
-      userIdentifier: 'sepp',
-      token: sendMail.lastCall.args[0].payload.token
+      userIdentifier: auth.userIdentifier,
+      token: DUMMY_TOKEN
     })
 
     return withinConnection(async ({ client }) => {
@@ -88,15 +98,12 @@ describe('user/confirm', () => {
   }))
 
   it('when token was NOT found, returns token not found error', t(async (withinConnection) => {
-    const sendMail = sinon.spy()
-    await register({ withinConnection, sendMail }, {
-      userIdentifier: 'sepp',
-      password: 'huber'
-    })
+    const auth = await createUserAuthenticationFactory({ withinConnection },
+      userAuthenticationFactory.build(unconfirmed))
 
     const result = await confirm({ withinConnection }, {
-      userIdentifier: 'sepp',
-      token: 'invalid token'
+      userIdentifier: auth.userIdentifier,
+      token: 'unknown token'
     })
 
     assertThat(result, hasProperties({
@@ -143,19 +150,12 @@ describe('user/validate', () => {
 })
 
 describe('user/requestPasswordReset', () => {
-  const registerAndRequestPWReset = async (withinConnection: WithinConnection, sendMail = sinon.spy()) => {
-    await register({ withinConnection, sendMail }, {
-      userIdentifier: 'sepp',
-      password: 'huber'
-    })
-    return requestPasswordReset({ withinConnection, sendMail }, {
-      userIdentifier: 'sepp'
-    })
-  }
-
   it('sends a pw reset email', t(async (withinConnection) => {
     const sendMail = sinon.spy()
-    await registerAndRequestPWReset(withinConnection, sendMail)
+    await createUserAuthenticationFactory({ withinConnection }, userAuthenticationFactory.build())
+    await requestPasswordReset({ withinConnection, sendMail }, {
+      userIdentifier: 'sepp'
+    })
     assertThat(sendMail.lastCall.args[0], hasProperties({
       type: 'PasswordResetRequestEmail',
       to: 'sepp'
@@ -165,19 +165,17 @@ describe('user/requestPasswordReset', () => {
   it('does not send an email on unknown user', t(async (withinConnection) => {
     const sendMail = sinon.spy()
     await requestPasswordReset({ withinConnection, sendMail }, {
-      userIdentifier: 'unknown'
+      userIdentifier: 'unknown user'
     })
     assertThat(sendMail.callCount, equalTo(0))
   }))
 
-  it('returns token', t(async (withinConnection) => {
-    const response = await registerAndRequestPWReset(withinConnection)
-    assertThat(response.body, hasProperty('token'))
-  }))
-
   it('sets passwordResetSentAt', t(async (withinConnection) => {
     return withMockedDate('2000-01-01', async () => {
-      await registerAndRequestPWReset(withinConnection)
+      await createUserAuthenticationFactory({ withinConnection }, userAuthenticationFactory.build())
+      await requestPasswordReset({ withinConnection, sendMail }, {
+        userIdentifier: 'sepp'
+      })
       return withinConnection(async ({ client }) => {
         const result = await client.query('select * from user_authentication')
         assertThat(result.rows[0], hasProperties({
@@ -189,39 +187,32 @@ describe('user/requestPasswordReset', () => {
 })
 
 describe('user/resetPasswordByToken', () => {
-  const sendMail = async () => {}
-  const resetPassword = async (withinConnection: WithinConnection) => {
-    const userIdentifier = 'sepp'
-    const newPassword = 'new password'
-
-    await register({ withinConnection, sendMail }, {
-      userIdentifier,
-      password: 'huber'
-    })
-
-    const pwResetResult = await requestPasswordReset({ withinConnection, sendMail }, {
-      userIdentifier
-    })
+  it('after success, user can sign in with new password', t(async (withinConnection) => {
+    const auth = await createUserAuthenticationFactory({ withinConnection },
+      userAuthenticationFactory.build(requestedPasswordReset))
 
     await resetPasswordByToken({ withinConnection }, {
-      userIdentifier,
-      token: pwResetResult.body.token,
-      newPassword
+      userIdentifier: auth.userIdentifier,
+      token: DUMMY_TOKEN,
+      newPassword: 'new password'
     })
 
-    return { userIdentifier, token: pwResetResult.body.token, newPassword }
-  }
-
-  it('after success, user can sign in with new password', t(async (withinConnection) => {
-    const { userIdentifier, newPassword } = await resetPassword(withinConnection)
     assertThat(await validatePassword({ withinConnection }, {
-      userIdentifier,
-      password: newPassword
+      userIdentifier: auth.userIdentifier,
+      password: 'new password'
     }), equalTo(true))
   }))
 
   it('after success, relevant attributes are set to null', t(async (withinConnection) => {
-    await resetPassword(withinConnection)
+    const auth = await createUserAuthenticationFactory({ withinConnection },
+      userAuthenticationFactory.build(requestedPasswordReset))
+
+    await resetPasswordByToken({ withinConnection }, {
+      userIdentifier: auth.userIdentifier,
+      token: DUMMY_TOKEN,
+      newPassword: 'new password'
+    })
+
     return withinConnection(async ({ client }) => {
       const result = await client.query('select * from user_authentication')
       assertThat(result.rows[0], hasProperties({
@@ -232,30 +223,24 @@ describe('user/resetPasswordByToken', () => {
   }))
 
   it('after token expired, pw is not resetted', t(async (withinConnection) => {
-    const sendMail = async () => {}
-    const userIdentifier = 'sepp'
-    const newPassword = 'new password'
-    await register({ withinConnection, sendMail }, {
-      userIdentifier,
-      password: 'huber'
-    })
-
     await withMockedDate('2000-01-01', async (remockDate) => {
-      const result = await requestPasswordReset({ withinConnection, sendMail }, {
-        userIdentifier
-      })
+      const auth = await createUserAuthenticationFactory({ withinConnection },
+        userAuthenticationFactory.build({
+          ...requestedPasswordReset,
+          passwordResetSentAt: LocalDateTime.from(nativeJs(new Date()))
+        }))
 
       remockDate('2000-01-02')
 
       await resetPasswordByToken({ withinConnection }, {
-        userIdentifier,
-        token: result.body.token,
-        newPassword
+        userIdentifier: auth.userIdentifier,
+        token: DUMMY_TOKEN,
+        newPassword: 'new password'
       })
 
       assertThat(await validatePassword({ withinConnection }, {
-        userIdentifier,
-        password: newPassword
+        userIdentifier: auth.userIdentifier,
+        password: 'new password'
       }), equalTo(false))
     })
   }))

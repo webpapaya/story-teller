@@ -129,7 +129,7 @@ type RequestPasswordReset = (
 ) => Promise<Result<{ userIdentifier: string, token: string }>>
 
 export const requestPasswordReset: RequestPasswordReset = async (dependencies, params) => {
-  const token = await crypto.randomBytes(50).toString('hex')
+  const token = await crypto.randomBytes(20).toString('hex')
   const hashedToken = await hashPassword(token)
 
   return dependencies.withinConnection(async ({ client }) => {

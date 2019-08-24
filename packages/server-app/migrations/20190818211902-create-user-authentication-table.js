@@ -11,7 +11,7 @@ exports.up = function (db) {
       confirmation_token       text,
       confirmed_at             timestamp without time zone,
 
-      password                 text,
+      password                 text NOT NULL,
       password_reset_token     text UNIQUE,
       password_reset_sent_at   timestamp without time zone
     );
