@@ -17,7 +17,8 @@ import {
   validatePassword,
   requestPasswordReset,
   resetPasswordByToken,
-  confirm
+  confirm,
+  findUserById
 } from './index'
 import {
   create as createUserAuthenticationFactory,
@@ -243,5 +244,30 @@ describe('user/resetPasswordByToken', () => {
         password: 'new password'
       }), equalTo(false))
     })
+  }))
+})
+
+describe('findUserById', () => {
+  it('when known userId is passed in', t(async (withinConnection) => {
+    const auth = await createUserAuthenticationFactory({ withinConnection },
+      userAuthenticationFactory.build())
+
+    const result = await withinConnection(({ client }) => {
+      return findUserById({ client }, { id: auth.id })
+    })
+    assertThat(result, hasProperties({
+      userIdentifier: equalTo(auth.userIdentifier)
+    }))
+  }))
+
+  it('when undefined is passed in', t(async (withinConnection) => {
+    const auth = await createUserAuthenticationFactory({ withinConnection },
+      userAuthenticationFactory.build())
+
+    const result = await withinConnection(({ client }) => {
+      return findUserById({ client }, { id: undefined as unknown as string })
+    })
+
+    assertThat(result, equalTo(undefined))
   }))
 })

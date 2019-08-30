@@ -40,11 +40,12 @@ export const create = async (dependencies: { withinConnection: WithinConnection 
     const keys = Object.keys(factory)
     // @ts-ignore
     const values = keys.map((key) => factory[key])
-    await client.query(`
+    const authentication = await client.query(`
       INSERT INTO user_authentication (${keys.map((v) => snakeCase(v)).join(', ')})
       VALUES (${values.map((_, i) => `$${i + 1}`).join(', ')})
+      RETURNING *
     `, values)
 
-    return factory
+    return authentication.rows[0]
   })
 }

@@ -23,12 +23,26 @@ export const hashPassword = async (password: string) =>
 export const comparePassword = async (password: string, passwordHash: string) =>
   bcrypt.compare(password, passwordHash)
 
+type FindUserById = (
+  deps: { client: DBClient },
+  params: { id: string }
+) => Promise<any>
+
+export const findUserById: FindUserById = async (dependencies, params) => {
+  const records = await dependencies.client.query(sql`
+      SELECT * FROM user_authentication
+      WHERE id=${params.id}
+      LIMIT 1
+  `)
+  return records.rows[0]
+}
+
 type FindUserByIdentifier = (
   deps: { client: DBClient },
   params: { userIdentifier: string }
 ) => Promise<any>
 
-const findUserByIdentifier: FindUserByIdentifier = async (dependencies, params) => {
+export const findUserByIdentifier: FindUserByIdentifier = async (dependencies, params) => {
   const records = await dependencies.client.query(sql`
       SELECT * FROM user_authentication
       WHERE user_identifier=${params.userIdentifier}
