@@ -14,7 +14,7 @@ import {
   requestPasswordReset,
   resetPasswordByToken,
   confirm
-} from './index'
+} from './commands'
 import {
   create as createUserAuthenticationFactory,
   userAuthenticationFactory,

@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express'
 
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
-import { register } from './authentication'
+import { register } from './authentication/commands'
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'

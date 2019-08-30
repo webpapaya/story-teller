@@ -11,7 +11,7 @@ import sinon from 'ts-sinon'
 import {
   register,
   findUserByAuthenticationToken
-} from './index'
+} from './commands'
 import {
   create as createUserAuthenticationFactory,
   userAuthenticationFactory
