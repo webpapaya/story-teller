@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import sql from 'sql-template-tag'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import { SendMail } from './emails'
+import { AuthenticationToken } from '../domain';
 
 type Result<Body> = {
   body: Body
@@ -150,7 +151,7 @@ export const requestPasswordReset: RequestPasswordReset = async (dependencies, p
     const result = await client.query(sql`
       UPDATE user_authentication
       SET password_reset_token=(${hashedToken}),
-          password_reset_sent_at=${new Date()}
+          password_reset_created_at=${new Date()}
       WHERE user_identifier=${params.userIdentifier}
       RETURNING *
     `)
@@ -187,13 +188,13 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
     const isTokenToOld = LocalDateTime.from(nativeJs(new Date()))
       .minusDays(1)
       .plusSeconds(1)
-      .isAfter(record.passwordResetSentAt)
+      .isAfter(record.passwordResetCreatedAt)
 
     if (isTokenToOld) {
       await client.query(sql`
         UPDATE user_authentication
         SET password_reset_token=null,
-            password_reset_sent_at=null
+            password_reset_created_at=null
         WHERE id=${record.id}
       `)
       return failure<ResetPasswordErrors>('Token not found')
@@ -204,10 +205,27 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
       UPDATE user_authentication
       SET password=${hashedPassword},
           password_reset_token=null,
-          password_reset_sent_at=null
+          password_reset_created_at=null,
+          password_changed_at=${new Date()}
       WHERE id=${record.id}
     `)
 
     return success(void 0)
   })
+}
+
+type FindUserByAuthenticationToken = (
+  deps: { client: DBClient },
+  token: AuthenticationToken
+) => Promise<any>
+
+export const findUserByAuthenticationToken: FindUserByAuthenticationToken = async (dependencies, token) => {
+  const records = await dependencies.client.query(sql`
+      SELECT * FROM user_authentication
+      WHERE id=${token.id}
+      AND (password_changed_at is null OR password_changed_at <= ${token.createdAt})
+      LIMIT 1
+  `)
+
+  return records.rows[0]
 }

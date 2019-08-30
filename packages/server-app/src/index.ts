@@ -1,45 +1,67 @@
-import express from 'express'
+import express, { Request, Response, NextFunction} from 'express'
 
-import passport from 'passport'
 import cookieParser from 'cookie-parser'
-import session from 'express-session'
 import bodyParser from 'body-parser'
+import { validatePassword, register, findUserByIdentifier, findUserById } from './authentication';
+import { withinConnection } from './lib/db';
+import { sendMail } from './authentication/emails';
 
-import LocalStrategy from 'passport-local'
 const app = express()
 const port = process.env.API_PORT
 
-app.use(cookieParser())
+app.use(cookieParser(process.env.SECRET_KEY_BASE))
 app.use(bodyParser())
-// @ts-ignore
-app.use(session({ secret: process.env.SECRET_KEY_BASE }))
-app.use(passport.initialize())
-app.use(passport.session())
-passport.use(new LocalStrategy.Strategy(
-  (username, password, done) => {
-    const user = { username, password }
-    return done(null, user)
+
+app.post('/sign-up', async (req, res, next) => {
+  await register({ withinConnection, sendMail }, {
+    userIdentifier: req.body.userIdentifier,
+    password: req.body.password,
+  })
+  res.send('Ok')
+})
+
+app.post('/sign-in', async (req, res) => {
+  if (await validatePassword({ withinConnection }, req.body)) {
+    await withinConnection(async ({ client }) => {
+      const user = await findUserByIdentifier({ client }, { userIdentifier: req.body.userIdentifier })
+      res.cookie('session', JSON.stringify({ id: user.id, createdAt: new Date() }), { signed: true })
+      res.sendStatus(200)
+    })
+  } else {
+    res.clearCookie('session')
+    res.sendStatus(401)
   }
-))
+});
 
-passport.serializeUser(function (user, done) {
-  done(null, user)
+app.post('/sign-out', async (req, res) => {
+  res.clearCookie('session')
+  res.sendStatus(200)
+});
+
+
+const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
+  const parsedCookie = JSON.parse(req.signedCookies.session || '{}')
+  const user = await withinConnection(async ({ client }) => {
+    return findUserById({ client }, { id: parsedCookie.id })
+  })
+
+  if (!user) {
+    res.sendStatus(401)
+    next('Unauthorized')
+  } else {
+    next()
+  }
+}
+
+app.get('/session', isAuthenticated, (req, res) => {
+  res.sendStatus(200)
 })
 
-passport.deserializeUser(function (user, done) {
-  console.log(user)
-  done(null, user)
-})
-
-const userAuth = passport.authenticate('local', { session: true })
-
-app.post('/login', userAuth, (req: express.Request, res: express.Response) => {
-  console.log(req.body)
-  res.send('Hello World!!')
-})
 app.get('/', (req: express.Request, res: express.Response) => {
   console.log(req.body)
   res.send('Hello World!!')
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
+

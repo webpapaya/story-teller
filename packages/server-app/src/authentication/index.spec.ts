@@ -3,7 +3,8 @@ import {
   equalTo,
   hasProperties,
   everyItem,
-  truthy as present
+  truthy as present,
+  falsy as blank
 // @ts-ignore
 } from 'hamjest'
 import mockdate from 'mockdate'
@@ -18,7 +19,8 @@ import {
   requestPasswordReset,
   resetPasswordByToken,
   confirm,
-  findUserById
+  findUserById,
+  findUserByAuthenticationToken
 } from './index'
 import {
   create as createUserAuthenticationFactory,
@@ -27,6 +29,7 @@ import {
   DUMMY_TOKEN,
   unconfirmed
 } from './factories'
+import { AuthenticationToken } from '../domain';
 
 const sendMail = sinon.spy()
 const withMockedDate = async <T>(date: string, fn: (remock: typeof mockdate.set) => T) => {
@@ -171,7 +174,7 @@ describe('user/requestPasswordReset', () => {
     assertThat(sendMail.callCount, equalTo(0))
   }))
 
-  it('sets passwordResetSentAt', t(async ({withinConnection}) => {
+  it('sets passwordResetCreatedAt', t(async ({withinConnection}) => {
     return withMockedDate('2000-01-01', async () => {
       await createUserAuthenticationFactory({ withinConnection }, userAuthenticationFactory.build())
       await requestPasswordReset({ withinConnection, sendMail }, {
@@ -180,7 +183,7 @@ describe('user/requestPasswordReset', () => {
       return withinConnection(async ({ client }) => {
         const result = await client.query('select * from user_authentication')
         assertThat(result.rows[0], hasProperties({
-          passwordResetSentAt: LocalDateTime.from(nativeJs(new Date()))
+          passwordResetCreatedAt: LocalDateTime.from(nativeJs(new Date()))
         }))
       })
     })
@@ -217,8 +220,9 @@ describe('user/resetPasswordByToken', () => {
     return withinConnection(async ({ client }) => {
       const result = await client.query('select * from user_authentication')
       assertThat(result.rows[0], hasProperties({
-        passwordResetSentAt: null,
-        passwordResetToken: null
+        passwordResetCreatedAt: null,
+        passwordResetToken: null,
+        passwordChangedAt: present()
       }))
     })
   }))
@@ -228,7 +232,7 @@ describe('user/resetPasswordByToken', () => {
       const auth = await createUserAuthenticationFactory({ withinConnection },
         userAuthenticationFactory.build({
           ...requestedPasswordReset,
-          passwordResetSentAt: LocalDateTime.from(nativeJs(new Date()))
+          passwordResetCreatedAt: LocalDateTime.from(nativeJs(new Date()))
         }))
 
       remockDate('2000-01-02')
@@ -269,5 +273,51 @@ describe('findUserById', () => {
     })
 
     assertThat(result, equalTo(undefined))
+  }))
+})
+
+
+describe('findUserByAuthenticationToken', () => {
+  it('when password was not reset yet, returns user', t(async ({ withinConnection, client }) => {
+    return withMockedDate('2000-01-02', async () => {
+      const auth = await createUserAuthenticationFactory({ withinConnection },
+        userAuthenticationFactory.build())
+
+      const token: AuthenticationToken = {
+        id: auth.id,
+        scope: 'user',
+        createdAt: LocalDateTime.from(nativeJs(new Date())),
+      }
+
+      assertThat(await findUserByAuthenticationToken({ client }, token),
+        hasProperties({ id: auth.id }))
+    })
+  }))
+
+  it('when password changed after token created, returns undefined', t(async ({ withinConnection, client }) => {
+    const auth = await createUserAuthenticationFactory({ withinConnection },
+      userAuthenticationFactory.build({ passwordChangedAt: LocalDateTime.of(2000, 1, 2) }))
+
+    const token: AuthenticationToken = {
+      id: auth.id,
+      scope: 'user',
+      createdAt: LocalDateTime.of(2000, 1, 1),
+    }
+
+    assertThat(await findUserByAuthenticationToken({ client }, token), blank())
+  }))
+
+  it('when password changed before token created, returns user', t(async ({ withinConnection, client }) => {
+    const auth = await createUserAuthenticationFactory({ withinConnection },
+      userAuthenticationFactory.build({ passwordChangedAt: LocalDateTime.of(2000, 1, 1) }))
+
+    const token: AuthenticationToken = {
+      id: auth.id,
+      scope: 'user',
+      createdAt: LocalDateTime.of(2000, 1, 1),
+    }
+
+    assertThat(await findUserByAuthenticationToken({ client }, token),
+      hasProperties({ id: auth.id }))
   }))
 })
