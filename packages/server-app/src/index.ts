@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction} from 'express'
 
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
-import { validatePassword, register, findUserByIdentifier, findUserById } from './authentication';
+import { findUserByAuthentication, register, findUserByIdentifier, findUserById } from './authentication';
 import { withinConnection } from './lib/db';
 import { sendMail } from './authentication/emails';
 
@@ -21,7 +21,7 @@ app.post('/sign-up', async (req, res, next) => {
 })
 
 app.post('/sign-in', async (req, res) => {
-  if (await validatePassword({ withinConnection }, req.body)) {
+  if (await findUserByAuthentication({ withinConnection }, req.body)) {
     await withinConnection(async ({ client }) => {
       const user = await findUserByIdentifier({ client }, { userIdentifier: req.body.userIdentifier })
       res.cookie('session', JSON.stringify({ id: user.id, createdAt: new Date() }), { signed: true })

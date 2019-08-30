@@ -3,18 +3,7 @@ import { LocalDateTime, nativeJs } from 'js-joda'
 import snakeCase from 'snake-case'
 import { WithinConnection } from '../lib/db'
 import uuid = require('uuid');
-
-type UserAuthentication = {
-  id: string,
-  userIdentifier: string
-  createdAt: LocalDateTime
-  confirmationToken: string | null
-  confirmedAt: LocalDateTime | null
-  password: string
-  passwordResetToken: string | null
-  passwordResetCreatedAt: LocalDateTime | null,
-  passwordChangedAt: LocalDateTime | null
-}
+import { UserAuthentication } from '../domain';
 
 export const DUMMY_TOKEN = '0fb339b556d1a822f68785bff7e67362e235563d'
 const DUMMY_TOKEN_HASHED = '$2b$04$he9DIvynmp4Xj4LZ.tvbsu5Xm/qq.RY5wNpGVsiKhfSlaa.yQn6Ka'

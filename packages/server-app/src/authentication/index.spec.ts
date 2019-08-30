@@ -15,7 +15,7 @@ import {
   hashPassword,
   comparePassword,
   register,
-  validatePassword,
+  findUserByAuthentication as findUserByAuthentication,
   requestPasswordReset,
   resetPasswordByToken,
   confirm,
@@ -40,20 +40,6 @@ const withMockedDate = async <T>(date: string, fn: (remock: typeof mockdate.set)
     mockdate.reset()
   }
 }
-
-describe('comparePassword', () => {
-  it('returns true when passwords match', async () => {
-    const password = 'sepp'
-    const passwordHash = await hashPassword(password)
-    assertThat(await comparePassword(password, passwordHash), equalTo(true))
-  })
-
-  it('returns false when passwords do NOT match', async () => {
-    const password = 'sepp'
-    const passwordHash = await hashPassword(password)
-    assertThat(await comparePassword('other password', passwordHash), equalTo(false))
-  })
-})
 
 describe('user/register', () => {
   it('when identifier is used twice, returns error', t(async ({withinConnection}) => {
@@ -129,29 +115,7 @@ describe('user/confirm', () => {
   }))
 })
 
-describe('user/validate', () => {
-  it('when passwords match, returns true', t(async ({withinConnection}) => {
-    await register({ withinConnection, sendMail }, {
-      userIdentifier: 'sepp',
-      password: 'huber'
-    })
-    assertThat(await validatePassword({ withinConnection }, {
-      userIdentifier: 'sepp',
-      password: 'huber'
-    }), equalTo(true))
-  }))
 
-  it('when passwords do NOT match, returns false', t(async ({withinConnection}) => {
-    await register({ withinConnection, sendMail }, {
-      userIdentifier: 'sepp',
-      password: 'huber'
-    })
-    assertThat(await validatePassword({ withinConnection }, {
-      userIdentifier: 'sepp',
-      password: 'huber1'
-    }), equalTo(false))
-  }))
-})
 
 describe('user/requestPasswordReset', () => {
   it('sends a pw reset email', t(async ({withinConnection}) => {
@@ -201,10 +165,10 @@ describe('user/resetPasswordByToken', () => {
       newPassword: 'new password'
     })
 
-    assertThat(await validatePassword({ withinConnection }, {
+    assertThat(await findUserByAuthentication({ withinConnection }, {
       userIdentifier: auth.userIdentifier,
       password: 'new password'
-    }), equalTo(true))
+    }), present())
   }))
 
   it('after success, relevant attributes are set to null', t(async ({withinConnection}) => {
@@ -243,10 +207,10 @@ describe('user/resetPasswordByToken', () => {
         newPassword: 'new password'
       })
 
-      assertThat(await validatePassword({ withinConnection }, {
+      assertThat(await findUserByAuthentication({ withinConnection }, {
         userIdentifier: auth.userIdentifier,
         password: 'new password'
-      }), equalTo(false))
+      }), blank())
     })
   }))
 })
@@ -276,6 +240,29 @@ describe('findUserById', () => {
   }))
 })
 
+describe('findUserByAuthentication', () => {
+  it('when password matches, returns user', t(async ({withinConnection}) => {
+    await register({ withinConnection, sendMail }, {
+      userIdentifier: 'sepp',
+      password: 'huber'
+    })
+    assertThat(await findUserByAuthentication({ withinConnection }, {
+      userIdentifier: 'sepp',
+      password: 'huber'
+    }), present())
+  }))
+
+  it('when password does NOT match, returns undefined', t(async ({withinConnection}) => {
+    await register({ withinConnection, sendMail }, {
+      userIdentifier: 'sepp',
+      password: 'huber'
+    })
+    assertThat(await findUserByAuthentication({ withinConnection }, {
+      userIdentifier: 'sepp',
+      password: 'huber1'
+    }), blank())
+  }))
+})
 
 describe('findUserByAuthenticationToken', () => {
   it('when password was not reset yet, returns user', t(async ({ withinConnection, client }) => {
