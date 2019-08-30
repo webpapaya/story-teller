@@ -1,10 +1,10 @@
-import express, { Request, Response, NextFunction} from 'express'
+import express, { Request, Response, NextFunction } from 'express'
 
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
-import { findUserByAuthentication, register, findUserByIdentifier, findUserById } from './authentication';
-import { withinConnection } from './lib/db';
-import { sendMail } from './authentication/emails';
+import { findUserByAuthentication, register, findUserById } from './authentication'
+import { withinConnection } from './lib/db'
+import { sendMail } from './authentication/emails'
 
 const app = express()
 const port = process.env.API_PORT
@@ -12,32 +12,31 @@ const port = process.env.API_PORT
 app.use(cookieParser(process.env.SECRET_KEY_BASE))
 app.use(bodyParser())
 
-app.post('/sign-up', async (req, res, next) => {
+app.post('/sign-up', async (req, res) => {
   await register({ withinConnection, sendMail }, {
     userIdentifier: req.body.userIdentifier,
-    password: req.body.password,
+    password: req.body.password
   })
   res.send('Ok')
 })
 
 app.post('/sign-in', async (req, res) => {
-  if (await findUserByAuthentication({ withinConnection }, req.body)) {
-    await withinConnection(async ({ client }) => {
-      const user = await findUserByIdentifier({ client }, { userIdentifier: req.body.userIdentifier })
+  return withinConnection(async ({ client }) => {
+    const user = await findUserByAuthentication({ client }, req.body)
+    if (user) {
       res.cookie('session', JSON.stringify({ id: user.id, createdAt: new Date() }), { signed: true })
       res.sendStatus(200)
-    })
-  } else {
-    res.clearCookie('session')
-    res.sendStatus(401)
-  }
-});
+    } else {
+      res.clearCookie('session')
+      res.sendStatus(401)
+    }
+  })
+})
 
 app.post('/sign-out', async (req, res) => {
   res.clearCookie('session')
   res.sendStatus(200)
-});
-
+})
 
 const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
   const parsedCookie = JSON.parse(req.signedCookies.session || '{}')
@@ -63,5 +62,3 @@ app.get('/', (req: express.Request, res: express.Response) => {
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-
-

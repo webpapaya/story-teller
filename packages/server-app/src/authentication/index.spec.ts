@@ -12,10 +12,8 @@ import { LocalDateTime, nativeJs } from 'js-joda'
 import sinon from 'ts-sinon'
 import { t } from '../lib/db'
 import {
-  hashPassword,
-  comparePassword,
   register,
-  findUserByAuthentication as findUserByAuthentication,
+  findUserByAuthentication,
   requestPasswordReset,
   resetPasswordByToken,
   confirm,
@@ -29,7 +27,7 @@ import {
   DUMMY_TOKEN,
   unconfirmed
 } from './factories'
-import { AuthenticationToken } from '../domain';
+import { AuthenticationToken } from '../domain'
 
 const sendMail = sinon.spy()
 const withMockedDate = async <T>(date: string, fn: (remock: typeof mockdate.set) => T) => {
@@ -42,7 +40,7 @@ const withMockedDate = async <T>(date: string, fn: (remock: typeof mockdate.set)
 }
 
 describe('user/register', () => {
-  it('when identifier is used twice, returns error', t(async ({withinConnection}) => {
+  it('when identifier is used twice, returns error', t(async ({ withinConnection }) => {
     await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
@@ -54,7 +52,7 @@ describe('user/register', () => {
     assertThat(result.body, equalTo('User Identifier already taken'))
   }))
 
-  it('sends a registration email', t(async ({withinConnection}) => {
+  it('sends a registration email', t(async ({ withinConnection }) => {
     const sendMail = sinon.spy()
     await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
@@ -69,7 +67,7 @@ describe('user/register', () => {
 })
 
 describe('user/confirm', () => {
-  it('when token was found, sets confirmationToken to null', t(async ({withinConnection}) => {
+  it('when token was found, sets confirmationToken to null', t(async ({ withinConnection }) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build(unconfirmed))
 
@@ -87,7 +85,7 @@ describe('user/confirm', () => {
     })
   }))
 
-  it('when token was NOT found, returns token not found error', t(async ({withinConnection}) => {
+  it('when token was NOT found, returns token not found error', t(async ({ withinConnection }) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build(unconfirmed))
 
@@ -102,7 +100,7 @@ describe('user/confirm', () => {
     }))
   }))
 
-  it('when user was not found', t(async ({withinConnection}) => {
+  it('when user was not found', t(async ({ withinConnection }) => {
     const result = await confirm({ withinConnection }, {
       userIdentifier: 'unknown user',
       token: 'invalid token'
@@ -115,10 +113,8 @@ describe('user/confirm', () => {
   }))
 })
 
-
-
 describe('user/requestPasswordReset', () => {
-  it('sends a pw reset email', t(async ({withinConnection}) => {
+  it('sends a pw reset email', t(async ({ withinConnection }) => {
     const sendMail = sinon.spy()
     await createUserAuthenticationFactory({ withinConnection }, userAuthenticationFactory.build())
     await requestPasswordReset({ withinConnection, sendMail }, {
@@ -130,7 +126,7 @@ describe('user/requestPasswordReset', () => {
     }))
   }))
 
-  it('does not send an email on unknown user', t(async ({withinConnection}) => {
+  it('does not send an email on unknown user', t(async ({ withinConnection }) => {
     const sendMail = sinon.spy()
     await requestPasswordReset({ withinConnection, sendMail }, {
       userIdentifier: 'unknown user'
@@ -138,7 +134,7 @@ describe('user/requestPasswordReset', () => {
     assertThat(sendMail.callCount, equalTo(0))
   }))
 
-  it('sets passwordResetCreatedAt', t(async ({withinConnection}) => {
+  it('sets passwordResetCreatedAt', t(async ({ withinConnection }) => {
     return withMockedDate('2000-01-01', async () => {
       await createUserAuthenticationFactory({ withinConnection }, userAuthenticationFactory.build())
       await requestPasswordReset({ withinConnection, sendMail }, {
@@ -155,7 +151,7 @@ describe('user/requestPasswordReset', () => {
 })
 
 describe('user/resetPasswordByToken', () => {
-  it('after success, user can sign in with new password', t(async ({withinConnection}) => {
+  it('after success, user can sign in with new password', t(async ({ withinConnection, client }) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build(requestedPasswordReset))
 
@@ -165,13 +161,13 @@ describe('user/resetPasswordByToken', () => {
       newPassword: 'new password'
     })
 
-    assertThat(await findUserByAuthentication({ withinConnection }, {
+    assertThat(await findUserByAuthentication({ client }, {
       userIdentifier: auth.userIdentifier,
       password: 'new password'
     }), present())
   }))
 
-  it('after success, relevant attributes are set to null', t(async ({withinConnection}) => {
+  it('after success, relevant attributes are set to null', t(async ({ withinConnection }) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build(requestedPasswordReset))
 
@@ -191,7 +187,7 @@ describe('user/resetPasswordByToken', () => {
     })
   }))
 
-  it('after token expired, pw is not resetted', t(async ({withinConnection}) => {
+  it('after token expired, pw is not resetted', t(async ({ withinConnection, client }) => {
     await withMockedDate('2000-01-01', async (remockDate) => {
       const auth = await createUserAuthenticationFactory({ withinConnection },
         userAuthenticationFactory.build({
@@ -207,7 +203,7 @@ describe('user/resetPasswordByToken', () => {
         newPassword: 'new password'
       })
 
-      assertThat(await findUserByAuthentication({ withinConnection }, {
+      assertThat(await findUserByAuthentication({ client }, {
         userIdentifier: auth.userIdentifier,
         password: 'new password'
       }), blank())
@@ -216,7 +212,7 @@ describe('user/resetPasswordByToken', () => {
 })
 
 describe('findUserById', () => {
-  it('when known userId is passed in', t(async ({withinConnection}) => {
+  it('when known userId is passed in', t(async ({ withinConnection }) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build())
 
@@ -228,8 +224,8 @@ describe('findUserById', () => {
     }))
   }))
 
-  it('when undefined is passed in', t(async ({withinConnection}) => {
-    const auth = await createUserAuthenticationFactory({ withinConnection },
+  it('when undefined is passed in', t(async ({ withinConnection }) => {
+    await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build())
 
     const result = await withinConnection(({ client }) => {
@@ -241,23 +237,23 @@ describe('findUserById', () => {
 })
 
 describe('findUserByAuthentication', () => {
-  it('when password matches, returns user', t(async ({withinConnection}) => {
+  it('when password matches, returns user', t(async ({ withinConnection, client }) => {
     await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
-    assertThat(await findUserByAuthentication({ withinConnection }, {
+    assertThat(await findUserByAuthentication({ client }, {
       userIdentifier: 'sepp',
       password: 'huber'
     }), present())
   }))
 
-  it('when password does NOT match, returns undefined', t(async ({withinConnection}) => {
+  it('when password does NOT match, returns undefined', t(async ({ withinConnection, client }) => {
     await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
-    assertThat(await findUserByAuthentication({ withinConnection }, {
+    assertThat(await findUserByAuthentication({ client }, {
       userIdentifier: 'sepp',
       password: 'huber1'
     }), blank())
@@ -273,7 +269,7 @@ describe('findUserByAuthenticationToken', () => {
       const token: AuthenticationToken = {
         id: auth.id,
         scope: 'user',
-        createdAt: LocalDateTime.from(nativeJs(new Date())),
+        createdAt: LocalDateTime.from(nativeJs(new Date()))
       }
 
       assertThat(await findUserByAuthenticationToken({ client }, token),
@@ -288,7 +284,7 @@ describe('findUserByAuthenticationToken', () => {
     const token: AuthenticationToken = {
       id: auth.id,
       scope: 'user',
-      createdAt: LocalDateTime.of(2000, 1, 1),
+      createdAt: LocalDateTime.of(2000, 1, 1)
     }
 
     assertThat(await findUserByAuthenticationToken({ client }, token), blank())
@@ -301,7 +297,7 @@ describe('findUserByAuthenticationToken', () => {
     const token: AuthenticationToken = {
       id: auth.id,
       scope: 'user',
-      createdAt: LocalDateTime.of(2000, 1, 1),
+      createdAt: LocalDateTime.of(2000, 1, 1)
     }
 
     assertThat(await findUserByAuthenticationToken({ client }, token),

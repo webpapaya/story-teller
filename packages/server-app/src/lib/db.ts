@@ -105,7 +105,7 @@ export const withinNamespace: WithinNamespace = async (namespace, client, fn) =>
 }
 
 type WithinConnectionForTesting = (fn: (params: {
-  withinConnection: WithinConnection,
+  withinConnection: WithinConnection
   client: DBClient
 }) => any) => () => any;
 export const t: WithinConnectionForTesting = (fn) => async () => {

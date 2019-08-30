@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import sql from 'sql-template-tag'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import { SendMail } from './emails'
-import { AuthenticationToken, UserAuthentication } from '../domain';
+import { AuthenticationToken, UserAuthentication } from '../domain'
 
 type Result<Body> = {
   body: Body
@@ -53,18 +53,15 @@ export const findUserByIdentifier: FindUserByIdentifier = async (dependencies, p
 }
 
 type FindUserByAuthentication = (
-  deps: { withinConnection: WithinConnection },
+  deps: { client: DBClient },
   params: { userIdentifier: string, password: string}
 ) => Promise<UserAuthentication>
 
-export const findUserByAuthentication: FindUserByAuthentication = async (dependencies, params) => {
-  return dependencies.withinConnection(async ({ client }) => {
-    const user = await findUserByIdentifier({ client }, params)
-    // eslint-disable-next-line no-return-await
-    return user && (await comparePassword(params.password, user.password))
-      ? user
-      : undefined
-  })
+export const findUserByAuthentication: FindUserByAuthentication = async ({ client }, params) => {
+  const user = await findUserByIdentifier({ client }, params)
+  return user && (await comparePassword(params.password, user.password))
+    ? user
+    : undefined
 }
 
 type RegisterErrors =
