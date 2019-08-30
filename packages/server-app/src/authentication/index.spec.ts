@@ -53,7 +53,7 @@ describe('comparePassword', () => {
 })
 
 describe('user/register', () => {
-  it('when identifier is used twice, returns error', t(async (withinConnection) => {
+  it('when identifier is used twice, returns error', t(async ({withinConnection}) => {
     await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
@@ -65,7 +65,7 @@ describe('user/register', () => {
     assertThat(result.body, equalTo('User Identifier already taken'))
   }))
 
-  it('sends a registration email', t(async (withinConnection) => {
+  it('sends a registration email', t(async ({withinConnection}) => {
     const sendMail = sinon.spy()
     await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
@@ -80,7 +80,7 @@ describe('user/register', () => {
 })
 
 describe('user/confirm', () => {
-  it('when token was found, sets confirmationToken to null', t(async (withinConnection) => {
+  it('when token was found, sets confirmationToken to null', t(async ({withinConnection}) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build(unconfirmed))
 
@@ -98,7 +98,7 @@ describe('user/confirm', () => {
     })
   }))
 
-  it('when token was NOT found, returns token not found error', t(async (withinConnection) => {
+  it('when token was NOT found, returns token not found error', t(async ({withinConnection}) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build(unconfirmed))
 
@@ -113,7 +113,7 @@ describe('user/confirm', () => {
     }))
   }))
 
-  it('when user was not found', t(async (withinConnection) => {
+  it('when user was not found', t(async ({withinConnection}) => {
     const result = await confirm({ withinConnection }, {
       userIdentifier: 'unknown user',
       token: 'invalid token'
@@ -127,7 +127,7 @@ describe('user/confirm', () => {
 })
 
 describe('user/validate', () => {
-  it('when passwords match, returns true', t(async (withinConnection) => {
+  it('when passwords match, returns true', t(async ({withinConnection}) => {
     await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
@@ -138,7 +138,7 @@ describe('user/validate', () => {
     }), equalTo(true))
   }))
 
-  it('when passwords do NOT match, returns false', t(async (withinConnection) => {
+  it('when passwords do NOT match, returns false', t(async ({withinConnection}) => {
     await register({ withinConnection, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
@@ -151,7 +151,7 @@ describe('user/validate', () => {
 })
 
 describe('user/requestPasswordReset', () => {
-  it('sends a pw reset email', t(async (withinConnection) => {
+  it('sends a pw reset email', t(async ({withinConnection}) => {
     const sendMail = sinon.spy()
     await createUserAuthenticationFactory({ withinConnection }, userAuthenticationFactory.build())
     await requestPasswordReset({ withinConnection, sendMail }, {
@@ -163,7 +163,7 @@ describe('user/requestPasswordReset', () => {
     }))
   }))
 
-  it('does not send an email on unknown user', t(async (withinConnection) => {
+  it('does not send an email on unknown user', t(async ({withinConnection}) => {
     const sendMail = sinon.spy()
     await requestPasswordReset({ withinConnection, sendMail }, {
       userIdentifier: 'unknown user'
@@ -171,7 +171,7 @@ describe('user/requestPasswordReset', () => {
     assertThat(sendMail.callCount, equalTo(0))
   }))
 
-  it('sets passwordResetSentAt', t(async (withinConnection) => {
+  it('sets passwordResetSentAt', t(async ({withinConnection}) => {
     return withMockedDate('2000-01-01', async () => {
       await createUserAuthenticationFactory({ withinConnection }, userAuthenticationFactory.build())
       await requestPasswordReset({ withinConnection, sendMail }, {
@@ -188,7 +188,7 @@ describe('user/requestPasswordReset', () => {
 })
 
 describe('user/resetPasswordByToken', () => {
-  it('after success, user can sign in with new password', t(async (withinConnection) => {
+  it('after success, user can sign in with new password', t(async ({withinConnection}) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build(requestedPasswordReset))
 
@@ -204,7 +204,7 @@ describe('user/resetPasswordByToken', () => {
     }), equalTo(true))
   }))
 
-  it('after success, relevant attributes are set to null', t(async (withinConnection) => {
+  it('after success, relevant attributes are set to null', t(async ({withinConnection}) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build(requestedPasswordReset))
 
@@ -223,7 +223,7 @@ describe('user/resetPasswordByToken', () => {
     })
   }))
 
-  it('after token expired, pw is not resetted', t(async (withinConnection) => {
+  it('after token expired, pw is not resetted', t(async ({withinConnection}) => {
     await withMockedDate('2000-01-01', async (remockDate) => {
       const auth = await createUserAuthenticationFactory({ withinConnection },
         userAuthenticationFactory.build({
@@ -248,7 +248,7 @@ describe('user/resetPasswordByToken', () => {
 })
 
 describe('findUserById', () => {
-  it('when known userId is passed in', t(async (withinConnection) => {
+  it('when known userId is passed in', t(async ({withinConnection}) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build())
 
@@ -260,7 +260,7 @@ describe('findUserById', () => {
     }))
   }))
 
-  it('when undefined is passed in', t(async (withinConnection) => {
+  it('when undefined is passed in', t(async ({withinConnection}) => {
     const auth = await createUserAuthenticationFactory({ withinConnection },
       userAuthenticationFactory.build())
 

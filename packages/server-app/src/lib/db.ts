@@ -104,12 +104,18 @@ export const withinNamespace: WithinNamespace = async (namespace, client, fn) =>
   }
 }
 
-type WithinConnectionForTesting = (fn: (params: WithinConnection) => any) => () => any;
+type WithinConnectionForTesting = (fn: (params: {
+  withinConnection: WithinConnection,
+  client: DBClient
+}) => any) => () => any;
 export const t: WithinConnectionForTesting = (fn) => async () => {
   return withinConnection(async (params) => {
     try {
       await params.begin()
-      return await fn(async (fn2) => fn2(params))
+      return await fn({
+        client: params.client,
+        withinConnection: async (fn2) => fn2(params)
+      })
     } finally {
       await params.rollback()
     }
