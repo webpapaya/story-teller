@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express'
 
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
-import { register } from './authentication/commands'
+import { register, requestPasswordReset, resetPasswordByToken, Result } from './authentication/commands'
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
@@ -13,12 +13,37 @@ const port = process.env.API_PORT
 app.use(cookieParser(process.env.SECRET_KEY_BASE))
 app.use(bodyParser())
 
+const resultToHTTP = (res: Response, result: Result<unknown>) => {
+  if (result.isSuccess) {
+    res.send(result.body)
+    res.status(200)
+  } else {
+    res.send(result.body)
+    res.status(400)
+  }
+}
+
+
+
 app.post('/sign-up', async (req, res) => {
-  await register({ withinConnection, sendMail }, {
+  return resultToHTTP(res, await register({ withinConnection, sendMail }, {
     userIdentifier: req.body.userIdentifier,
     password: req.body.password
-  })
-  res.sendStatus(200)
+  }))
+})
+
+app.post('/request-password-reset', async (req, res) => {
+  return resultToHTTP(res, await requestPasswordReset({ withinConnection, sendMail }, {
+    userIdentifier: req.body.userIdentifier,
+  }))
+})
+
+app.post('/reset-password-by-token', async (req, res) => {
+  return resultToHTTP(res, await resetPasswordByToken({ withinConnection }, {
+    userIdentifier: req.body.userIdentifier,
+    newPassword: req.body.password,
+    token: req.query.token
+  }))
 })
 
 app.post('/sign-in', async (req, res) => {
@@ -57,7 +82,6 @@ app.get('/session', isAuthenticated, (req, res) => {
 })
 
 app.get('/', (req: express.Request, res: express.Response) => {
-  console.log(req.body)
   res.send('Hello World!!')
 })
 

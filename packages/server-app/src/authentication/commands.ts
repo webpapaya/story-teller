@@ -7,7 +7,7 @@ import { SendMail } from './emails'
 import { AuthenticationToken } from '../domain'
 import { findUserByIdentifier } from './queries'
 
-type Result<Body> = {
+export type Result<Body> = {
   body: Body
   isSuccess: boolean
 }
