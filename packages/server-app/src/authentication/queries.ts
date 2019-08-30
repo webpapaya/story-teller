@@ -12,7 +12,7 @@ export const comparePassword = async (password: string, passwordHash: string) =>
 type FindUserById = (
   deps: { client: DBClient },
   params: { id: string }
-) => Promise<any>
+) => Promise<UserAuthentication | undefined>
 
 export const findUserById: FindUserById = async (dependencies, params) => {
   const records = await dependencies.client.query(sql`
@@ -26,7 +26,7 @@ export const findUserById: FindUserById = async (dependencies, params) => {
 type FindUserByIdentifier = (
   deps: { client: DBClient },
   params: { userIdentifier: string }
-) => Promise<any>
+) => Promise<UserAuthentication | undefined>
 
 export const findUserByIdentifier: FindUserByIdentifier = async (dependencies, params) => {
   const records = await dependencies.client.query(sql`
@@ -40,7 +40,7 @@ export const findUserByIdentifier: FindUserByIdentifier = async (dependencies, p
 type FindUserByAuthentication = (
   deps: { client: DBClient },
   params: { userIdentifier: string, password: string}
-) => Promise<UserAuthentication>
+) => Promise<UserAuthentication | undefined>
 
 export const findUserByAuthentication: FindUserByAuthentication = async ({ client }, params) => {
   const user = await findUserByIdentifier({ client }, params)
@@ -52,7 +52,7 @@ export const findUserByAuthentication: FindUserByAuthentication = async ({ clien
 type FindUserByAuthenticationToken = (
   deps: { client: DBClient },
   token: AuthenticationToken
-) => Promise<any>
+) => Promise<UserAuthentication | undefined>
 
 export const findUserByAuthenticationToken: FindUserByAuthenticationToken = async ({ client }, token) => {
   const records = await client.query(sql`

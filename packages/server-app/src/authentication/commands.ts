@@ -22,13 +22,8 @@ const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 export const hashPassword = async (password: string) =>
   bcrypt.hash(password, SALT_ROUNDS)
 
-export const comparePassword = async (password: string, passwordHash: string) =>
-  bcrypt.compare(password, passwordHash)
-
-type FindUserById = (
-  deps: { client: DBClient },
-  params: { id: string }
-) => Promise<any>
+export const comparePassword = async (password: string, passwordHash: any) =>
+  passwordHash && bcrypt.compare(password, passwordHash)
 
 type RegisterErrors =
 | 'User Identifier already taken'
@@ -150,7 +145,7 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
       return failure<ResetPasswordErrors>('Token not found')
     }
 
-    const isTokenToOld = LocalDateTime.from(nativeJs(new Date()))
+    const isTokenToOld = record.passwordResetCreatedAt && LocalDateTime.from(nativeJs(new Date()))
       .minusDays(1)
       .plusSeconds(1)
       .isAfter(record.passwordResetCreatedAt)
