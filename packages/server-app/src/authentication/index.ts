@@ -4,7 +4,8 @@ import crypto from 'crypto'
 import sql from 'sql-template-tag'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import { SendMail } from './emails'
-import { AuthenticationToken, UserAuthentication } from '../domain'
+import { AuthenticationToken } from '../domain'
+import { findUserByIdentifier } from './queries'
 
 type Result<Body> = {
   body: Body
@@ -28,41 +29,6 @@ type FindUserById = (
   deps: { client: DBClient },
   params: { id: string }
 ) => Promise<any>
-
-export const findUserById: FindUserById = async (dependencies, params) => {
-  const records = await dependencies.client.query(sql`
-      SELECT * FROM user_authentication
-      WHERE id=${params.id}
-      LIMIT 1
-  `)
-  return records.rows[0]
-}
-
-type FindUserByIdentifier = (
-  deps: { client: DBClient },
-  params: { userIdentifier: string }
-) => Promise<any>
-
-export const findUserByIdentifier: FindUserByIdentifier = async (dependencies, params) => {
-  const records = await dependencies.client.query(sql`
-      SELECT * FROM user_authentication
-      WHERE user_identifier=${params.userIdentifier}
-      LIMIT 1
-  `)
-  return records.rows[0]
-}
-
-type FindUserByAuthentication = (
-  deps: { client: DBClient },
-  params: { userIdentifier: string, password: string}
-) => Promise<UserAuthentication>
-
-export const findUserByAuthentication: FindUserByAuthentication = async ({ client }, params) => {
-  const user = await findUserByIdentifier({ client }, params)
-  return user && (await comparePassword(params.password, user.password))
-    ? user
-    : undefined
-}
 
 type RegisterErrors =
 | 'User Identifier already taken'
@@ -218,8 +184,8 @@ type FindUserByAuthenticationToken = (
   token: AuthenticationToken
 ) => Promise<any>
 
-export const findUserByAuthenticationToken: FindUserByAuthenticationToken = async (dependencies, token) => {
-  const records = await dependencies.client.query(sql`
+export const findUserByAuthenticationToken: FindUserByAuthenticationToken = async ({ client }, token) => {
+  const records = await client.query(sql`
       SELECT * FROM user_authentication
       WHERE id=${token.id}
       AND (password_changed_at is null OR password_changed_at <= ${token.createdAt})

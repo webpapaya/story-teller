@@ -2,9 +2,10 @@ import express, { Request, Response, NextFunction } from 'express'
 
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
-import { findUserByAuthentication, register, findUserById } from './authentication'
+import { register } from './authentication'
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
+import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
 
 const app = express()
 const port = process.env.API_PORT
@@ -17,7 +18,7 @@ app.post('/sign-up', async (req, res) => {
     userIdentifier: req.body.userIdentifier,
     password: req.body.password
   })
-  res.send('Ok')
+  res.sendStatus(200)
 })
 
 app.post('/sign-in', async (req, res) => {
@@ -39,17 +40,16 @@ app.post('/sign-out', async (req, res) => {
 })
 
 const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
-  const parsedCookie = JSON.parse(req.signedCookies.session || '{}')
-  const user = await withinConnection(async ({ client }) => {
-    return findUserById({ client }, { id: parsedCookie.id })
+  await withinConnection(async ({ client }) => {
+    const parsedCookie = JSON.parse(req.signedCookies.session || '{}')
+    const user = findUserByAuthenticationToken({ client }, parsedCookie)
+    if (!user) {
+      res.sendStatus(401)
+      next('Unauthorized')
+    } else {
+      next()
+    }
   })
-
-  if (!user) {
-    res.sendStatus(401)
-    next('Unauthorized')
-  } else {
-    next()
-  }
 }
 
 app.get('/session', isAuthenticated, (req, res) => {
