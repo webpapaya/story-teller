@@ -7,7 +7,6 @@ import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
 import * as v from 'validation.ts'
 import cors from 'cors'
-import { URL } from 'url';
 const app = express()
 const port = process.env.API_PORT
 
@@ -15,7 +14,7 @@ app.use(cookieParser(process.env.SECRET_KEY_BASE))
 app.use(bodyParser())
 app.use(cors({
   origin: (process.env.CORS_WHITELIST || '').split(','),
-  credentials: true,
+  credentials: true
 }))
 
 type CommandViaHTTP = <A, B>(dependencies: B, args: {
