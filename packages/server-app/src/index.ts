@@ -6,11 +6,17 @@ import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
 import * as v from 'validation.ts'
+import cors from 'cors'
+import { URL } from 'url';
 const app = express()
 const port = process.env.API_PORT
 
 app.use(cookieParser(process.env.SECRET_KEY_BASE))
 app.use(bodyParser())
+app.use(cors({
+  origin: (process.env.CORS_WHITELIST || '').split(','),
+  credentials: true,
+}))
 
 type CommandViaHTTP = <A, B>(dependencies: B, args: {
   validator: v.Validator<A>
@@ -40,7 +46,7 @@ const resultToHTTP = (res: Response, result: Result<unknown>) => {
 const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
   await withinConnection(async ({ client }) => {
     const parsedCookie = JSON.parse(req.signedCookies.session || '{}')
-    const user = findUserByAuthenticationToken({ client }, parsedCookie)
+    const user = await findUserByAuthenticationToken({ client }, parsedCookie)
     if (!user) {
       res.sendStatus(401)
       next('Unauthorized')
