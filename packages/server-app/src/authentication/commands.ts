@@ -11,10 +11,10 @@ export type Result<Body> = {
   body: Body
   isSuccess: boolean
 }
-const success = <T>(body: T): Result<T> =>
+export const success = <T>(body: T): Result<T> =>
   ({ isSuccess: true, body })
 
-const failure = <T>(body: T): Result<T> =>
+export const failure = <T>(body: T): Result<T> =>
   ({ isSuccess: false, body })
 
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
@@ -135,7 +135,7 @@ type ResetPasswordErrors =
 
 type ResetPasswordByToken = (
   deps: { withinConnection: WithinConnection },
-  params: { userIdentifier: string, token: string, newPassword: string }
+  params: { userIdentifier: string, token: string, password: string }
 ) => Promise<Result<void | ResetPasswordErrors>>
 
 export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, params) => {
@@ -160,7 +160,7 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
       return failure<ResetPasswordErrors>('Token not found')
     }
 
-    const hashedPassword = await hashPassword(params.newPassword)
+    const hashedPassword = await hashPassword(params.password)
     await client.query(sql`
       UPDATE user_authentication
       SET password=${hashedPassword},

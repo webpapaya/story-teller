@@ -146,7 +146,7 @@ describe('user/resetPasswordByToken', () => {
     await resetPasswordByToken({ withinConnection }, {
       userIdentifier: auth.userIdentifier,
       token: DUMMY_TOKEN,
-      newPassword: 'new password'
+      password: 'new password'
     })
 
     assertThat(await findUserByAuthentication({ client }, {
@@ -162,7 +162,7 @@ describe('user/resetPasswordByToken', () => {
     await resetPasswordByToken({ withinConnection }, {
       userIdentifier: auth.userIdentifier,
       token: DUMMY_TOKEN,
-      newPassword: 'new password'
+      password: 'new password'
     })
 
     return withinConnection(async ({ client }) => {
@@ -188,7 +188,7 @@ describe('user/resetPasswordByToken', () => {
       await resetPasswordByToken({ withinConnection }, {
         userIdentifier: auth.userIdentifier,
         token: DUMMY_TOKEN,
-        newPassword: 'new password'
+        password: 'new password'
       })
 
       assertThat(await findUserByAuthentication({ client }, {

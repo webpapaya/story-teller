@@ -1,17 +1,31 @@
 import express, { Request, Response, NextFunction } from 'express'
-
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
-import { register, requestPasswordReset, resetPasswordByToken, Result } from './authentication/commands'
+import { register, requestPasswordReset, resetPasswordByToken, Result, failure } from './authentication/commands'
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
-
+import * as v from 'validation.ts'
 const app = express()
 const port = process.env.API_PORT
 
 app.use(cookieParser(process.env.SECRET_KEY_BASE))
 app.use(bodyParser())
+
+type CommandViaHTTP = <A, B>(dependencies: B, args: {
+  validator: v.Validator<A>
+  useCase: (deps: B, value: A) => Promise<Result<unknown>>
+}) => (req: Request, res: Response) => Promise<void>
+
+const commandViaHTTP: CommandViaHTTP = (dependencies, { validator, useCase }) => async (req, res) => {
+  const result = await validator.validate({ ...req.body, ...req.query })
+    .fold(
+      () => failure({ isError: true, body: 'ValidationError' }),
+      (v) => useCase(dependencies, v)
+    )
+
+  return resultToHTTP(res, result)
+}
 
 const resultToHTTP = (res: Response, result: Result<unknown>) => {
   if (result.isSuccess) {
@@ -23,28 +37,42 @@ const resultToHTTP = (res: Response, result: Result<unknown>) => {
   }
 }
 
+const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
+  await withinConnection(async ({ client }) => {
+    const parsedCookie = JSON.parse(req.signedCookies.session || '{}')
+    const user = findUserByAuthenticationToken({ client }, parsedCookie)
+    if (!user) {
+      res.sendStatus(401)
+      next('Unauthorized')
+    } else {
+      next()
+    }
+  })
+}
 
+app.post('/sign-up', commandViaHTTP({ withinConnection, sendMail }, {
+  validator: v.object({
+    userIdentifier: v.string,
+    password: v.string
+  }),
+  useCase: register
+}))
 
-app.post('/sign-up', async (req, res) => {
-  return resultToHTTP(res, await register({ withinConnection, sendMail }, {
-    userIdentifier: req.body.userIdentifier,
-    password: req.body.password
-  }))
-})
+app.post('/request-password-reset', commandViaHTTP({ withinConnection, sendMail }, {
+  validator: v.object({
+    userIdentifier: v.string
+  }),
+  useCase: requestPasswordReset
+}))
 
-app.post('/request-password-reset', async (req, res) => {
-  return resultToHTTP(res, await requestPasswordReset({ withinConnection, sendMail }, {
-    userIdentifier: req.body.userIdentifier,
-  }))
-})
-
-app.post('/reset-password-by-token', async (req, res) => {
-  return resultToHTTP(res, await resetPasswordByToken({ withinConnection }, {
-    userIdentifier: req.body.userIdentifier,
-    newPassword: req.body.password,
-    token: req.query.token
-  }))
-})
+app.post('/reset-password-by-token', commandViaHTTP({ withinConnection }, {
+  validator: v.object({
+    userIdentifier: v.string,
+    password: v.string,
+    token: v.string
+  }),
+  useCase: resetPasswordByToken
+}))
 
 app.post('/sign-in', async (req, res) => {
   return withinConnection(async ({ client }) => {
@@ -63,19 +91,6 @@ app.post('/sign-out', async (req, res) => {
   res.clearCookie('session')
   res.sendStatus(200)
 })
-
-const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
-  await withinConnection(async ({ client }) => {
-    const parsedCookie = JSON.parse(req.signedCookies.session || '{}')
-    const user = findUserByAuthenticationToken({ client }, parsedCookie)
-    if (!user) {
-      res.sendStatus(401)
-      next('Unauthorized')
-    } else {
-      next()
-    }
-  })
-}
 
 app.get('/session', isAuthenticated, (req, res) => {
   res.sendStatus(200)
