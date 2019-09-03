@@ -1,0 +1,11 @@
+:root {
+  --color-white: #ffffff;
+
+  --color-primary-lightest: #a1bfff;
+
+  --color-primary-regular: #2268FF;
+  --color-primary-darker: #0A57FB;
+
+  --color-grey-lighter: rgb(92, 92, 92);
+  --color-grey-regular: rgb(65, 65, 65);
+}
