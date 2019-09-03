@@ -16,7 +16,7 @@ export interface InjectedProps<A> {
 
 // Options for the HOC factory that are not dependent on props values
 interface Options<A> {
-  validator: v.Validator<A>,
+  schema: v.Validator<A>,
   defaultValues?: Partial<A>
 }
 
@@ -40,7 +40,7 @@ const isForm = <A, OriginalProps extends {}>(options: Options<A>,
 
       this.setState((state) => {
         const values = { ...state.values, [name]: value }
-        const isPropValid = options.validator.validate(values)
+        const isPropValid = options.schema.validate(values)
           .fold(
             (errors) => !errors.some((error) => error.context.endsWith(name)),
             () => true
@@ -52,7 +52,7 @@ const isForm = <A, OriginalProps extends {}>(options: Options<A>,
 
     onSubmit = (evt: React.FormEvent) => {
       evt.preventDefault()
-      options.validator.validate(this.state.values)
+      options.schema.validate(this.state.values)
         .fold(
           (test)=>{
             console.log(test)

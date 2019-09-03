@@ -7,7 +7,7 @@ import isForm from './is-form'
 import * as v from 'validation.ts'
 
 const DummyForm = isForm({
-  validator: v.object({
+  schema: v.object({
     test1: v.string.filter((x) => x.length <= 5),
   })
 }, (props) => {

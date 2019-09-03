@@ -11,7 +11,7 @@ const SignUp = isForm({
     password: '',
     passwordConfirmation: ''
   },
-  validator: v.object({
+  schema: v.object({
     userIdentifier: v.string,
     password: v.string,
     passwordConfirmation: v.string,

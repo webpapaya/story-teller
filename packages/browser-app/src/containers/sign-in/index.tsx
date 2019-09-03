@@ -10,7 +10,7 @@ const SignIn = isForm({
     userIdentifier: '',
     password: ''
   },
-  validator: v.object({
+  schema: v.object({
     userIdentifier: v.string,
     password: v.string,
   }),
