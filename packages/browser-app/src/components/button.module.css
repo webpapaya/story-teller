@@ -1,0 +1,45 @@
+.button {
+  /* button reset */
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  text-decoration: none;
+
+  background: transparent;
+
+  /* inherit font & color from ancestor */
+  color: inherit;
+  font: inherit;
+
+  /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+  line-height: normal;
+
+  /* Corrects font smoothing for webkit */
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+
+  /* Corrects inability to style clickable `input` types in iOS */
+  -webkit-appearance: none;
+  cursor: pointer;
+
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 700;
+  transition: all 200ms;
+
+  border-radius: 9999px;
+  padding: 5px 15px;
+
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  color: #ffffff;
+  background: #2268FF;
+}
+
+.button.block {
+  display: flex;
+  width: 100%;
+}

@@ -1,18 +1,10 @@
 import React from 'react';
+import SignIn from './containers/sign-in';
 
-const onSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
-  evt.preventDefault()
-  console.log(evt.target)
-}
+
 
 const App: React.FC = () => {
-  return (
-    <form onSubmit={onSubmit}>
-      <input type="text" name="username" />
-      <input type="password" name="password" />
-      <button type="submit">Submit</button>
-    </form>
-  );
+  return (<SignIn onSubmit={(values) => console.log(values)} />);
 }
 
 export default App;

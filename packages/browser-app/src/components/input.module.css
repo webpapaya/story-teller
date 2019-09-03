@@ -1,0 +1,32 @@
+.label {
+	font-weight: bold;
+	display: block;
+	font-family: 'Open Sans', sans-serif;
+	font-weight: 500;
+	color: rgb(65, 65, 65);
+}
+
+.input {
+	border:none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	-ms-appearance: none; /* get rid of default appearance for IE8, 9 and 10*/
+	background: transparent;
+
+	color: rgb(92, 92, 92);
+	font-size: 18px;
+	width: 100%;
+	border: none;
+	padding: 10px 0 4px;
+	background: transparent;
+	margin-bottom: 25px;
+	outline: none;
+	transition: all 200ms;
+	border-bottom: 2px solid rgb(161, 191, 255);
+}
+
+.input.focused {
+	margin-bottom: 24px;
+	border-bottom: 3px solid #0A57FB;
+}
