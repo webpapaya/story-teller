@@ -1,0 +1,40 @@
+
+body, .primary {
+  --theme-color-lightest: var(--color-primary-lightest);
+  --theme-color-lighter: var(--color-primary-lighter);
+  --theme-color-regular: var(--color-primary-regular);
+  --theme-color-darker: var(--color-primary-darker);
+  --theme-color-darkest: var(--color-primary-darkest);
+}
+
+.secondary {
+  --theme-color-lightest: var(--color-secondary-lightest);
+  --theme-color-lighter: var(--color-secondary-lighter);
+  --theme-color-regular: var(--color-secondary-regular);
+  --theme-color-darker: var(--color-secondary-darker);
+  --theme-color-darkest: var(--color-secondary-darkest);
+}
+
+.success {
+  --theme-color-lightest: var(--color-success-lightest);
+  --theme-color-lighter: var(--color-success-lighter);
+  --theme-color-regular: var(--color-success-regular);
+  --theme-color-darker: var(--color-success-darker);
+  --theme-color-darkest: var(--color-success-darkest);
+}
+
+.warning {
+  --theme-color-lightest: var(--color-warning-lightest);
+  --theme-color-lighter: var(--color-warning-lighter);
+  --theme-color-regular: var(--color-warning-regular);
+  --theme-color-darker: var(--color-warning-darker);
+  --theme-color-darkest: var(--color-warning-darkest);
+}
+
+.danger {
+  --theme-color-lightest: var(--color-danger-lightest);
+  --theme-color-lighter: var(--color-danger-lighter);
+  --theme-color-regular: var(--color-danger-regular);
+  --theme-color-darker: var(--color-danger-darker);
+  --theme-color-darkest: var(--color-danger-darkest);
+}

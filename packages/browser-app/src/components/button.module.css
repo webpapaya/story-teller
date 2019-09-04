@@ -35,7 +35,21 @@
   align-items: center;
 
   color: var(--color-white);
-  background: var(--color-primary-regular);
+  background: var(--theme-color-regular);
+  outline: none;
+}
+
+.button:focus, .button:active {
+  background: var(--theme-color-darkest);
+}
+
+.button:hover {
+  background: var(--theme-color-darker);
+}
+
+.button.disabled {
+  cursor: not-allowed;
+  background: var(--theme-color-lighter);
 }
 
 .button.block {
