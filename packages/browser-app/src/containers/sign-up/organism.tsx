@@ -19,11 +19,13 @@ const SignUp = isForm({
 }, ({ values, onValueChange }) => (
   <>
     <InputText
+      label="E-Mail/Username"
       name="userIdentifier"
       value={values.userIdentifier}
       onChange={onValueChange}
     />
     <InputPassword
+      label="Password"
       name="password"
       value={values.password}
       onChange={onValueChange}

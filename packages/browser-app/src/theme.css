@@ -1,4 +1,13 @@
 :root {
+  --font-big: 400 24px 'Open Sans', sans-serif;
+  --font-regular: 400 18px 'Open Sans', sans-serif;
+  --font-small: 400 14px 'Open Sans', sans-serif;
+
+  --font-big-bold: 700 24px 'Open Sans', sans-serif;
+  --font-regular-bold: 700 18px 'Open Sans', sans-serif;
+  --font-small-bold: 700 14px 'Open Sans', sans-serif;
+
+
   --color-white: #ffffff;
 
   --color-primary-lightest: #a1bfff;

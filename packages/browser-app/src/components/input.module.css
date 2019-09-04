@@ -1,8 +1,6 @@
 .label {
-	font-weight: bold;
 	display: block;
-	font-family: 'Open Sans', sans-serif;
-	font-weight: 500;
+	font: var(--font-small-bold);
 	color: var(--color-grey-regular);
 }
 
@@ -14,8 +12,8 @@
 	-ms-appearance: none; /* get rid of default appearance for IE8, 9 and 10*/
 	background: transparent;
 
-	color: var(--color-grey-regular);
-	font-size: 18px;
+  color: var(--color-grey-regular);
+  font: var(--font-regular);
 	width: 100%;
 	border: none;
 	padding: 10px 0 4px;

@@ -24,8 +24,7 @@
   -webkit-appearance: none;
   cursor: pointer;
 
-  font-family: 'Open Sans', sans-serif;
-  font-weight: 700;
+  font: var(--font-regular-bold);
   transition: all 200ms;
 
   border-radius: 9999px;
