@@ -39,12 +39,12 @@
   outline: none;
 }
 
-.button:focus, .button:active {
-  background: var(--theme-color-darkest);
+.button:focus, .button:hover {
+  background: var(--theme-color-darker);
 }
 
-.button:hover {
-  background: var(--theme-color-darker);
+.button:active {
+  background: var(--theme-color-darkest);
 }
 
 .button.disabled {

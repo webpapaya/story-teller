@@ -2,7 +2,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import styles from './colors.module.css';
 
-const colors = 'primary secondary success warning danger'.split(' ')
+const colors = 'primary secondary success warning danger grey'.split(' ')
 const variants = 'lightest lighter regular darker darkest'.split(' ')
 
 const Colors = () => {
@@ -14,7 +14,11 @@ const Colors = () => {
             { color }
           </th>
           { variants.map((variant) => (
-            <td key={variant} style={{ background: `var(--color-${color}-${variant})`}}>
+            <td
+              key={variant}
+              className={styles[variant]}
+              style={{ background: `var(--color-${color}-${variant})`}}
+            >
               { variant }
             </td>
           ))}

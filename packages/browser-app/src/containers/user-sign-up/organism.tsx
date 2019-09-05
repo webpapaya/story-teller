@@ -5,7 +5,7 @@ import { InputText } from '../../components/input-text';
 import { InputPassword } from '../../components/input-password';
 import { Button } from '../../components/button';
 
-const SignUp = isForm({
+const Organism = isForm({
   defaultValues: {
     userIdentifier: '',
     password: '',
@@ -30,8 +30,8 @@ const SignUp = isForm({
       value={values.password}
       onChange={onValueChange}
     />
-    <Button>Submit</Button>
+    <Button block>Submit</Button>
   </>
 ))
 
-export default SignUp
+export default Organism

@@ -7,20 +7,19 @@
   --font-regular-bold: 700 18px 'Open Sans', sans-serif;
   --font-small-bold: 700 14px 'Open Sans', sans-serif;
 
-
   --color-white: #ffffff;
 
-  --color-primary-lightest: #F4D9FF;
-  --color-primary-lighter: #D48DFF;
-  --color-primary-regular: #A442FF;
-  --color-primary-darker: #5F21B7;
-  --color-primary-darkest: #2E0C7A;
+  --color-primary-lightest: #D6E4FF;
+  --color-primary-lighter: #84A9FF;
+  --color-primary-regular: #3366FF;
+  --color-primary-darker: #1939B7;
+  --color-primary-darkest: #091A7A;
 
-  --color-secondary-lightest: #D2FEF6;
-  --color-secondary-lighter: #78FDFA;
-  --color-secondary-regular: #20DCF9;
-  --color-secondary-darker: #1083B3;
-  --color-secondary-darkest: #064477;
+  --color-secondary-lightest: #F4D9FF;
+  --color-secondary-lighter: #D48DFF;
+  --color-secondary-regular: #A442FF;
+  --color-secondary-darker: #5F21B7;
+  --color-secondary-darkest: #2E0C7A;
 
   --color-success-lightest: #F3FED4;
   --color-success-lighter: #CFFA7F;

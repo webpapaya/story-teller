@@ -1,3 +1,14 @@
 .table {
-	width: 100%;
+  font: var(--font-regular);
+  text-align: left;
+  width: 100%;
+}
+
+.table td, .table th {
+  padding: 10px;
+  color: var(--color-white);
+}
+
+.table td.lightest, .table td.lighter, .table th {
+  color: var(--color-grey-regular);
 }
