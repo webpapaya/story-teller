@@ -1,10 +1,12 @@
 import React from 'react';
-import SignIn from './containers/user-sign-in/organism';
+import { Provider } from 'react-redux'
+import SignIn from './containers/user-sign-in';
+import { store } from './domain';
 
-
-
-const App: React.FC = () => {
-  return (<SignIn onSubmit={(values) => console.log(values)} />);
-}
+const App = () => (
+  <Provider store={store}>
+    <SignIn />
+  </Provider>
+)
 
 export default App;

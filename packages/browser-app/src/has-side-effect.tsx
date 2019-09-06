@@ -23,7 +23,6 @@ type Options = {
     LoadingComponent?: React.ComponentType;
     ErrorComponent?: React.ComponentType;
 };
-const x = 1
 
 type hasSideEffectType = ({
     props: propsToListen,
