@@ -4,5 +4,7 @@ export type Action<Type extends string, Payload> = {
 }
 
 export type Actions =
+  | Action<'USER/SIGN_UP/SUCCESS', void>
+  | Action<'USER/SIGN_UP/ERROR', void>
   | Action<'USER/SIGN_IN/SUCCESS', void>
   | Action<'USER/SIGN_IN/ERROR', void>

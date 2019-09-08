@@ -11,8 +11,8 @@ const Organism = isForm({
   schema: v.object({
     userIdentifier: v.string,
   }),
-}, ({ values, onValueChange }) => (
-  <>
+}, ({ values, onValueChange, onSubmit }) => (
+  <form onSubmit={onSubmit}>
     <InputText
       label="E-Mail"
       name="userIdentifier"
@@ -20,7 +20,7 @@ const Organism = isForm({
       onChange={onValueChange}
     />
     <Button block>Submit</Button>
-  </>
+  </form>
 ))
 
 export default Organism

@@ -14,8 +14,8 @@ const Organism = isForm({
     password: v.string,
     passwordConfirmation: v.string,
   }),
-}, ({ values, onValueChange }) => (
-  <>
+}, ({ values, onValueChange, onSubmit }) => (
+  <form onSubmit={onSubmit}>
     <InputPassword
       label="New password"
       name="password"
@@ -29,7 +29,7 @@ const Organism = isForm({
       onChange={onValueChange}
     />
     <Button block>Submit</Button>
-  </>
+  </form>
 ))
 
 export default Organism

@@ -14,8 +14,8 @@ const SignIn = isForm({
     userIdentifier: v.string,
     password: v.string,
   }),
-}, ({ values, onValueChange }) => (
-  <>
+}, ({ values, onValueChange, onSubmit }) => (
+  <form onSubmit={onSubmit}>
     <InputText
       label="E-Mail/Username"
       name="userIdentifier"
@@ -29,7 +29,7 @@ const SignIn = isForm({
       onChange={onValueChange}
     />
     <Button block>Submit</Button>
-  </>
+  </form>
 ))
 
 export default SignIn

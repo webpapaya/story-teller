@@ -66,14 +66,12 @@ const isForm = <A, OriginalProps extends {}>(options: Options<A>,
 
     render() {
       return (
-        <form onSubmit={this.onSubmit}>
-          <Component
-            {...this.props}
-            onSubmit={this.onSubmit}
-            values={this.state.values}
-            onValueChange={this.onValueChange}
-          />
-        </form>
+        <Component
+          {...this.props}
+          onSubmit={this.onSubmit}
+          values={this.state.values}
+          onValueChange={this.onValueChange}
+        />
       )
     }
   }
