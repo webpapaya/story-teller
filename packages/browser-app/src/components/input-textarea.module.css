@@ -2,7 +2,7 @@
 	font: var(--font-regular-bold);
 }
 
-.h1, .h2, .h3, .p, .codeblock, .quote {
+.h1, .h2, .h3, .p, .codeblock, .blockquote {
 	margin-left: var(--space-xl);
 }
 
@@ -67,6 +67,27 @@
 .codeblock:last-child {
 	border-bottom-left-radius: 2px;
 	border-bottom-right-radius: 2px;
+	padding-bottom: var(--space-md);
+	margin-bottom: var(--space-md);
+}
+
+
+.blockquote {
+	font: var(--font-regular-bold);
+	color: var(--color-grey-regular);
+	border-left: 4px solid var(--color-grey-lighter);
+
+	margin-top: var(--space-md);
+	padding-left: var(--space-md);
+	padding-right: var(--space-md);
+	padding-bottom: var(--space-xs);
+}
+
+.blockquote:first-child {
+	padding-top: var(--space-md);
+}
+
+.blockquote:last-child {
 	padding-bottom: var(--space-md);
 	margin-bottom: var(--space-md);
 }

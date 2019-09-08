@@ -17,7 +17,7 @@ const getBlockStyle = (block: ContentBlock) => {
     case 'header-two': return styles.h2;
     case 'header-three': return styles.h3;
     case 'unordered-list-item': return styles.ul;
-    case 'blockquote': return styles.quote;
+    case 'blockquote': return styles.blockquote;
     case 'code-block': return styles.codeblock;
     default: return '';
   }
