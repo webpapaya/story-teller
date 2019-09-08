@@ -3,7 +3,7 @@ import isForm from '../../is-form';
 import * as v from 'validation.ts'
 import { InputText } from '../../components/input-text';
 import { Button } from '../../components/button';
-import { InputTextarea } from '../../components/input-textarea';
+import { InputTextarea } from '../../components/editor';
 import styles from './organism.module.css'
 
 const Organism = isForm({

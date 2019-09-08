@@ -1,9 +1,9 @@
 import React from 'react';
 
 import 'draft-js/dist/Draft.css';
-import styles from './input-textarea.module.css'
+import styles from './index.module.css'
 import {Editor, EditorState, RichUtils, ContentBlock, DraftBlockType, Modifier, SelectionState} from 'draft-js'
-import {Navigation} from './editor/navigation'
+import {Navigation} from './navigation'
 
 // @ts-ignore
 import {stateFromMarkdown} from 'draft-js-import-markdown';

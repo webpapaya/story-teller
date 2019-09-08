@@ -1,9 +1,9 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import InputTextarea from './input-textarea';
-import { Button } from './button';
+import InputTextarea from './index';
+import { Button } from '../button';
 
-storiesOf('InputTextarea', module)
+storiesOf('Editor', module)
 	.add('default', () => (
 		<InputTextarea
 			leftNavigation={<Button>Save</Button>}
