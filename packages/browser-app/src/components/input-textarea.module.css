@@ -16,7 +16,7 @@
 
 .h1 {
 	font: var(--font-biggest-bold);
-	margin-bottom: var(--space-md);
+	margin-top: var(--space-xl);
 }
 
 .h1:before {
@@ -25,25 +25,16 @@
 
 .h2 {
 	font: var(--font-bigger-bold);
-	margin-bottom: var(--space-sm);
+	margin-top: var(--space-lg);
 }
 
 .h2:before {
 	content: '##';
 }
 
-.h3 {
-	font: var(--font-regular-bold);
-	margin-bottom: var(--space-xs);
-}
-
-.h3:before {
-	content: '###';
-}
-
 .p {
 	font: var(--font-regular);
-	margin-bottom: var(--space-md);
+	margin-top: var(--space-md);
 }
 
 .ul {
@@ -61,6 +52,7 @@
 	font-family: var(--font-face-monospace);
 	background: var(--color-grey-lighter);
 	color: var(--color-grey-darkest);
+	margin-top: var(--space-md);
 	padding-left: var(--space-md);
 	padding-right: var(--space-md);
 	padding-bottom: var(--space-xs);
