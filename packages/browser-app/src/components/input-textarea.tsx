@@ -1,7 +1,10 @@
 import React from 'react';
+
 import 'draft-js/dist/Draft.css';
-import {Editor, EditorState, RichUtils, ContentBlock, DraftBlockType} from 'draft-js'
 import styles from './input-textarea.module.css'
+import {Editor, EditorState, RichUtils, ContentBlock, DraftBlockType, Modifier, SelectionState} from 'draft-js'
+import {Navigation} from './editor/navigation'
+
 // @ts-ignore
 import {stateFromMarkdown} from 'draft-js-import-markdown';
 // @ts-ignore
@@ -14,14 +17,16 @@ const getBlockStyle = (block: ContentBlock) => {
     case 'header-two': return styles.h2;
     case 'header-three': return styles.h3;
     case 'unordered-list-item': return styles.ul;
-
+    case 'blockquote': return styles.quote;
+    case 'code-block': return styles.codeblock;
     default: return '';
   }
 }
 
 type InputTextareaProps = {
   value?: string,
-  onChange?: (value: string) => void
+  onChange?: (value: string) => void,
+  leftNavigation?: JSX.Element,
 }
 
 export class InputTextarea extends React.Component<InputTextareaProps> {
@@ -36,9 +41,6 @@ export class InputTextarea extends React.Component<InputTextareaProps> {
       editorState: EditorState.createWithContent(stateFromMarkdown(props.value|| ''))
     };
     this.editorRef = React.createRef();
-
-    // this.handleKeyCommand = this._handleKeyCommand.bind(this);
-    // this.mapKeyToEditorCommand = this._mapKeyToEditorCommand.bind(this);
   }
 
   focus = () => this.editorRef.current!.focus();
@@ -50,6 +52,10 @@ export class InputTextarea extends React.Component<InputTextareaProps> {
     })
   };
 
+  onTab = (event: React.KeyboardEvent) => {
+    this.onChange(RichUtils.onTab(event, this.state.editorState, 4));
+  }
+
   toggleInlineStyle = (inlineStyle: string) => {
     this.onChange(
       RichUtils.toggleInlineStyle(
@@ -59,68 +65,58 @@ export class InputTextarea extends React.Component<InputTextareaProps> {
     );
   }
 
-  toggleBlockType = (blockType: DraftBlockType) => {
-    this.onChange(
-      RichUtils.toggleBlockType(
-        this.state.editorState,
-        blockType
-      )
-    );
+
+
+  _contentWithoutInlineStyles() {
+    const selectionState = this.state.editorState.getSelection();
+    const anchorKey = selectionState.getAnchorKey();
+    const currentContent = this.state.editorState.getCurrentContent();
+    const currentContentBlock = currentContent.getBlockForKey(anchorKey);
+    return Modifier.replaceText(
+      this.state.editorState.getCurrentContent(),
+      SelectionState.createEmpty(anchorKey).merge({focusOffset:
+        currentContentBlock.getText().length}) as SelectionState,
+      currentContentBlock.getText()
+    )
   }
 
-  // _handleKeyCommand(command, editorState) {
-  //   const newState = RichUtils.handleKeyCommand(editorState, command);
-  //   if (newState) {
-  //     this.onChange(newState);
-  //     return true;
-  //   }
-  //   return false;
-  // }
-  // _mapKeyToEditorCommand(e) {
-  //   if (e.keyCode === 9 /* TAB */) {
-  //     const newEditorState = RichUtils.onTab(
-  //       e,
-  //       this.state.editorState,
-  //       4, /* maxDepth */
-  //     );
-  //     if (newEditorState !== this.state.editorState) {
-  //       this.onChange(newEditorState);
-  //     }
-  //     return;
-  //   }
-  //   return getDefaultKeyBinding(e);
-  // }
+  toggleBlockStyle = (blockType: DraftBlockType) => {
+    const selectionState = this.state.editorState.getSelection();
+    const anchorKey = selectionState.getAnchorKey();
+    const currentContent = this.state.editorState.getCurrentContent();
+    const currentContentBlock = currentContent.getBlockForKey(anchorKey);
+    const nextType = currentContentBlock.getType() === blockType
+        ? 'unstyled'
+        : blockType;
 
+    const nextContent = Modifier.setBlockType(
+      this._contentWithoutInlineStyles(),
+      selectionState,
+      nextType
+    )
+
+    this.onChange(EditorState.push(
+      this.state.editorState,
+      nextContent,
+      'change-block-data'
+    ));
+  }
 
   render() {
     const {editorState} = this.state;
-    // If the user changes block type before entering any text, we can
-    // either style the placeholder or hide it. Let's just hide it now.
-    let className = 'RichEditor-editor';
-    var contentState = editorState.getCurrentContent();
-    if (!contentState.hasText()) {
-      if (contentState.getBlockMap().first().getType() !== 'unstyled') {
-        className += ' RichEditor-hidePlaceholder';
-      }
-    }
-
-
     return (
-      <div className="RichEditor-root">
-        <BlockStyleControls
+      <div >
+        <Navigation
           editorState={editorState}
-          onToggle={this.toggleBlockType}
+          onToggleInlineStyle={this.toggleInlineStyle}
+          onToggleBlockStyle={this.toggleBlockStyle}
+          leftNavigation={this.props.leftNavigation}
         />
-        <InlineStyleControls
-          editorState={editorState}
-          onToggle={this.toggleInlineStyle}
-        />
-        <div className={className} onClick={this.focus}>
+        <div onClick={this.focus}>
           <Editor
             blockStyleFn={getBlockStyle}
             editorState={editorState}
-            // handleKeyCommand={this.handleKeyCommand}
-            // keyBindingFn={this.mapKeyToEditorCommand}
+            onTab={this.onTab}
             onChange={this.onChange}
             ref={this.editorRef}
             spellCheck={true}
@@ -130,84 +126,5 @@ export class InputTextarea extends React.Component<InputTextareaProps> {
     );
   }
 }
-
-class StyleButton extends React.Component<{
-  style: string,
-  label: React.ReactChild
-  onToggle: (style: string) => void,
-  active: boolean
-}> {
-  onToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    this.props.onToggle(this.props.style);
-  };
-
-  render() {
-    let className = 'RichEditor-styleButton';
-    if (this.props.active) {
-      className += ' RichEditor-activeButton';
-    }
-    return (
-      <span className={className} onMouseDown={this.onToggle}>
-        {this.props.label}
-      </span>
-    );
-  }
-}
-const BLOCK_TYPES = [
-  {label: 'H1', style: 'header-one'},
-  {label: 'H2', style: 'header-two'},
-  {label: 'H3', style: 'header-three'},
-  {label: 'Blockquote', style: 'blockquote'},
-  {label: 'UL', style: 'unordered-list-item'},
-  {label: 'OL', style: 'ordered-list-item'},
-  {label: 'Code Block', style: 'code-block'},
-];
-
-const BlockStyleControls = (props: { editorState: EditorState, onToggle: (t: string) => void }) => {
-  const {editorState} = props;
-  const selection = editorState.getSelection();
-  const blockType = editorState
-    .getCurrentContent()
-    .getBlockForKey(selection.getStartKey())
-    .getType();
-
-  return (
-    <div className="RichEditor-controls">
-      {BLOCK_TYPES.map((type) =>
-        <StyleButton
-          key={type.label}
-          active={type.style === blockType}
-          label={type.label}
-          onToggle={props.onToggle}
-          style={type.style}
-        />
-      )}
-    </div>
-  );
-};
-var INLINE_STYLES = [
-  {label: 'Bold', style: 'BOLD'},
-  {label: 'Italic', style: 'ITALIC'},
-  {label: 'Underline', style: 'UNDERLINE'},
-  {label: 'Monospace', style: 'CODE'},
-];
-const InlineStyleControls = (props: { editorState: EditorState, onToggle: (t: string) => void }) => {
-  const currentStyle = props.editorState.getCurrentInlineStyle();
-
-  return (
-    <div className="RichEditor-controls">
-      {INLINE_STYLES.map((type) =>
-        <StyleButton
-          key={type.label}
-          active={currentStyle.has(type.style)}
-          label={type.label}
-          onToggle={props.onToggle}
-          style={type.style}
-        />
-      )}
-    </div>
-  );
-};
 
 export default InputTextarea;

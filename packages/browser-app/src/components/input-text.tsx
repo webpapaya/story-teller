@@ -22,5 +22,4 @@ export const InputText = ({ name, value, onChange, label }: InputProps) => (
       onChange={onChange}
     />
   </>
-
 )

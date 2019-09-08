@@ -2,12 +2,11 @@
 	font: var(--font-regular-bold);
 }
 
-.h1, .h2, .h3, .p, .ul {
-	margin-left: 3rem;
-	position: 'relative';
+.h1, .h2, .h3, .p, .codeblock, .quote {
+	margin-left: var(--space-xl);
 }
 
-.h1:before, .h2:before, .h3:before, .p:before {
+.h1:before, .h2:before, .h3:before {
 	position: absolute;
 	transform: translateX(-100%);
 	display: block;
@@ -48,5 +47,34 @@
 }
 
 .ul {
+	margin-left: 3rem !important;
+	font: var(--font-regular);
+	padding-top: var(--space-xs)
+}
 
+.ul:first-child {
+	padding-top: 0;
+}
+
+.codeblock {
+	font: var(--font-regular);
+	font-family: var(--font-face-monospace);
+	background: var(--color-grey-lighter);
+	color: var(--color-grey-darkest);
+	padding-left: var(--space-md);
+	padding-right: var(--space-md);
+	padding-bottom: var(--space-xs);
+}
+
+.codeblock:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	padding-top: var(--space-md);
+}
+
+.codeblock:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	padding-bottom: var(--space-md);
+	margin-bottom: var(--space-md);
 }

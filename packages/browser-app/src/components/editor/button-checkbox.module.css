@@ -1,0 +1,39 @@
+.button {
+  /* button reset */
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  text-decoration: none;
+
+  background: transparent;
+
+  /* inherit font & color from ancestor */
+  color: inherit;
+  font: inherit;
+
+  /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+  line-height: normal;
+
+  /* Corrects font smoothing for webkit */
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+
+  /* Corrects inability to style clickable `input` types in iOS */
+  -webkit-appearance: none;
+  cursor: pointer;
+
+  color: var(--color-grey-darker);
+  padding: var(--space-xxs);
+  display: inline-flex;
+}
+
+.button {
+  margin-right: var(--space-xxs);
+}
+
+.checked {
+  border-radius: 2px;
+  background: var(--color-grey-lighter);
+}

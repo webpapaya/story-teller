@@ -1,0 +1,13 @@
+.actions {
+  z-index: 2;
+  background: var(--color-white);
+  position: sticky;
+  top: 0;
+  padding: var(--space-xs);
+  padding-left: calc(var(--space-xl) - var(--space-xs) / 2);
+  margin-bottom: var(--space-xs);
+  box-shadow: var(--shadow-1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

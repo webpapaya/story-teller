@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Lato:100,400,400i,700&display=swap');
 
 :root {
-  --font-face: 'Lato', sans-serif;
+  --font-face-default: 'Lato', sans-serif;
+  --font-face-monospace: monospace;
 
   --font-size-smallest: 0.750rem;
   --font-size-smaller: 0.875rem;
@@ -9,17 +10,17 @@
   --font-size-bigger: 1.500rem;
   --font-size-biggest: 2.000rem;
 
-  --font-smallest: 400 var(--font-size-smallest) var(--font-face);
-  --font-smaller: 400 var(--font-size-smaller) var(--font-face);
-  --font-regular: 400 var(--font-size-regular) var(--font-face);
-  --font-bigger: 400 var(--font-size-bigger) var(--font-face);
-  --font-biggest: 400 var(--font-size-biggest) var(--font-face);
+  --font-smallest: 400 var(--font-size-smallest) var(--font-face-default);
+  --font-smaller: 400 var(--font-size-smaller) var(--font-face-default);
+  --font-regular: 400 var(--font-size-regular) var(--font-face-default);
+  --font-bigger: 400 var(--font-size-bigger) var(--font-face-default);
+  --font-biggest: 400 var(--font-size-biggest) var(--font-face-default);
 
-  --font-smallest-bold: 700 var(--font-size-smallest) var(--font-face);
-  --font-smaller-bold: 700 var(--font-size-smaller) var(--font-face);
-  --font-regular-bold: 700 var(--font-size-regular) var(--font-face);
-  --font-bigger-bold: 700 var(--font-size-bigger) var(--font-face);
-  --font-biggest-bold: 700 var(--font-size-biggest) var(--font-face);
+  --font-smallest-bold: 700 var(--font-size-smallest) var(--font-face-default);
+  --font-smaller-bold: 700 var(--font-size-smaller) var(--font-face-default);
+  --font-regular-bold: 700 var(--font-size-regular) var(--font-face-default);
+  --font-bigger-bold: 700 var(--font-size-bigger) var(--font-face-default);
+  --font-biggest-bold: 700 var(--font-size-biggest) var(--font-face-default);
 
 
   --color-white: #ffffff;
@@ -54,8 +55,8 @@
   --color-danger-darker: #DB5E30;
   --color-danger-darkest: #B74021;
 
-  --color-grey-lightest: #F7F7F7;
-  --color-grey-lighter: #CFCFCF;
+  --color-grey-lightest: #f6f6f6;
+  --color-grey-lighter: #f1f1f1;
   --color-grey-regular: #616161;
   --color-grey-darker: #453034;
   --color-grey-darkest: #2E121C;
