@@ -1,0 +1,52 @@
+.bold {
+	font: var(--font-regular-bold);
+}
+
+.h1, .h2, .h3, .p, .ul {
+	margin-left: 3rem;
+	position: 'relative';
+}
+
+.h1:before, .h2:before, .h3:before, .p:before {
+	position: absolute;
+	transform: translateX(-100%);
+	display: block;
+	padding-right: 10px;
+	color: var(--color-grey-lighter)
+}
+
+.h1 {
+	font: var(--font-biggest-bold);
+	margin-bottom: var(--space-md);
+}
+
+.h1:before {
+	content: '#';
+}
+
+.h2 {
+	font: var(--font-bigger-bold);
+	margin-bottom: var(--space-sm);
+}
+
+.h2:before {
+	content: '##';
+}
+
+.h3 {
+	font: var(--font-regular-bold);
+	margin-bottom: var(--space-xs);
+}
+
+.h3:before {
+	content: '###';
+}
+
+.p {
+	font: var(--font-regular);
+	margin-bottom: var(--space-md);
+}
+
+.ul {
+
+}

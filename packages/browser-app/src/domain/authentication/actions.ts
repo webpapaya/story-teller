@@ -13,7 +13,6 @@ export const signIn: ActionCreator<{ userIdentifier: string, password: string}, 
     payload: void 0
   })))
 
-
 export const signUp: ActionCreator<{ userIdentifier: string, password: string}, void, Actions> = (body) => async (dispatch, _, { http }) => http.post('/sign-up', body)
   .then(() => dispatch({
     type: 'USER/SIGN_UP/SUCCESS',

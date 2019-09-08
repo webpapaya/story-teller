@@ -24,10 +24,7 @@ const Organism = isForm({
       onChange={onValueChange}
     />
     <InputTextarea
-      label="Description"
-      name="description"
-      value={values.description}
-      onChange={onValueChange}
+
     />
     <nav className={styles.actions}>
       <Button>Create</Button>

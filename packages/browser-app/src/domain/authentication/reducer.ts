@@ -1,5 +1,3 @@
-import { Actions } from './types'
-
 type AuthenticatedUser = {
   id: string
   email: string
