@@ -33,6 +33,11 @@
   margin-right: var(--space-xxs);
 }
 
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
 .checked {
   border-radius: 2px;
   background: var(--color-grey-lighter);

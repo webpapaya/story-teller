@@ -27,7 +27,7 @@
   font: var(--font-regular-bold);
   transition: all 200ms;
 
-  border-radius: 9999px;
+  border-radius: 2px;
   padding: 5px 15px;
 
   display: inline-flex;

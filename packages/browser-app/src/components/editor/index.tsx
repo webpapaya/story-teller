@@ -65,8 +65,6 @@ export class InputTextarea extends React.Component<InputTextareaProps> {
     );
   }
 
-
-
   _contentWithoutInlineStyles() {
     const selectionState = this.state.editorState.getSelection();
     const anchorKey = selectionState.getAnchorKey();

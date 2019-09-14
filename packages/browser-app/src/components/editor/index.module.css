@@ -52,13 +52,13 @@
 	font-family: var(--font-face-monospace);
 	background: var(--color-grey-lighter);
 	color: var(--color-grey-darkest);
-	margin-top: var(--space-md);
 	padding-left: var(--space-md);
 	padding-right: var(--space-md);
 	padding-bottom: var(--space-xs);
 }
 
 .codeblock:first-child {
+	margin-top: var(--space-md);
 	border-top-left-radius: 2px;
 	border-top-right-radius: 2px;
 	padding-top: var(--space-md);

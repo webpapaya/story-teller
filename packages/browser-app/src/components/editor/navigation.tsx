@@ -51,6 +51,7 @@ export const Navigation = (props: NavigationProps) => {
             name={type.label}
             checked={currentStyle.has(type.style)}
             onChange={() => props.onToggleInlineStyle(type.style) }
+            disabled={blockType !== 'unstyled'}
           >
             <type.Icon />
           </ButtonCheckbox>

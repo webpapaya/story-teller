@@ -26,9 +26,9 @@ const Organism = isForm({
     <InputTextarea
 
     />
-    <nav className={styles.actions}>
+    {/* <nav className={styles.actions}>
       <Button>Create</Button>
-    </nav>
+    </nav> */}
   </form>
 ))
 
