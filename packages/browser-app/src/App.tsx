@@ -4,6 +4,7 @@ import { BrowserRouter, Route } from 'react-router-dom'
 import SignIn from './containers/user-sign-in';
 import SignUp from './containers/user-sign-up'
 import { store } from './domain';
+import Page from './components/page';
 
 const App = () => (
   <Provider store={store}>
@@ -15,4 +16,4 @@ const App = () => (
 
 )
 
-export default App;
+export default Page;

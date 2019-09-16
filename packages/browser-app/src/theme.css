@@ -73,9 +73,15 @@
   --space-xxxl: calc(8.5 * var(--space-unit));
 
 
-  --shadow-1: 0 1px 3px rgba(46, 18, 28, 0.12), 0 1px 2px rgba(46, 18, 28, 0.24);
-  --shadow-2: 0 3px 6px rgba(46, 18, 28, 0.16), 0 3px 6px rgba(46, 18, 28, 0.23);
-  --shadow-3: 0 10px 20px rgba(46, 18, 28, 0.19), 0 6px 6px rgba(46, 18, 28, 0.23);
-  --shadow-4: 0 14px 28px rgba(46, 18, 28, 0.25), 0 10px 10px rgba(46, 18, 28, 0.22);
-  --shadow-5: 0 19px 38px rgba(46, 18, 28, 0.30), 0 15px 12px rgba(46, 18, 28, 0.22);
+  --shadow-1: 0 1px 3px rgba(122, 100, 108, 0.12), 0 1px 2px rgba(122, 100, 108, 0.24);
+  --shadow-2: 0 3px 6px rgba(122, 100, 108, 0.16), 0 3px 6px rgba(122, 100, 108, 0.23);
+  --shadow-3: 0 10px 20px rgba(122, 100, 108, 0.19), 0 6px 6px rgba(122, 100, 108, 0.23);
+  --shadow-4: 0 14px 28px rgba(122, 100, 108, 0.25), 0 10px 10px rgba(122, 100, 108, 0.22);
+  --shadow-5: 0 19px 38px rgba(122, 100, 108, 0.30), 0 15px 12px rgba(122, 100, 108, 0.22);
+}
+
+html, body, #root{
+  min-height: 100vh;
+  overflow: auto;
+  background: var(--color-grey-lightest);
 }

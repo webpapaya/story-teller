@@ -1,0 +1,105 @@
+.wrapper {
+  background: var(--color-white);
+  display: grid;
+  grid-auto-rows: auto 1fr auto;
+  grid-template-columns: auto 350px;
+  grid-template-areas:
+    "header sidebar"
+    "main sidebar"
+    "footer sidebar";
+
+  box-shadow: var(--shadow-3);
+  border-top-left-radius: var(--space-xxxs);
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  right: 0;
+  bottom: 0;
+}
+
+.header {
+  border-top-left-radius: var(--space-xxxs);
+  padding: var(--space-sm);
+  grid-area: header;
+}
+.main {
+  grid-area: main;
+}
+
+.aside {
+  box-shadow: var(--shadow-2);
+  grid-area: sidebar;
+  position: relative;
+  z-index: 3;
+}
+
+.aside2ndLevel {
+  position: absolute;
+  box-shadow: var(--shadow-2);
+  background: var(--color-white);
+
+  top: 0;
+  left: var(--space-sm);
+  right: 0;
+  bottom: 0;
+
+}
+
+.footer {
+  padding: var(--space-sm);
+  grid-area: footer;
+  font: var(--font-regular);
+  font-size: var(--font-size-smallest);
+  color: var(--color-grey-regular);
+}
+
+.subNavigation {
+  display: flex;
+  justify-content: flex-end;
+  border-bottom: 1px solid var(--color-grey-lighter);
+}
+
+.button {
+  /* button reset */
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  text-decoration: none;
+
+  background: transparent;
+
+  /* inherit font & color from ancestor */
+  color: inherit;
+  font: inherit;
+
+  /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+  line-height: normal;
+
+  /* Corrects font smoothing for webkit */
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+
+  /* Corrects inability to style clickable `input` types in iOS */
+  -webkit-appearance: none;
+  cursor: pointer;
+
+  line-height: 1;
+  display: inline-flex;
+
+  width: var(--space-xl);
+  height: var(--space-xl);
+  align-items: center;
+  justify-content: center;
+}
+
+.primary {
+  background: var(--color-primary-regular);
+  color: var(--color-white);
+}
+
+.secondary {
+  background: var(--color-primary-white);
+  color: var(--color-grey-regular);
+}
