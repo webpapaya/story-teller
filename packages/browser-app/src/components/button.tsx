@@ -6,6 +6,7 @@ import { css } from '../utils/css';
 type ButtonProps = {
   color?: 'primary' | 'secondary' | 'danger' | 'monochrome',
   size?: 'regular' | 'small'
+  variant?: 'solid' | 'link' | 'outline'
   children: React.ReactNode,
   type?: 'button' | 'submit' | 'reset'
   block?: boolean
@@ -18,12 +19,14 @@ export const Button = ({
   color = 'primary',
   size = 'regular',
   block = false,
-  disabled = false
+  disabled = false,
+  variant = 'solid'
 }: ButtonProps) => (
   <button type={type} className={
     css(
       theme[color],
       styles[`${size}Size`],
+      styles[`${variant}Variant`],
       styles.button,
       block && styles.block,
       disabled && styles.disabled
