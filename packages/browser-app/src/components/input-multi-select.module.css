@@ -5,7 +5,7 @@
 .label {
   display: flex;
   color: var(--color-grey-500);
-	font: var(--font-regular);
+  font: var(--font-regular);
   font-size: var(--font-size-regular);
   padding: var(--space-sm);
   cursor: pointer;

@@ -3,4 +3,4 @@ import { storiesOf } from '../../storybook';
 import Organism from './organism';
 
 storiesOf('FeatureCreate', module)
-	.add('default', () => <Organism />)
+  .add('default', () => <Organism />)

@@ -3,4 +3,4 @@ import { storiesOf } from '../../storybook';
 import Organism from './organism';
 
 storiesOf('UserResetPassword', module)
-	.add('default', () => <Organism />)
+  .add('default', () => <Organism />)

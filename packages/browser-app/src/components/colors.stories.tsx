@@ -30,4 +30,4 @@ const Colors = () => {
 }
 
 storiesOf('Colors', module)
-	.add('default', () => <Colors />)
+  .add('default', () => <Colors />)
