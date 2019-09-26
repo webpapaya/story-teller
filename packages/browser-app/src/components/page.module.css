@@ -50,13 +50,13 @@
   grid-area: footer;
   font: var(--font-regular);
   font-size: var(--font-size-smallest);
-  color: var(--color-grey-regular);
+  color: var(--color-grey-500);
 }
 
 .subNavigation {
   display: flex;
   justify-content: flex-end;
-  border-bottom: 1px solid var(--color-grey-lighter);
+  border-bottom: 1px solid var(--color-grey-300);
 }
 
 .button {
@@ -95,11 +95,11 @@
 }
 
 .primary {
-  background: var(--color-primary-regular);
+  background: var(--color-primary-500);
   color: var(--color-white);
 }
 
 .secondary {
   background: var(--color-primary-white);
-  color: var(--color-grey-regular);
+  color: var(--color-grey-500);
 }

@@ -35,21 +35,21 @@
   align-items: center;
 
   color: var(--color-white);
-  background: var(--theme-color-regular);
+  background: var(--theme-color-500);
   outline: none;
 }
 
 .button:focus, .button:hover {
-  background: var(--theme-color-darker);
+  background: var(--theme-color-700);
 }
 
 .button:active {
-  background: var(--theme-color-darkest);
+  background: var(--theme-color-900);
 }
 
 .button.disabled {
   cursor: not-allowed;
-  background: var(--theme-color-lighter);
+  background: var(--theme-color-300);
 }
 
 .button.block {

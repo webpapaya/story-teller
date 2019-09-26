@@ -4,14 +4,14 @@
 
 .label {
   display: flex;
-  color: var(--color-grey-regular);
-	font: var(--font-regular);
+  color: var(--color-grey-500);
+	font: var(--font-500);
   font-size: var(--font-size-regular);
   padding: var(--space-sm);
   cursor: pointer;
   align-items: center;
   line-height: 1;
-  border-bottom: 1px solid var(--color-grey-lighter);
+  border-bottom: 1px solid var(--color-grey-300);
   user-select: none;
 }
 
@@ -20,7 +20,7 @@
 }
 
 .label.focused {
-  background: var(--color-grey-lightest);
+  background: var(--color-grey-100);
 }
 
 .checkIcon {

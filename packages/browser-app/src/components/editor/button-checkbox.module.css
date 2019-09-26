@@ -24,7 +24,7 @@
   -webkit-appearance: none;
   cursor: pointer;
 
-  color: var(--color-grey-darker);
+  color: var(--color-grey-700);
   padding: var(--space-xxs);
   display: inline-flex;
 }
@@ -40,5 +40,5 @@
 
 .checked {
   border-radius: 2px;
-  background: var(--color-grey-lighter);
+  background: var(--color-grey-300);
 }

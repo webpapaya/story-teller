@@ -10,5 +10,5 @@
 }
 
 .table td.lightest, .table td.lighter, .table th {
-  color: var(--color-grey-regular);
+  color: var(--color-grey-500);
 }
