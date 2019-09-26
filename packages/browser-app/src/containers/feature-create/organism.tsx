@@ -2,7 +2,6 @@ import React from 'react';
 import isForm from '../../is-form';
 import * as v from 'validation.ts'
 import { InputText } from '../../components/input-text';
-import { Button } from '../../components/button';
 import { InputTextarea } from '../../components/editor/editor';
 import styles from './organism.module.css'
 

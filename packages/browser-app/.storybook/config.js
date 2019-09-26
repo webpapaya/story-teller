@@ -1,4 +1,5 @@
 import { configure } from '@storybook/react';
+import './addons'
 import '../src/theme.css'
 
 function requireAll(requireContext) {

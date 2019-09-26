@@ -1,5 +1,5 @@
 import React from 'react';
-import { storiesOf } from '@storybook/react';
+import { storiesOf } from '../storybook';
 import styles from './colors.module.css';
 
 const colors = 'primary secondary success warning danger grey'.split(' ')

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
+import { storiesOf } from '../storybook';
 import {InputMultiSelect} from './input-multi-select';
 
 storiesOf('InputMultiSelect', module)
