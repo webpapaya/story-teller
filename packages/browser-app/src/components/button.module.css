@@ -34,7 +34,6 @@
   justify-content: center;
   align-items: center;
 
-
   outline: none;
 }
 
@@ -50,6 +49,10 @@
 
 .smallSize {
   padding: var(--space-xs) var(--space-xs);
+}
+
+.marginBottom {
+  margin-bottom: var(--space-xs);
 }
 
 /* variant: solid */

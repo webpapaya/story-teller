@@ -3,6 +3,7 @@ import isForm from '../../is-form';
 import * as v from 'validation.ts'
 import { Button } from '../../components/button';
 import { InputPassword } from '../../components/input-password';
+import { Link } from '../../components/link';
 
 const Organism = isForm({
   defaultValues: {
@@ -27,7 +28,10 @@ const Organism = isForm({
       value={values.passwordConfirmation}
       onChange={onValueChange}
     />
-    <Button block>Submit</Button>
+    <Button block marginBottom>Submit</Button>
+    <Link to="/" variant="link" block>
+      Cancel
+    </Link>
   </form>
 ))
 

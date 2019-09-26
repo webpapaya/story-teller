@@ -11,6 +11,7 @@ type ButtonProps = {
   type?: 'button' | 'submit' | 'reset'
   block?: boolean
   disabled?: boolean
+  marginBottom?: boolean
 }
 
 export const Button = ({
@@ -20,7 +21,8 @@ export const Button = ({
   size = 'regular',
   block = false,
   disabled = false,
-  variant = 'solid'
+  variant = 'solid',
+  marginBottom = false
 }: ButtonProps) => (
   <button type={type} className={
     css(
@@ -29,7 +31,8 @@ export const Button = ({
       styles[`${variant}Variant`],
       styles.button,
       block && styles.block,
-      disabled && styles.disabled
+      disabled && styles.disabled,
+      marginBottom && styles.marginBottom
     )
   }>
     { children }

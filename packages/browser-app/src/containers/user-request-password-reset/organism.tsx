@@ -3,6 +3,7 @@ import isForm from '../../is-form';
 import * as v from 'validation.ts'
 import { InputText } from '../../components/input-text';
 import { Button } from '../../components/button';
+import { Link } from '../../components/link';
 
 const Organism = isForm({
   defaultValues: {
@@ -19,7 +20,13 @@ const Organism = isForm({
       value={values.userIdentifier}
       onChange={onValueChange}
     />
-    <Button block>Submit</Button>
+    <Button block marginBottom>Submit</Button>
+    <Link to="/sign-in" variant="link" block>
+      Sign in
+    </Link>
+    <Link to="/sign-up" variant="link" block>
+      Sign up
+    </Link>
   </form>
 ))
 

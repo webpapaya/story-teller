@@ -4,6 +4,7 @@ import * as v from 'validation.ts'
 import { InputText } from '../../components/input-text';
 import { InputPassword } from '../../components/input-password';
 import { Button } from '../../components/button';
+import { Link } from '../../components/link';
 
 const SignIn = isForm({
   defaultValues: {
@@ -28,7 +29,13 @@ const SignIn = isForm({
       value={values.password}
       onChange={onValueChange}
     />
-    <Button block>Submit</Button>
+    <Button block marginBottom>Sign in</Button>
+    <Link to="/sign-up" variant="link" block>
+      Sign up
+    </Link>
+    <Link to="/request-password-reset" variant="link" block>
+      Request password reset
+    </Link>
   </form>
 ))
 
