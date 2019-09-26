@@ -111,6 +111,7 @@ export class InputMultiSelect extends React.Component<Props, State> {
           ref={this.searchRef}
           onKeyDown={this.onSearchKeyUp}
           onChange={this.onSearchChange}
+          variant="title"
         />
 
         {this.filteredOptions.map((option, idx) => {

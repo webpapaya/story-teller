@@ -84,7 +84,7 @@
   --color-grey-800: #381E25;
   --color-grey-900: #2E121C;
 
-  --color-white: var(--color-grey-100);
+  --color-white: #ffffff;
 
   --space-unit: 1rem;
   --space-xxxs: calc(0.25 * var(--space-unit));
@@ -109,4 +109,8 @@ html, body, #root{
   min-height: 100vh;
   overflow: auto;
   background: var(--color-grey-100);
+}
+
+* {
+  box-sizing: border-box;
 }

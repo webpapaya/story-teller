@@ -31,9 +31,10 @@
   grid-area: sidebar;
   position: relative;
   z-index: 3;
+  padding: var(--space-sm);
 }
 
-.aside2ndLevel {
+/* .aside2ndLevel {
   position: absolute;
   box-shadow: var(--shadow-2);
   background: var(--color-white);
@@ -43,7 +44,7 @@
   right: 0;
   bottom: 0;
 
-}
+} */
 
 .footer {
   padding: var(--space-sm);
@@ -57,6 +58,8 @@
   display: flex;
   justify-content: flex-end;
   border-bottom: 1px solid var(--color-grey-300);
+  margin: calc(-1 * var(--space-sm));
+  margin-bottom: var(--space-sm);
 }
 
 .button {

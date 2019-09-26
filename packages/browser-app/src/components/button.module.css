@@ -28,7 +28,7 @@
   transition: all 200ms;
 
   border-radius: 2px;
-  padding: 5px 15px;
+  padding: var(--space-sm) var(--space-lg);
 
   display: inline-flex;
   justify-content: center;
@@ -55,4 +55,12 @@
 .button.block {
   display: flex;
   width: 100%;
+}
+
+.regularSize {
+  padding: var(--space-sm) var(--space-lg);
+}
+
+.smallSize {
+  padding: var(--space-xs) var(--space-xs);
 }

@@ -12,6 +12,7 @@ const Page = () => (
        <InputText
           label="Title"
           name="title"
+          variant="title"
        />
      </header>
      <main className={css(styles.main)}>
@@ -32,7 +33,7 @@ const Page = () => (
           </button>
         </nav>
 
-        {/* <InputMultiSelect
+        <InputMultiSelect
             label="Tags"
             name="tags"
             options={[
@@ -40,11 +41,11 @@ const Page = () => (
               { key: 'test2', label: 'Second', value: 2 },
               { key: 'test3', label: 'Third', value: 3 }
             ]}
-          /> */}
+          />
        </section>
-       <section className={css(styles.aside2ndLevel)}>
+       {/* <section className={css(styles.aside2ndLevel)}>
             hallo
-       </section>
+       </section> */}
      </aside>
      <footer className={css(styles.footer)}>
        Last saved 20.01.2000
