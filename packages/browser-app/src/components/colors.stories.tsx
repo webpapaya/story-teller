@@ -3,7 +3,7 @@ import { storiesOf } from '../storybook';
 import styles from './colors.module.css';
 
 const colors = 'primary secondary success warning danger grey'.split(' ')
-const variants = 'lightest lighter regular darker darkest'.split(' ')
+const variants = '100 200 300 400 500 600 700 800 900'.split(' ')
 
 const Colors = () => {
   return (
