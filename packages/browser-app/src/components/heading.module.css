@@ -29,3 +29,7 @@
 .noMargin {
   margin-bottom: 0;
 }
+
+.strikethroughTextDecoration {
+  text-decoration: line-through;
+}

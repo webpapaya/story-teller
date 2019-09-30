@@ -6,6 +6,7 @@ type HeadingProps = {
   tagName?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
   variant?: 'h1' | 'h2' | 'h3' | 'h4'
   noMargin?: boolean,
+  textDecoration?: 'none' | 'strikethrough'
   children: React.ReactNode,
 }
 
@@ -13,10 +14,11 @@ const Heading = ({
   children,
   tagName = 'h1',
   variant = 'h1',
+  textDecoration = 'none',
   noMargin = false
 }: HeadingProps) => (
   React.createElement(tagName, {
-    className: css(styles.default, styles[variant], noMargin && styles.noMargin)
+    className: css(styles.default, styles[variant], styles[`${textDecoration}TextDecoration`], noMargin && styles.noMargin)
   }, children)
 )
 
