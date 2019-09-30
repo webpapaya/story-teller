@@ -2,9 +2,11 @@ import React from 'react';
 import styles from './page.module.css'
 import { css } from '../utils/css';
 import {SaveOutlined, DeleteOutline} from '@material-ui/icons'
-import { InputMultiSelect } from './input-multi-select';
+import Badge from './badge';
 import InputTextarea from './editor/editor';
 import { InputText } from './input-text';
+import Heading from './heading';
+import { Button } from './button';
 
 const Page = () => (
   <div className={styles.wrapper}>
@@ -22,30 +24,29 @@ const Page = () => (
       />
      </main>
      <aside className={css(styles.aside)}>
-       <section className={css(styles.aside1stLevel)}>
         <nav className={css(styles.subNavigation)}>
-          <button className={css(styles.button, styles.secondary)}>
-            <DeleteOutline />
-          </button>
-
-          <button className={css(styles.button, styles.primary)}>
-            <SaveOutlined />
-          </button>
+          <Button>
+            Save
+          </Button>
         </nav>
 
-        <InputMultiSelect
-            label="Tags"
-            name="tags"
-            options={[
-              { key: 'test1', label: 'First', value: 1 },
-              { key: 'test2', label: 'Second', value: 2 },
-              { key: 'test3', label: 'Third', value: 3 }
-            ]}
+        <Heading variant="h4" tagName="h2">
+          Revisions
+        </Heading>
+        <ul>
+          <Badge
+            tagName="li"
+            title="Fixed typo"
+            bottomLeft="1 additional Tasks"
+            bottomRight="Sepp Huber"
           />
-       </section>
-       {/* <section className={css(styles.aside2ndLevel)}>
-            hallo
-       </section> */}
+          <Badge
+            tagName="li"
+            title="Fixed typo"
+            bottomLeft="1 additional Tasks"
+            bottomRight="Sepp Huber"
+          />
+        </ul>
      </aside>
      <footer className={css(styles.footer)}>
        Last saved 20.01.2000

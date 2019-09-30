@@ -5,30 +5,44 @@ import Badge from './badge';
 storiesOf('Badge', module)
   .add('default', () => (
     <Badge
-      top="Sepp Huber"
+      topLeft="Sepp Huber"
       title="Fixed typo"
-      bottom="1 additional Tasks"
+      bottomLeft="1 additional Tasks"
     />
   ))
   .add('li', () => (
     <>
       <Badge
         tagName="li"
-        top="Sepp Huber"
+        topLeft="Top left"
+        topRight="Top right"
         title="Fixed typo"
-        bottom="1 additional Tasks"
       />
       <Badge
         tagName="li"
-        top="Sepp Huber"
+        bottomLeft="Top left"
+        bottomRight="Top right"
         title="Fixed typo"
-        bottom="1 additional Tasks"
       />
       <Badge
         tagName="li"
-        top="Sepp Huber"
+        topLeft="Top left"
         title="Fixed typo"
-        bottom="1 additional Tasks"
+      />
+      <Badge
+        tagName="li"
+        topRight="Top right"
+        title="Fixed typo"
+      />
+      <Badge
+        tagName="li"
+        bottomLeft="Bottom left"
+        title="Fixed typo"
+      />
+      <Badge
+        tagName="li"
+        bottomRight="Bottom right"
+        title="Fixed typo"
       />
     </>
   ))

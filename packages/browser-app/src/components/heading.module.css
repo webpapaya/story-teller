@@ -1,0 +1,23 @@
+.h1 {
+  font: var(--font-biggest-bold);
+  margin-bottom: var(--space-md);
+  color: var(--color-grey-600);
+}
+
+.h2 {
+  font: var(--font-bigger-bold);
+  margin-bottom: var(--space-sm);
+  color: var(--color-grey-600);
+}
+
+.h3 {
+  font: var(--font-regular-bold);
+  margin-bottom: var(--space-xs);
+  color: var(--color-grey-600);
+}
+
+.h4 {
+  font: var(--font-smaller-bold);
+  margin-bottom: var(--space-xxs);
+  color: var(--color-grey-600);
+}
