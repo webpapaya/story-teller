@@ -10,12 +10,10 @@
 
   box-shadow: var(--shadow-3);
   border-top-left-radius: var(--space-xxxs);
-  position: absolute;
-  top: var(--space-md);
-  left: var(--space-md);
-  right: 0;
-  bottom: 0;
-  grid-gap: var(--space-sm);
+  margin-top: var(--space-md);
+  margin-left: var(--space-md);
+
+  grid-gap: var(--space-md);
   padding: var(--space-sm);
 }
 
@@ -28,7 +26,6 @@
 }
 
 .aside {
-  /* box-shadow: var(--shadow-2); */
   grid-area: sidebar;
   position: relative;
   z-index: 3;

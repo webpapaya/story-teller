@@ -4,7 +4,7 @@ import { css } from '../utils/css';
 
 type HeadingProps = {
   tagName?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-  variant?: 'h1' | 'h2' | 'h3' | 'h4'
+  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5'
   noMargin?: boolean,
   textDecoration?: 'none' | 'strikethrough'
   children: React.ReactNode,
