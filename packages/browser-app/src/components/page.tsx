@@ -7,17 +7,36 @@ import { InputText } from './input-text';
 import Heading from './heading';
 import { Button } from './button';
 import Task from './task';
+import { Link } from './link';
 
 const Page = () => (
-  <div className={styles.wrapper}>
-    <header className={css(styles.header)}>
-       <InputText
-          label="Title"
-          name="title"
-          variant="title"
-       />
-     </header>
-     <main className={css(styles.main)}>
+  <>
+
+
+    <nav className={css(styles.navigation)}>
+      <Link to="/whatever">
+          Edit
+      </Link>
+      <Link to="/whatever">
+          Tasks
+      </Link>
+      <Link to="/whatever">
+          Open Diskussions
+      </Link>
+    </nav>
+
+    <div className={styles.wrapper}>
+      <header className={css(styles.header)}>
+          <InputText
+              label="Title"
+              name="title"
+              variant="title"
+          />
+          <Button>
+              Save Title
+          </Button>
+      </header>
+      <main className={css(styles.main)}>
       <InputTextarea
         onChange={(x) => console.log(x)}
         value=""
@@ -35,11 +54,7 @@ const Page = () => (
       </div>
      </main>
      <aside className={css(styles.aside)}>
-        <nav className={css(styles.subNavigation)}>
-          <Button>
-            Save
-          </Button>
-        </nav>
+
 
         <Heading variant="h4" tagName="h2">
           Revisions
@@ -65,6 +80,7 @@ const Page = () => (
        Last saved 20.01.2000
      </footer>
  </div>
+ </>
 )
 
 export default Page;

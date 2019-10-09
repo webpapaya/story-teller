@@ -20,7 +20,7 @@ export const Link = ({
   size = 'regular',
   block = false,
   disabled = false,
-  variant = 'solid',
+  variant = 'link',
   to,
 }: LinkProps) => (
   <ReactRouterLink
