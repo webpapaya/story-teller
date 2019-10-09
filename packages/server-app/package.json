@@ -6,7 +6,8 @@
   "scripts": {
     "env": "env $(cat $ENV_FILE | sed '/^#/ d')",
     "infrastructure:up": "npm run env -- docker-compose -p $ENV_FILE up -d",
-    "infrastructure:down": "npm run env -- docker-compose -p $ENV_FILE down -v",
+    "infrastructure:down": "npm run env -- docker-compose -p $ENV_FILE down",
+    "infrastructure:implode": "npm run infrastructure:down -- -v",
     "db:migrate:create": "npm run env -- db-migrate create",
     "db:migrate:up": "npm run env -- db-migrate up",
     "db:migrate:down": "npm run env -- db-migrate down",
