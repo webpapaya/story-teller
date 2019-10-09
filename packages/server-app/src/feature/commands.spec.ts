@@ -1,6 +1,6 @@
 import { t, assertDifference } from '../spec-helpers'
-import uuid from 'uuid';
-import { createFeature } from './commands';
+import uuid from 'uuid'
+import { createFeature } from './commands'
 
 describe('feature/create', () => {
   it('creates a new record', t(async ({ withinConnection }) => {
@@ -9,7 +9,7 @@ describe('feature/create', () => {
         id: uuid(),
         title: 'A new feature',
         description: 'A feature description'
-      });
+      })
     })
   }))
 })

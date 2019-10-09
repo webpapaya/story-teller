@@ -31,7 +31,7 @@ export type UserAuthentication = {
 }
 
 export type Feature = {
-  id: UUID,
+  id: UUID
   title: string
   description: string
 }
