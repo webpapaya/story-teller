@@ -1,5 +1,8 @@
 import mockdate from 'mockdate'
+// @ts-ignore
+import { assertThat, equalTo } from 'hamjest'
 import { WithinConnection, DBClient, withinConnection } from './lib/db'
+import { PoolClient } from 'pg'
 
 export const withMockedDate = async <T>(date: string, fn: (remock: typeof mockdate.set) => T) => {
   try {
@@ -26,5 +29,15 @@ export const t: WithinConnectionForTesting = (fn) => async () => {
     } finally {
       await params.rollback()
     }
+  })
+}
+
+export const assertDifference = async (deps: { withinConnection: WithinConnection }, table: string, difference: number, fn: Function) => {
+  return deps.withinConnection(async ({ client}) => {
+    const before = await client.query(`select count(*) as count from ${table};`)
+    await fn();
+    const after = await client.query(`select count(*) as count from ${table};`)
+    assertThat(parseInt(after.rows[0].count),
+      equalTo(parseInt(before.rows[0].count) + difference));
   })
 }

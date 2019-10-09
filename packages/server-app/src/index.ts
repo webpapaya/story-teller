@@ -1,12 +1,14 @@
 import express, { Request, Response, NextFunction } from 'express'
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
-import { register, requestPasswordReset, resetPasswordByToken, Result, failure } from './authentication/commands'
+import { register, requestPasswordReset, resetPasswordByToken } from './authentication/commands'
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
 import * as v from 'validation.ts'
 import cors from 'cors'
+import { createFeature } from './feature/commands'
+import { Result, failure } from './domain'
 const app = express()
 const port = process.env.API_PORT
 
@@ -104,5 +106,14 @@ app.get('/session', isAuthenticated, (req, res) => {
 app.get('/', (req: express.Request, res: express.Response) => {
   res.send('Hello World!!')
 })
+
+app.post('/feature', commandViaHTTP({ withinConnection }, {
+  validator: v.object({
+    id: v.string,
+    title: v.string,
+    description: v.string
+  }),
+  useCase: createFeature
+}))
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

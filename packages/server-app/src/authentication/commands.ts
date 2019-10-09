@@ -4,18 +4,8 @@ import crypto from 'crypto'
 import sql from 'sql-template-tag'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import { SendMail } from './emails'
-import { AuthenticationToken } from '../domain'
+import { AuthenticationToken, Result, success, failure } from '../domain'
 import { findUserByIdentifier } from './queries'
-
-export type Result<Body> = {
-  body: Body
-  isSuccess: boolean
-}
-export const success = <T>(body: T): Result<T> =>
-  ({ isSuccess: true, body })
-
-export const failure = <T>(body: T): Result<T> =>
-  ({ isSuccess: false, body })
 
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 
