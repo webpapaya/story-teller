@@ -8,14 +8,16 @@ import { findUserByAuthentication, findUserByAuthenticationToken } from './authe
 import * as v from 'validation.ts'
 import cors from 'cors'
 import { createFeature } from './feature/commands'
-import { Result, failure, UserAuthentication } from './domain'
+import { Result, failure, UserAuthentication, success } from './domain'
 const app = express()
 const port = process.env.API_PORT
 
 declare global {
   namespace Express {
     interface Request {
-      userAuthentication: UserAuthentication
+      auth: {
+        user: UserAuthentication | null
+      }
     }
   }
 }
@@ -27,17 +29,31 @@ app.use(cors({
   credentials: true
 }))
 
+const pick = (props: string[], object: any) => props.reduce((filtered, key) => {
+  // @ts-ignore
+  if (object[key]) {
+    // @ts-ignore
+    filtered[key] = object[key]
+  }
+  return filtered;
+}, {})
+
 type CommandViaHTTP = <A, B>(dependencies: B, args: {
-  validator: v.Validator<A>
-  useCase: (deps: B, value: A) => Promise<Result<unknown>>
+  validator: v.Validator<A>,
+  paramsWhitelist?: string[]
+  useCase: (deps: B & { auth: Express.Request['auth'] }, value: A) => Promise<Result<unknown>>
 }) => (req: Request, res: Response) => Promise<void>
 
-const commandViaHTTP: CommandViaHTTP = (dependencies, { validator, useCase }) => async (req, res) => {
+const commandViaHTTP: CommandViaHTTP = (dependencies, { paramsWhitelist, validator, useCase }) => async (req, res) => {
   const result = await validator.validate({ ...req.body, ...req.query })
     .fold(
       () => failure({ isError: true, body: 'ValidationError' }),
-      (v) => useCase(dependencies, v)
+      (v) => useCase({ ...dependencies, auth: req.auth }, v)
     )
+
+  if (paramsWhitelist && result.isSuccess) {
+    result.body = pick(paramsWhitelist, result.body)
+  }
 
   return resultToHTTP(res, result)
 }
@@ -60,15 +76,18 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
       res.sendStatus(401)
       next('Unauthorized')
     } else {
-      req.userAuthentication = user
+      req.auth = { user }
       next()
     }
   })
 }
 
-app.get('/session', isAuthenticated, (req, res) => {
-  res.send(req.userAuthentication)
-})
+app.get('/session', isAuthenticated, commandViaHTTP({}, {
+  validator: v.object({}),
+  useCase: async (dependencies) => success(dependencies.auth.user),
+  paramsWhitelist: ['id', 'userIdentifier']
+}))
+
 
 app.post('/sign-up', commandViaHTTP({ withinConnection, sendMail }, {
   validator: v.object({
