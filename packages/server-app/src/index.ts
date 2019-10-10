@@ -38,22 +38,23 @@ const pick = (props: string[], object: any) => props.reduce((filtered, key) => {
   return filtered;
 }, {})
 
-type CommandViaHTTP = <A, B>(dependencies: B, args: {
+type CommandViaHTTP = <A, B, C>(dependencies: B, args: {
   validator: v.Validator<A>,
-  paramsWhitelist?: string[]
-  useCase: (deps: B & { auth: Express.Request['auth'] }, value: A) => Promise<Result<unknown>>
+  response?: v.Validator<C>,
+  useCase: (deps: B & { auth: Express.Request['auth'] }, value: A) => Promise<Result<C>>
 }) => (req: Request, res: Response) => Promise<void>
 
-const commandViaHTTP: CommandViaHTTP = (dependencies, { paramsWhitelist, validator, useCase }) => async (req, res) => {
+const commandViaHTTP: CommandViaHTTP = (dependencies, { response, validator, useCase }) => async (req, res) => {
   const result = await validator.validate({ ...req.body, ...req.query })
     .fold(
       () => failure({ isError: true, body: 'ValidationError' }),
       (v) => useCase({ ...dependencies, auth: req.auth }, v)
     )
+    if (response && result.isSuccess) {
+      // @ts-ignore
+      result.body = pick(Object.keys(response.props), result.body)
+    }
 
-  if (paramsWhitelist && result.isSuccess) {
-    result.body = pick(paramsWhitelist, result.body)
-  }
 
   return resultToHTTP(res, result)
 }
@@ -84,8 +85,12 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
 
 app.get('/session', isAuthenticated, commandViaHTTP({}, {
   validator: v.object({}),
-  useCase: async (dependencies) => success(dependencies.auth.user),
-  paramsWhitelist: ['id', 'userIdentifier']
+  useCase: async (dependencies): Promise<Result<UserAuthentication>> =>
+    success(dependencies.auth.user as UserAuthentication),
+  response: v.object({
+    id: v.string,
+    userIdentifier: v.string,
+  }),
 }))
 
 
