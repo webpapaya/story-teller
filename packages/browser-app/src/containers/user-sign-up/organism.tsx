@@ -32,6 +32,12 @@ const Organism = isForm({
       value={values.password}
       onChange={onValueChange}
     />
+    <InputPassword
+      label="Password Confirmation"
+      name="passwordConfirmation"
+      value={values.passwordConfirmation}
+      onChange={onValueChange}
+    />
     <Button block marginBottom>Sign up</Button>
 
     <Link to="/sign-in" variant="link" block>

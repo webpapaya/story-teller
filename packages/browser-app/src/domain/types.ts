@@ -11,7 +11,7 @@ export type AppState = ReturnType<typeof rootReducer>
 
 export type ActionCreator<Args, ReturnValue, Actions extends AnyAction> = (
   arg: Args
-) => ThunkAction<ReturnValue, AppState, ExternalDependencies, Actions>
+) => ThunkAction<Promise<ReturnValue>, AppState, ExternalDependencies, Actions>
 
 export type MapStateToProps<OwnPropsType, ReturnValue> =
   (state: AppState, ownProps: OwnPropsType) => ReturnValue;
@@ -23,3 +23,5 @@ export type MapDispatchToProps<ReturnValue> = (
 export type UnpackThunk<ActionCreator extends (...args: any) => any> = (
   ...args: Parameters<ActionCreator>
 ) => ReturnType<ReturnType<ActionCreator>>;
+
+

@@ -8,9 +8,17 @@ import { findUserByAuthentication, findUserByAuthenticationToken } from './authe
 import * as v from 'validation.ts'
 import cors from 'cors'
 import { createFeature } from './feature/commands'
-import { Result, failure } from './domain'
+import { Result, failure, UserAuthentication } from './domain'
 const app = express()
 const port = process.env.API_PORT
+
+declare global {
+  namespace Express {
+    interface Request {
+      userAuthentication: UserAuthentication
+    }
+  }
+}
 
 app.use(cookieParser(process.env.SECRET_KEY_BASE))
 app.use(bodyParser())
@@ -52,10 +60,15 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
       res.sendStatus(401)
       next('Unauthorized')
     } else {
+      req.userAuthentication = user
       next()
     }
   })
 }
+
+app.get('/session', isAuthenticated, (req, res) => {
+  res.send(req.userAuthentication)
+})
 
 app.post('/sign-up', commandViaHTTP({ withinConnection, sendMail }, {
   validator: v.object({
@@ -99,15 +112,7 @@ app.post('/sign-out', async (req, res) => {
   res.sendStatus(200)
 })
 
-app.get('/session', isAuthenticated, (req, res) => {
-  res.sendStatus(200)
-})
-
-app.get('/', (req: express.Request, res: express.Response) => {
-  res.send('Hello World!!')
-})
-
-app.post('/feature', commandViaHTTP({ withinConnection }, {
+app.post('/feature', isAuthenticated, commandViaHTTP({ withinConnection }, {
   validator: v.object({
     id: v.string,
     title: v.string,

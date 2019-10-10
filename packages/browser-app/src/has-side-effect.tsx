@@ -8,7 +8,7 @@ const hasRequiredProps = (requiredProps: string[], props: object): boolean =>
     requiredProps.some(propName => getObjectProperty(propName, props) === undefined);
 
 type ExternalProps = {
-    sideEffect: (props: unknown) => Promise<unknown>;
+    sideEffect: (props: any) => Promise<any>;
 };
 
 type InjectedProps = {

@@ -2,7 +2,6 @@
   "name": "root",
   "private": true,
   "devDependencies": {
-    "lerna": "^3.16.4",
-    "storybook-react-router": "^1.0.7"
+    "lerna": "^3.16.4"
   }
 }

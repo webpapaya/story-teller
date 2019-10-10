@@ -6,7 +6,10 @@ import { signUp } from '../../domain/authentication/actions';
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType> = (dispatch) => {
   return {
-    onSubmit: (values) => dispatch(signUp(values))
+    onSubmit: (values) => {
+
+      return dispatch(signUp(values))
+    }
   }
 }
 

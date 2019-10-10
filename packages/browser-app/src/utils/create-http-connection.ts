@@ -8,18 +8,18 @@ const createHTTPInstance = (options: { baseURL: string }) => {
     mode: 'cors'
   }
 
-  console.log(joinURL(options.baseURL, '/test'))
-
   return {
     get: (path: string) => window.fetch(joinURL(options.baseURL, path), {
       ...defaultOptions,
       method: 'GET'
     }),
-    post: (path: string, body: object) => window.fetch(joinURL(options.baseURL, path), {
+    post: (path: string, body: object) => {
+      return window.fetch(joinURL(options.baseURL, path), {
       ...defaultOptions,
       method: 'POST',
       body: JSON.stringify(body)
-    }),
+    })
+  },
     patch: (path: string, body: object) => window.fetch(joinURL(options.baseURL, path), {
       ...defaultOptions,
       method: 'PATCH',
@@ -34,7 +34,12 @@ const createHTTPInstance = (options: { baseURL: string }) => {
       ...defaultOptions,
       method: 'DELETE',
       body: JSON.stringify(body)
-    })
+    }),
+
+    getJSON: (path: string) => window.fetch(joinURL(options.baseURL, path), {
+      ...defaultOptions,
+      method: 'GET'
+    }).then((res) => res.json()),
   }
 }
 
