@@ -1,18 +1,20 @@
 import * as v from 'validation.ts'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete'
-export type CommandDefinition<A> = {
+export type CommandDefinition<A, B> = {
   verb: HTTPVerb
-  name: string
+  action?: string
+  model: string
   validator: v.Validator<A>
-  response?: v.Validator<unknown>
+  response: B extends object ? v.Validator<B> : undefined
 }
 
-const buildCommandDefinition = <A>(definition: CommandDefinition<A>) => definition
+const buildCommandDefinition = <A, B>(definition: CommandDefinition<A, B>) => definition
 
 export const SESSION_DEFINITION = buildCommandDefinition({
   verb: 'get',
-  name: 'session',
+  model: 'user',
+  action: 'session',
   validator: v.object({}),
   response: v.object({
     id: v.string,
@@ -22,34 +24,41 @@ export const SESSION_DEFINITION = buildCommandDefinition({
 
 export const SIGN_UP_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: 'sign-up',
+  action: 'sign-up',
+  model: 'user',
   validator: v.object({
     userIdentifier: v.string,
     password: v.string
-  })
+  }),
+  response: undefined
 })
 
 export const REQUEST_PASSWORD_RESET_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: 'request-password-reset',
+  action: 'request-password-reset',
+  model: 'user',
   validator: v.object({
     userIdentifier: v.string
-  })
+  }),
+  response: undefined
 })
 
 export const RESET_PASSWORD_BY_TOKEN_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: 'reset-password-by-token',
+  action: 'reset-password-by-token',
+  model: 'user',
   validator: v.object({
     userIdentifier: v.string,
     password: v.string,
     token: v.string
-  })
+  }),
+  response: undefined
 })
 
 export const SIGN_IN_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: 'sign-in',
+  action: 'sign-in',
+  model: 'user',
   validator: v.object({
     userIdentifier: v.string,
     password: v.string
@@ -62,16 +71,20 @@ export const SIGN_IN_DEFINITION = buildCommandDefinition({
 
 export const SIGN_OUT_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: 'sign-out',
-  validator: v.object({})
+  model: 'user',
+  action: 'sign-out',
+  validator: v.object({}),
+  response: undefined
 })
 
 export const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: 'feature',
+  action: 'create',
+  model: 'user',
   validator: v.object({
     id: v.string,
     title: v.string,
     description: v.string
-  })
+  }),
+  response: undefined
 })

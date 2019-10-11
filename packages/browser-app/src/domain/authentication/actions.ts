@@ -1,15 +1,25 @@
 import { ActionCreator } from '../types'
-import { SESSION_DEFINITION, CommandDefinition, SIGN_IN_DEFINITION, SIGN_UP_DEFINITION } from '@story-teller/shared'
+import { SESSION_DEFINITION, CommandDefinition, SIGN_IN_DEFINITION, SIGN_UP_DEFINITION, SIGN_OUT_DEFINITION } from '@story-teller/shared'
 import { AnyAction } from 'redux'
 
-type FetchViaHTTP = <A extends CommandDefinition<unknown>>(
+type FetchViaHTTP = <A extends CommandDefinition<unknown, unknown>>(
   definition: A
 ) => ActionCreator<A['validator']['T'], void, AnyAction>
 
 const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _, { http }) => {
-  const payload = await http[definition.verb](`/${definition.name}`, body).then((r) => r.json())
+  const route = [
+    definition.model,
+    definition.action
+  ].filter(x => x).join('/')
+
+  const payload = await http[definition.verb](`/${route}`, body).then((r) => r.json())
+
   dispatch({
-    type: `${definition.name}/FETCH/SUCCESS`.toUpperCase(),
+    type: [
+      definition.model,
+      definition.action || 'FETCH',
+      'SUCCESS'
+    ].join('/').toUpperCase(),
     payload
   })
   return payload
@@ -17,4 +27,5 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _,
 
 export const signIn = fetchViaHTTP(SIGN_IN_DEFINITION)
 export const signUp = fetchViaHTTP(SIGN_UP_DEFINITION)
+export const signOut = fetchViaHTTP(SIGN_OUT_DEFINITION)
 export const getAuthenticatedUser = fetchViaHTTP(SESSION_DEFINITION)

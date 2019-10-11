@@ -1,14 +1,23 @@
 import express, { Request, Response, NextFunction } from 'express'
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
+import cors from 'cors'
 import { register, requestPasswordReset, resetPasswordByToken } from './authentication/commands'
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
-import cors from 'cors'
 import { createFeature } from './feature/commands'
 import { Result, failure, UserAuthentication, success } from './domain'
-import { SESSION_DEFINITION, SIGN_UP_DEFINITION, REQUEST_PASSWORD_RESET_DEFINITION, RESET_PASSWORD_BY_TOKEN_DEFINITION, SIGN_IN_DEFINITION, SIGN_OUT_DEFINITION, CREATE_FEATURE_DEFINITION, CommandDefinition } from '@story-teller/shared'
+import {
+  SESSION_DEFINITION,
+  SIGN_UP_DEFINITION,
+  REQUEST_PASSWORD_RESET_DEFINITION,
+  RESET_PASSWORD_BY_TOKEN_DEFINITION,
+  SIGN_IN_DEFINITION,
+  SIGN_OUT_DEFINITION,
+  CREATE_FEATURE_DEFINITION,
+  CommandDefinition
+} from '@story-teller/shared'
 
 const app = express()
 const port = process.env.API_PORT
@@ -41,7 +50,7 @@ const pick = (props: string[], object: any) => props.reduce((filtered, key) => {
 }, {})
 
 type HTTPMiddleware = (req: Request, res: Response, next: NextFunction) => Promise<void> | void
-type CommandViaHTTP = <A, B, C>(definition: CommandDefinition<A>, args: {
+type CommandViaHTTP = <A, D, B, C>(definition: CommandDefinition<A, D>, args: {
   app: any
   dependencies: B
   middlewares?: HTTPMiddleware[]
@@ -49,7 +58,12 @@ type CommandViaHTTP = <A, B, C>(definition: CommandDefinition<A>, args: {
 }) => void
 
 const commandViaHTTP: CommandViaHTTP = ({ validator, response, ...http }, { app, useCase, middlewares = [], dependencies }) => {
-  app[http.verb](`/${http.name}`, ...(middlewares || []), async (req: Request, res: Response) => {
+  const route = [
+    http.model,
+    http.action
+  ].filter(x => x).join('/')
+
+  app[http.verb](`/${route}`, ...(middlewares || []), async (req: Request, res: Response) => {
     const result = await validator.validate({ ...req.body, ...req.query })
       .fold(
         () => failure({ isError: true, body: 'ValidationError' }),
@@ -89,7 +103,6 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
   })
 }
 
-console.log('dskafl')
 commandViaHTTP(SESSION_DEFINITION, {
   app,
   middlewares: [isAuthenticated],
@@ -112,7 +125,7 @@ commandViaHTTP(REQUEST_PASSWORD_RESET_DEFINITION, {
 
 commandViaHTTP(RESET_PASSWORD_BY_TOKEN_DEFINITION, {
   app,
-  dependencies: { withinConnection, sendMail },
+  dependencies: { withinConnection },
   useCase: resetPasswordByToken
 })
 
