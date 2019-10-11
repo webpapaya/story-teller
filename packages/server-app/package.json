@@ -1,8 +1,7 @@
 {
-  "name": "server-app",
+  "name": "@story-teller/server-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "env": "env $(cat $ENV_FILE | sed '/^#/ d')",
     "infrastructure:up": "npm run env -- docker-compose -p $ENV_FILE up -d",

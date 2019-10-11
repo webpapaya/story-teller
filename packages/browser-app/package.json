@@ -1,5 +1,5 @@
 {
-  "name": "browser-app",
+  "name": "@story-teller/browser-app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
