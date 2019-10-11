@@ -1,7 +1,14 @@
 {
   "name": "root",
   "private": true,
+  "scripts": {
+    "lint": "lerna run lint"
+  },
   "devDependencies": {
-    "lerna": "^3.16.4"
-  }
+    "lerna": "^3.16.4",
+    "pre-commit": "^1.2.2"
+  },
+  "pre-commit": [
+    "lint"
+  ]
 }

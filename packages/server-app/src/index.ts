@@ -14,6 +14,7 @@ const app = express()
 const port = process.env.API_PORT
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       auth: {
@@ -36,14 +37,13 @@ const pick = (props: string[], object: any) => props.reduce((filtered, key) => {
     // @ts-ignore
     filtered[key] = object[key]
   }
-  return filtered;
+  return filtered
 }, {})
-
 
 type HTTPMiddleware = (req: Request, res: Response, next: NextFunction) => Promise<void> | void
 type CommandViaHTTP = <A, B, C>(definition: CommandDefinition<A>, args: {
-  app: any,
-  dependencies: B,
+  app: any
+  dependencies: B
   middlewares?: HTTPMiddleware[]
   useCase: (deps: B & { auth: Express.Request['auth'], res: Response }, value: A) => Promise<Result<C>>
 }) => void
@@ -51,10 +51,10 @@ type CommandViaHTTP = <A, B, C>(definition: CommandDefinition<A>, args: {
 const commandViaHTTP: CommandViaHTTP = ({ validator, response, ...http }, { app, useCase, middlewares = [], dependencies }) => {
   app[http.verb](http.name, ...(middlewares || []), async (req: Request, res: Response) => {
     const result = await validator.validate({ ...req.body, ...req.query })
-    .fold(
-      () => failure({ isError: true, body: 'ValidationError' }),
-      (v) => useCase({ ...dependencies, auth: req.auth, res }, v)
-    )
+      .fold(
+        () => failure({ isError: true, body: 'ValidationError' }),
+        (v) => useCase({ ...dependencies, auth: req.auth, res }, v)
+      )
 
     if (response && result.isSuccess) {
       // @ts-ignore

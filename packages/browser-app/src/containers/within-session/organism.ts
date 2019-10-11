@@ -1,6 +1,3 @@
-import React from 'react'
-import { OrganismPropsType } from './types'
+const Organism = () => null
 
-const Organism = ({}: OrganismPropsType) => null
-
-export default Organism;
+export default Organism

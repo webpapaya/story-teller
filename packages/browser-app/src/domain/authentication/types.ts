@@ -11,16 +11,14 @@ export type Actions =
   | Action<'USER/SIGN_IN/SUCCESS', void>
   | Action<'USER/SIGN_IN/ERROR', void>
 
-
-
-  export type UserAuthentication = {
-    id: string
-    userIdentifier: string
-    createdAt: string
-    confirmationToken: string | null
-    confirmedAt: string | null
-    password: string
-    passwordResetToken: string | null
-    passwordResetCreatedAt: string | null
-    passwordChangedAt: string | null
-  }
+export type UserAuthentication = {
+  id: string
+  userIdentifier: string
+  createdAt: string
+  confirmationToken: string | null
+  confirmedAt: string | null
+  password: string
+  passwordResetToken: string | null
+  passwordResetCreatedAt: string | null
+  passwordChangedAt: string | null
+}

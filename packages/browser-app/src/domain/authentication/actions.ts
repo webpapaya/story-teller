@@ -37,5 +37,4 @@ export const getAuthenticatedUser: ActionCreator<void, void, Actions> = () => as
       type: 'USER/FETCH/ERROR',
       payload: void 0
     })))
-
 }

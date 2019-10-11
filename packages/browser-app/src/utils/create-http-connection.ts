@@ -15,11 +15,11 @@ const createHTTPInstance = (options: { baseURL: string }) => {
     }),
     post: (path: string, body: object) => {
       return window.fetch(joinURL(options.baseURL, path), {
-      ...defaultOptions,
-      method: 'POST',
-      body: JSON.stringify(body)
-    })
-  },
+        ...defaultOptions,
+        method: 'POST',
+        body: JSON.stringify(body)
+      })
+    },
     patch: (path: string, body: object) => window.fetch(joinURL(options.baseURL, path), {
       ...defaultOptions,
       method: 'PATCH',
@@ -39,7 +39,7 @@ const createHTTPInstance = (options: { baseURL: string }) => {
     getJSON: (path: string) => window.fetch(joinURL(options.baseURL, path), {
       ...defaultOptions,
       method: 'GET'
-    }).then((res) => res.json()),
+    }).then((res) => res.json())
   }
 }
 

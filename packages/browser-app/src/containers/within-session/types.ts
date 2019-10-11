@@ -1,5 +1,5 @@
-import { UnpackThunk } from "../../domain/types";
-import { getAuthenticatedUser } from "../../domain/authentication/actions";
+import { UnpackThunk } from '../../domain/types'
+import { getAuthenticatedUser } from '../../domain/authentication/actions'
 
 export type OwnPropsType = { children: React.ReactNode };
 

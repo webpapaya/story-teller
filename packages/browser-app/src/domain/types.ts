@@ -23,5 +23,3 @@ export type MapDispatchToProps<ReturnValue> = (
 export type UnpackThunk<ActionCreator extends (...args: any) => any> = (
   ...args: Parameters<ActionCreator>
 ) => ReturnType<ReturnType<ActionCreator>>;
-
-
