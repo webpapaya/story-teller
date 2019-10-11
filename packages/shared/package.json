@@ -2,11 +2,13 @@
   "name": "@story-teller/shared",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "lint": "eslint --ext js,ts .",
+    "lint": "eslint --ext js,ts --ignore-path .gitignore .",
     "test": "mocha -r ts-node/register --timeout 500000 --inspect-brk --watch-extensions ts $(find src -name '*.spec.ts')",
-    "tsc": "tsc"
+    "start": "npm run build -- --watch",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",

@@ -89,6 +89,7 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
   })
 }
 
+console.log('dskafl')
 commandViaHTTP(SESSION_DEFINITION, {
   app,
   middlewares: [isAuthenticated],

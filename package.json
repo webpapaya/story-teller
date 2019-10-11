@@ -2,13 +2,16 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "lint": "lerna run lint"
+    "lint": "lerna run lint",
+    "start": "lerna run start --parallel",
+    "build": "lerna run build --parallel"
   },
   "devDependencies": {
     "lerna": "^3.16.4",
     "pre-commit": "^1.2.2"
   },
   "pre-commit": [
-    "lint"
+    "lint",
+    "build"
   ]
 }

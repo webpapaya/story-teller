@@ -8,7 +8,7 @@ import Organism from './organism';
 const mapStateToProps: MapStateToProps<OwnPropsType, StatePropsType> = () => ({})
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType> = (dispatch) => ({
-  sideEffect: () => dispatch(getAuthenticatedUser())
+  sideEffect: () => dispatch(getAuthenticatedUser({}))
 })
 
 export default connect(

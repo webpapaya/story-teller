@@ -10,8 +10,8 @@
     "db:migrate:create": "npm run env -- db-migrate create",
     "db:migrate:up": "npm run env -- db-migrate up",
     "db:migrate:down": "npm run env -- db-migrate down",
-    "start": "npm run env -- ts-node-dev --inspect --notify=0 --respawn ./src/index.ts",
-    "lint": "eslint --ext js,ts .",
+    "start": "npm run env -- ts-node-dev --notify=0 --respawn ./src/index.ts",
+    "lint": "eslint --ext js,ts --ignore-path .gitignore .",
     "test": "ENV_FILE=.env.test npm run env -- mocha -r ts-node/register --timeout 500000 --inspect-brk --watch-extensions ts $(find src -name '*.spec.ts')",
     "tsc": "tsc"
   },
@@ -68,6 +68,7 @@
     "standard": "^14.1.0",
     "ts-node-dev": "^1.0.0-pre.39",
     "ts-sinon": "^1.0.17",
-    "typescript": "^3.5.1"
+    "typescript": "^3.5.1",
+    "@story-teller/shared": "*"
   }
 }
