@@ -38,25 +38,34 @@ const pick = (props: string[], object: any) => props.reduce((filtered, key) => {
   return filtered;
 }, {})
 
-type CommandViaHTTP = <A, B, C>(dependencies: B, args: {
+type HTTPVerb = 'get' | 'post' | 'patch' | 'delete'
+type HTTPMiddleware = (req: Request, res: Response, next: NextFunction) => Promise<void> | void
+type CommandViaHTTP = <A, B, C>(http: {
+  verb: HTTPVerb,
+  name: string,
   validator: v.Validator<A>,
   response?: v.Validator<C>,
-  useCase: (deps: B & { auth: Express.Request['auth'] }, value: A) => Promise<Result<C>>
-}) => (req: Request, res: Response) => Promise<void>
+}, dependencies: B, args: {
+  app: any,
+  middlewares?: HTTPMiddleware[]
+  useCase: (deps: B & { auth: Express.Request['auth'], res: Response }, value: A) => Promise<Result<C>>
+}) => void
 
-const commandViaHTTP: CommandViaHTTP = (dependencies, { response, validator, useCase }) => async (req, res) => {
-  const result = await validator.validate({ ...req.body, ...req.query })
+const commandViaHTTP: CommandViaHTTP = ({ validator, response, ...http }, dependencies, { app, useCase, middlewares }) => {
+  app[http.verb](http.name, ...(middlewares || []), async (req: Request, res: Response) => {
+    const result = await validator.validate({ ...req.body, ...req.query })
     .fold(
       () => failure({ isError: true, body: 'ValidationError' }),
-      (v) => useCase({ ...dependencies, auth: req.auth }, v)
+      (v) => useCase({ ...dependencies, auth: req.auth, res }, v)
     )
+
     if (response && result.isSuccess) {
       // @ts-ignore
       result.body = pick(Object.keys(response.props), result.body)
     }
 
-
-  return resultToHTTP(res, result)
+    return resultToHTTP(res, result)
+  })
 }
 
 const resultToHTTP = (res: Response, result: Result<unknown>) => {
@@ -83,66 +92,107 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
   })
 }
 
-app.get('/session', isAuthenticated, commandViaHTTP({}, {
+commandViaHTTP({
+  verb: 'get',
+  name: '/session',
   validator: v.object({}),
-  useCase: async (dependencies): Promise<Result<UserAuthentication>> =>
-    success(dependencies.auth.user as UserAuthentication),
   response: v.object({
     id: v.string,
     userIdentifier: v.string,
   }),
-}))
+}, {}, {
+  app,
+  middlewares: [isAuthenticated],
+  useCase: async (dependencies): Promise<Result<UserAuthentication>> =>
+    success(dependencies.auth.user as UserAuthentication)
+})
 
-
-app.post('/sign-up', commandViaHTTP({ withinConnection, sendMail }, {
+commandViaHTTP({
+  verb: 'post',
+  name: '/sign-up',
   validator: v.object({
     userIdentifier: v.string,
     password: v.string
   }),
+}, { withinConnection, sendMail }, {
+  app,
   useCase: register
-}))
+})
 
-app.post('/request-password-reset', commandViaHTTP({ withinConnection, sendMail }, {
+commandViaHTTP({
+  verb: 'post',
+  name: '/request-password-reset',
   validator: v.object({
     userIdentifier: v.string
   }),
+}, { withinConnection, sendMail }, {
+  app,
   useCase: requestPasswordReset
-}))
+})
 
-app.post('/reset-password-by-token', commandViaHTTP({ withinConnection }, {
+commandViaHTTP({
+  verb: 'post',
+  name: '/reset-password-by-token',
   validator: v.object({
     userIdentifier: v.string,
     password: v.string,
     token: v.string
   }),
+}, { withinConnection, sendMail }, {
+  app,
   useCase: resetPasswordByToken
-}))
-
-app.post('/sign-in', async (req, res) => {
-  return withinConnection(async ({ client }) => {
-    const user = await findUserByAuthentication({ client }, req.body)
-    if (user) {
-      res.cookie('session', JSON.stringify({ id: user.id, createdAt: new Date() }), { signed: true })
-      res.sendStatus(200)
-    } else {
-      res.clearCookie('session')
-      res.sendStatus(401)
-    }
-  })
 })
 
-app.post('/sign-out', async (req, res) => {
-  res.clearCookie('session')
-  res.sendStatus(200)
+commandViaHTTP({
+  verb: 'post',
+  name: '/sign-in',
+  validator: v.object({
+    userIdentifier: v.string,
+    password: v.string
+  }),
+  response: v.object({
+    id: v.string,
+    userIdentifier: v.string
+  }),
+}, { withinConnection }, {
+  app,
+  useCase: async ({ withinConnection, res }, args): Promise<Result<any>> => {
+    return withinConnection(async ({ client }) => {
+      const user = await findUserByAuthentication({ client }, args)
+      if (user) {
+        res.cookie('session', JSON.stringify({ id: user.id, createdAt: new Date() }), { signed: true })
+        return success(user)
+      } else {
+        res.clearCookie('session')
+        return failure('unauthorized')
+      }
+    })
+  }
 })
 
-app.post('/feature', isAuthenticated, commandViaHTTP({ withinConnection }, {
+commandViaHTTP({
+  verb: 'post',
+  name: '/sign-in',
+  validator: v.object({}),
+}, {}, {
+  app,
+  useCase: async ({ res }) => {
+    res.clearCookie('session')
+    return success('OK')
+  }
+})
+
+commandViaHTTP({
+  verb: 'post',
+  name: '/feature',
   validator: v.object({
     id: v.string,
     title: v.string,
     description: v.string
   }),
+}, { withinConnection }, {
+  app,
   useCase: createFeature
-}))
+})
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
