@@ -39,19 +39,25 @@ const pick = (props: string[], object: any) => props.reduce((filtered, key) => {
 }, {})
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete'
-type HTTPMiddleware = (req: Request, res: Response, next: NextFunction) => Promise<void> | void
-type CommandViaHTTP = <A, B, C>(http: {
+
+type CommandDefinition<A> = {
   verb: HTTPVerb,
   name: string,
   validator: v.Validator<A>,
-  response?: v.Validator<C>,
-}, dependencies: B, args: {
+  response?: v.Validator<unknown>,
+}
+
+const buildCommandDefinition = <A>(definition: CommandDefinition<A>) => definition
+
+type HTTPMiddleware = (req: Request, res: Response, next: NextFunction) => Promise<void> | void
+type CommandViaHTTP = <A, B, C>(definition: CommandDefinition<A>, args: {
   app: any,
+  dependencies: B,
   middlewares?: HTTPMiddleware[]
   useCase: (deps: B & { auth: Express.Request['auth'], res: Response }, value: A) => Promise<Result<C>>
 }) => void
 
-const commandViaHTTP: CommandViaHTTP = ({ validator, response, ...http }, dependencies, { app, useCase, middlewares }) => {
+const commandViaHTTP: CommandViaHTTP = ({ validator, response, ...http }, { app, useCase, middlewares = [], dependencies }) => {
   app[http.verb](http.name, ...(middlewares || []), async (req: Request, res: Response) => {
     const result = await validator.validate({ ...req.body, ...req.query })
     .fold(
@@ -92,7 +98,8 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
   })
 }
 
-commandViaHTTP({
+
+const SESSION_DEFINITION = buildCommandDefinition({
   verb: 'get',
   name: '/session',
   validator: v.object({}),
@@ -100,37 +107,46 @@ commandViaHTTP({
     id: v.string,
     userIdentifier: v.string,
   }),
-}, {}, {
+})
+
+commandViaHTTP(SESSION_DEFINITION, {
   app,
   middlewares: [isAuthenticated],
+  dependencies: {},
   useCase: async (dependencies): Promise<Result<UserAuthentication>> =>
     success(dependencies.auth.user as UserAuthentication)
 })
 
-commandViaHTTP({
+const SIGN_UP_DEFINITION = buildCommandDefinition({
   verb: 'post',
   name: '/sign-up',
   validator: v.object({
     userIdentifier: v.string,
     password: v.string
   }),
-}, { withinConnection, sendMail }, {
+})
+
+commandViaHTTP(SIGN_UP_DEFINITION, {
   app,
+  dependencies: { withinConnection, sendMail },
   useCase: register
 })
 
-commandViaHTTP({
+const REQUEST_PASSWORD_RESET_DEFINITION = buildCommandDefinition({
   verb: 'post',
   name: '/request-password-reset',
   validator: v.object({
     userIdentifier: v.string
-  }),
-}, { withinConnection, sendMail }, {
+  })
+})
+
+commandViaHTTP(REQUEST_PASSWORD_RESET_DEFINITION, {
   app,
+  dependencies: { withinConnection, sendMail },
   useCase: requestPasswordReset
 })
 
-commandViaHTTP({
+const RESET_PASSWORD_BY_TOKEN_DEFINITION = buildCommandDefinition({
   verb: 'post',
   name: '/reset-password-by-token',
   validator: v.object({
@@ -138,12 +154,15 @@ commandViaHTTP({
     password: v.string,
     token: v.string
   }),
-}, { withinConnection, sendMail }, {
+})
+
+commandViaHTTP(RESET_PASSWORD_BY_TOKEN_DEFINITION, {
   app,
+  dependencies: { withinConnection, sendMail },
   useCase: resetPasswordByToken
 })
 
-commandViaHTTP({
+const SIGN_IN_DEFINITION = buildCommandDefinition({
   verb: 'post',
   name: '/sign-in',
   validator: v.object({
@@ -154,8 +173,11 @@ commandViaHTTP({
     id: v.string,
     userIdentifier: v.string
   }),
-}, { withinConnection }, {
+})
+
+commandViaHTTP(SIGN_IN_DEFINITION, {
   app,
+  dependencies: { withinConnection },
   useCase: async ({ withinConnection, res }, args): Promise<Result<any>> => {
     return withinConnection(async ({ client }) => {
       const user = await findUserByAuthentication({ client }, args)
@@ -170,19 +192,22 @@ commandViaHTTP({
   }
 })
 
-commandViaHTTP({
+const SIGN_OUT_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: '/sign-in',
+  name: '/sign-out',
   validator: v.object({}),
-}, {}, {
+})
+
+commandViaHTTP(SIGN_OUT_DEFINITION, {
   app,
+  dependencies: {},
   useCase: async ({ res }) => {
     res.clearCookie('session')
     return success('OK')
   }
 })
 
-commandViaHTTP({
+const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
   verb: 'post',
   name: '/feature',
   validator: v.object({
@@ -190,8 +215,11 @@ commandViaHTTP({
     title: v.string,
     description: v.string
   }),
-}, { withinConnection }, {
+})
+
+commandViaHTTP(CREATE_FEATURE_DEFINITION, {
   app,
+  dependencies: { withinConnection },
   useCase: createFeature
 })
 
