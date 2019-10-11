@@ -5,10 +5,11 @@ import { register, requestPasswordReset, resetPasswordByToken } from './authenti
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
-import * as v from 'validation.ts'
 import cors from 'cors'
 import { createFeature } from './feature/commands'
 import { Result, failure, UserAuthentication, success } from './domain'
+import { SESSION_DEFINITION, SIGN_UP_DEFINITION, REQUEST_PASSWORD_RESET_DEFINITION, RESET_PASSWORD_BY_TOKEN_DEFINITION, SIGN_IN_DEFINITION, SIGN_OUT_DEFINITION, CREATE_FEATURE_DEFINITION, CommandDefinition } from '@story-teller/shared'
+
 const app = express()
 const port = process.env.API_PORT
 
@@ -38,16 +39,6 @@ const pick = (props: string[], object: any) => props.reduce((filtered, key) => {
   return filtered;
 }, {})
 
-type HTTPVerb = 'get' | 'post' | 'patch' | 'delete'
-
-type CommandDefinition<A> = {
-  verb: HTTPVerb,
-  name: string,
-  validator: v.Validator<A>,
-  response?: v.Validator<unknown>,
-}
-
-const buildCommandDefinition = <A>(definition: CommandDefinition<A>) => definition
 
 type HTTPMiddleware = (req: Request, res: Response, next: NextFunction) => Promise<void> | void
 type CommandViaHTTP = <A, B, C>(definition: CommandDefinition<A>, args: {
@@ -98,17 +89,6 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
   })
 }
 
-
-const SESSION_DEFINITION = buildCommandDefinition({
-  verb: 'get',
-  name: '/session',
-  validator: v.object({}),
-  response: v.object({
-    id: v.string,
-    userIdentifier: v.string,
-  }),
-})
-
 commandViaHTTP(SESSION_DEFINITION, {
   app,
   middlewares: [isAuthenticated],
@@ -117,27 +97,10 @@ commandViaHTTP(SESSION_DEFINITION, {
     success(dependencies.auth.user as UserAuthentication)
 })
 
-const SIGN_UP_DEFINITION = buildCommandDefinition({
-  verb: 'post',
-  name: '/sign-up',
-  validator: v.object({
-    userIdentifier: v.string,
-    password: v.string
-  }),
-})
-
 commandViaHTTP(SIGN_UP_DEFINITION, {
   app,
   dependencies: { withinConnection, sendMail },
   useCase: register
-})
-
-const REQUEST_PASSWORD_RESET_DEFINITION = buildCommandDefinition({
-  verb: 'post',
-  name: '/request-password-reset',
-  validator: v.object({
-    userIdentifier: v.string
-  })
 })
 
 commandViaHTTP(REQUEST_PASSWORD_RESET_DEFINITION, {
@@ -146,33 +109,10 @@ commandViaHTTP(REQUEST_PASSWORD_RESET_DEFINITION, {
   useCase: requestPasswordReset
 })
 
-const RESET_PASSWORD_BY_TOKEN_DEFINITION = buildCommandDefinition({
-  verb: 'post',
-  name: '/reset-password-by-token',
-  validator: v.object({
-    userIdentifier: v.string,
-    password: v.string,
-    token: v.string
-  }),
-})
-
 commandViaHTTP(RESET_PASSWORD_BY_TOKEN_DEFINITION, {
   app,
   dependencies: { withinConnection, sendMail },
   useCase: resetPasswordByToken
-})
-
-const SIGN_IN_DEFINITION = buildCommandDefinition({
-  verb: 'post',
-  name: '/sign-in',
-  validator: v.object({
-    userIdentifier: v.string,
-    password: v.string
-  }),
-  response: v.object({
-    id: v.string,
-    userIdentifier: v.string
-  }),
 })
 
 commandViaHTTP(SIGN_IN_DEFINITION, {
@@ -192,12 +132,6 @@ commandViaHTTP(SIGN_IN_DEFINITION, {
   }
 })
 
-const SIGN_OUT_DEFINITION = buildCommandDefinition({
-  verb: 'post',
-  name: '/sign-out',
-  validator: v.object({}),
-})
-
 commandViaHTTP(SIGN_OUT_DEFINITION, {
   app,
   dependencies: {},
@@ -205,16 +139,6 @@ commandViaHTTP(SIGN_OUT_DEFINITION, {
     res.clearCookie('session')
     return success('OK')
   }
-})
-
-const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
-  verb: 'post',
-  name: '/feature',
-  validator: v.object({
-    id: v.string,
-    title: v.string,
-    description: v.string
-  }),
 })
 
 commandViaHTTP(CREATE_FEATURE_DEFINITION, {

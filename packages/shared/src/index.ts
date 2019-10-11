@@ -1,7 +1,7 @@
 import * as v from 'validation.ts'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete'
-type CommandDefinition<A> = {
+export type CommandDefinition<A> = {
   verb: HTTPVerb
   name: string
   validator: v.Validator<A>
