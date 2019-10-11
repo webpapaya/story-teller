@@ -13,33 +13,28 @@ const createHTTPInstance = (options: { baseURL: string }) => {
       ...defaultOptions,
       method: 'GET'
     }),
-    post: (path: string, body: object) => {
+    post: (path: string, body: unknown) => {
       return window.fetch(joinURL(options.baseURL, path), {
         ...defaultOptions,
         method: 'POST',
         body: JSON.stringify(body)
       })
     },
-    patch: (path: string, body: object) => window.fetch(joinURL(options.baseURL, path), {
+    patch: (path: string, body: unknown) => window.fetch(joinURL(options.baseURL, path), {
       ...defaultOptions,
       method: 'PATCH',
       body: JSON.stringify(body)
     }),
-    put: (path: string, body: object) => window.fetch(joinURL(options.baseURL, path), {
+    put: (path: string, body: unknown) => window.fetch(joinURL(options.baseURL, path), {
       ...defaultOptions,
       method: 'PUT',
       body: JSON.stringify(body)
     }),
-    delete: (path: string, body: object) => window.fetch(joinURL(options.baseURL, path), {
+    delete: (path: string, body: unknown) => window.fetch(joinURL(options.baseURL, path), {
       ...defaultOptions,
       method: 'DELETE',
       body: JSON.stringify(body)
-    }),
-
-    getJSON: (path: string) => window.fetch(joinURL(options.baseURL, path), {
-      ...defaultOptions,
-      method: 'GET'
-    }).then((res) => res.json())
+    })
   }
 }
 

@@ -49,7 +49,7 @@ type CommandViaHTTP = <A, B, C>(definition: CommandDefinition<A>, args: {
 }) => void
 
 const commandViaHTTP: CommandViaHTTP = ({ validator, response, ...http }, { app, useCase, middlewares = [], dependencies }) => {
-  app[http.verb](http.name, ...(middlewares || []), async (req: Request, res: Response) => {
+  app[http.verb](`/${http.name}`, ...(middlewares || []), async (req: Request, res: Response) => {
     const result = await validator.validate({ ...req.body, ...req.query })
       .fold(
         () => failure({ isError: true, body: 'ValidationError' }),

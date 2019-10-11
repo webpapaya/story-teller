@@ -12,7 +12,7 @@ const buildCommandDefinition = <A>(definition: CommandDefinition<A>) => definiti
 
 export const SESSION_DEFINITION = buildCommandDefinition({
   verb: 'get',
-  name: '/session',
+  name: 'session',
   validator: v.object({}),
   response: v.object({
     id: v.string,
@@ -22,7 +22,7 @@ export const SESSION_DEFINITION = buildCommandDefinition({
 
 export const SIGN_UP_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: '/sign-up',
+  name: 'sign-up',
   validator: v.object({
     userIdentifier: v.string,
     password: v.string
@@ -31,7 +31,7 @@ export const SIGN_UP_DEFINITION = buildCommandDefinition({
 
 export const REQUEST_PASSWORD_RESET_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: '/request-password-reset',
+  name: 'request-password-reset',
   validator: v.object({
     userIdentifier: v.string
   })
@@ -39,7 +39,7 @@ export const REQUEST_PASSWORD_RESET_DEFINITION = buildCommandDefinition({
 
 export const RESET_PASSWORD_BY_TOKEN_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: '/reset-password-by-token',
+  name: 'reset-password-by-token',
   validator: v.object({
     userIdentifier: v.string,
     password: v.string,
@@ -49,7 +49,7 @@ export const RESET_PASSWORD_BY_TOKEN_DEFINITION = buildCommandDefinition({
 
 export const SIGN_IN_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: '/sign-in',
+  name: 'sign-in',
   validator: v.object({
     userIdentifier: v.string,
     password: v.string
@@ -62,13 +62,13 @@ export const SIGN_IN_DEFINITION = buildCommandDefinition({
 
 export const SIGN_OUT_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: '/sign-out',
+  name: 'sign-out',
   validator: v.object({})
 })
 
 export const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
   verb: 'post',
-  name: '/feature',
+  name: 'feature',
   validator: v.object({
     id: v.string,
     title: v.string,
