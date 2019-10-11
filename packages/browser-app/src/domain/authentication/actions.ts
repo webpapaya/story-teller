@@ -22,6 +22,7 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _,
     ].join('/').toUpperCase(),
     payload
   })
+
   return payload
 }
 

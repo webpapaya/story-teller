@@ -1,21 +1,25 @@
 import React from 'react';
 import { Provider } from 'react-redux'
-import { BrowserRouter, Route } from 'react-router-dom'
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
+import { store } from './domain';
+
 import SignIn from './containers/user-sign-in';
 import SignUp from './containers/user-sign-up'
-import { store } from './domain';
-import Page from './components/page';
-import WithinSession from './containers/within-session';
+import FeatureCreate from './containers/feature-create/organism'
+import ProtectedRoute from './containers/protected-route';
 
 const App = () => (
-  <Provider store={store}>
-    <BrowserRouter>
-      <WithinSession>test</WithinSession>
-      <Route path="/sign-in" component={SignIn} />
-      <Route path="/sign-up" component={SignUp} />
-    </BrowserRouter>
-  </Provider>
+  <BrowserRouter>
+    <Provider store={store}>
+        <Switch>
+          <ProtectedRoute path='/' component={FeatureCreate} />
 
+          <Route path="/sign-up" component={SignUp} />
+          <Route path="/sign-in" component={SignIn} />
+          <Redirect to="/sign-in" exact />
+        </Switch>
+    </Provider>
+  </BrowserRouter>
 )
 
 export default App

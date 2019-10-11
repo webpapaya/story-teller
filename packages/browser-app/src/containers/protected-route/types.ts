@@ -1,10 +1,11 @@
 import { UnpackThunk } from '../../domain/types'
 import { getAuthenticatedUser } from '../../domain/authentication/actions'
+import {RouteProps} from 'react-router-dom'
 
-export type OwnPropsType = { children: React.ReactNode };
-
+export type OwnPropsType = RouteProps
 export type StatePropsType = {
-  isAuthenticated: boolean
+  isAuthenticated: boolean,
+  isLoading: boolean,
 };
 
 export type DispatchPropsType = {

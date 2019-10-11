@@ -1,6 +1,6 @@
 import React from 'react';
-import isForm from '../../is-form';
 import * as v from 'validation.ts'
+import isForm from '../../is-form';
 import { InputText } from '../../components/input-text';
 import { InputTextarea } from '../../components/editor/editor';
 import styles from './organism.module.css'
