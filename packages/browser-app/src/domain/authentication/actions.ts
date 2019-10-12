@@ -1,6 +1,6 @@
+import { AnyAction } from 'redux'
 import { ActionCreator } from '../types'
 import { SESSION_DEFINITION, CommandDefinition, SIGN_IN_DEFINITION, SIGN_UP_DEFINITION, SIGN_OUT_DEFINITION } from '@story-teller/shared'
-import { AnyAction } from 'redux'
 
 type FetchViaHTTP = <A extends CommandDefinition<unknown, unknown>>(
   definition: A
@@ -12,14 +12,14 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _,
     definition.action
   ].filter(x => x).join('/')
 
-  const payload = await http[definition.verb](`/${route}`, body).then((r) => r.json())
+  const payload = await http[definition.verb](`/${route}`, body).then((r) => r.json()).catch(() => undefined)
 
   dispatch({
     type: [
       definition.model,
       definition.action || 'FETCH',
       'SUCCESS'
-    ].join('/').toUpperCase(),
+    ].join('/').replace(/-/g, '_').toUpperCase(),
     payload
   })
 

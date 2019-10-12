@@ -1,7 +1,10 @@
+import { History } from 'history'
 import { UnpackThunk } from '../../domain/types'
 import { signIn } from '../../domain/authentication/actions'
 
-export type OwnPropsType = {};
+export type OwnPropsType = {
+  history: History
+};
 export type StatePropsType = {};
 
 export type DispatchPropsType = {

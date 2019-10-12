@@ -5,12 +5,12 @@ import { DispatchPropsType, StatePropsType, OwnPropsType } from './types'
 import hasSideEffect from '../../has-side-effect';
 import Organism from './organism';
 
-const mapStateToProps: MapStateToProps<OwnPropsType, StatePropsType> = (state) => ({
+const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state) => ({
   isAuthenticated: !!state.authentication[0],
   isLoading: false,
 })
 
-const mapDispatchToProps: MapDispatchToProps<DispatchPropsType> = (dispatch) => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch) => ({
   sideEffect: () => dispatch(getAuthenticatedUser({}))
 })
 

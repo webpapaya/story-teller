@@ -7,16 +7,16 @@ import SignIn from './containers/user-sign-in';
 import SignUp from './containers/user-sign-up'
 import FeatureCreate from './containers/feature-create/organism'
 import ProtectedRoute from './containers/protected-route';
+import Navigation from './containers/navigation';
 
 const App = () => (
   <BrowserRouter>
     <Provider store={store}>
+        <ProtectedRoute path='*' component={Navigation} />
         <Switch>
-          <ProtectedRoute path='/' component={FeatureCreate} />
-
           <Route path="/sign-up" component={SignUp} />
           <Route path="/sign-in" component={SignIn} />
-          <Redirect to="/sign-in" exact />
+          <ProtectedRoute path='/' component={FeatureCreate} />
         </Switch>
     </Provider>
   </BrowserRouter>

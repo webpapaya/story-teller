@@ -1,14 +1,11 @@
-import { History } from 'history';
 import { UnpackThunk } from '../../domain/types'
-import { signUp } from '../../domain/authentication/actions'
+import { signOut } from '../../domain/authentication/actions'
 
-export type OwnPropsType = {
-  history: History
-};
+export type OwnPropsType = {};
 export type StatePropsType = {};
 
 export type DispatchPropsType = {
-  onSubmit: UnpackThunk<typeof signUp>
+  onSignOut: UnpackThunk<typeof signOut>
 };
 
 export type OrganismPropsType = OwnPropsType & StatePropsType & Omit<DispatchPropsType, 'sideEffect'>;

@@ -13,11 +13,12 @@ export type ActionCreator<Args, ReturnValue, Actions extends AnyAction> = (
   arg: Args
 ) => ThunkAction<Promise<ReturnValue>, AppState, ExternalDependencies, Actions>
 
-export type MapStateToProps<OwnPropsType, ReturnValue> =
+export type MapStateToProps<ReturnValue, OwnPropsType> =
   (state: AppState, ownProps: OwnPropsType) => ReturnValue;
 
-export type MapDispatchToProps<ReturnValue> = (
-  dispatch: ThunkDispatch<AppState, ExternalDependencies, AnyAction>
+export type MapDispatchToProps<ReturnValue, OwnPropsType> = (
+  dispatch: ThunkDispatch<AppState, ExternalDependencies, AnyAction>,
+  ownProps: OwnPropsType,
 ) => ReturnValue;
 
 export type UnpackThunk<ActionCreator extends (...args: any) => any> = (

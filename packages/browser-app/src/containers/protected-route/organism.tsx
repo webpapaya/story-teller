@@ -9,7 +9,7 @@ const Organism = ({ isAuthenticated, isLoading, ...props }: OrganismPropsType) =
   } else if (isLoading) {
     return <Loading />
   } else {
-    return <Redirect to='/' />
+    return <Redirect to='/sign-in' />
   }
 }
 

@@ -8,6 +8,7 @@ type ButtonProps = {
   size?: 'regular' | 'small'
   variant?: 'solid' | 'link' | 'outline'
   children: React.ReactNode,
+  onClick?: () => any
   type?: 'button' | 'submit' | 'reset'
   block?: boolean
   disabled?: boolean
@@ -22,9 +23,10 @@ export const Button = ({
   block = false,
   disabled = false,
   variant = 'solid',
-  marginBottom = false
+  marginBottom = false,
+  onClick
 }: ButtonProps) => (
-  <button type={type} className={
+  <button type={type} onClick={onClick} className={
     css(
       theme[color],
       styles[`${size}Size`],
