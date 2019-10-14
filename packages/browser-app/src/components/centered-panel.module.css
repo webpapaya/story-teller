@@ -1,0 +1,13 @@
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-white);
+  padding: var(--space-lg) var(--space-sm) var(--space-md);
+  box-shadow: var(--shadow-1);
+  max-width: 400px;
+  margin: 10px;
+  width: 100%;
+  margin: auto;
+}

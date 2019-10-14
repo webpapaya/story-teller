@@ -94,7 +94,6 @@
 .linkVariant {
   color: var(--theme-color-500);
   display: inline;
-  padding: 0 var(--space-xxs) 0 0;
 }
 
 /* variant: outline */

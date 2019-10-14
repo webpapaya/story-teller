@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { MapDispatchToProps, MapStateToProps } from '../../domain/types';
-import { getAuthenticatedUser, signIn } from '../../domain/authentication/actions';
+import { getAuthenticatedUser } from '../../domain/authentication/actions';
 import { DispatchPropsType, StatePropsType, OwnPropsType } from './types'
 import hasSideEffect from '../../has-side-effect';
 import Organism from './organism';

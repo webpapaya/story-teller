@@ -1,6 +1,6 @@
 import { AnyAction } from 'redux'
 import { ActionCreator } from '../types'
-import { SESSION_DEFINITION, CommandDefinition, SIGN_IN_DEFINITION, SIGN_UP_DEFINITION, SIGN_OUT_DEFINITION } from '@story-teller/shared'
+import { SESSION_DEFINITION, CommandDefinition, SIGN_IN_DEFINITION, SIGN_UP_DEFINITION, SIGN_OUT_DEFINITION, REQUEST_PASSWORD_RESET_DEFINITION } from '@story-teller/shared'
 
 type FetchViaHTTP = <A extends CommandDefinition<unknown, unknown>>(
   definition: A
@@ -29,4 +29,5 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _,
 export const signIn = fetchViaHTTP(SIGN_IN_DEFINITION)
 export const signUp = fetchViaHTTP(SIGN_UP_DEFINITION)
 export const signOut = fetchViaHTTP(SIGN_OUT_DEFINITION)
+export const requestPasswordReset = fetchViaHTTP(REQUEST_PASSWORD_RESET_DEFINITION);
 export const getAuthenticatedUser = fetchViaHTTP(SESSION_DEFINITION)

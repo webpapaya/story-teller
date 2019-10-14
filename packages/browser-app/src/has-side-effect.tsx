@@ -44,7 +44,7 @@ const hasSideEffect: hasSideEffectType = ({
                 .sideEffect(props)
                 .then(() => setAdditionalProps({isLoading: false, wasLoaded: true, error: undefined}))
                 .catch(error => setAdditionalProps({isLoading: false, wasLoaded: false, error}));
-        }, propsToListen.map(propName => getObjectProperty(propName, props)));
+        }, propsToListen.map(propName => getObjectProperty(propName, props))); // eslint-disable-line react-hooks/exhaustive-deps
 
         if (ErrorComponent && additionalProps.wasLoaded && (hasRequiredProps(requiredProps, props) || additionalProps.error)) {
             return <ErrorComponent />;

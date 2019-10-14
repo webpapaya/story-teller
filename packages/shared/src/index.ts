@@ -40,7 +40,7 @@ export const REQUEST_PASSWORD_RESET_DEFINITION = buildCommandDefinition({
   validator: v.object({
     userIdentifier: v.string
   }),
-  response: undefined
+  response: v.object({})
 })
 
 export const RESET_PASSWORD_BY_TOKEN_DEFINITION = buildCommandDefinition({
