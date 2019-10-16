@@ -6,7 +6,7 @@ import { store } from './domain';
 import SignIn from './containers/user-sign-in';
 import SignUp from './containers/user-sign-up'
 import RequestPasswordReset from './containers/user-request-password-reset'
-import FeatureCreate from './containers/feature-create/organism'
+import FeatureCreate from './containers/feature-create'
 import ProtectedRoute from './containers/protected-route';
 import Navigation from './containers/navigation';
 import CenteredPanel from './components/centered-panel';

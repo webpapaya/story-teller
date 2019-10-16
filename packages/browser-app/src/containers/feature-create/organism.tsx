@@ -1,33 +1,44 @@
 import React from 'react';
 import * as v from 'validation.ts'
+import uuid from 'uuid'
 import isForm from '../../is-form';
 import { InputText } from '../../components/input-text';
-import { InputTextarea } from '../../components/editor/editor';
+import { Button } from '../../components/button';
+import { OrganismPropsType } from './types';
 import styles from './organism.module.css'
+import { InputHidden } from '../../components/input-hidden';
 
-const Organism = isForm({
+const Organism = isForm<any, OrganismPropsType>({
   defaultValues: {
+    id: '',
     title: '',
     description: ''
   },
   schema: v.object({
+    id: v.string,
     title: v.string,
     description: v.string,
   }),
 }, ({ values, onValueChange, onSubmit }) => (
   <form onSubmit={onSubmit} className={styles.form}>
+    <InputHidden
+      name="id"
+      defaultValue={uuid()}
+      onChange={onValueChange}
+    />
     <InputText
       label="Title"
       name="title"
       value={values.title}
       onChange={onValueChange}
     />
-    <InputTextarea
-
+    <InputText
+      label="Description"
+      name="description"
+      value={values.description}
+      onChange={onValueChange}
     />
-    {/* <nav className={styles.actions}>
-      <Button>Create</Button>
-    </nav> */}
+    <Button type="submit">Save</Button>
   </form>
 ))
 
