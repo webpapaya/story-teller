@@ -1,3 +1,4 @@
+import * as v from 'validation.ts'
 import express, { Request, Response, NextFunction } from 'express'
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
@@ -16,8 +17,10 @@ import {
   SIGN_IN_DEFINITION,
   SIGN_OUT_DEFINITION,
   CREATE_FEATURE_DEFINITION,
-  CommandDefinition
+  CommandDefinition,
+  LIST_FEATURES_DEFINITION
 } from '@story-teller/shared'
+import { whereFeature } from './feature/queries'
 
 const app = express()
 const port = process.env.API_PORT
@@ -71,8 +74,18 @@ const commandViaHTTP: CommandViaHTTP = ({ validator, response, ...http }, { app,
       )
 
     if (response && result.isSuccess) {
-      // @ts-ignore
-      result.body = pick(Object.keys(response.props), result.body)
+
+      if (response.constructor.name === 'ArrayValidator') {
+
+        // @ts-ignore
+        result.body = result.body.map((entity) => {
+          // @ts-ignore
+          return pick(Object.keys(response.validator.props), entity)
+        })
+      } else {
+        // @ts-ignore
+        result.body = pick(Object.keys(response.props), result.body)
+      }
     }
 
     return resultToHTTP(res, result)
@@ -159,6 +172,12 @@ commandViaHTTP(CREATE_FEATURE_DEFINITION, {
   app,
   dependencies: { withinConnection },
   useCase: createFeature
+})
+
+commandViaHTTP(LIST_FEATURES_DEFINITION, {
+  app,
+  dependencies: { withinConnection },
+  useCase: whereFeature
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
