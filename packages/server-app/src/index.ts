@@ -1,4 +1,3 @@
-import * as v from 'validation.ts'
 import express, { Request, Response, NextFunction } from 'express'
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
@@ -17,10 +16,10 @@ import {
   SIGN_IN_DEFINITION,
   SIGN_OUT_DEFINITION,
   CREATE_FEATURE_DEFINITION,
-  CommandDefinition,
   LIST_FEATURES_DEFINITION
 } from '@story-teller/shared'
 import { whereFeature } from './feature/queries'
+import { commandViaHTTP } from './command-via-http'
 
 const app = express()
 const port = process.env.API_PORT
@@ -42,65 +41,6 @@ app.use(cors({
   origin: (process.env.CORS_WHITELIST || '').split(','),
   credentials: true
 }))
-
-const pick = (props: string[], object: any) => props.reduce((filtered, key) => {
-  // @ts-ignore
-  if (object[key]) {
-    // @ts-ignore
-    filtered[key] = object[key]
-  }
-  return filtered
-}, {})
-
-type HTTPMiddleware = (req: Request, res: Response, next: NextFunction) => Promise<void> | void
-type CommandViaHTTP = <A, D, B, C>(definition: CommandDefinition<A, D>, args: {
-  app: any
-  dependencies: B
-  middlewares?: HTTPMiddleware[]
-  useCase: (deps: B & { auth: Express.Request['auth'], res: Response }, value: A) => Promise<Result<C>>
-}) => void
-
-const commandViaHTTP: CommandViaHTTP = ({ validator, response, ...http }, { app, useCase, middlewares = [], dependencies }) => {
-  const route = [
-    http.model,
-    http.action
-  ].filter(x => x).join('/')
-
-  app[http.verb](`/${route}`, ...(middlewares || []), async (req: Request, res: Response) => {
-    const result = await validator.validate({ ...req.body, ...req.query })
-      .fold(
-        () => failure({ isError: true, body: 'ValidationError' }),
-        (v) => useCase({ ...dependencies, auth: req.auth, res }, v)
-      )
-
-    if (response && result.isSuccess) {
-
-      if (response.constructor.name === 'ArrayValidator') {
-
-        // @ts-ignore
-        result.body = result.body.map((entity) => {
-          // @ts-ignore
-          return pick(Object.keys(response.validator.props), entity)
-        })
-      } else {
-        // @ts-ignore
-        result.body = pick(Object.keys(response.props), result.body)
-      }
-    }
-
-    return resultToHTTP(res, result)
-  })
-}
-
-const resultToHTTP = (res: Response, result: Result<unknown>) => {
-  if (result.isSuccess) {
-    res.send(result.body)
-    res.status(200)
-  } else {
-    res.send(result.body)
-    res.status(400)
-  }
-}
 
 const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
   await withinConnection(async ({ client }) => {

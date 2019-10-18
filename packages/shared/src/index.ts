@@ -9,7 +9,7 @@ export type CommandDefinition<A, B> = {
   response: B extends object ? v.Validator<B> : undefined
 }
 
-const buildCommandDefinition = <A, B>(definition: CommandDefinition<A, B>) => definition
+export const buildCommandDefinition = <A, B>(definition: CommandDefinition<A, B>) => definition
 
 export const SESSION_DEFINITION = buildCommandDefinition({
   verb: 'get',
@@ -80,11 +80,23 @@ export const SIGN_OUT_DEFINITION = buildCommandDefinition({
 export const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
   verb: 'post',
   action: 'create',
-  model: 'user',
+  model: 'feature',
   validator: v.object({
     id: v.string,
     title: v.string,
     description: v.string
   }),
   response: undefined
+})
+
+export const LIST_FEATURES_DEFINITION = buildCommandDefinition({
+  verb: 'get',
+  action: 'fetch',
+  model: 'feature',
+  validator: v.object({}),
+  response: v.array(v.object({
+    id: v.string,
+    title: v.string,
+    description: v.string
+  }))
 })
