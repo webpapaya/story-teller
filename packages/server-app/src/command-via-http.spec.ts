@@ -55,6 +55,7 @@ describe('executeCommand', () => {
     })
   }, {
     useCase: () => success({ id: 2, userIdentifier: 'Sepp' }),
+    auth: { user: null },
     dependencies: {}
   })
 

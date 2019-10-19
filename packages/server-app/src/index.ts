@@ -24,16 +24,6 @@ import { commandViaHTTP } from './command-via-http'
 const app = express()
 const port = process.env.API_PORT
 
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Express {
-    interface Request {
-      auth: {
-        user: UserAuthentication | null
-      }
-    }
-  }
-}
 
 app.use(cookieParser(process.env.SECRET_KEY_BASE))
 app.use(bodyParser())

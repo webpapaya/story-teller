@@ -6,7 +6,6 @@ import Organism from './organism'
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => ({
   onSubmit: async (values) => {
-    await dispatch(whereFeature({}))
     await dispatch(createFeature(values))
   }
 })

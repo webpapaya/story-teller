@@ -19,20 +19,24 @@ export const attributeFiltering = <A extends v.Validator<unknown>>(schema: A | u
   return schema
     .validate(value)
     .fold(
-      (e) => { throw e },
+      (e) => {
+        console.error(e)
+        throw e;
+       },
       (s) => s
     )
 }
 
 type ExecuteCommand = <A, B, C, D extends Result<unknown>>(definition: CommandDefinition<A, B>, args: {
   dependencies: C
+  auth: Express.Request['auth'],
   useCase: (deps: C & { auth: Express.Request['auth'] }, value: A) => D
 }) => (params: any) => Promise<Result<unknown>>
 
 export const executeCommand: ExecuteCommand = (definition, args) => async (params) => {
   const result = await definition.validator.validate(params).fold(
     (properties) => failure({ type: 'ValidationError', properties }),
-    (v) => args.useCase({ ...args.dependencies, auth: params.auth }, v)
+    (v) => args.useCase({ ...args.dependencies, auth: args.auth }, v)
   )
 
   if (result.isSuccess) {
@@ -44,11 +48,12 @@ export const executeCommand: ExecuteCommand = (definition, args) => async (param
 
 const resultToHTTP = (res: Response, result: Result<unknown>) => {
   if (result.isSuccess) {
-    res.send(result.body)
     res.status(200)
-  } else {
     res.send(result.body)
+
+  } else {
     res.status(400)
+    res.send(result.body)
   }
 }
 
@@ -68,12 +73,17 @@ export const commandViaHTTP: CommandViaHTTP = (definition, { app, useCase, middl
   ].filter(x => x).join('/')
 
   app[definition.verb](`/${route}`, ...(middlewares || []), async (req: Request, res: Response) => {
-    const result = await executeCommand(definition, {
+    const command = await executeCommand(definition, {
       dependencies: { ...dependencies, res },
+      auth: req.auth,
       // @ts-ignore
       useCase
-    })({ ...req.body, ...req.query })
+    })
 
-    return resultToHTTP(res, result)
+    try {
+      return resultToHTTP(res, await command({ ...req.body, ...req.query }))
+    } catch (e) {
+      return resultToHTTP(res, failure(e))
+    }
   })
 }

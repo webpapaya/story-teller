@@ -7,6 +7,7 @@ import SignIn from './containers/user-sign-in';
 import SignUp from './containers/user-sign-up'
 import RequestPasswordReset from './containers/user-request-password-reset'
 import FeatureCreate from './containers/feature-create'
+import FeatureList from './containers/feature-list'
 import ProtectedRoute from './containers/protected-route';
 import Navigation from './containers/navigation';
 import CenteredPanel from './components/centered-panel';
@@ -40,7 +41,12 @@ const App = () => (
               </CenteredPanel>
             )}
           />
-          <ProtectedRoute path='/' component={FeatureCreate} />
+          <ProtectedRoute path='/' component={() => (
+            <>
+              <FeatureCreate />
+              <FeatureList />
+            </>
+          )} />
         </Switch>
     </Provider>
   </BrowserRouter>
