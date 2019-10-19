@@ -11,13 +11,17 @@ export type CommandDefinition<A, B> = {
 
 export const buildCommandDefinition = <A, B>(definition: CommandDefinition<A, B>) => definition
 
+export const nonEmptyString = v.string.filter((value) => value.length > 0)
+export const uuid = v.string.filter((value) =>
+  !!value.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i))
+
 export const SESSION_DEFINITION = buildCommandDefinition({
   verb: 'get',
   model: 'user',
   action: 'session',
   validator: v.object({}),
   response: v.object({
-    id: v.string,
+    id: uuid,
     userIdentifier: v.string
   })
 })
@@ -27,8 +31,8 @@ export const SIGN_UP_DEFINITION = buildCommandDefinition({
   action: 'sign-up',
   model: 'user',
   validator: v.object({
-    userIdentifier: v.string,
-    password: v.string
+    userIdentifier: nonEmptyString,
+    password: nonEmptyString
   }),
   response: undefined
 })
@@ -38,7 +42,7 @@ export const REQUEST_PASSWORD_RESET_DEFINITION = buildCommandDefinition({
   action: 'request-password-reset',
   model: 'user',
   validator: v.object({
-    userIdentifier: v.string
+    userIdentifier: nonEmptyString
   }),
   response: v.object({})
 })
@@ -48,9 +52,9 @@ export const RESET_PASSWORD_BY_TOKEN_DEFINITION = buildCommandDefinition({
   action: 'reset-password-by-token',
   model: 'user',
   validator: v.object({
-    userIdentifier: v.string,
-    password: v.string,
-    token: v.string
+    userIdentifier: nonEmptyString,
+    password: nonEmptyString,
+    token: nonEmptyString
   }),
   response: undefined
 })
@@ -60,12 +64,12 @@ export const SIGN_IN_DEFINITION = buildCommandDefinition({
   action: 'sign-in',
   model: 'user',
   validator: v.object({
-    userIdentifier: v.string,
-    password: v.string
+    userIdentifier: nonEmptyString,
+    password: nonEmptyString
   }),
   response: v.object({
-    id: v.string,
-    userIdentifier: v.string
+    id: uuid,
+    userIdentifier: nonEmptyString
   })
 })
 
@@ -82,9 +86,9 @@ export const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
   action: 'create',
   model: 'feature',
   validator: v.object({
-    id: v.string,
-    title: v.string,
-    description: v.string
+    id: uuid,
+    title: nonEmptyString,
+    description: nonEmptyString
   }),
   response: undefined
 })
@@ -95,8 +99,8 @@ export const LIST_FEATURES_DEFINITION = buildCommandDefinition({
   model: 'feature',
   validator: v.object({}),
   response: v.array(v.object({
-    id: v.string,
-    title: v.string,
-    description: v.string
+    id: uuid,
+    title: nonEmptyString,
+    description: nonEmptyString
   }))
 })

@@ -94,7 +94,7 @@ commandViaHTTP(SIGN_OUT_DEFINITION, {
   dependencies: {},
   useCase: async ({ res }) => {
     res.clearCookie('session')
-    return success('OK')
+    return success({})
   }
 })
 

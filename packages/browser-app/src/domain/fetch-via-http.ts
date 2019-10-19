@@ -29,7 +29,7 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _,
 
   try {
     const payload = await http[definition.verb](`/${route}`, body)
-      .then((r) => r.json()).catch(() => undefined)
+      .then((r) => r.json())
 
     dispatch({
       type: buildType([
