@@ -1,9 +1,9 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions'
-import { storiesOf } from '../../storybook';
-import Organism from './organism';
+import { storiesOf } from '../../../storybook';
+import Organism from '.';
 
-storiesOf('FeatureCreate', module)
+storiesOf('FeatureList', module)
   .add('default', () => (
     <Organism features={[]}/>
   ))
