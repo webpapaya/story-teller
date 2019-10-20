@@ -1,5 +1,11 @@
+import qs from 'qs';
+
 const joinURL = (...parts: string[]) =>
-  parts.join('/').replace(/([^:]\/)\/+/g, '$1')
+  parts
+    .join('/')
+    .replace(/([^:]\/)\/+/g, '$1')
+    .replace(/\?$/, '')
+    .replace('/?', '?')
 
 const parseResponse = (res: Response) => {
   if (res.status < 400) {
@@ -17,7 +23,7 @@ const createHTTPInstance = (options: { baseURL: string }) => {
   }
 
   return {
-    get: (path: string) => window.fetch(joinURL(options.baseURL, path), {
+    get: (path: string, params: unknown = {}) => window.fetch(joinURL(options.baseURL, path, `?${qs.stringify(params)}`), {
       ...defaultOptions,
       method: 'GET'
     }).then(parseResponse),

@@ -8,7 +8,8 @@ exports.up = function (db) {
       title                      text not null,
       description                text not null,
       previous_feature_id        uuid REFERENCES public.feature(id) ON DELETE CASCADE,
-      next_feature_id            uuid REFERENCES public.feature(id) ON DELETE CASCADE
+      next_feature_id            uuid REFERENCES public.feature(id) ON DELETE CASCADE,
+      created_at                 timestamp without time zone NOT NULL default (now() at time zone 'utc')
     );
   `)
 }

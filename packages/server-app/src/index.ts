@@ -17,9 +17,10 @@ import {
   SIGN_OUT_DEFINITION,
   CREATE_FEATURE_DEFINITION,
   LIST_FEATURES_DEFINITION,
-  CREATE_FEATURE_REVISION_DEFINITION
+  CREATE_FEATURE_REVISION_DEFINITION,
+  LIST_FEATURE_REVISIONS_DEFINITION
 } from '@story-teller/shared'
-import { whereFeature } from './feature/queries'
+import { whereFeature, whereFeatureRevision } from './feature/queries'
 import { commandViaHTTP } from './command-via-http'
 
 const app = express()
@@ -117,5 +118,13 @@ commandViaHTTP(LIST_FEATURES_DEFINITION, {
   dependencies: { withinConnection },
   useCase: whereFeature
 })
+
+commandViaHTTP(LIST_FEATURE_REVISIONS_DEFINITION, {
+  app,
+  dependencies: { withinConnection },
+  useCase: whereFeatureRevision
+})
+
+
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

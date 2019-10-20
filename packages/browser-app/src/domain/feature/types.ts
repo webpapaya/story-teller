@@ -8,6 +8,8 @@ export type Action<Type extends string, Payload> = {
 
 export type Actions =
   | Action<'FEATURE/FETCH/SUCCESS', Feature[]>
+  | Action<'FEATURE_REVISION/FETCH/SUCCESS', Feature[]>
+
   | Action<'FEATURE/CREATE/SUCCESS', Feature>
-  | Action<'FEATURE/CREATE_REVISION/SUCCESS', Feature & { previousFeatureId: string }>
+  | Action<'FEATURE/CREATE_REVISION/SUCCESS', Feature>
 

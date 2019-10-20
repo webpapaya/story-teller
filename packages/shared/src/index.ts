@@ -81,6 +81,16 @@ export const SIGN_OUT_DEFINITION = buildCommandDefinition({
   response: v.object({}),
 })
 
+
+const FEATURE_RESOURCE = v.object({
+  id: uuid,
+  title: nonEmptyString,
+  description: nonEmptyString,
+  previousFeatureId: v.union(uuid, v.null),
+  nextFeatureId: v.union(uuid, v.null),
+  originalFeatureId: uuid
+})
+
 export const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
   verb: 'post',
   action: 'create',
@@ -90,7 +100,7 @@ export const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
     title: nonEmptyString,
     description: nonEmptyString
   }),
-  response: undefined
+  response: FEATURE_RESOURCE
 })
 
 export const CREATE_FEATURE_REVISION_DEFINITION = buildCommandDefinition({
@@ -103,12 +113,7 @@ export const CREATE_FEATURE_REVISION_DEFINITION = buildCommandDefinition({
     description: nonEmptyString,
     previousFeatureId: uuid
   }),
-  response: v.object({
-    id: uuid,
-    title: nonEmptyString,
-    description: nonEmptyString,
-    previousFeatureId: uuid
-  })
+  response: FEATURE_RESOURCE
 })
 
 export const LIST_FEATURES_DEFINITION = buildCommandDefinition({
@@ -116,9 +121,13 @@ export const LIST_FEATURES_DEFINITION = buildCommandDefinition({
   action: 'fetch',
   model: 'feature',
   validator: v.object({}),
-  response: v.array(v.object({
-    id: uuid,
-    title: nonEmptyString,
-    description: nonEmptyString
-  }))
+  response: v.array(FEATURE_RESOURCE)
+})
+
+export const LIST_FEATURE_REVISIONS_DEFINITION = buildCommandDefinition({
+  verb: 'get',
+  action: 'fetch',
+  model: 'feature-revision',
+  validator: v.object({ id: uuid }),
+  response: v.array(FEATURE_RESOURCE)
 })

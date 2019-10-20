@@ -10,6 +10,7 @@
     "db:migrate:create": "npm run env -- db-migrate create",
     "db:migrate:up": "npm run env -- db-migrate up",
     "db:migrate:down": "npm run env -- db-migrate down",
+    "db:migrate:redo": "npm run db:migrate:down && npm run db:migrate:up",
     "start": "npm run env -- ts-node-dev --inspect --notify=0 --respawn ./src/index.ts",
     "lint": "eslint --ext js,ts --ignore-path .gitignore .",
     "test": "ENV_FILE=.env.test npm run env -- mocha -r ts-node/register --timeout 500000 --watch-extensions ts $(find src -name '*.spec.ts')",

@@ -8,22 +8,18 @@ type CreateFeature = (
 ) => Promise<Result<Feature>>
 
 export const createFeature: CreateFeature = async (deps, params) => {
-  return deps.withinConnection(async ({ client }) => {
-    const result = await client.query(sql`
-      INSERT INTO feature (id, title, description)
-      VALUES (${params.id}, ${params.title}, ${params.description})
-      returning *
-    `)
-    return success(result.rows[0])
+  return createFeatureRevision(deps, {
+    ...params,
+    previousFeatureId: null,
   })
 }
 
-type UpdateFeature = (
+type CreateFeatureRevision = (
   deps: { withinConnection: WithinConnection },
   params: Feature & { previousFeatureId: null | string }
 ) => Promise<Result<Feature>>
 
-export const createFeatureRevision: UpdateFeature = async (deps, params) => {
+export const createFeatureRevision: CreateFeatureRevision = async (deps, params) => {
   return deps.withinConnection(async ({ client }) => {
     const result = await client.query(sql`
       INSERT INTO feature (id, title, description, previous_feature_id)
@@ -33,13 +29,15 @@ export const createFeatureRevision: UpdateFeature = async (deps, params) => {
         ${params.description},
         ${params.previousFeatureId}
       )
-      returning *
+      returning *, id as original_feature_id
     `)
-    await client.query(sql`
+    if (params.previousFeatureId) {
+      await client.query(sql`
         UPDATE feature
         SET next_feature_id=${params.id}
         WHERE id=${params.previousFeatureId}
     `)
+    }
     return success(result.rows[0])
   })
 }
