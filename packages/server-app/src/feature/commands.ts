@@ -35,6 +35,11 @@ export const createFeatureRevision: UpdateFeature = async (deps, params) => {
       )
       returning *
     `)
+    await client.query(sql`
+        UPDATE feature
+        SET next_feature_id=${params.id}
+        WHERE id=${params.previousFeatureId}
+    `)
     return success(result.rows[0])
   })
 }

@@ -9,7 +9,9 @@ type WhereFeature = (
 export const whereFeature: WhereFeature = async (deps) => {
   return deps.withinConnection(async ({ client }) => {
     const result = await client.query(sql`
-      select * from feature;
+      SELECT *
+      FROM feature
+      WHERE next_feature_id IS NULL;
     `)
     return success(result.rows)
   })

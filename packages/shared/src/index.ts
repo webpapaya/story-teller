@@ -22,7 +22,7 @@ export const SESSION_DEFINITION = buildCommandDefinition({
   validator: v.object({}),
   response: v.object({
     id: uuid,
-    userIdentifier: v.string
+    userIdentifier: nonEmptyString
   })
 })
 
@@ -78,7 +78,7 @@ export const SIGN_OUT_DEFINITION = buildCommandDefinition({
   model: 'user',
   action: 'sign-out',
   validator: v.object({}),
-  response: undefined
+  response: v.object({}),
 })
 
 export const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
@@ -107,6 +107,7 @@ export const CREATE_FEATURE_REVISION_DEFINITION = buildCommandDefinition({
     id: uuid,
     title: nonEmptyString,
     description: nonEmptyString,
+    previousFeatureId: uuid
   })
 })
 

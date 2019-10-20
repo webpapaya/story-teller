@@ -1,9 +1,12 @@
+import { History } from 'history';
 import { UnpackThunk } from '../../domain/types'
-import { createFeature, whereFeature } from '../../domain/feature/actions';
+import { whereFeature, createFeatureRevision } from '../../domain/feature/actions';
 import { Feature } from '../../domain/feature/types';
+
 
 export type OwnPropsType = {
   id: string,
+  history: History
 };
 
 export type StatePropsType = {
@@ -12,7 +15,7 @@ export type StatePropsType = {
 
 export type DispatchPropsType = {
   sideEffect: UnpackThunk<typeof whereFeature>
-  onSubmit: UnpackThunk<typeof createFeature>
+  onSubmit: UnpackThunk<typeof createFeatureRevision>
 };
 
 export type OrganismPropsType = StatePropsType & Omit<DispatchPropsType, 'sideEffect'>;

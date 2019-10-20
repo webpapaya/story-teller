@@ -13,6 +13,7 @@ const Organism = isForm<any, any>({
     id: v.string,
     title: v.string,
     description: v.string,
+    previousFeatureId: v.string,
   })
 }, ({ onSubmit, onValueChange, values }) => {
   return (
@@ -20,6 +21,11 @@ const Organism = isForm<any, any>({
       <InputHidden
         name="id"
         defaultValue={uuid()}
+        onChange={onValueChange}
+      />
+      <InputHidden
+        name="previousFeatureId"
+        defaultValue={values.id}
         onChange={onValueChange}
       />
       <InputText

@@ -23,10 +23,11 @@ interface Options<A> {
 const isForm = <A, OriginalProps extends {}>(options: Options<A>,
   Component: React.ComponentType<OriginalProps & InjectedProps<A>>,
 ) => {
-  class HOC extends React.Component<OriginalProps & ExternalProps<A>, {values: Partial<A>}> {
+  class HOC extends React.Component<OriginalProps & ExternalProps<A>, {values: Partial<A>, submitCount: number}> {
     constructor(props: OriginalProps & ExternalProps<A>) {
       super(props)
       this.state = {
+        submitCount: 0,
         values: { ...options.defaultValues, ...props.defaultValues },
       }
     }
@@ -57,9 +58,10 @@ const isForm = <A, OriginalProps extends {}>(options: Options<A>,
           (test)=>{
             console.log(test)
           },
-          (values) => {
+          async (values) => {
             if (this.props.onSubmit) {
-              this.props.onSubmit(values)
+              await this.props.onSubmit(values)
+              this.setState({ submitCount: this.state.submitCount + 1 })
             }
           })
     }
@@ -68,6 +70,7 @@ const isForm = <A, OriginalProps extends {}>(options: Options<A>,
       return (
         <Component
           {...this.props}
+          key={this.state.submitCount}
           onSubmit={this.onSubmit}
           values={this.state.values}
           onValueChange={this.onValueChange}

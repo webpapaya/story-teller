@@ -45,7 +45,7 @@ const App = () => (
           />
           <ProtectedRoute path='/feature/create' component={FeatureCreate} />
           <ProtectedRoute path='/feature/:id' component={(props: any) => (
-            <FeatureUpdate id={props.match.params.id} />
+            <FeatureUpdate id={props.match.params.id} history={props.history} />
           )} />
           <ProtectedRoute path='/' component={FeatureList} />
         </Switch>
