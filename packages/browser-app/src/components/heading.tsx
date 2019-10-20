@@ -3,7 +3,7 @@ import styles from './heading.module.css'
 import { css } from '../utils/css';
 
 type HeadingProps = {
-  tagName?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+  tagName?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'span'
   variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5'
   noMargin?: boolean,
   textDecoration?: 'none' | 'strikethrough'
