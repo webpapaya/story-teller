@@ -17,3 +17,24 @@ export const createFeature: CreateFeature = async (deps, params) => {
     return success(result.rows[0])
   })
 }
+
+type UpdateFeature = (
+  deps: { withinConnection: WithinConnection },
+  params: Feature & { previousFeatureId: null | string }
+) => Promise<Result<Feature>>
+
+export const createFeatureRevision: UpdateFeature = async (deps, params) => {
+  return deps.withinConnection(async ({ client }) => {
+    const result = await client.query(sql`
+      INSERT INTO feature (id, title, description, previous_feature_id)
+      VALUES (
+        ${params.id},
+        ${params.title},
+        ${params.description},
+        ${params.previousFeatureId}
+      )
+      returning *
+    `)
+    return success(result.rows[0])
+  })
+}

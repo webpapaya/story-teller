@@ -6,7 +6,7 @@ import { register, requestPasswordReset, resetPasswordByToken } from './authenti
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
-import { createFeature } from './feature/commands'
+import { createFeature, createFeatureRevision } from './feature/commands'
 import { Result, failure, UserAuthentication, success } from './domain'
 import {
   SESSION_DEFINITION,
@@ -16,7 +16,8 @@ import {
   SIGN_IN_DEFINITION,
   SIGN_OUT_DEFINITION,
   CREATE_FEATURE_DEFINITION,
-  LIST_FEATURES_DEFINITION
+  LIST_FEATURES_DEFINITION,
+  CREATE_FEATURE_REVISION_DEFINITION
 } from '@story-teller/shared'
 import { whereFeature } from './feature/queries'
 import { commandViaHTTP } from './command-via-http'
@@ -102,6 +103,13 @@ commandViaHTTP(CREATE_FEATURE_DEFINITION, {
   app,
   dependencies: { withinConnection },
   useCase: createFeature
+})
+
+
+commandViaHTTP(CREATE_FEATURE_REVISION_DEFINITION, {
+  app,
+  dependencies: { withinConnection },
+  useCase: createFeatureRevision
 })
 
 commandViaHTTP(LIST_FEATURES_DEFINITION, {

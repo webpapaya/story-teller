@@ -10,7 +10,9 @@ describe('feature queries', () => {
     const feature = {
       id: uuid(),
       title: 'A new feature',
-      description: 'A feature description'
+      description: 'A feature description',
+      nextFeatureId: null,
+      previousFeatureId: null,
     }
 
     await createFeature({ withinConnection }, feature)

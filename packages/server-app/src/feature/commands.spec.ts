@@ -1,8 +1,10 @@
+// @ts-ignore
+import { assertThat, hasProperties } from 'hamjest'
 import { t, assertDifference } from '../spec-helpers'
 import uuid from 'uuid'
-import { createFeature } from './commands'
+import { createFeature, createFeatureRevision as createFeatureRevision } from './commands'
 
-describe('feature', () => {
+describe('createFeature', () => {
   it('creates a new record', t(async ({ withinConnection }) => {
     return assertDifference({ withinConnection }, 'feature', 1, async () => {
       await createFeature({ withinConnection }, {
@@ -13,3 +15,27 @@ describe('feature', () => {
     })
   }))
 })
+
+describe('createFeatureRevision', () => {
+  it('creates a new record', t(async ({ withinConnection }) => {
+    const feature = {
+      id: uuid(),
+      title: 'A new feature',
+      description: 'A feature description'
+    }
+
+    await createFeature({ withinConnection }, feature)
+
+    const updatedFeature = {
+      ...feature,
+      id: uuid(),
+      title: 'Updated',
+      description: 'Updated',
+      previousFeatureId: feature.id
+    }
+
+    const result = await createFeatureRevision({ withinConnection }, updatedFeature)
+    assertThat(result.body, hasProperties(updatedFeature))
+  }))
+})
+

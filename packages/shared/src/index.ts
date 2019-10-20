@@ -93,6 +93,23 @@ export const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
   response: undefined
 })
 
+export const CREATE_FEATURE_REVISION_DEFINITION = buildCommandDefinition({
+  verb: 'post',
+  action: 'create-revision',
+  model: 'feature',
+  validator: v.object({
+    id: uuid,
+    title: nonEmptyString,
+    description: nonEmptyString,
+    previousFeatureId: uuid
+  }),
+  response: v.object({
+    id: uuid,
+    title: nonEmptyString,
+    description: nonEmptyString,
+  })
+})
+
 export const LIST_FEATURES_DEFINITION = buildCommandDefinition({
   verb: 'get',
   action: 'fetch',

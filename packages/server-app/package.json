@@ -12,7 +12,7 @@
     "db:migrate:down": "npm run env -- db-migrate down",
     "start": "npm run env -- ts-node-dev --inspect --notify=0 --respawn ./src/index.ts",
     "lint": "eslint --ext js,ts --ignore-path .gitignore .",
-    "test": "ENV_FILE=.env.test npm run env -- mocha -r ts-node/register --timeout 500000 --inspect-brk --watch-extensions ts $(find src -name '*.spec.ts')",
+    "test": "ENV_FILE=.env.test npm run env -- mocha -r ts-node/register --timeout 500000 --watch-extensions ts $(find src -name '*.spec.ts')",
     "tsc": "tsc"
   },
   "pre-commit": [
