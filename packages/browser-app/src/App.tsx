@@ -8,7 +8,7 @@ import SignUp from './containers/user-sign-up'
 import RequestPasswordReset from './containers/user-request-password-reset'
 import FeatureCreate from './containers/feature-create'
 import FeatureList from './containers/feature-list'
-import FeatureUpdate from './containers/feature-update'
+import FeatureUpdate from './containers/feature-create-revision'
 import ProtectedRoute from './containers/protected-route';
 import Navigation from './containers/navigation';
 import CenteredPanel from './components/centered-panel';
