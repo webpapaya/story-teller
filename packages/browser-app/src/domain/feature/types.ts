@@ -1,6 +1,6 @@
-import { LIST_FEATURES_DEFINITION } from '@story-teller/shared'
+import { LIST_FEATURES_COMMAND } from '@story-teller/shared'
 
-export type Feature = typeof LIST_FEATURES_DEFINITION.response.T[0]
+export type Feature = typeof LIST_FEATURES_COMMAND.response.T[0]
 export type Action<Type extends string, Payload> = {
   type: Type
   payload: Payload

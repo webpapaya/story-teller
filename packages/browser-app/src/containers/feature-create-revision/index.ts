@@ -5,16 +5,16 @@ import { whereFeature, createFeatureRevision, whereFeatureRevisions } from '../.
 import Organism from './organism'
 import hasSideEffect from '../../has-side-effect';
 import Loading from '../../components/loading';
+import { selectFeature } from '../../domain/feature/selectors';
 
 const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state, props) => ({
-  defaultValues: state.features.find((feature) => feature.id === props.id)
+  defaultValues: selectFeature(state, props.id)
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => ({
   sideEffect: () => dispatch(whereFeatureRevisions({ id: props.id })),
   onSubmit: async (args) => {
     await dispatch(createFeatureRevision(args))
-    props.history.replace(`/feature/${args.id}`)
   }
 })
 

@@ -9,11 +9,9 @@ type WhereFeature = (
 export const whereFeature: WhereFeature = async (deps) => {
   return deps.withinConnection(async ({ client }) => {
     const result = await client.query(sql`
-      SELECT
-        *,
-        id as original_feature_id
+      SELECT DISTINCT ON (original_id) *
       FROM feature
-      WHERE next_feature_id IS NULL;
+      ORDER BY original_id, version DESC;
     `)
     return success(result.rows)
   })
@@ -27,18 +25,9 @@ type WhereFeatureRevision = (
 export const whereFeatureRevision: WhereFeatureRevision = async (deps, params) => {
   return deps.withinConnection(async ({ client }) => {
     const result = await client.query(sql`
-      WITH RECURSIVE subordinates AS (
-        SELECT *
-        FROM feature
-        WHERE id = ${params.id}
-        UNION
-          SELECT e.*
-          FROM feature e
-          INNER JOIN subordinates s ON s.previous_feature_id = e.id
-      ) SELECT
-          *,
-          ${params.id} as original_feature_id
-        FROM subordinates;
+      SELECT *
+      FROM feature
+      WHERE original_id = ${params.id}
     `)
     return success(result.rows)
   })

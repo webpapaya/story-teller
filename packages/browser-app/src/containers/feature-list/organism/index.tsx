@@ -9,7 +9,8 @@ const Organism = (props: OrganismPropsType) => (
   <>
     {props.features.map((feature) => (
       <Link
-        to={`/feature/${feature.id}`}
+        key={feature.originalId}
+        to={`/feature/${feature.originalId}`}
         className={css(styles.wrapper)}
       >
         <Heading variant="h3" noMargin tagName='span'>

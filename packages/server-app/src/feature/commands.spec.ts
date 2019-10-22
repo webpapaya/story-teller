@@ -31,7 +31,7 @@ describe('createFeatureRevision', () => {
       id: uuid(),
       title: 'Updated',
       description: 'Updated',
-      previousFeatureId: feature.id
+      originalId: feature.id
     }
 
     const result = await createFeatureRevision({ withinConnection }, updatedFeature)

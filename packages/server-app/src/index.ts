@@ -9,16 +9,16 @@ import { findUserByAuthentication, findUserByAuthenticationToken } from './authe
 import { createFeature, createFeatureRevision } from './feature/commands'
 import { Result, failure, UserAuthentication, success } from './domain'
 import {
-  SESSION_DEFINITION,
-  SIGN_UP_DEFINITION,
-  REQUEST_PASSWORD_RESET_DEFINITION,
-  RESET_PASSWORD_BY_TOKEN_DEFINITION,
-  SIGN_IN_DEFINITION,
-  SIGN_OUT_DEFINITION,
-  CREATE_FEATURE_DEFINITION,
-  LIST_FEATURES_DEFINITION,
-  CREATE_FEATURE_REVISION_DEFINITION,
-  LIST_FEATURE_REVISIONS_DEFINITION
+  SESSION_COMMAND,
+  SIGN_UP_COMMAND,
+  REQUEST_PASSWORD_RESET_COMMAND,
+  RESET_PASSWORD_BY_TOKEN_COMMAND,
+  SIGN_IN_COMMAND,
+  SIGN_OUT_COMMAND,
+  CREATE_FEATURE_COMMAND,
+  LIST_FEATURES_COMMAND,
+  CREATE_FEATURE_REVISION_COMMAND,
+  LIST_FEATURE_REVISIONS_COMMAND
 } from '@story-teller/shared'
 import { whereFeature, whereFeatureRevision } from './feature/queries'
 import { commandViaHTTP } from './command-via-http'
@@ -48,7 +48,7 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
   })
 }
 
-commandViaHTTP(SESSION_DEFINITION, {
+commandViaHTTP(SESSION_COMMAND, {
   app,
   middlewares: [isAuthenticated],
   dependencies: {},
@@ -56,25 +56,25 @@ commandViaHTTP(SESSION_DEFINITION, {
     success(dependencies.auth.user as UserAuthentication)
 })
 
-commandViaHTTP(SIGN_UP_DEFINITION, {
+commandViaHTTP(SIGN_UP_COMMAND, {
   app,
   dependencies: { withinConnection, sendMail },
   useCase: register
 })
 
-commandViaHTTP(REQUEST_PASSWORD_RESET_DEFINITION, {
+commandViaHTTP(REQUEST_PASSWORD_RESET_COMMAND, {
   app,
   dependencies: { withinConnection, sendMail },
   useCase: requestPasswordReset
 })
 
-commandViaHTTP(RESET_PASSWORD_BY_TOKEN_DEFINITION, {
+commandViaHTTP(RESET_PASSWORD_BY_TOKEN_COMMAND, {
   app,
   dependencies: { withinConnection },
   useCase: resetPasswordByToken
 })
 
-commandViaHTTP(SIGN_IN_DEFINITION, {
+commandViaHTTP(SIGN_IN_COMMAND, {
   app,
   dependencies: { withinConnection },
   useCase: async ({ withinConnection, res }, args): Promise<Result<any>> => {
@@ -91,7 +91,7 @@ commandViaHTTP(SIGN_IN_DEFINITION, {
   }
 })
 
-commandViaHTTP(SIGN_OUT_DEFINITION, {
+commandViaHTTP(SIGN_OUT_COMMAND, {
   app,
   dependencies: {},
   useCase: async ({ res }) => {
@@ -100,26 +100,26 @@ commandViaHTTP(SIGN_OUT_DEFINITION, {
   }
 })
 
-commandViaHTTP(CREATE_FEATURE_DEFINITION, {
+commandViaHTTP(CREATE_FEATURE_COMMAND, {
   app,
   dependencies: { withinConnection },
   useCase: createFeature
 })
 
 
-commandViaHTTP(CREATE_FEATURE_REVISION_DEFINITION, {
+commandViaHTTP(CREATE_FEATURE_REVISION_COMMAND, {
   app,
   dependencies: { withinConnection },
   useCase: createFeatureRevision
 })
 
-commandViaHTTP(LIST_FEATURES_DEFINITION, {
+commandViaHTTP(LIST_FEATURES_COMMAND, {
   app,
   dependencies: { withinConnection },
   useCase: whereFeature
 })
 
-commandViaHTTP(LIST_FEATURE_REVISIONS_DEFINITION, {
+commandViaHTTP(LIST_FEATURE_REVISIONS_COMMAND, {
   app,
   dependencies: { withinConnection },
   useCase: whereFeatureRevision

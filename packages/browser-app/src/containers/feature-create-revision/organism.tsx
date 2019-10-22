@@ -13,9 +13,9 @@ const Organism = isForm<any, any>({
     id: v.string,
     title: v.string,
     description: v.string,
-    previousFeatureId: v.string,
+    originalId: v.string,
   })
-}, ({ onSubmit, onValueChange, values }) => {
+}, ({ onSubmit, onValueChange, values, id }) => {
   return (
     <form onSubmit={onSubmit} className={styles.form}>
       <InputHidden
@@ -24,8 +24,8 @@ const Organism = isForm<any, any>({
         onChange={onValueChange}
       />
       <InputHidden
-        name="previousFeatureId"
-        defaultValue={values.id}
+        name="originalId"
+        defaultValue={id}
         onChange={onValueChange}
       />
       <InputText

@@ -11,8 +11,6 @@ describe('whereFeature', () => {
       id: uuid(),
       title: 'A new feature',
       description: 'A feature description',
-      nextFeatureId: null,
-      previousFeatureId: null,
     }
 
     await createFeature({ withinConnection }, feature)
@@ -27,16 +25,14 @@ describe('whereFeature', () => {
     const feature = {
       id: uuid(),
       title: 'A new feature',
-      description: 'A feature description',
-      nextFeatureId: null,
-      previousFeatureId: null,
+      description: 'A feature description'
     }
+
     const revision = {
       id: uuid(),
       title: 'updated',
       description: 'updated',
-      nextFeatureId: null,
-      previousFeatureId: feature.id,
+      originalId: feature.id,
     }
 
     await createFeature({ withinConnection }, feature)
@@ -48,7 +44,7 @@ describe('whereFeature', () => {
       })))
   }))
 
-  it('returns originalFeatureId property', t(async ({ withinConnection }) => {
+  it('returns originalId property', t(async ({ withinConnection }) => {
     const feature = {
       id: uuid(),
       title: 'A new feature',
@@ -58,7 +54,7 @@ describe('whereFeature', () => {
     await createFeature({ withinConnection }, feature)
     const result = await whereFeature({ withinConnection })
 
-    assertThat(result.body, everyItem(hasProperty('originalFeatureId', feature.id)))
+    assertThat(result.body, everyItem(hasProperty('originalId', feature.id)))
   }))
 })
 
@@ -73,21 +69,20 @@ describe('whereFeatureRevision', () => {
       id: uuid(),
       title: 'updated',
       description: 'updated',
-      nextFeatureId: null,
-      previousFeatureId: feature.id,
+      originalId: feature.id,
     }
 
     await createFeature({ withinConnection }, feature)
     await createFeatureRevision({ withinConnection }, revision)
 
-    assertThat(await whereFeatureRevision({ withinConnection }, { id: revision.id }),
+    assertThat(await whereFeatureRevision({ withinConnection }, { id: feature.id }),
       hasProperty('body', hasProperties({
-        0: hasProperties(revision),
-        1: hasProperties(feature)
+        0: hasProperties(feature),
+        1: hasProperties(revision)
       })))
   }))
 
-  it('returns originalFeatureId property', t(async ({ withinConnection }) => {
+  it('returns originalId property', t(async ({ withinConnection }) => {
     const feature = {
       id: uuid(),
       title: 'A new feature',
@@ -97,14 +92,13 @@ describe('whereFeatureRevision', () => {
       id: uuid(),
       title: 'updated',
       description: 'updated',
-      nextFeatureId: null,
-      previousFeatureId: feature.id,
+      originalId: feature.id,
     }
 
     await createFeature({ withinConnection }, feature)
     await createFeatureRevision({ withinConnection }, revision)
-    const result = await whereFeatureRevision({ withinConnection }, { id: revision.id })
+    const result = await whereFeatureRevision({ withinConnection }, { id: feature.id })
 
-    assertThat(result.body, everyItem(hasProperty('originalFeatureId', revision.id)))
+    assertThat(result.body, everyItem(hasProperty('originalId', feature.id)))
   }))
 })

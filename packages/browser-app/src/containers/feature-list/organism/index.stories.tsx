@@ -11,16 +11,15 @@ storiesOf('FeatureList', module)
         id: uuid(),
         title: 'A Feature',
         description: 'Irrelevant',
-        nextFeatureId: null,
-        previousFeatureId: null,
-        originalFeatureId: uuid()
+        originalId: uuid(),
+        version: 0,
+
       }, {
         id: uuid(),
         title: 'A Feature',
         description: 'Irrelevant',
-        nextFeatureId: null,
-        previousFeatureId: null,
-        originalFeatureId: uuid()
+        originalId: uuid(),
+        version: 0,
       }
     ]}/>
   ))

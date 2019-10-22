@@ -15,7 +15,7 @@ export const nonEmptyString = v.string.filter((value) => value.length > 0)
 export const uuid = v.string.filter((value) =>
   !!value.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i))
 
-export const SESSION_DEFINITION = buildCommandDefinition({
+export const SESSION_COMMAND = buildCommandDefinition({
   verb: 'get',
   model: 'user',
   action: 'session',
@@ -26,7 +26,7 @@ export const SESSION_DEFINITION = buildCommandDefinition({
   })
 })
 
-export const SIGN_UP_DEFINITION = buildCommandDefinition({
+export const SIGN_UP_COMMAND = buildCommandDefinition({
   verb: 'post',
   action: 'sign-up',
   model: 'user',
@@ -37,7 +37,7 @@ export const SIGN_UP_DEFINITION = buildCommandDefinition({
   response: undefined
 })
 
-export const REQUEST_PASSWORD_RESET_DEFINITION = buildCommandDefinition({
+export const REQUEST_PASSWORD_RESET_COMMAND = buildCommandDefinition({
   verb: 'post',
   action: 'request-password-reset',
   model: 'user',
@@ -47,7 +47,7 @@ export const REQUEST_PASSWORD_RESET_DEFINITION = buildCommandDefinition({
   response: v.object({})
 })
 
-export const RESET_PASSWORD_BY_TOKEN_DEFINITION = buildCommandDefinition({
+export const RESET_PASSWORD_BY_TOKEN_COMMAND = buildCommandDefinition({
   verb: 'post',
   action: 'reset-password-by-token',
   model: 'user',
@@ -59,7 +59,7 @@ export const RESET_PASSWORD_BY_TOKEN_DEFINITION = buildCommandDefinition({
   response: undefined
 })
 
-export const SIGN_IN_DEFINITION = buildCommandDefinition({
+export const SIGN_IN_COMMAND = buildCommandDefinition({
   verb: 'post',
   action: 'sign-in',
   model: 'user',
@@ -73,7 +73,7 @@ export const SIGN_IN_DEFINITION = buildCommandDefinition({
   })
 })
 
-export const SIGN_OUT_DEFINITION = buildCommandDefinition({
+export const SIGN_OUT_COMMAND = buildCommandDefinition({
   verb: 'post',
   model: 'user',
   action: 'sign-out',
@@ -81,17 +81,18 @@ export const SIGN_OUT_DEFINITION = buildCommandDefinition({
   response: v.object({}),
 })
 
-
-const FEATURE_RESOURCE = v.object({
+// Features
+const FEATURE_AGGREGATE = v.object({
   id: uuid,
   title: nonEmptyString,
   description: nonEmptyString,
-  previousFeatureId: v.union(uuid, v.null),
-  nextFeatureId: v.union(uuid, v.null),
-  originalFeatureId: uuid
+
+  // deprecated
+  originalId: uuid,
+  version: v.number
 })
 
-export const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
+export const CREATE_FEATURE_COMMAND = buildCommandDefinition({
   verb: 'post',
   action: 'create',
   model: 'feature',
@@ -100,10 +101,10 @@ export const CREATE_FEATURE_DEFINITION = buildCommandDefinition({
     title: nonEmptyString,
     description: nonEmptyString
   }),
-  response: FEATURE_RESOURCE
+  response: FEATURE_AGGREGATE
 })
 
-export const CREATE_FEATURE_REVISION_DEFINITION = buildCommandDefinition({
+export const CREATE_FEATURE_REVISION_COMMAND = buildCommandDefinition({
   verb: 'post',
   action: 'create-revision',
   model: 'feature',
@@ -111,23 +112,50 @@ export const CREATE_FEATURE_REVISION_DEFINITION = buildCommandDefinition({
     id: uuid,
     title: nonEmptyString,
     description: nonEmptyString,
-    previousFeatureId: uuid
+    originalId: uuid
   }),
-  response: FEATURE_RESOURCE
+  response: FEATURE_AGGREGATE
 })
 
-export const LIST_FEATURES_DEFINITION = buildCommandDefinition({
+export const LIST_FEATURES_COMMAND = buildCommandDefinition({
   verb: 'get',
   action: 'fetch',
   model: 'feature',
   validator: v.object({}),
-  response: v.array(FEATURE_RESOURCE)
+  response: v.array(FEATURE_AGGREGATE)
 })
 
-export const LIST_FEATURE_REVISIONS_DEFINITION = buildCommandDefinition({
+export const LIST_FEATURE_REVISIONS_COMMAND = buildCommandDefinition({
   verb: 'get',
   action: 'fetch',
   model: 'feature-revision',
   validator: v.object({ id: uuid }),
-  response: v.array(FEATURE_RESOURCE)
+  response: v.array(FEATURE_AGGREGATE)
+})
+
+// Revisions
+const REVISION_AGGREGATE = v.object({
+  id: uuid,
+  reason: v.string,
+  featureId: uuid,
+  version: v.number
+})
+
+export const LIST_REVISIONS_COMMAND = buildCommandDefinition({
+  verb: 'get',
+  action: 'fetch',
+  model: 'revision',
+  validator: v.object({ featureId: uuid }),
+  response: v.array(REVISION_AGGREGATE)
+})
+
+export const CREATE_REVISION_COMMAND = buildCommandDefinition({
+  verb: 'post',
+  action: 'create',
+  model: 'revision',
+  validator: v.object({
+    id: uuid,
+    feature: FEATURE_AGGREGATE
+  }),
+  response: v.array(REVISION_AGGREGATE)
 })

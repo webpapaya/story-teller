@@ -13,6 +13,7 @@ function uniqueBy<Type, Key extends keyof Type>(key: Key, array: Type[]): Type[]
 
 const reducer = (state = initialState, action: Actions): Feature[] => {
   switch (action.type) {
+
     case "FEATURE_REVISION/FETCH/SUCCESS":
     case "FEATURE/FETCH/SUCCESS":
         return uniqueBy('id', [
@@ -20,16 +21,7 @@ const reducer = (state = initialState, action: Actions): Feature[] => {
           ...action.payload
         ])
 
-    case "FEATURE/CREATE_REVISION/SUCCESS":  return uniqueBy('id', [
-      ...state.map((feature) => {
-        if (feature.id === action.payload.previousFeatureId) {
-          return { ...feature, nextFeatureId: action.payload.id }
-        }
-        return feature
-      }),
-      action.payload
-    ])
-
+    case "FEATURE/CREATE_REVISION/SUCCESS":
     case "FEATURE/CREATE/SUCCESS": return uniqueBy('id', [
       ...state,
       action.payload

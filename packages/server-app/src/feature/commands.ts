@@ -10,34 +10,33 @@ type CreateFeature = (
 export const createFeature: CreateFeature = async (deps, params) => {
   return createFeatureRevision(deps, {
     ...params,
-    previousFeatureId: null,
+    originalId: params.id,
   })
 }
 
 type CreateFeatureRevision = (
   deps: { withinConnection: WithinConnection },
-  params: Feature & { previousFeatureId: null | string }
+  params: Feature & { originalId: null | string }
 ) => Promise<Result<Feature>>
 
 export const createFeatureRevision: CreateFeatureRevision = async (deps, params) => {
   return deps.withinConnection(async ({ client }) => {
     const result = await client.query(sql`
-      INSERT INTO feature (id, title, description, previous_feature_id)
+      INSERT INTO feature (id, title, description, original_id, version)
       VALUES (
         ${params.id},
         ${params.title},
         ${params.description},
-        ${params.previousFeatureId}
+        ${params.originalId},
+        (
+          SELECT count(*)
+          FROM feature
+          WHERE original_id = ${params.originalId}
+        )
       )
-      returning *, id as original_feature_id
+      returning *
     `)
-    if (params.previousFeatureId) {
-      await client.query(sql`
-        UPDATE feature
-        SET next_feature_id=${params.id}
-        WHERE id=${params.previousFeatureId}
-    `)
-    }
+
     return success(result.rows[0])
   })
 }

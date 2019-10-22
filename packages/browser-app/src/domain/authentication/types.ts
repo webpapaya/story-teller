@@ -1,4 +1,4 @@
-import { SESSION_DEFINITION } from "@story-teller/shared"
+import { SESSION_COMMAND } from "@story-teller/shared"
 
 export type AuthenticatedUser = {
   id: string
@@ -11,6 +11,6 @@ export type Action<Type extends string, Payload> = {
 }
 
 export type Actions =
-  | Action<'USER/SESSION/SUCCESS', typeof SESSION_DEFINITION['response']['T']>
+  | Action<'USER/SESSION/SUCCESS', typeof SESSION_COMMAND['response']['T']>
   | Action<'USER/SIGN_OUT/SUCCESS', void>
 
