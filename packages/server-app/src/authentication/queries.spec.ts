@@ -3,22 +3,21 @@ import {
   equalTo,
   hasProperties,
   truthy as present,
-  falsy as blank
 // @ts-ignore
 } from 'hamjest'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import sinon from 'ts-sinon'
 import {
   register,
-  findUserByAuthenticationToken
 } from './commands'
 import {
   create as createUserAuthenticationFactory,
-  userAuthenticationFactory
+  userAuthenticationFactory,
 } from './factories'
 import { AuthenticationToken } from '../domain'
-import { findUserById, findUserByAuthentication } from './queries'
+import { findUserById, findUserByAuthentication, findUserByAuthenticationToken } from './queries'
 import { withMockedDate, t } from '../spec-helpers'
+import { Err } from 'space-lift'
 
 const sendMail = sinon.spy()
 
@@ -30,7 +29,7 @@ describe('findUserById', () => {
     const result = await withinConnection(({ client }) => {
       return findUserById({ client }, { id: auth.id })
     })
-    assertThat(result, hasProperties({
+    assertThat(result.get(), hasProperties({
       userIdentifier: equalTo(auth.userIdentifier)
     }))
   }))
@@ -43,7 +42,7 @@ describe('findUserById', () => {
       return findUserById({ client }, { id: undefined as unknown as string })
     })
 
-    assertThat(result, equalTo(undefined))
+    assertThat(result, equalTo(Err('NOT_FOUND')))
   }))
 })
 
@@ -53,10 +52,10 @@ describe('findUserByAuthentication', () => {
       userIdentifier: 'sepp',
       password: 'huber'
     })
-    assertThat(await findUserByAuthentication({ client }, {
+    assertThat((await findUserByAuthentication({ client }, {
       userIdentifier: 'sepp',
       password: 'huber'
-    }), present())
+    })).get(), present())
   }))
 
   it('when password does NOT match, returns undefined', t(async ({ withinConnection, client }) => {
@@ -64,10 +63,12 @@ describe('findUserByAuthentication', () => {
       userIdentifier: 'sepp',
       password: 'huber'
     })
-    assertThat(await findUserByAuthentication({ client }, {
+    const result = await findUserByAuthentication({ client }, {
       userIdentifier: 'sepp',
       password: 'huber1'
-    }), blank())
+    })
+
+    assertThat(result, equalTo(Err('NOT_FOUND')))
   }))
 })
 
@@ -83,7 +84,8 @@ describe('findUserByAuthenticationToken', () => {
         createdAt: LocalDateTime.from(nativeJs(new Date()))
       }
 
-      assertThat(await findUserByAuthenticationToken({ client }, token),
+      const result = await findUserByAuthenticationToken({ client }, token)
+      assertThat(result.get(),
         hasProperties({ id: auth.id }))
     })
   }))
@@ -98,7 +100,7 @@ describe('findUserByAuthenticationToken', () => {
       createdAt: LocalDateTime.of(2000, 1, 1)
     }
 
-    assertThat(await findUserByAuthenticationToken({ client }, token), blank())
+    assertThat(await findUserByAuthenticationToken({ client }, token), equalTo(Err('NOT_FOUND')))
   }))
 
   it('when password changed before token created, returns user', t(async ({ withinConnection, client }) => {
@@ -110,8 +112,9 @@ describe('findUserByAuthenticationToken', () => {
       scope: 'user',
       createdAt: LocalDateTime.of(2000, 1, 1)
     }
+    const result = await findUserByAuthenticationToken({ client }, token)
 
-    assertThat(await findUserByAuthenticationToken({ client }, token),
+    assertThat(result.get(),
       hasProperties({ id: auth.id }))
   }))
 })

@@ -35,7 +35,7 @@ describe('createFeatureRevision', () => {
     }
 
     const result = await createFeatureRevision({ withinConnection }, updatedFeature)
-    assertThat(result.body, hasProperties(updatedFeature))
+    assertThat(result.get(), hasProperties(updatedFeature))
   }))
 })
 

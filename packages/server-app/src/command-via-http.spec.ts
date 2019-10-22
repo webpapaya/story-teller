@@ -9,7 +9,7 @@ import {
 
 import * as v from 'validation.ts'
 import { executeCommand, attributeFiltering } from './command-via-http'
-import { success } from './domain'
+import { Ok } from 'space-lift'
 
 describe('attributeFiltering', () => {
   [
@@ -54,14 +54,14 @@ describe('executeCommand', () => {
       userIdentifier: v.string
     })
   }, {
-    useCase: () => success({ id: 2, userIdentifier: 'Sepp' }),
+    useCase: () => Ok({ id: 2, userIdentifier: 'Sepp' }),
     auth: { user: null },
     dependencies: {}
   })
 
   it('with corrupted data, returns validation error', async () => {
     const result = await command({ })
-    assertThat(result.body, hasProperties({
+    assertThat(result.get(), hasProperties({
       type: 'ValidationError',
       properties: hasProperties({ length: 2 })
     }))
@@ -69,7 +69,7 @@ describe('executeCommand', () => {
 
   it('with correctdata, returns filtered response', async () => {
     const result = await command({ id: 1, userIdentifier: 'irrelevant' })
-    assertThat(result.body, hasProperties({
+    assertThat(result.get(), hasProperties({
       id: blank(),
       userIdentifier: present()
     }))

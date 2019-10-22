@@ -1,7 +1,8 @@
 import * as v from 'validation.ts'
-import { Result, failure, UserAuthentication } from './domain'
+import { UserAuthentication } from './domain'
 import { CommandDefinition } from '@story-teller/shared'
 import { NextFunction, Request, Response } from 'express'
+import { Result, Err, Ok } from 'space-lift'
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -27,33 +28,35 @@ export const attributeFiltering = <A extends v.Validator<unknown>>(schema: A | u
     )
 }
 
-type ExecuteCommand = <A, B, C, D extends Result<unknown>>(definition: CommandDefinition<A, B>, args: {
+type ExecuteCommand = <A, B, C, D extends Result<unknown, unknown>>(definition: CommandDefinition<A, B>, args: {
   dependencies: C
   auth: Express.Request['auth'],
   useCase: (deps: C & { auth: Express.Request['auth'] }, value: A) => D
-}) => (params: any) => Promise<Result<unknown>>
+}) => (params: any) => Promise<Result<unknown, unknown>>
 
 export const executeCommand: ExecuteCommand = (definition, args) => async (params) => {
   const result = await definition.validator.validate(params).fold(
-    (properties) => failure({ type: 'ValidationError', properties }),
+    (properties) => Err({ type: 'ValidationError', properties }),
     (v) => args.useCase({ ...args.dependencies, auth: args.auth }, v)
   )
 
-  if (result.isSuccess) {
-    result.body = attributeFiltering(definition.response, result.body)
+  if (result.isOk()) {
+    return Ok(attributeFiltering(definition.response, result.get()))
   }
 
   return result
 }
 
-const resultToHTTP = (res: Response, result: Result<unknown>) => {
-  if (result.isSuccess) {
+const resultToHTTP = (res: Response, result: Result<unknown, unknown>) => {
+  if (result.isOk()) {
     res.status(200)
-    res.send(result.body)
-
+    res.send(result.get())
+  } else if (result.get() === 'NOT_FOUND') {
+    res.status(404)
+    res.send({})
   } else {
     res.status(400)
-    res.send(result.body)
+    res.send(result.get())
   }
 }
 
@@ -63,7 +66,7 @@ type CommandViaHTTP = <A, B, C, D>(definition: CommandDefinition<A, B>, args: {
   app: any
   middlewares?: HTTPMiddleware[]
   dependencies: C
-  useCase: (deps: C & { auth: Express.Request['auth'], res: Response }, value: A) => Promise<Result<D>>
+  useCase: (deps: C & { auth: Express.Request['auth'], res: Response }, value: A) => Promise<Result<unknown, D>>
 }) => void
 
 export const commandViaHTTP: CommandViaHTTP = (definition, { app, useCase, middlewares = [], dependencies }) => {
@@ -83,7 +86,7 @@ export const commandViaHTTP: CommandViaHTTP = (definition, { app, useCase, middl
     try {
       return resultToHTTP(res, await command({ ...req.body, ...req.query }))
     } catch (e) {
-      return resultToHTTP(res, failure(e))
+      return resultToHTTP(res, Err(e))
     }
   })
 }

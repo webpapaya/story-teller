@@ -1,11 +1,12 @@
 import sql from 'sql-template-tag'
+import { Result, Ok } from 'space-lift'
 import { WithinConnection } from '../lib/db'
-import { Feature, Result, success } from '../domain'
+import { Feature } from '../domain'
 
 type CreateFeature = (
   deps: { withinConnection: WithinConnection },
   params: Feature
-) => Promise<Result<Feature>>
+) => Promise<Result<never, Feature>>
 
 export const createFeature: CreateFeature = async (deps, params) => {
   return createFeatureRevision(deps, {
@@ -17,7 +18,7 @@ export const createFeature: CreateFeature = async (deps, params) => {
 type CreateFeatureRevision = (
   deps: { withinConnection: WithinConnection },
   params: Feature & { originalId: null | string }
-) => Promise<Result<Feature>>
+) => Promise<Result<never, Feature>>
 
 export const createFeatureRevision: CreateFeatureRevision = async (deps, params) => {
   return deps.withinConnection(async ({ client }) => {
@@ -37,6 +38,6 @@ export const createFeatureRevision: CreateFeatureRevision = async (deps, params)
       returning *
     `)
 
-    return success(result.rows[0])
+    return Ok(result.rows[0])
   })
 }

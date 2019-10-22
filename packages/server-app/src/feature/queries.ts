@@ -1,10 +1,11 @@
 import sql from 'sql-template-tag'
+import { Result, Ok } from 'space-lift'
 import { WithinConnection } from '../lib/db'
-import { Feature, Result, success } from '../domain'
+import { Feature } from '../domain'
 
 type WhereFeature = (
   deps: { withinConnection: WithinConnection },
-) => Promise<Result<Feature[]>>
+) => Promise<Result<never, Feature[]>>
 
 export const whereFeature: WhereFeature = async (deps) => {
   return deps.withinConnection(async ({ client }) => {
@@ -13,14 +14,14 @@ export const whereFeature: WhereFeature = async (deps) => {
       FROM feature
       ORDER BY original_id, version DESC;
     `)
-    return success(result.rows)
+    return Ok(result.rows as Feature[])
   })
 }
 
 type WhereFeatureRevision = (
   deps: { withinConnection: WithinConnection },
   params: { id: string }
-) => Promise<Result<Feature[]>>
+) => Promise<Result<never, Feature[]>>
 
 export const whereFeatureRevision: WhereFeatureRevision = async (deps, params) => {
   return deps.withinConnection(async ({ client }) => {
@@ -29,6 +30,6 @@ export const whereFeatureRevision: WhereFeatureRevision = async (deps, params) =
       FROM feature
       WHERE original_id = ${params.id}
     `)
-    return success(result.rows)
+    return Ok(result.rows as Feature[])
   })
 }

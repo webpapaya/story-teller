@@ -7,7 +7,7 @@ import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
 import { createFeature, createFeatureRevision } from './feature/commands'
-import { Result, failure, UserAuthentication, success } from './domain'
+import { UserAuthentication } from './domain'
 import {
   SESSION_COMMAND,
   SIGN_UP_COMMAND,
@@ -22,6 +22,8 @@ import {
 } from '@story-teller/shared'
 import { whereFeature, whereFeatureRevision } from './feature/queries'
 import { commandViaHTTP } from './command-via-http'
+import { Result, Ok, Err } from 'space-lift'
+import { HTTPError, Errors } from './errors'
 
 const app = express()
 const port = process.env.API_PORT
@@ -38,12 +40,12 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
   await withinConnection(async ({ client }) => {
     const parsedCookie = JSON.parse(req.signedCookies.session || '{}')
     const user = await findUserByAuthenticationToken({ client }, parsedCookie)
-    if (!user) {
+    if (user.isOk()) {
+      req.auth = { user: user.get() }
+      next()
+    } else {
       res.sendStatus(401)
       next('Unauthorized')
-    } else {
-      req.auth = { user }
-      next()
     }
   })
 }
@@ -52,8 +54,8 @@ commandViaHTTP(SESSION_COMMAND, {
   app,
   middlewares: [isAuthenticated],
   dependencies: {},
-  useCase: async (dependencies): Promise<Result<UserAuthentication>> =>
-    success(dependencies.auth.user as UserAuthentication)
+  useCase: async (dependencies): Promise<Result<never, UserAuthentication>> =>
+    Ok(dependencies.auth.user as UserAuthentication)
 })
 
 commandViaHTTP(SIGN_UP_COMMAND, {
@@ -77,15 +79,15 @@ commandViaHTTP(RESET_PASSWORD_BY_TOKEN_COMMAND, {
 commandViaHTTP(SIGN_IN_COMMAND, {
   app,
   dependencies: { withinConnection },
-  useCase: async ({ withinConnection, res }, args): Promise<Result<any>> => {
+  useCase: async ({ withinConnection, res }, args): Promise<Result<Errors, UserAuthentication>> => {
     return withinConnection(async ({ client }) => {
       const user = await findUserByAuthentication({ client }, args)
-      if (user) {
-        res.cookie('session', JSON.stringify({ id: user.id, createdAt: new Date() }), { signed: true })
-        return success(user)
+      if (user.isOk()) {
+        res.cookie('session', JSON.stringify({ id: user.get().id, createdAt: new Date() }), { signed: true })
+        return user
       } else {
         res.clearCookie('session')
-        return failure('unauthorized')
+        return Err<HTTPError>('UNAUTHORIZED')
       }
     })
   }
@@ -96,7 +98,7 @@ commandViaHTTP(SIGN_OUT_COMMAND, {
   dependencies: {},
   useCase: async ({ res }) => {
     res.clearCookie('session')
-    return success({})
+    return Ok({})
   }
 })
 
@@ -124,7 +126,5 @@ commandViaHTTP(LIST_FEATURE_REVISIONS_COMMAND, {
   dependencies: { withinConnection },
   useCase: whereFeatureRevision
 })
-
-
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

@@ -1,11 +1,19 @@
-import { WithinConnection, DBClient } from '../lib/db'
+import { WithinConnection } from '../lib/db'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import sql from 'sql-template-tag'
+import { Result as SResult, Err, Ok} from 'space-lift'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import { SendMail } from './emails'
-import { AuthenticationToken, Result, success, failure } from '../domain'
+import { UserAuthentication } from '../domain'
 import { findUserByIdentifier } from './queries'
+import { RepositoryError } from '../errors'
+
+type TokenErrors =
+| 'TOKEN_NOT_FOUND'
+| 'TOKEN_IS_TO_OLD'
+| 'TOKEN_EXPIRED'
+| 'TOKEN_INVALID'
 
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 
@@ -21,7 +29,7 @@ type RegisterErrors =
 type Register = (
   deps: { withinConnection: WithinConnection, sendMail: SendMail },
   params: { userIdentifier: string, password: string}
-) => Promise<Result<void | RegisterErrors>>
+) => Promise<SResult<RegisterErrors, undefined>>
 
 export const register: Register = async (dependencies, params) => {
   const passwordHash = await hashPassword(params.password)
@@ -52,29 +60,30 @@ export const register: Register = async (dependencies, params) => {
         payload: { token: confirmationToken }
       })
 
-      return success(void 0)
+      return Ok(void 0)
     } catch (e) {
       if (e.code === '23505') {
-        return failure<RegisterErrors>('User Identifier already taken')
+        return Err<RegisterErrors>('User Identifier already taken')
       }
       throw e
     }
   })
 }
 
-type ConfirmErrors =
-| 'Token not found'
-
 type Confirm = (
   deps: { withinConnection: WithinConnection },
   params: { userIdentifier: string, token: string }
-) => Promise<Result<void | ConfirmErrors>>
+) => Promise<SResult<RepositoryError, UserAuthentication>>
 
 export const confirm: Confirm = async (dependencies, params) => {
   return dependencies.withinConnection(async ({ client }) => {
-    const record = await findUserByIdentifier({ client }, params)
-    if (!record || !await comparePassword(params.token, record.confirmationToken)) {
-      return failure<ConfirmErrors>('Token not found')
+    const result = await findUserByIdentifier({ client }, params)
+    if (!result.isOk()) { return result }
+    const record = result.get()
+
+
+    if (!(await comparePassword(params.token, record.confirmationToken))) {
+      return Err<RepositoryError>('NOT_FOUND')
     }
 
     await client.query(sql`
@@ -82,16 +91,16 @@ export const confirm: Confirm = async (dependencies, params) => {
       SET confirmation_token=null,
           confirmed_at=${new Date()}
       WHERE user_identifier=${params.userIdentifier}
-      RETURNING *
     `)
-    return success(void 0)
+
+    return result
   })
 }
 
 type RequestPasswordReset = (
   deps: { withinConnection: WithinConnection, sendMail: SendMail },
   params: { userIdentifier: string}
-) => Promise<Result<{ userIdentifier: string, token: string }>>
+) => Promise<SResult<never, { userIdentifier: string, token: string }>>
 
 export const requestPasswordReset: RequestPasswordReset = async (dependencies, params) => {
   const token = await crypto.randomBytes(20).toString('hex')
@@ -115,24 +124,28 @@ export const requestPasswordReset: RequestPasswordReset = async (dependencies, p
       })
     }
 
-    return success({ userIdentifier: params.userIdentifier, token })
+    return Ok({ userIdentifier: params.userIdentifier, token })
   })
 }
 
 type ResetPasswordErrors =
 | 'Token too old'
 | 'Token not found'
+| 'Token invalid'
 
 type ResetPasswordByToken = (
   deps: { withinConnection: WithinConnection },
   params: { userIdentifier: string, token: string, password: string }
-) => Promise<Result<void | ResetPasswordErrors>>
+) => Promise<SResult<TokenErrors, undefined>>
 
 export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, params) => {
   return dependencies.withinConnection(async ({ client }) => {
-    const record = await findUserByIdentifier({ client }, params)
-    if (!record || !await comparePassword(params.token, record.passwordResetToken)) {
-      return failure<ResetPasswordErrors>('Token not found')
+    const result = await findUserByIdentifier({ client }, params)
+    if (!result.isOk()) { return Err<TokenErrors>('TOKEN_NOT_FOUND') }
+    const record = result.get()
+
+    if (!await comparePassword(params.token, record.passwordResetToken)) {
+      return Err<TokenErrors>('TOKEN_INVALID')
     }
 
     const isTokenToOld = record.passwordResetCreatedAt && LocalDateTime.from(nativeJs(new Date()))
@@ -147,7 +160,7 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
             password_reset_created_at=null
         WHERE id=${record.id}
       `)
-      return failure<ResetPasswordErrors>('Token not found')
+      return Err<TokenErrors>('TOKEN_EXPIRED')
     }
 
     const hashedPassword = await hashPassword(params.password)
@@ -160,22 +173,6 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
       WHERE id=${record.id}
     `)
 
-    return success(void 0)
+    return Ok(void 0)
   })
-}
-
-type FindUserByAuthenticationToken = (
-  deps: { client: DBClient },
-  token: AuthenticationToken
-) => Promise<any>
-
-export const findUserByAuthenticationToken: FindUserByAuthenticationToken = async ({ client }, token) => {
-  const records = await client.query(sql`
-      SELECT * FROM user_authentication
-      WHERE id=${token.id}
-      AND (password_changed_at is null OR password_changed_at <= ${token.createdAt})
-      LIMIT 1
-  `)
-
-  return records.rows[0]
 }

@@ -24,6 +24,8 @@ import {
 } from './factories'
 import { findUserByAuthentication } from './queries'
 import { withMockedDate, t } from '../spec-helpers'
+import { Err } from 'space-lift'
+import { equal } from 'assert'
 
 const sendMail = sinon.spy()
 
@@ -37,7 +39,7 @@ describe('user/register', () => {
       userIdentifier: 'sepp',
       password: 'huber'
     })
-    assertThat(result.body, equalTo('User Identifier already taken'))
+    assertThat(result, equalTo(Err('User Identifier already taken')))
   }))
 
   it('sends a registration email', t(async ({ withinConnection }) => {
@@ -82,10 +84,7 @@ describe('user/confirm', () => {
       token: 'unknown token'
     })
 
-    assertThat(result, hasProperties({
-      isSuccess: false,
-      body: 'Token not found'
-    }))
+    assertThat(result, equalTo(Err('NOT_FOUND')))
   }))
 
   it('when user was not found', t(async ({ withinConnection }) => {
@@ -94,10 +93,7 @@ describe('user/confirm', () => {
       token: 'invalid token'
     })
 
-    assertThat(result, hasProperties({
-      isSuccess: false,
-      body: 'Token not found'
-    }))
+    assertThat(result, equalTo(Err('NOT_FOUND')))
   }))
 })
 
@@ -194,7 +190,7 @@ describe('user/resetPasswordByToken', () => {
       assertThat(await findUserByAuthentication({ client }, {
         userIdentifier: auth.userIdentifier,
         password: 'new password'
-      }), blank())
+      }), equalTo(Err('NOT_FOUND')))
     })
   }))
 })

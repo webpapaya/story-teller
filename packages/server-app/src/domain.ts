@@ -1,16 +1,6 @@
 import { LocalDateTime } from 'js-joda'
 
 type UUID = string
-export type Result<Body> = {
-  body: Body
-  isSuccess: boolean
-}
-
-export const success = <T>(body: T): Result<T> =>
-  ({ isSuccess: true, body })
-
-export const failure = <T>(body: T): Result<T> =>
-  ({ isSuccess: false, body })
 
 export type AuthenticationToken = {
   id: UUID
