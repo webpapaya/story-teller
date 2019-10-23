@@ -35,10 +35,8 @@ type ExecuteCommand = <A, B, C, D extends Result<unknown, unknown>>(definition: 
 }) => (params: any) => Promise<Result<unknown, unknown>>
 
 export const executeCommand: ExecuteCommand = (definition, args) => async (params) => {
-  const result = await definition.validator.validate(params).fold(
-    (properties) => Err({ type: 'ValidationError', properties }),
-    (v) => args.useCase({ ...args.dependencies, auth: args.auth }, v)
-  )
+  const result = await definition.validator.validate(params)
+    .flatMap((v) => args.useCase({ ...args.dependencies, auth: args.auth }, v))
 
   if (result.isOk()) {
     return Ok(attributeFiltering(definition.response, result.get()))
@@ -53,6 +51,9 @@ const resultToHTTP = (res: Response, result: Result<unknown, unknown>) => {
     res.send(result.get())
   } else if (result.get() === 'NOT_FOUND') {
     res.status(404)
+    res.send({})
+  } else if (result.get() === 'UNAUTHORIZED') {
+    res.status(401)
     res.send({})
   } else {
     res.status(400)

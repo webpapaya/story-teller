@@ -37,17 +37,19 @@ app.use(cors({
 }))
 
 const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
-  await withinConnection(async ({ client }) => {
+  const user = await withinConnection(async ({ client }) => {
     const parsedCookie = JSON.parse(req.signedCookies.session || '{}')
-    const user = await findUserByAuthenticationToken({ client }, parsedCookie)
-    if (user.isOk()) {
-      req.auth = { user: user.get() }
-      next()
-    } else {
-      res.sendStatus(401)
-      next('Unauthorized')
-    }
+    return findUserByAuthenticationToken({ client }, parsedCookie)
   })
+
+  if (user.isOk()) {
+    req.auth = { user: user.get() }
+    next()
+  } else {
+    res.status(401)
+    res.send({})
+    next(Err('UNAUTHORIZED'))
+  }
 }
 
 commandViaHTTP(SESSION_COMMAND, {

@@ -128,11 +128,6 @@ export const requestPasswordReset: RequestPasswordReset = async (dependencies, p
   })
 }
 
-type ResetPasswordErrors =
-| 'Token too old'
-| 'Token not found'
-| 'Token invalid'
-
 type ResetPasswordByToken = (
   deps: { withinConnection: WithinConnection },
   params: { userIdentifier: string, token: string, password: string }

@@ -35,7 +35,7 @@ export const createFeatureRevision: CreateFeatureRevision = async (deps, params)
           WHERE original_id = ${params.originalId}
         )
       )
-      returning *
+      RETURNING *
     `)
 
     return Ok(result.rows[0])
