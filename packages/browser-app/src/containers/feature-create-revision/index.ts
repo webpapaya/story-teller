@@ -7,9 +7,11 @@ import hasSideEffect from '../../has-side-effect';
 import Loading from '../../components/loading';
 import { selectFeature } from '../../domain/feature/selectors';
 import { whereRevisions } from '../../domain/revision/actions';
+import { whereRevisionForFeature } from '../../domain/revision/selectors';
 
 const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state, props) => ({
-  defaultValues: selectFeature(state, props.id)
+  defaultValues: selectFeature(state, props.id),
+  revision: whereRevisionForFeature(state, props.id)
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => ({

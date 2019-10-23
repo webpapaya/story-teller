@@ -15,7 +15,7 @@ const Organism = isForm<any, any>({
     description: v.string,
     originalId: v.string,
   })
-}, ({ onSubmit, onValueChange, values, id }) => {
+}, ({ onSubmit, onValueChange, values, id, revision }) => {
   return (
     <form onSubmit={onSubmit} className={styles.form}>
       <InputHidden

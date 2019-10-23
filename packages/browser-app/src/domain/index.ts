@@ -3,11 +3,13 @@ import ReduxThunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import authenticationReducer from './authentication/reducer'
 import featureReducer from './feature/reducer'
+import revisionReducer from './revision/reducer'
 import createHTTPInstance from '../utils/create-http-connection'
 
 export const rootReducer = combineReducers({
   authentication: authenticationReducer,
-  features: featureReducer
+  features: featureReducer,
+  revisions: revisionReducer
 })
 
 export const store = createStore(rootReducer, composeWithDevTools(

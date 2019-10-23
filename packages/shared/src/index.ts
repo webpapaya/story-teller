@@ -49,7 +49,7 @@ export namespace Authentication {
         userIdentifier: nonEmptyString,
         password: nonEmptyString
       }),
-      response: undefined
+      response: v.object({})
     }),
 
     resetPasswordByToken: buildCommandDefinition({
@@ -61,7 +61,7 @@ export namespace Authentication {
         password: nonEmptyString,
         token: nonEmptyString
       }),
-      response: undefined
+      response: v.object({})
     }),
 
     requestPasswordReset: buildCommandDefinition({
