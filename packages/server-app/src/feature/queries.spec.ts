@@ -2,7 +2,7 @@
 import { assertThat, hasProperty, hasProperties, everyItem } from 'hamjest'
 import { t } from '../spec-helpers'
 import uuid from 'uuid'
-import { createFeature, createFeatureRevision } from './commands'
+import { createFeature, updateFeature } from './commands'
 import { whereFeature } from './queries'
 
 describe('whereFeature', () => {
@@ -35,7 +35,7 @@ describe('whereFeature', () => {
     }
 
     await createFeature({ withinConnection }, feature)
-    await createFeatureRevision({ withinConnection }, revision)
+    await updateFeature({ withinConnection }, revision)
 
     const features = await whereFeature({ withinConnection })
     assertThat(features.get(), hasProperties({

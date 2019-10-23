@@ -3,7 +3,7 @@
 import { assertThat, hasProperties, instanceOf, equalTo } from 'hamjest'
 import { t } from '../spec-helpers'
 import uuid from 'uuid'
-import { createFeatureRevision, createFeature } from '../feature/commands'
+import { updateFeature, createFeature } from '../feature/commands'
 import { whereRevision } from './queries'
 import { LocalDateTime } from 'js-joda'
 
@@ -23,7 +23,7 @@ describe('whereFeature', () => {
     }
 
     await createFeature({ withinConnection }, feature)
-    await createFeatureRevision({ withinConnection }, revision)
+    await updateFeature({ withinConnection }, revision)
 
     const features = await whereRevision({ withinConnection }, { featureId: feature.id })
 

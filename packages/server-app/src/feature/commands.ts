@@ -9,18 +9,18 @@ type CreateFeature = (
 ) => Promise<Result<never, Feature>>
 
 export const createFeature: CreateFeature = async (deps, params) => {
-  return createFeatureRevision(deps, {
+  return updateFeature(deps, {
     ...params,
     originalId: params.id,
   })
 }
 
-type CreateFeatureRevision = (
+type UpdateFeature = (
   deps: { withinConnection: WithinConnection },
   params: Feature & { originalId: null | string }
 ) => Promise<Result<never, Feature>>
 
-export const createFeatureRevision: CreateFeatureRevision = async (deps, params) => {
+export const updateFeature: UpdateFeature = async (deps, params) => {
   return deps.withinConnection(async ({ client }) => {
     const result = await client.query(sql`
       INSERT INTO feature (id, title, description, original_id, version)

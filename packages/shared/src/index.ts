@@ -1,6 +1,6 @@
 import * as v from 'validation.ts'
 
-type HTTPVerb = 'get' | 'post' | 'patch' | 'delete'
+type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 export type CommandDefinition<A, B> = {
   verb: HTTPVerb
   action?: string
@@ -81,73 +81,73 @@ export const SIGN_OUT_COMMAND = buildCommandDefinition({
   response: v.object({}),
 })
 
-// Features
-const FEATURE_AGGREGATE = v.object({
-  id: uuid,
-  title: nonEmptyString,
-  description: nonEmptyString,
-
-  // deprecated
-  originalId: uuid,
-  version: v.number
-})
-
-export const CREATE_FEATURE_COMMAND = buildCommandDefinition({
-  verb: 'post',
-  action: 'create',
-  model: 'feature',
-  validator: v.object({
-    id: uuid,
-    title: nonEmptyString,
-    description: nonEmptyString
-  }),
-  response: FEATURE_AGGREGATE
-})
-
-export const CREATE_FEATURE_REVISION_COMMAND = buildCommandDefinition({
-  verb: 'post',
-  action: 'create-revision',
-  model: 'feature',
-  validator: v.object({
+export namespace Feature {
+  export const aggregate = v.object({
     id: uuid,
     title: nonEmptyString,
     description: nonEmptyString,
-    originalId: uuid
-  }),
-  response: FEATURE_AGGREGATE
-})
 
-export const LIST_FEATURES_COMMAND = buildCommandDefinition({
-  verb: 'get',
-  action: 'fetch',
-  model: 'feature',
-  validator: v.object({}),
-  response: v.array(FEATURE_AGGREGATE)
-})
+    // deprecated
+    originalId: uuid,
+    version: v.number
+  })
 
-// Revisions
-const REVISION_AGGREGATE = v.object({
-  id: uuid,
-  reason: v.string,
-  featureId: uuid,
-  version: v.number,
-})
+  export const actions = {
+    create: buildCommandDefinition({
+      verb: 'post',
+      action: 'create',
+      model: 'feature',
+      validator: v.object({
+        id: uuid,
+        title: nonEmptyString,
+        description: nonEmptyString
+      }),
+      response: aggregate
+    }),
 
-export const LIST_REVISIONS_COMMAND = buildCommandDefinition({
-  verb: 'get',
-  action: 'fetch',
-  model: 'revision',
-  validator: v.object({ featureId: uuid }),
-  response: v.array(REVISION_AGGREGATE)
-})
+    update: buildCommandDefinition({
+      verb: 'put',
+      action: 'update',
+      model: 'feature',
+      validator: v.object({
+        id: uuid,
+        title: nonEmptyString,
+        description: nonEmptyString,
+        originalId: uuid
+      }),
+      response: aggregate
+    })
+  }
 
-export const CREATE_REVISION_COMMAND = buildCommandDefinition({
-  verb: 'post',
-  action: 'create',
-  model: 'revision',
-  validator: v.object({
+  export const queries = {
+    where: buildCommandDefinition({
+      verb: 'get',
+      action: 'fetch',
+      model: 'feature',
+      validator: v.object({}),
+      response: v.array(aggregate)
+    })
+  }
+}
+
+export namespace Revision {
+  export const aggregate = v.object({
     id: uuid,
-    feature: FEATURE_AGGREGATE
-  }),
-  response: v.array(REVISION_AGGREGATE)
-})
+    reason: v.string,
+    featureId: uuid,
+    version: v.number,
+  })
+
+  export const actions = {}
+
+  export const queries = {
+    where: buildCommandDefinition({
+      verb: 'get',
+      action: 'fetch',
+      model: 'revision',
+      validator: v.object({ featureId: uuid }),
+      response: v.array(aggregate)
+    })
+  }
+}
+

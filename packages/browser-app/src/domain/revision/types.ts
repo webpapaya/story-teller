@@ -1,6 +1,6 @@
-import { LIST_REVISIONS_COMMAND } from '@story-teller/shared'
+import { Revision } from '@story-teller/shared'
 
-export type Revision = typeof LIST_REVISIONS_COMMAND.response.T[0]
+export type Revision = typeof Revision.aggregate.T
 export type Action<Type extends string, Payload> = {
   type: Type
   payload: Payload

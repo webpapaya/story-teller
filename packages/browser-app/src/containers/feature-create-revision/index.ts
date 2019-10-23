@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { DispatchPropsType, OwnPropsType, StatePropsType } from './types';
 import { MapDispatchToProps, MapStateToProps } from '../../domain/types';
-import { whereFeature, createFeatureRevision } from '../../domain/feature/actions';
+import { whereFeature, updateFeature } from '../../domain/feature/actions';
 import Organism from './organism'
 import hasSideEffect from '../../has-side-effect';
 import Loading from '../../components/loading';
@@ -19,8 +19,8 @@ const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = 
       dispatch(whereRevisions({ featureId: props.id }))
     ])
   },
-  onSubmit: async (args) => {
-    await dispatch(createFeatureRevision(args))
+  onSubmit: async (feature) => {
+    await dispatch(updateFeature(feature))
   }
 })
 

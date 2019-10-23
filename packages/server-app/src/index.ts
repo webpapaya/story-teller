@@ -6,7 +6,7 @@ import { register, requestPasswordReset, resetPasswordByToken } from './authenti
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
-import { createFeature, createFeatureRevision } from './feature/commands'
+import { createFeature, updateFeature } from './feature/commands'
 import { UserAuthentication } from './domain'
 import {
   SESSION_COMMAND,
@@ -15,10 +15,9 @@ import {
   RESET_PASSWORD_BY_TOKEN_COMMAND,
   SIGN_IN_COMMAND,
   SIGN_OUT_COMMAND,
-  CREATE_FEATURE_COMMAND,
-  LIST_FEATURES_COMMAND,
-  CREATE_FEATURE_REVISION_COMMAND,
-  LIST_REVISIONS_COMMAND
+
+  Revision,
+  Feature
 } from '@story-teller/shared'
 import { whereFeature } from './feature/queries'
 import { commandViaHTTP } from './command-via-http'
@@ -105,28 +104,31 @@ commandViaHTTP(SIGN_OUT_COMMAND, {
   }
 })
 
-commandViaHTTP(CREATE_FEATURE_COMMAND, {
+commandViaHTTP(Feature.actions.create, {
   app,
   dependencies: { withinConnection },
   useCase: createFeature
 })
 
-commandViaHTTP(CREATE_FEATURE_REVISION_COMMAND, {
+commandViaHTTP(Feature.actions.update, {
   app,
   dependencies: { withinConnection },
-  useCase: createFeatureRevision
+  useCase: updateFeature
 })
 
-commandViaHTTP(LIST_FEATURES_COMMAND, {
+commandViaHTTP(Feature.queries.where, {
   app,
   dependencies: { withinConnection },
   useCase: whereFeature
 })
 
-commandViaHTTP(LIST_REVISIONS_COMMAND, {
+commandViaHTTP(Revision.queries.where, {
   app,
   dependencies: { withinConnection },
   useCase: whereRevision
 })
+
+
+
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

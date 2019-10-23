@@ -2,7 +2,7 @@
 import { assertThat, hasProperties } from 'hamjest'
 import { t, assertDifference } from '../spec-helpers'
 import uuid from 'uuid'
-import { createFeature, createFeatureRevision as createFeatureRevision } from './commands'
+import { createFeature, updateFeature as updateFeature } from './commands'
 
 describe('createFeature', () => {
   it('creates a new record', t(async ({ withinConnection }) => {
@@ -34,7 +34,7 @@ describe('createFeatureRevision', () => {
       originalId: feature.id
     }
 
-    const result = await createFeatureRevision({ withinConnection }, updatedFeature)
+    const result = await updateFeature({ withinConnection }, updatedFeature)
     assertThat(result.get(), hasProperties(updatedFeature))
   }))
 })
