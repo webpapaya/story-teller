@@ -9,13 +9,7 @@ import { findUserByAuthentication, findUserByAuthenticationToken } from './authe
 import { createFeature, updateFeature } from './feature/commands'
 import { UserAuthentication } from './domain'
 import {
-  SESSION_COMMAND,
-  SIGN_UP_COMMAND,
-  REQUEST_PASSWORD_RESET_COMMAND,
-  RESET_PASSWORD_BY_TOKEN_COMMAND,
-  SIGN_IN_COMMAND,
-  SIGN_OUT_COMMAND,
-
+  Authentication,
   Revision,
   Feature
 } from '@story-teller/shared'
@@ -52,7 +46,7 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
   }
 }
 
-commandViaHTTP(SESSION_COMMAND, {
+commandViaHTTP(Authentication.queries.session, {
   app,
   middlewares: [isAuthenticated],
   dependencies: {},
@@ -60,25 +54,25 @@ commandViaHTTP(SESSION_COMMAND, {
     Ok(dependencies.auth.user as UserAuthentication)
 })
 
-commandViaHTTP(SIGN_UP_COMMAND, {
+commandViaHTTP(Authentication.actions.signUp, {
   app,
   dependencies: { withinConnection, sendMail },
   useCase: register
 })
 
-commandViaHTTP(REQUEST_PASSWORD_RESET_COMMAND, {
+commandViaHTTP(Authentication.actions.requestPasswordReset, {
   app,
   dependencies: { withinConnection, sendMail },
   useCase: requestPasswordReset
 })
 
-commandViaHTTP(RESET_PASSWORD_BY_TOKEN_COMMAND, {
+commandViaHTTP(Authentication.actions.resetPasswordByToken, {
   app,
   dependencies: { withinConnection },
   useCase: resetPasswordByToken
 })
 
-commandViaHTTP(SIGN_IN_COMMAND, {
+commandViaHTTP(Authentication.actions.signIn, {
   app,
   dependencies: { withinConnection },
   useCase: async ({ withinConnection, res }, args): Promise<Result<Errors, UserAuthentication>> => {
@@ -95,7 +89,7 @@ commandViaHTTP(SIGN_IN_COMMAND, {
   }
 })
 
-commandViaHTTP(SIGN_OUT_COMMAND, {
+commandViaHTTP(Authentication.actions.signOut, {
   app,
   dependencies: {},
   useCase: async ({ res }) => {
