@@ -94,8 +94,6 @@ export namespace Feature {
     id: uuid,
     title: nonEmptyString,
     description: nonEmptyString,
-
-    // deprecated
     originalId: uuid,
     version: v.number
   })

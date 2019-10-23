@@ -21,6 +21,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = 
   },
   onSubmit: async (feature) => {
     await dispatch(updateFeature(feature))
+    await dispatch(whereRevisions({ featureId: props.id }))
   }
 })
 
