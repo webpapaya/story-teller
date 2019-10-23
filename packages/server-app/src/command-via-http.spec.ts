@@ -61,10 +61,7 @@ describe('executeCommand', () => {
 
   it('with corrupted data, returns validation error', async () => {
     const result = await command({ })
-    assertThat(result.get(), hasProperties({
-      type: 'ValidationError',
-      properties: hasProperties({ length: 2 })
-    }))
+    assertThat(result.get(), hasProperties({ length: 2 }))
   })
 
   it('with correctdata, returns filtered response', async () => {

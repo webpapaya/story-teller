@@ -125,20 +125,12 @@ export const LIST_FEATURES_COMMAND = buildCommandDefinition({
   response: v.array(FEATURE_AGGREGATE)
 })
 
-export const LIST_FEATURE_REVISIONS_COMMAND = buildCommandDefinition({
-  verb: 'get',
-  action: 'fetch',
-  model: 'feature-revision',
-  validator: v.object({ id: uuid }),
-  response: v.array(FEATURE_AGGREGATE)
-})
-
 // Revisions
 const REVISION_AGGREGATE = v.object({
   id: uuid,
   reason: v.string,
   featureId: uuid,
-  version: v.number
+  version: v.number,
 })
 
 export const LIST_REVISIONS_COMMAND = buildCommandDefinition({

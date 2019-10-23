@@ -25,3 +25,12 @@ export type Feature = {
   title: string
   description: string
 }
+
+export type FeatureRevision = {
+  id: UUID,
+  reason?: string,
+  featureId: UUID,
+  createdAt: LocalDateTime,
+  version: number
+}
+

@@ -18,12 +18,13 @@ import {
   CREATE_FEATURE_COMMAND,
   LIST_FEATURES_COMMAND,
   CREATE_FEATURE_REVISION_COMMAND,
-  LIST_FEATURE_REVISIONS_COMMAND
+  LIST_REVISIONS_COMMAND
 } from '@story-teller/shared'
-import { whereFeature, whereFeatureRevision } from './feature/queries'
+import { whereFeature } from './feature/queries'
 import { commandViaHTTP } from './command-via-http'
 import { Result, Ok, Err } from 'space-lift'
 import { HTTPError, Errors } from './errors'
+import { whereRevision } from './revisions/queries'
 
 const app = express()
 const port = process.env.API_PORT
@@ -110,7 +111,6 @@ commandViaHTTP(CREATE_FEATURE_COMMAND, {
   useCase: createFeature
 })
 
-
 commandViaHTTP(CREATE_FEATURE_REVISION_COMMAND, {
   app,
   dependencies: { withinConnection },
@@ -123,10 +123,10 @@ commandViaHTTP(LIST_FEATURES_COMMAND, {
   useCase: whereFeature
 })
 
-commandViaHTTP(LIST_FEATURE_REVISIONS_COMMAND, {
+commandViaHTTP(LIST_REVISIONS_COMMAND, {
   app,
   dependencies: { withinConnection },
-  useCase: whereFeatureRevision
+  useCase: whereRevision
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

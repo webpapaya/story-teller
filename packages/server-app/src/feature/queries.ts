@@ -17,19 +17,3 @@ export const whereFeature: WhereFeature = async (deps) => {
     return Ok(result.rows as Feature[])
   })
 }
-
-type WhereFeatureRevision = (
-  deps: { withinConnection: WithinConnection },
-  params: { id: string }
-) => Promise<Result<never, Feature[]>>
-
-export const whereFeatureRevision: WhereFeatureRevision = async (deps, params) => {
-  return deps.withinConnection(async ({ client }) => {
-    const result = await client.query(sql`
-      SELECT *
-      FROM feature
-      WHERE original_id = ${params.id}
-    `)
-    return Ok(result.rows as Feature[])
-  })
-}
