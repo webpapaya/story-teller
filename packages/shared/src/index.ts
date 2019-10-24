@@ -119,7 +119,8 @@ export namespace Feature {
         id: uuid,
         title: nonEmptyString,
         description: nonEmptyString,
-        originalId: uuid
+        originalId: uuid,
+        reason: nonEmptyString
       }),
       response: aggregate
     })

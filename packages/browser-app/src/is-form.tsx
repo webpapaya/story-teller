@@ -61,7 +61,13 @@ const isForm = <A, OriginalProps extends {}>(options: Options<A>,
           async (values) => {
             if (this.props.onSubmit) {
               await this.props.onSubmit(values)
-              this.setState({ submitCount: this.state.submitCount + 1 })
+              this.setState({
+                values: {
+                  ...options.defaultValues,
+                  ...this.props.defaultValues
+                },
+                submitCount: this.state.submitCount + 1
+              })
             }
           })
     }

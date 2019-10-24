@@ -9,10 +9,12 @@ import RequestPasswordReset from './containers/user-request-password-reset'
 import FeatureCreate from './containers/feature-create'
 import FeatureList from './containers/feature-list'
 import FeatureUpdate from './containers/feature-create-revision'
+import FeatureRevisionList from './containers/feature-revision-list'
+
 import ProtectedRoute from './containers/protected-route';
 import Navigation from './containers/navigation';
 import CenteredPanel from './components/centered-panel';
-import { RouterProps } from 'react-router';
+
 
 const App = () => (
   <BrowserRouter>
@@ -45,7 +47,10 @@ const App = () => (
           />
           <ProtectedRoute path='/feature/create' component={FeatureCreate} />
           <ProtectedRoute path='/feature/:id' component={(props: any) => (
-            <FeatureUpdate id={props.match.params.id} history={props.history} />
+            <>
+              <FeatureUpdate id={props.match.params.id} history={props.history} />
+              <FeatureRevisionList id={props.match.params.id} />
+            </>
           )} />
           <ProtectedRoute path='/' component={FeatureList} />
         </Switch>

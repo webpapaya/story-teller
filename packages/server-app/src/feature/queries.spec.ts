@@ -32,6 +32,7 @@ describe('whereFeature', () => {
       title: 'updated',
       description: 'updated',
       originalId: feature.id,
+      reason: 'Fixed typo'
     }
 
     await createFeature({ withinConnection }, feature)

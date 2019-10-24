@@ -31,7 +31,8 @@ describe('createFeatureRevision', () => {
       id: uuid(),
       title: 'Updated',
       description: 'Updated',
-      originalId: feature.id
+      originalId: feature.id,
+      reason: 'Fixed typo'
     }
 
     const result = await updateFeature({ withinConnection }, updatedFeature)

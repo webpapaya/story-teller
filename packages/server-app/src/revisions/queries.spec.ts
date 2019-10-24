@@ -19,7 +19,8 @@ describe('whereFeature', () => {
       id: uuid(),
       title: 'A new feature',
       description: 'A feature description',
-      originalId: feature.id
+      originalId: feature.id,
+      reason: 'Fixed typo'
     }
 
     await createFeature({ withinConnection }, feature)
@@ -38,7 +39,8 @@ describe('whereFeature', () => {
         id: revision.id,
         featureId: feature.id,
         createdAt: instanceOf(LocalDateTime),
-        version: 1
+        version: 1,
+        reason: revision.reason
       })
     }))
   }))

@@ -11,5 +11,5 @@ export type Actions =
   | Action<'FEATURE_REVISION/FETCH/SUCCESS', Feature[]>
 
   | Action<'FEATURE/CREATE/SUCCESS', Feature>
-  | Action<'FEATURE/CREATE_REVISION/SUCCESS', Feature>
+  | Action<'FEATURE/UPDATE/SUCCESS', Feature>
 

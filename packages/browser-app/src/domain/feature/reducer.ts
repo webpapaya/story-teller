@@ -1,14 +1,7 @@
 import { Feature, Actions } from './types'
+import { uniqueBy } from '../../utils/unique-by'
+
 const initialState: Feature[] = []
-
-function uniqueBy<Type, Key extends keyof Type>(key: Key, array: Type[]): Type[] {
-  return Object.values(array.reduce((result, obj) => {
-    // @ts-ignore
-    result[obj[key]] = obj
-    return result
-  }, {}));
-}
-
 
 const reducer = (state = initialState, action: Actions): Feature[] => {
   switch (action.type) {
@@ -19,7 +12,7 @@ const reducer = (state = initialState, action: Actions): Feature[] => {
           ...action.payload
         ])
 
-    case "FEATURE/CREATE_REVISION/SUCCESS":
+    case "FEATURE/UPDATE/SUCCESS":
     case "FEATURE/CREATE/SUCCESS": return uniqueBy('id', [
       ...state,
       action.payload

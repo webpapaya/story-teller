@@ -12,23 +12,25 @@ export const createFeature: CreateFeature = async (deps, params) => {
   return updateFeature(deps, {
     ...params,
     originalId: params.id,
+    reason: 'Creation'
   })
 }
 
 type UpdateFeature = (
   deps: { withinConnection: WithinConnection },
-  params: Feature & { originalId: null | string }
+  params: Feature & { originalId: string, reason: string }
 ) => Promise<Result<never, Feature>>
 
 export const updateFeature: UpdateFeature = async (deps, params) => {
   return deps.withinConnection(async ({ client }) => {
     const result = await client.query(sql`
-      INSERT INTO feature (id, title, description, original_id, version)
+      INSERT INTO feature (id, title, description, original_id, reason, version)
       VALUES (
         ${params.id},
         ${params.title},
         ${params.description},
         ${params.originalId},
+        ${params.reason},
         (
           SELECT count(*)
           FROM feature

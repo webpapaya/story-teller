@@ -16,7 +16,7 @@ export const whereRevision: WhereRevision = async (deps, filter) => {
         original_id as feature_id,
         created_at,
         version,
-        'Unknown' as reason
+        reason
       FROM feature
       WHERE original_id=${filter.featureId}
     `)
