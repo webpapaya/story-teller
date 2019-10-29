@@ -26,6 +26,12 @@ export type Feature = {
   description: string
 }
 
+export type Tag = {
+  id: UUID
+  name: string
+  color: string
+}
+
 export type FeatureRevision = {
   id: UUID,
   reason?: string,

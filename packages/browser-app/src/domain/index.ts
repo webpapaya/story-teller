@@ -1,5 +1,6 @@
 import { combineReducers, createStore, applyMiddleware } from 'redux'
 import ReduxThunk from 'redux-thunk'
+import createMemoizeMiddleware from 'redux-memoize';
 import { composeWithDevTools } from 'redux-devtools-extension'
 import authenticationReducer from './authentication/reducer'
 import featureReducer from './feature/reducer'
@@ -13,7 +14,9 @@ export const rootReducer = combineReducers({
 })
 
 export const store = createStore(rootReducer, composeWithDevTools(
-  applyMiddleware(ReduxThunk.withExtraArgument({
-    http: createHTTPInstance({ baseURL: process.env.REACT_APP_SERVER_URL as string })
-  }))
+  applyMiddleware(
+    createMemoizeMiddleware({ ttl: 999999 }),
+    ReduxThunk.withExtraArgument({
+      http: createHTTPInstance({ baseURL: process.env.REACT_APP_SERVER_URL as string })
+    }))
 ))

@@ -14,6 +14,7 @@ export const buildCommandDefinition = <A, B>(definition: CommandDefinition<A, B>
 export const nonEmptyString = v.string.filter((value) => value.length > 0)
 export const uuid = v.string.filter((value) =>
   !!value.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i))
+export const color = v.string
 
 export namespace Authentication {
   export const aggregate = v.object({})
@@ -95,7 +96,12 @@ export namespace Feature {
     title: nonEmptyString,
     description: nonEmptyString,
     originalId: uuid,
-    version: v.number
+    version: v.number,
+    tags: v.array(v.object({
+      id: uuid,
+      name: nonEmptyString,
+      color: color
+    }))
   })
 
   export const actions = {
@@ -108,7 +114,7 @@ export namespace Feature {
         title: nonEmptyString,
         description: nonEmptyString
       }),
-      response: aggregate
+      response: v.object({}),
     }),
 
     update: buildCommandDefinition({
@@ -122,7 +128,7 @@ export namespace Feature {
         originalId: uuid,
         reason: nonEmptyString
       }),
-      response: aggregate
+      response: v.object({}),
     })
   }
 

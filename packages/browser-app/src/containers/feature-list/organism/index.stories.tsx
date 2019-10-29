@@ -1,5 +1,4 @@
 import React from 'react';
-import { action } from '@storybook/addon-actions'
 import { storiesOf } from '../../../storybook';
 import Organism from '.';
 import uuid from 'uuid';
@@ -13,13 +12,14 @@ storiesOf('FeatureList', module)
         description: 'Irrelevant',
         originalId: uuid(),
         version: 0,
-
+        tags: []
       }, {
         id: uuid(),
         title: 'A Feature',
         description: 'Irrelevant',
         originalId: uuid(),
         version: 0,
+        tags: []
       }
     ]}/>
   ))

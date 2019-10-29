@@ -1,6 +1,7 @@
 import { AnyAction } from 'redux'
 import { ActionCreator } from './types'
 import { CommandDefinition } from '@story-teller/shared'
+import { memoize } from 'redux-memoize';
 
 type FetchViaHTTP = <A extends CommandDefinition<unknown, unknown>>(
   definition: A
@@ -12,7 +13,7 @@ const buildRoute = (values: (string | undefined)[] ) =>
 const buildType = (values: string[]) =>
   buildRoute(values).replace(/-/g, '_').toUpperCase()
 
-const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _, { http }) => {
+const fetchViaHTTP: FetchViaHTTP = (definition) => memoize((body) => async (dispatch, _, { http }) => {
   const route = buildRoute([
     definition.model,
     definition.action
@@ -37,7 +38,7 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _,
         definition.action || 'FETCH',
         'SUCCESS'
       ]),
-      payload
+      payload: definition.verb === 'get' ? payload : body
     })
     return payload
   } catch (e) {
@@ -51,6 +52,6 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _,
     })
     return body
   }
-}
+})
 
 export default fetchViaHTTP;
