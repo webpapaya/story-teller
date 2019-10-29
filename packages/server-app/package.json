@@ -11,6 +11,7 @@
     "db:migrate:up": "npm run env -- db-migrate up",
     "db:migrate:down": "npm run env -- db-migrate down",
     "db:migrate:redo": "npm run db:migrate:down && npm run db:migrate:up",
+    "db:migrate:dump": "npm run env -- schemats generate -c postgres://compup:password@localhost:15432/compup_development -s public -o osm.ts -C",
     "start": "npm run env -- ts-node-dev --inspect --notify=0 --respawn ./src/index.ts",
     "lint": "eslint --ext js,ts --ignore-path .gitignore .",
     "test": "ENV_FILE=.env.test npm run env -- mocha -r ts-node/register --timeout 500000 --watch-extensions ts $(find src -name '*.spec.ts')",
@@ -51,6 +52,7 @@
     "validation.ts": "0.0.25"
   },
   "devDependencies": {
+    "@story-teller/shared": "*",
     "@types/expect": "^1.20.4",
     "@types/mocha": "^5.2.7",
     "@types/mockdate": "^2.0.0",
@@ -68,10 +70,10 @@
     "mocha": "^6.1.4",
     "mockdate": "^2.0.5",
     "pre-commit": "^1.2.2",
+    "schemats": "^3.0.3",
     "standard": "^14.1.0",
     "ts-node-dev": "^1.0.0-pre.39",
     "ts-sinon": "^1.0.17",
-    "typescript": "^3.5.1",
-    "@story-teller/shared": "*"
+    "typescript": "^3.5.1"
   }
 }

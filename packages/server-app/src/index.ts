@@ -22,7 +22,6 @@ import { whereRevision } from './revisions/queries'
 const app = express()
 const port = process.env.API_PORT
 
-
 app.use(cookieParser(process.env.SECRET_KEY_BASE))
 app.use(bodyParser())
 app.use(cors({

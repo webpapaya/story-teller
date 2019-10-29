@@ -5,7 +5,7 @@ exports.up = function (db) {
     create table if not exists
     public.user_authentication (
       id                          uuid PRIMARY KEY DEFAULT uuid_generate_v1(),
-      user_identifier             text UNIQUE,
+      user_identifier             text NOT NULL UNIQUE,
       created_at                  timestamp without time zone NOT NULL,
 
       confirmation_token          text,

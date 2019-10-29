@@ -24,7 +24,8 @@ export const findUserById: FindUserById = async (dependencies, params) => {
   `)
   const record = records.rows[0]
   if (!record) { return Err('NOT_FOUND') }
-  return Ok(record as UserAuthentication)
+
+  return Ok(record)
 }
 
 type FindUserByIdentifier = (
