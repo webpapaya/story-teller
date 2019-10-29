@@ -9,9 +9,9 @@ declare module 'redux-memoize' {
   export function memoize<T>(
     options: Options,
     action: T
-  ): T
+  ): T & { unmemoized: T }
 
-  export function memoize<T>(
+  export function memoize<T extends function>(
     action: T
-  ): T
+  ): T & { unmemoized: T }
 }

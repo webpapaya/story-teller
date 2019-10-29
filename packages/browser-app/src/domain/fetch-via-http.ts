@@ -5,7 +5,9 @@ import { memoize } from 'redux-memoize';
 
 type FetchViaHTTP = <A extends CommandDefinition<unknown, unknown>>(
   definition: A
-) => ActionCreator<A['validator']['T'], void, AnyAction>
+) => ActionCreator<A['validator']['T'], void, AnyAction> & {
+  unmemoized: ActionCreator<A['validator']['T'], void, AnyAction>
+}
 
 const buildRoute = (values: (string | undefined)[] ) =>
   values.filter(x => x).join('/')
