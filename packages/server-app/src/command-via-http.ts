@@ -66,7 +66,7 @@ type HTTPMiddleware = (req: Request, res: Response, next: NextFunction) => Promi
 type CommandViaHTTP = <A, B, C, D>(definition: CommandDefinition<A, B>, args: {
   app: any
   middlewares?: HTTPMiddleware[]
-  dependencies: C
+  dependencies: C | (() => C)
   useCase: (deps: C & { auth: Express.Request['auth'], res: Response }, value: A) => Promise<Result<unknown, D>>
 }) => void
 
@@ -77,8 +77,13 @@ export const commandViaHTTP: CommandViaHTTP = (definition, { app, useCase, middl
   ].filter(x => x).join('/')
 
   app[definition.verb](`/${route}`, ...(middlewares || []), async (req: Request, res: Response) => {
+    const deps = typeof dependencies === 'function'
+      // @ts-ignore
+      ? dependencies()
+      : dependencies
+
     const command = await executeCommand(definition, {
-      dependencies: { ...dependencies, res },
+      dependencies: { ...deps, res },
       auth: req.auth,
       // @ts-ignore
       useCase

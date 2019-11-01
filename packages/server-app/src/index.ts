@@ -55,7 +55,7 @@ commandViaHTTP(Authentication.queries.session, {
 
 commandViaHTTP(Authentication.actions.signUp, {
   app,
-  dependencies: { withinConnection, sendMail },
+  dependencies: () => ({ withinConnection, sendMail }),
   useCase: register
 })
 
@@ -120,8 +120,5 @@ commandViaHTTP(Revision.queries.where, {
   dependencies: { withinConnection },
   useCase: whereRevision
 })
-
-
-
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

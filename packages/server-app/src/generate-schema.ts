@@ -44,15 +44,25 @@ const DEFAULT_LOOKUP_MAP = {
   timestamptz: 'date',
 }
 
-type OverwritableTypes = Partial<typeof DEFAULT_LOOKUP_MAP> & { [key: string]: string }
+type Overwrites = Partial<typeof DEFAULT_LOOKUP_MAP> & { [key: string]: string }
 
-export const columnsForTable = async (client: PoolClient, schema: string, table: string): Promise<ColumnDefinition[]> => {
+const toCamelCase = (s: string) => {
+  return s.replace(/([-_][a-z])/ig, ($1) => {
+    return $1.toUpperCase()
+      .replace('-', '')
+      .replace('_', '');
+  });
+};
+
+const toPascalCase = (s: string) => {
+  const camelCased = toCamelCase(s)
+  return camelCased.charAt(0).toUpperCase() + camelCased.slice(1)
+};
+
+export const columnsForTable = (client: PoolClient) => async (schema: string, table: string): Promise<ColumnDefinition[]> => {
   const result = await client.query(sql`
     SELECT
-      replace(
-        lower(substring(column_name from 1 for 1)) ||
-        substring(initcap(column_name) from 2 for length(column_name))
-      , '_', '') as column,
+      column_name as column,
       udt_name as data_type,
       is_nullable
     FROM information_schema.columns
@@ -61,7 +71,7 @@ export const columnsForTable = async (client: PoolClient, schema: string, table:
   return result.rows
 }
 
-export const tablesInSchema = async (client: PoolClient, schema: string): Promise<TableDefinition[]> => {
+export const tablesInSchema = (client: PoolClient) => async (schema: string): Promise<TableDefinition[]> => {
   const result = await client.query(sql`
     SELECT table_name
     FROM information_schema.columns
@@ -71,23 +81,23 @@ export const tablesInSchema = async (client: PoolClient, schema: string): Promis
   return result.rows
 }
 
-export const generateTypesForTable = (table: string, tableDefinition: ColumnDefinition[]) => {
+export const generateTypesForTable = (table: string, tableDefinition: ColumnDefinition[], overwrites: Overwrites = {}) => {
   const properties = tableDefinition.map((defintion) => {
     const dataType = defintion.isNullable === 'YES'
-      ? `${postgresToTypescript(defintion.dataType)} | null`
-      : postgresToTypescript(defintion.dataType)
+      ? `${postgresToTypescript(defintion.dataType, overwrites)} | null`
+      : postgresToTypescript(defintion.dataType, overwrites)
 
-    return `  ${defintion.column}: ${dataType},`
+    return `  ${toCamelCase(defintion.column)}: ${dataType},`
   }).join('\n')
 
   return [
-    `export type ${table} {`,
+    `export type ${toPascalCase(table)} {`,
     properties,
     '}'
   ].join('\n')
 }
 
-export const postgresToTypescript = (postgresType: string, overwritten: OverwritableTypes = {}) => {
+export const postgresToTypescript = (postgresType: string, overwritten: Overwrites = {}) => {
   const lookup = { ...DEFAULT_LOOKUP_MAP, ...overwritten }
   const getValue = (key: string) => {
     // @ts-ignore
@@ -101,4 +111,27 @@ export const postgresToTypescript = (postgresType: string, overwritten: Overwrit
   } else {
     return 'any'
   }
+}
+
+type GenerateTypesForSchema = (deps: {
+  tablesInSchema: (schema: string) => Promise<TableDefinition[]>,
+  columnsForTable: (schema: string, table: string) => Promise<ColumnDefinition[]>,
+  writeFile: (fileContents: string) => Promise<undefined>
+}, options: {
+  header?: string,
+  overwrites?: Overwrites,
+  schema: string,
+}) => Promise<void>
+
+export const generateTypesForSchema: GenerateTypesForSchema = async (deps, options) => {
+  const tables = await deps.tablesInSchema(options.schema)
+  const tableContent = (await Promise.all(tables.map(async (definition) => {
+    const columns = await deps.columnsForTable(options.schema, definition.tableName)
+    return generateTypesForTable(definition.tableName, columns, options.overwrites)
+  })))
+
+  await deps.writeFile([
+    options.header,
+    ...tableContent,
+  ].filter((value) => value).join('\n\n'))
 }

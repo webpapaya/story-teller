@@ -10,26 +10,68 @@ import {
   generateTypesForTable,
   columnsForTable,
   tablesInSchema,
-  postgresToTypescript
+  postgresToTypescript,
+  generateTypesForSchema
 } from './generate-schema'
+import sinon from 'sinon'
+
+const lastCallArgs = (matcher: any) =>
+  hasProperty('lastCall', hasProperty('args', matcher))
 
 describe('generateSchema', () => {
+  describe('generateSchema', () => {
+    const tablesInSchema = sinon.fake.returns(Promise.resolve([
+      { tableName: 'a_table' }
+    ]))
+
+    const columnsForTable = sinon.fake.returns(Promise.resolve([
+      { column: 'a_column', dataType: 'text', isNullable: 'YES' },
+      { column: 'b_column', dataType: 'text', isNullable: 'NO' }
+    ]))
+
+    const writeFile = sinon.fake.returns(Promise.resolve())
+
+    it('generates file with header', async () => {
+      await generateTypesForSchema({
+        tablesInSchema,
+        columnsForTable,
+        writeFile,
+      }, { schema: 'public', header: `import { LocalDate } from 'js-joda'` })
+
+      assertThat(writeFile, lastCallArgs(equalTo([
+        `import { LocalDate } from 'js-joda'\n\nexport type ATable {\n  aColumn: string | null,\n  bColumn: string,\n}`
+      ])))
+    })
+
+    it('generates file with overwrites', async () => {
+      await generateTypesForSchema({
+        tablesInSchema,
+        columnsForTable,
+        writeFile,
+      }, { schema: 'public', overwrites: {
+        text: 'any'
+      } })
+
+      assertThat(writeFile, lastCallArgs(equalTo([
+        `export type ATable {\n  aColumn: any | null,\n  bColumn: any,\n}`
+      ])))
+    })
+  })
+
   it('columnsForTable: responds correct columns', t(async ({ withinConnection }) => {
     return withinConnection(async ({ client }) => {
       await client.query(`
         create table if not exists
         public.test (
           id           uuid PRIMARY KEY,
-          camel_cased  text,
           array_text   text[]
         );
       `)
 
-      const columns = await columnsForTable(client, 'public', 'test')
+      const columns = await columnsForTable(client)('public', 'test')
       assertThat(columns, equalTo([
         { column: 'id', dataType: 'uuid', isNullable: 'NO' },
-        { column: 'camelCased', dataType: 'text', isNullable: 'YES' },
-        { column: 'arrayText', dataType: '_text', isNullable: 'YES' }
+        { column: 'array_text', dataType: '_text', isNullable: 'YES' }
       ]))
     })
   }))
@@ -38,21 +80,21 @@ describe('generateSchema', () => {
     return withinConnection(async ({ client }) => {
       await client.query(`
         create table if not exists
-        public.test (id uuid PRIMARY KEY);
+        public.test_table (id uuid PRIMARY KEY);
       `)
 
-      const tables = await tablesInSchema(client, 'public')
-      assertThat(tables, hasItems(hasProperty('tableName', 'test')))
+      const tables = await tablesInSchema(client)('public')
+      assertThat(tables, hasItems(hasProperty('tableName', 'test_table')))
     })
   }))
 
   it('generateTypesForTable: definition for table', () => {
-    const result = generateTypesForTable('ATable', [{
-      column: 'aValue',
+    const result = generateTypesForTable('a_table', [{
+      column: 'a_value',
       dataType: 'text',
       isNullable: 'YES'
     }, {
-      column: 'bValue',
+      column: 'b_value',
       dataType: 'text',
       isNullable: 'NO'
     }])
@@ -68,27 +110,8 @@ describe('generateSchema', () => {
   describe('postgresToTypescript', () => {
     [
       { pg: 'bpchar', ts: 'string'},
-      { pg: 'char', ts: 'string'},
-      { pg: 'varchar', ts: 'string'},
-      { pg: 'text', ts: 'string'},
-      { pg: 'citext', ts: 'string'},
-      { pg: 'uuid', ts: 'string'},
-      { pg: 'bytea', ts: 'string'},
-      { pg: 'inet', ts: 'string'},
-      { pg: 'time', ts: 'string'},
-      { pg: 'timetz', ts: 'string'},
-      { pg: 'interval', ts: 'string'},
-      { pg: 'name', ts: 'string'},
       { pg: '_text', ts: 'string[]'},
-
-      { pg: 'int2', ts: 'number' },
-      { pg: 'int4', ts: 'number' },
-      { pg: 'int8', ts: 'number' },
-      { pg: 'float4', ts: 'number' },
       { pg: 'float8', ts: 'number' },
-      { pg: 'numeric', ts: 'number' },
-      { pg: 'money', ts: 'number' },
-      { pg: 'oid', ts: 'number' },
       { pg: 'unknown type', ts: 'any' },
     ].forEach(({ pg, ts }) => {
       it(`converts ${pg} to ${ts}`, () => {
