@@ -5,12 +5,14 @@ import { composeWithDevTools } from 'redux-devtools-extension'
 import authenticationReducer from './authentication/reducer'
 import featureReducer from './feature/reducer'
 import revisionReducer from './revision/reducer'
+import tagReducer from './tags/reducer'
 import createHTTPInstance from '../utils/create-http-connection'
 
 export const rootReducer = combineReducers({
   authentication: authenticationReducer,
   features: featureReducer,
-  revisions: revisionReducer
+  revisions: revisionReducer,
+  tags: tagReducer,
 })
 
 export const store = createStore(rootReducer, composeWithDevTools(

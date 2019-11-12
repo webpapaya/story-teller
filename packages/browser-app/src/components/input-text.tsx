@@ -60,26 +60,4 @@ export const InputText = React.forwardRef<HTMLInputElement, InputProps>(({
       </>
     )
   }
-
-  // return (
-  //     <>
-  //       <label className={styles.label} htmlFor={name}>
-  //         { label }
-  //       </label>
-
-  //       <input
-  //         ref={ref}
-  //         className={css(
-  //           styles.input,
-  //           error && styles.inputError
-  //         )}
-  //         type="text"
-  //         name={name}
-  //         value={value}
-  //         onChange={onChange}
-  //         onKeyDown={onKeyDown}
-  //       />
-  //       {error && (<span className={styles.error}>{error}</span>)}
-  //     </>
-  // )
 })

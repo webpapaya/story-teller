@@ -10,6 +10,7 @@ import FeatureCreate from './containers/feature-create'
 import FeatureList from './containers/feature-list'
 import FeatureUpdate from './containers/feature-create-revision'
 import FeatureRevisionList from './containers/feature-revision-list'
+import FeatureSetTags from './containers/feature-set-tags'
 
 import ProtectedRoute from './containers/protected-route';
 import Navigation from './containers/navigation';
@@ -48,6 +49,7 @@ const App = () => (
           <ProtectedRoute path='/feature/create' component={FeatureCreate} />
           <ProtectedRoute path='/feature/:id' component={(props: any) => (
             <>
+              <FeatureSetTags featureId={props.match.params.id} />
               <FeatureUpdate id={props.match.params.id} history={props.history} />
               <FeatureRevisionList id={props.match.params.id} />
             </>

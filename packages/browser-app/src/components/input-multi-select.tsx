@@ -8,21 +8,24 @@ import {
   Clear
 } from '@material-ui/icons';
 
-
-type Props = {
+type Option = {
+  value: any,
+  label: string,
+  key: string
+}
+export type Props = {
   label: string,
   name: string,
-  options: {
-    value: any,
-    label: string,
-    key: string
-  }[]
+  addNewOption?: (name: string) => Option,
+  onChange?: (e: { target: { value: Option[]} }) => unknown
+  options: Option[]
 }
 
 type State = {
   search: string,
   selectedItems: any[],
   cursor: number,
+  newOptions: Option[]
 }
 
 export class InputMultiSelect extends React.Component<Props, State> {
@@ -30,44 +33,61 @@ export class InputMultiSelect extends React.Component<Props, State> {
   state = {
     search: '',
     selectedItems: [] as string[],
+    newOptions: [] as Option[],
     cursor: 0,
   }
 
-  toggleSelectedItem = (value: any) => {
+  private toggleSelectedItem = (option: Option) => {
     const selectedItems = this.state.selectedItems;
-    selectedItems.includes(value)
-      ? this.setState(() => ({ selectedItems: selectedItems.filter((item) => item !== value) }))
-      : this.setState(() => ({ selectedItems: [...selectedItems, value] }))
+
+    const nextSelectedItems = selectedItems.includes(option.value)
+      ? selectedItems.filter((item) => item !== option.value)
+      : [...selectedItems, option.key]
+
+    const newItems = this.props.addNewOption && this.isUnknownOption()
+      ? [...this.state.newOptions, option]
+      : this.state.newOptions.filter((newItem) => nextSelectedItems.includes(newItem.key))
+
+    this.setState({
+      newOptions: newItems,
+      selectedItems: nextSelectedItems
+    }, this.triggerChangeEvent)
   }
 
-  setCursorState = (cursor:number) => {
+  private triggerChangeEvent = () => {
+    if (!this.props.onChange) { return }
+    this.props.onChange({ target: { value: this.selectedValues }})
+  }
+
+  private get selectedValues() {
+    return this.options
+      .filter((option) => this.state.selectedItems.includes(option.key))
+      .map((option) => option.value)
+  }
+
+  private setCursorState = (cursor:number) => {
     this.setState({ cursor })
   }
 
-  onSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+  private onSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       search: e.target.value,
     }, () => this.setCursorState(this.findNextCursorPosition(0)))
   }
 
-  onItemSelect = (value: any) => (e: ChangeEvent<HTMLInputElement>) => {
-    this.toggleSelectedItem(value);
+  private onItemSelect = (option: Option) => (e: ChangeEvent<HTMLInputElement>) => {
+    this.toggleSelectedItem(option);
     this.focusSearchBox();
   }
 
-  focusSearchBox() {
+  private focusSearchBox() {
     if (this.searchRef) {
       // @ts-ignore
       this.searchRef.current.focus()
     }
   }
 
-  handleEnter = () => {
-    const firstOption = this.filteredOptions[this.state.cursor];
-    if (firstOption) { this.toggleSelectedItem(firstOption.value) }
-  }
-
-  findNextCursorPosition(direction: number) {
+  private findNextCursorPosition(direction: number) {
     const cursor = this.state.cursor;
     const nextPosition = (cursor + direction) % this.filteredOptions.length;
     if (this.filteredOptions.length === 0) {
@@ -79,27 +99,55 @@ export class InputMultiSelect extends React.Component<Props, State> {
     }
   }
 
-  handleCursor = (direction: number) => {
+  private selectOption = (option: Option) => {
+    const firstOption = this.filteredOptions[this.state.cursor];
+    if (firstOption) { return this.toggleSelectedItem(firstOption) }
+    if (this.props.addNewOption) { this.toggleSelectedItem(option) }
+  }
+
+  private setCursor = (direction: number) => {
     this.setCursorState(this.findNextCursorPosition(direction));
   }
 
-  onSearchKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
+  private onSearchKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
     switch (e.key) {
       case 'Enter':
         e.preventDefault();
-        return this.handleEnter();
+        return this.selectOption(this.filteredOptions[this.state.cursor]);
       case 'ArrowUp':
         e.preventDefault();
-        return this.handleCursor(-1);
+        return this.setCursor(-1);
       case 'ArrowDown':
         e.preventDefault();
-        return this.handleCursor(+1);
+        return this.setCursor(+1);
     }
   }
 
-  get filteredOptions() {
-    return this.props.options.filter((option) =>
-      this.state.search === '' || option.label.toLocaleLowerCase().includes(this.state.search.toLocaleLowerCase()))
+  private isUnknownOption() {
+    return this.state.search &&
+      ![...this.state.newOptions, ...this.props.options]
+        .map((option) => option.label.toLocaleLowerCase())
+        .includes(this.state.search.toLocaleLowerCase())
+  }
+
+  private get filteredOptions() {
+    const filteredOptions =
+      this.options.filter((option) =>
+        this.state.search === '' ||
+          option.label.toLocaleLowerCase().includes(this.state.search.toLocaleLowerCase()))
+
+    if (this.props.addNewOption && this.isUnknownOption()) {
+      filteredOptions.push(this.props.addNewOption(this.state.search))
+    }
+
+    return filteredOptions
+  }
+
+  private get options() {
+    return [
+      ...this.props.options,
+      ...this.state.newOptions
+    ]
   }
 
   render() {
@@ -115,7 +163,7 @@ export class InputMultiSelect extends React.Component<Props, State> {
         />
 
         {this.filteredOptions.map((option, idx) => {
-          const isChecked = this.state.selectedItems.includes(option.value)
+          const isChecked = this.state.selectedItems.includes(option.key)
           return (
             <label
               key={option.key}
@@ -131,14 +179,14 @@ export class InputMultiSelect extends React.Component<Props, State> {
                 )}
                 type="checkbox"
                 key={option.key}
-                name={option.key}
-                value={option.value}
+                name={this.props.name}
+                value={option.key}
                 checked={isChecked}
-                onChange={this.onItemSelect(option.value)}
+                onChange={this.onItemSelect(option)}
               />
 
               <Check fontSize="small" className={css(styles.checkIcon)} />
-              { this.filteredOptions.includes(option) && option.label }
+              { option.label }
               <Clear fontSize="small" className={css(styles.clearIcon)} />
             </label>
         )})}

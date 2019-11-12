@@ -12,9 +12,5 @@
   },
   "pre-commit": [
     "build"
-  ],
-  "dependencies": {
-    "@storybook/addon-actions": "^5.2.4",
-    "uuid": "^3.3.3"
-  }
+  ]
 }
