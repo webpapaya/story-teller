@@ -5,27 +5,27 @@ const initialState: Feature[] = []
 
 const reducer = (state = initialState, action: Actions): Feature[] => {
   switch (action.type) {
-    case "FEATURE_REVISION/FETCH/SUCCESS":
-    case "FEATURE/FETCH/SUCCESS":
-        return uniqueBy('id', [
-          ...state,
-          ...action.payload
-        ])
+    case 'FEATURE_REVISION/FETCH/SUCCESS':
+    case 'FEATURE/FETCH/SUCCESS':
+      return uniqueBy('id', [
+        ...state,
+        ...action.payload
+      ])
 
-    case "FEATURE/UPDATE/SUCCESS":
-    case "FEATURE/CREATE/SUCCESS": return uniqueBy('id', [
+    case 'FEATURE/UPDATE/SUCCESS':
+    case 'FEATURE/CREATE/SUCCESS': return uniqueBy('id', [
       ...state,
       action.payload
     ])
 
-    case "FEATURE/SET_TAGS/SUCCESS":
-        const feature = state.find((f) => f.originalId === action.payload.featureId)
-        if (!feature) { return state; }
+    case 'FEATURE/SET_TAGS/SUCCESS':
+      const feature = state.find((f) => f.originalId === action.payload.featureId)
+      if (!feature) { return state }
 
-        return uniqueBy('id', [
-          ...state,
-          { ...feature, tags: action.payload.tags }
-        ])
+      return uniqueBy('id', [
+        ...state,
+        { ...feature, tags: action.payload.tags }
+      ])
 
     default: return state
   }

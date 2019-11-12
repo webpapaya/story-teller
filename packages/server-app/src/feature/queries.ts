@@ -2,7 +2,6 @@ import sql from 'sql-template-tag'
 import { Result, Ok } from 'space-lift'
 import { WithinConnection } from '../lib/db'
 import { Feature, Tag } from '../domain'
-import { PoolClient } from 'pg'
 
 type WhereFeature = (
   deps: { withinConnection: WithinConnection },

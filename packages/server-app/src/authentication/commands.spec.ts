@@ -3,8 +3,7 @@ import {
   equalTo,
   hasProperties,
   everyItem,
-  truthy as present,
-  falsy as blank
+  truthy as present
 // @ts-ignore
 } from 'hamjest'
 import { LocalDateTime, nativeJs } from 'js-joda'
@@ -25,7 +24,6 @@ import {
 import { findUserByAuthentication } from './queries'
 import { withMockedDate, t } from '../spec-helpers'
 import { Err } from 'space-lift'
-import { equal } from 'assert'
 
 const sendMail = sinon.spy()
 

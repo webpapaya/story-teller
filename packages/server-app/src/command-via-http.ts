@@ -1,4 +1,5 @@
 import * as v from 'validation.ts'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { UserAuthentication } from './domain'
 import { CommandDefinition } from '@story-teller/shared'
 import { NextFunction, Request, Response } from 'express'
@@ -22,15 +23,15 @@ export const attributeFiltering = <A extends v.Validator<unknown>>(schema: A | u
     .fold(
       (e) => {
         console.error(e)
-        throw e;
-       },
+        throw e
+      },
       (s) => s
     )
 }
 
 type ExecuteCommand = <A, B, C, D extends Result<unknown, unknown>>(definition: CommandDefinition<A, B>, args: {
   dependencies: C
-  auth: Express.Request['auth'],
+  auth: Express.Request['auth']
   useCase: (deps: C & { auth: Express.Request['auth'] }, value: A) => D
 }) => (params: any) => Promise<Result<unknown, unknown>>
 

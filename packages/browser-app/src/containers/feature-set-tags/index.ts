@@ -1,14 +1,13 @@
-import { connect } from 'react-redux';
-import { DispatchPropsType, OwnPropsType, StatePropsType } from './types';
-import { MapDispatchToProps, MapStateToProps } from '../../domain/types';
-import { setTags, whereFeature } from '../../domain/feature/actions';
+import { connect } from 'react-redux'
+import { DispatchPropsType, OwnPropsType, StatePropsType } from './types'
+import { MapDispatchToProps, MapStateToProps } from '../../domain/types'
+import { setTags, whereFeature } from '../../domain/feature/actions'
 import Organism from './organism'
-import hasSideEffect from '../../has-side-effect';
-import Loading from '../../components/loading';
-import { selectFeature } from '../../domain/feature/selectors';
-import { whereRevisions } from '../../domain/revision/actions';
-import { whereTags } from '../../domain/tags/actions';
-import { selectTags } from '../../domain/tags/selectors';
+import hasSideEffect from '../../has-side-effect'
+import Loading from '../../components/loading'
+import { selectFeature } from '../../domain/feature/selectors'
+import { whereTags } from '../../domain/tags/actions'
+import { selectTags } from '../../domain/tags/selectors'
 
 const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state, props) => ({
   tags: selectTags(state),
@@ -24,10 +23,8 @@ const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = 
   },
   onSubmit: async (values) => {
     await dispatch(setTags.unmemoized(values))
-  },
+  }
 })
-
-
 
 export default connect(
   mapStateToProps,

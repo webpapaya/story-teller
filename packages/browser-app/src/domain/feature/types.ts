@@ -15,4 +15,3 @@ export type Actions =
   | Action<'FEATURE/SET_TAGS/SUCCESS', { featureId: string, tags: Tag[] }>
   | Action<'FEATURE/CREATE/SUCCESS', Feature>
   | Action<'FEATURE/UPDATE/SUCCESS', Feature>
-

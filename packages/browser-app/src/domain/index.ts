@@ -1,6 +1,6 @@
 import { combineReducers, createStore, applyMiddleware } from 'redux'
 import ReduxThunk from 'redux-thunk'
-import createMemoizeMiddleware from 'redux-memoize';
+import createMemoizeMiddleware from 'redux-memoize'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import authenticationReducer from './authentication/reducer'
 import featureReducer from './feature/reducer'
@@ -12,7 +12,7 @@ export const rootReducer = combineReducers({
   authentication: authenticationReducer,
   features: featureReducer,
   revisions: revisionReducer,
-  tags: tagReducer,
+  tags: tagReducer
 })
 
 export const store = createStore(rootReducer, composeWithDevTools(

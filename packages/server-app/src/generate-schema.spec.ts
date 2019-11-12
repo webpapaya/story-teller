@@ -2,7 +2,7 @@ import {
   assertThat,
   equalTo,
   hasProperty,
-  hasItems,
+  hasItems
 // @ts-ignore
 } from 'hamjest'
 import { t } from './spec-helpers'
@@ -35,7 +35,7 @@ describe('generateSchema', () => {
       await generateTypesForSchema({
         tablesInSchema,
         columnsForTable,
-        writeFile,
+        writeFile
       }, { schema: 'public', header: `import { LocalDate } from 'js-joda'` })
 
       assertThat(writeFile, lastCallArgs(equalTo([
@@ -47,10 +47,11 @@ describe('generateSchema', () => {
       await generateTypesForSchema({
         tablesInSchema,
         columnsForTable,
-        writeFile,
-      }, { schema: 'public', overwrites: {
-        text: 'any'
-      } })
+        writeFile
+      }, { schema: 'public',
+        overwrites: {
+          text: 'any'
+        } })
 
       assertThat(writeFile, lastCallArgs(equalTo([
         `export type ATable {\n  aColumn: any | null,\n  bColumn: any,\n}`
@@ -103,16 +104,16 @@ describe('generateSchema', () => {
       'export type ATable {',
       '  aValue: string | null,',
       '  bValue: string,',
-      '}',
+      '}'
     ].join('\n')))
   })
 
   describe('postgresToTypescript', () => {
     [
-      { pg: 'bpchar', ts: 'string'},
-      { pg: '_text', ts: 'string[]'},
+      { pg: 'bpchar', ts: 'string' },
+      { pg: '_text', ts: 'string[]' },
       { pg: 'float8', ts: 'number' },
-      { pg: 'unknown type', ts: 'any' },
+      { pg: 'unknown type', ts: 'any' }
     ].forEach(({ pg, ts }) => {
       it(`converts ${pg} to ${ts}`, () => {
         assertThat(postgresToTypescript(pg), equalTo(ts))
@@ -120,11 +121,11 @@ describe('generateSchema', () => {
     })
 
     it('types can be overwritten', () => {
-      assertThat(postgresToTypescript('text', {text: 'yolo'}), equalTo('yolo'))
+      assertThat(postgresToTypescript('text', { text: 'yolo' }), equalTo('yolo'))
     })
 
     it('array types can be overwritten as well', () => {
-      assertThat(postgresToTypescript('_text', {_text: 'yolo[]'}), equalTo('yolo[]'))
+      assertThat(postgresToTypescript('_text', { _text: 'yolo[]' }), equalTo('yolo[]'))
     })
   })
 })

@@ -1,8 +1,7 @@
-import { History } from 'history';
-import { Revision } from '../../domain/revision/types';
+import { Revision } from '../../domain/revision/types'
 
 export type OwnPropsType = {
-  id: string,
+  id: string
 };
 
 export type StatePropsType = {

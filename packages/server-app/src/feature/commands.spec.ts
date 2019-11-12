@@ -2,7 +2,7 @@
 import { assertThat, hasProperties } from 'hamjest'
 import { t, assertDifference } from '../spec-helpers'
 import uuid from 'uuid'
-import { createFeature, updateFeature as updateFeature, setFeatureTags, ensureTags } from './commands'
+import { createFeature, updateFeature, setFeatureTags, ensureTags } from './commands'
 
 describe('createFeature', () => {
   it('creates a new record', t(async ({ withinConnection }) => {

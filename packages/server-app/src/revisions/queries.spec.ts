@@ -12,7 +12,7 @@ describe('whereFeature', () => {
     const feature = {
       id: uuid(),
       title: 'A new feature',
-      description: 'A feature description',
+      description: 'A feature description'
     }
 
     const revision = {
@@ -49,7 +49,7 @@ describe('whereFeature', () => {
     const feature = {
       id: uuid(),
       title: 'A new feature',
-      description: 'A feature description',
+      description: 'A feature description'
     }
 
     await createFeature({ withinConnection }, feature)

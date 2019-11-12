@@ -8,4 +8,3 @@ export type Action<Type extends string, Payload> = {
 
 export type Actions =
   | Action<'REVISION/FETCH/SUCCESS', Revision[]>
-

@@ -1,14 +1,14 @@
 import { UnpackThunk } from '../../domain/types'
-import { Tag, Feature } from '../../domain/feature/types';
-import { setTags } from '../../domain/feature/actions';
+import { Tag, Feature } from '../../domain/feature/types'
+import { setTags } from '../../domain/feature/actions'
 
 export type OwnPropsType = {
-  featureId: string,
+  featureId: string
 };
 
 export type StatePropsType = {
-  tags: Tag[],
-  feature: Feature,
+  tags: Tag[]
+  feature: Feature
 };
 
 export type DispatchPropsType = {

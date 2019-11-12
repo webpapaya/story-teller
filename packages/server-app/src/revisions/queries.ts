@@ -24,4 +24,3 @@ export const whereRevision: WhereRevision = async (deps, filter) => {
     return Ok(result.rows as FeatureRevision[])
   })
 }
-

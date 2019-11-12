@@ -2,7 +2,7 @@ import { WithinConnection } from '../lib/db'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import sql from 'sql-template-tag'
-import { Result as SResult, Err, Ok} from 'space-lift'
+import { Result as SResult, Err, Ok } from 'space-lift'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import { SendMail } from './emails'
 import { UserAuthentication } from '../domain'
@@ -80,7 +80,6 @@ export const confirm: Confirm = async (dependencies, params) => {
     const result = await findUserByIdentifier({ client }, params)
     if (!result.isOk()) { return result }
     const record = result.get()
-
 
     if (!(await comparePassword(params.token, record.confirmationToken))) {
       return Err<RepositoryError>('NOT_FOUND')

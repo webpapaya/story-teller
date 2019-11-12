@@ -1,5 +1,5 @@
-import { AppState } from "../types";
-import { Feature } from "./types";
+import { AppState } from '../types'
+import { Feature } from './types'
 
 const findLatestFeatures = (features: Feature[]): Feature[] => {
   return Object.values(features.reduce((result, obj) => {
@@ -11,7 +11,7 @@ const findLatestFeatures = (features: Feature[]): Feature[] => {
     }
 
     return result
-  }, {}));
+  }, {}))
 }
 
 export const selectFeatures = (state: AppState): Feature[] =>
@@ -21,5 +21,5 @@ export const selectFeature = (state: AppState, id: string): Feature => {
   const relevantFeatures = state.features
     .filter((feature) => feature.originalId === id)
 
-  return findLatestFeatures(relevantFeatures)[0];
+  return findLatestFeatures(relevantFeatures)[0]
 }

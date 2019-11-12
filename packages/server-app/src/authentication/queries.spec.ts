@@ -2,17 +2,17 @@ import {
   assertThat,
   equalTo,
   hasProperties,
-  truthy as present,
+  truthy as present
 // @ts-ignore
 } from 'hamjest'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import sinon from 'ts-sinon'
 import {
-  register,
+  register
 } from './commands'
 import {
   create as createUserAuthenticationFactory,
-  userAuthenticationFactory,
+  userAuthenticationFactory
 } from './factories'
 import { AuthenticationToken } from '../domain'
 import { findUserById, findUserByAuthentication, findUserByAuthenticationToken } from './queries'

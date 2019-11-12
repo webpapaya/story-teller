@@ -3,7 +3,7 @@ import { Result, Ok } from 'space-lift'
 import { WithinConnection } from '../lib/db'
 import { Feature, Tag } from '../domain'
 import { uniqueBy } from '../utils/unique-by'
-import { PoolClient, Pool } from 'pg'
+import { PoolClient } from 'pg'
 
 type CreateFeature = (
   deps: { withinConnection: WithinConnection },
@@ -46,8 +46,6 @@ export const updateFeature: UpdateFeature = async (deps, params) => {
   })
 }
 
-
-
 type UnassignTagsFromFeature = (
   deps: { client: PoolClient },
   params: { featureId: string, tags: Tag[] }
@@ -65,7 +63,6 @@ const unassignTagsFromFeature: UnassignTagsFromFeature = async ({ client }, para
   await client.query(deleteQuery)
   return Ok(undefined)
 }
-
 
 type AssignTagsToFeature = (
   deps: { client: PoolClient },
@@ -123,7 +120,7 @@ export const ensureTags: EnsureTags = async ({ client }, params) => {
     DO UPDATE
     SET name=EXCLUDED.name, color=EXCLUDED.color
   `)
-  await client.query(query);
+  await client.query(query)
 
   return Ok(params.tags)
 }

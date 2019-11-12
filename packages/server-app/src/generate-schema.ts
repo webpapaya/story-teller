@@ -2,13 +2,13 @@ import sql from 'sql-template-strings'
 import { PoolClient } from 'pg'
 
 type ColumnDefinition = {
-  column: string,
-  dataType: string,
+  column: string
+  dataType: string
   isNullable: 'NO' | 'YES'
 }
 
 type TableDefinition = {
-  tableName: string,
+  tableName: string
 }
 
 const DEFAULT_LOOKUP_MAP = {
@@ -41,7 +41,7 @@ const DEFAULT_LOOKUP_MAP = {
 
   date: 'date',
   timestamp: 'date',
-  timestamptz: 'date',
+  timestamptz: 'date'
 }
 
 type Overwrites = Partial<typeof DEFAULT_LOOKUP_MAP> & { [key: string]: string }
@@ -50,14 +50,14 @@ const toCamelCase = (s: string) => {
   return s.replace(/([-_][a-z])/ig, ($1) => {
     return $1.toUpperCase()
       .replace('-', '')
-      .replace('_', '');
-  });
-};
+      .replace('_', '')
+  })
+}
 
 const toPascalCase = (s: string) => {
   const camelCased = toCamelCase(s)
   return camelCased.charAt(0).toUpperCase() + camelCased.slice(1)
-};
+}
 
 export const columnsForTable = (client: PoolClient) => async (schema: string, table: string): Promise<ColumnDefinition[]> => {
   const result = await client.query(sql`
@@ -114,14 +114,14 @@ export const postgresToTypescript = (postgresType: string, overwritten: Overwrit
 }
 
 type GenerateTypesForSchema = (deps: {
-  tablesInSchema: (schema: string) => Promise<TableDefinition[]>,
-  columnsForTable: (schema: string, table: string) => Promise<ColumnDefinition[]>,
+  tablesInSchema: (schema: string) => Promise<TableDefinition[]>
+  columnsForTable: (schema: string, table: string) => Promise<ColumnDefinition[]>
   writeFile: (fileContents: string) => Promise<undefined>
 }, options: {
-  header?: string,
-  overwrites?: Overwrites,
-  schema: string,
-}) => Promise<void>
+    header?: string
+    overwrites?: Overwrites
+    schema: string
+  }) => Promise<void>
 
 export const generateTypesForSchema: GenerateTypesForSchema = async (deps, options) => {
   const tables = await deps.tablesInSchema(options.schema)
@@ -132,6 +132,6 @@ export const generateTypesForSchema: GenerateTypesForSchema = async (deps, optio
 
   await deps.writeFile([
     options.header,
-    ...tableContent,
+    ...tableContent
   ].filter((value) => value).join('\n\n'))
 }

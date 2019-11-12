@@ -1,5 +1,5 @@
-import { AppState } from "../types";
-import { Revision } from "./types";
+import { AppState } from '../types'
+import { Revision } from './types'
 
 export const whereRevisionForFeature = (appState: AppState, featureId: string): Revision[] => {
   return appState.revisions

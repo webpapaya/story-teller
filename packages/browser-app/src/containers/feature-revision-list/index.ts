@@ -1,11 +1,10 @@
-import { connect } from 'react-redux';
-import { DispatchPropsType, OwnPropsType, StatePropsType } from './types';
-import { MapDispatchToProps, MapStateToProps } from '../../domain/types';
+import { connect } from 'react-redux'
+import { DispatchPropsType, OwnPropsType, StatePropsType } from './types'
+import { MapDispatchToProps, MapStateToProps } from '../../domain/types'
 import Organism from './organism'
-import hasSideEffect from '../../has-side-effect';
-import Loading from '../../components/loading';
-import { whereRevisions } from '../../domain/revision/actions';
-import { whereRevisionForFeature } from '../../domain/revision/selectors';
+import hasSideEffect from '../../has-side-effect'
+import { whereRevisions } from '../../domain/revision/actions'
+import { whereRevisionForFeature } from '../../domain/revision/selectors'
 
 const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state, props) => ({
   revision: whereRevisionForFeature(state, props.id)
@@ -16,7 +15,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = 
     await Promise.all([
       dispatch(whereRevisions({ featureId: props.id }))
     ])
-  },
+  }
 })
 
 export default connect(

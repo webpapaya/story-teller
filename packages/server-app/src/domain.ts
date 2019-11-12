@@ -33,10 +33,9 @@ export type Tag = {
 }
 
 export type FeatureRevision = {
-  id: UUID,
-  reason?: string,
-  featureId: UUID,
-  createdAt: LocalDateTime,
+  id: UUID
+  reason?: string
+  featureId: UUID
+  createdAt: LocalDateTime
   version: number
 }
-

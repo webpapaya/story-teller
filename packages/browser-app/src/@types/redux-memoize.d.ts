@@ -1,3 +1,4 @@
+/* eslint-disable import/export */
 declare module 'redux-memoize' {
   import { Middleware } from 'redux'
   type Options = {

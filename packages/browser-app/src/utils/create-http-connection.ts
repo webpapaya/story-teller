@@ -1,4 +1,4 @@
-import qs from 'qs';
+import qs from 'qs'
 
 const joinURL = (...parts: string[]) =>
   parts
