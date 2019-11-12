@@ -1,9 +1,9 @@
 // @ts-ignore
-import { assertThat, hasProperty, hasProperties, everyItem } from 'hamjest'
+import { assertThat, hasProperty, hasProperties, everyItem, allOf } from 'hamjest'
 import { t } from '../spec-helpers'
 import uuid from 'uuid'
 import { createFeature, updateFeature, ensureTags, setFeatureTags } from './commands'
-import { whereFeature } from './queries'
+import { whereFeature, whereTags } from './queries'
 
 describe('whereFeature', () => {
   it('finds queries in a db', t(async ({ withinConnection }) => {
@@ -70,5 +70,18 @@ describe('whereFeature', () => {
     const result = await whereFeature({ withinConnection })
     assertThat(result.get(), everyItem(hasProperty('tags',
       everyItem(hasProperties(tag)))))
+  }))
+})
+
+describe('whereTags', () => {
+  it('returns a list of tags', t(async ({ withinConnection, client }) => {
+    const tag = { id: uuid(), color: '#ff00ff', name: 'bug' }
+    await ensureTags({ client }, { tags: [tag] })
+
+    const result = await whereTags({ withinConnection })
+
+    assertThat(result.get(), allOf(
+      hasProperty('length', 1),
+      everyItem(hasProperties(tag))))
   }))
 })

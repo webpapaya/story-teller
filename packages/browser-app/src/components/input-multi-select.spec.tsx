@@ -10,8 +10,8 @@ const lastCallArgs = (matcher: any) =>
   hasProperty('lastCall', hasProperty('args', matcher))
 
 const OPTIONS = [
-  { key: 'first', value: 'first', label: 'first' },
-  { key: 'second', value: 'second', label: 'second' },
+  { key: 'first key', value: 'first value', search: 'first search', label: 'first label' },
+  { key: 'second key', value: 'second value', search: 'second search', label: 'second label' },
 ]
 const renderInputMultiSelect = (props: Partial<Props> = {}) => render(
   <InputMultiSelect
@@ -27,8 +27,8 @@ afterEach(cleanup);
 it('without search filter, renders all options', async () => {
   const { container } = renderInputMultiSelect();
   assertThat([
-    queryByText(container, 'first'),
-    queryByText(container, 'second'),
+    queryByText(container, 'first label'),
+    queryByText(container, 'second label'),
   ], everyItem(present()))
 })
 
@@ -40,12 +40,8 @@ it('with search filter present, renders applicable options', async () => {
   const checkboxes = container.querySelectorAll('input[type="checkbox"]');
   assertThat(checkboxes, hasProperties({
     length: 1,
-    0: hasProperties({ value: 'first', checked: false }),
+    0: hasProperties({ value: 'first key', checked: false }),
   }))
-
-  assertThat([
-    queryByText(container, 'first'),
-  ], everyItem(present()))
 })
 
 describe('when enter is clicked', () => {
@@ -57,8 +53,8 @@ describe('when enter is clicked', () => {
     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
     assertThat(checkboxes, hasProperties({
-      0: hasProperties({ value: 'first', checked: true }),
-      1: hasProperties({ value: 'second', checked: false }),
+      0: hasProperties({ value: 'first key', checked: true }),
+      1: hasProperties({ value: 'second key', checked: false }),
     }))
   })
 
@@ -87,8 +83,8 @@ it('when value selected and search changed, selects first element', async () => 
   const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
   assertThat(checkboxes, hasProperties({
-    0: hasProperties({ value: 'first', checked: false }),
-    1: hasProperties({ value: 'second', checked: true }),
+    0: hasProperties({ value: 'first key', checked: false }),
+    1: hasProperties({ value: 'second key', checked: true }),
   }))
 })
 
@@ -101,8 +97,8 @@ it('when selected after cursor moved 1 down, second option is selected', async (
     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
     assertThat(checkboxes, hasProperties({
-      0: hasProperties({ value: 'first', checked: false }),
-      1: hasProperties({ value: 'second', checked: true }),
+      0: hasProperties({ value: 'first key', checked: false }),
+      1: hasProperties({ value: 'second key', checked: true }),
     }))
 })
 
@@ -117,8 +113,8 @@ it('WHEN selected after cursor moved 2 down, first option is selected again', as
   const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
   assertThat(checkboxes, hasProperties({
-    0: hasProperties({ value: 'first', checked: true }),
-    1: hasProperties({ value: 'second', checked: false }),
+    0: hasProperties({ value: 'first key', checked: true }),
+    1: hasProperties({ value: 'second key', checked: false }),
   }))
 })
 
@@ -131,8 +127,8 @@ it('WHEN selected after cursor moved up 1 time, last option is selected', async 
   const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
   assertThat(checkboxes, hasProperties({
-    0: hasProperties({ value: 'first', checked: false }),
-    1: hasProperties({ value: 'second', checked: true }),
+    0: hasProperties({ value: 'first key', checked: false }),
+    1: hasProperties({ value: 'second key', checked: true }),
   }))
 })
 
@@ -147,8 +143,8 @@ it('WHEN no item selectable (due to filter) and cursor moved, nothing selected',
   const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
   assertThat(checkboxes, hasProperties({
-    0: hasProperties({ value: 'first', checked: false }),
-    1: hasProperties({ value: 'second', checked: false }),
+    0: hasProperties({ value: 'first key', checked: false }),
+    1: hasProperties({ value: 'second key', checked: false }),
   }))
 })
 
@@ -163,8 +159,8 @@ describe('WHEN new items can be added', () => {
     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
     assertThat(checkboxes, hasProperties({
-      0: hasProperties({ value: 'first', checked: true }),
-      1: hasProperties({ value: 'second', checked: false }),
+      0: hasProperties({ value: 'first key', checked: true }),
+      1: hasProperties({ value: 'second key', checked: false }),
     }))
   })
 
@@ -172,7 +168,8 @@ describe('WHEN new items can be added', () => {
     const { container } = renderInputMultiSelect({ addNewOption: (name) => ({
       key: name,
       value: name,
-      label: name
+      search: name,
+      label: name,
     })});
     const searchBox = container.querySelector('input[name="tags"]')!
 
@@ -184,8 +181,8 @@ describe('WHEN new items can be added', () => {
     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
     assertThat(checkboxes, hasProperties({
-      0: hasProperties({ value: 'first', checked: false }),
-      1: hasProperties({ value: 'second', checked: false }),
+      0: hasProperties({ value: 'first key', checked: false }),
+      1: hasProperties({ value: 'second key', checked: false }),
       2: hasProperties({ value: 'new', checked: true }),
     }))
   })
@@ -194,7 +191,8 @@ describe('WHEN new items can be added', () => {
     const { container } = renderInputMultiSelect({ addNewOption: (name) => ({
       key: uuid(),
       value: name,
-      label: name
+      search: name,
+      label: name,
     })});
     const searchBox = container.querySelector('input[name="tags"]')!
 
@@ -206,8 +204,8 @@ describe('WHEN new items can be added', () => {
     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
     assertThat(checkboxes, hasProperties({
-      0: hasProperties({ value: 'first', checked: false }),
-      1: hasProperties({ value: 'second', checked: false }),
+      0: hasProperties({ value: 'first key', checked: false }),
+      1: hasProperties({ value: 'second key', checked: false }),
       2: hasProperties({ checked: true }),
     }))
   })
@@ -216,7 +214,8 @@ describe('WHEN new items can be added', () => {
     const { container } = renderInputMultiSelect({ addNewOption: (name) => ({
       key: name,
       value: name,
-      label: name
+      search: name,
+      label: name,
     })});
     const searchBox = container.querySelector('input[name="tags"]')!
 
@@ -231,8 +230,8 @@ describe('WHEN new items can be added', () => {
     assertThat(checkboxes, allOf(
       hasProperties({
         length: 2,
-        0: hasProperties({ value: 'first', checked: false }),
-        1: hasProperties({ value: 'second', checked: false }),
+        0: hasProperties({ value: 'first key', checked: false }),
+        1: hasProperties({ value: 'second key', checked: false }),
       })
     ))
   })

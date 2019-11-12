@@ -14,7 +14,10 @@ export const buildCommandDefinition = <A, B>(definition: CommandDefinition<A, B>
 export const nonEmptyString = v.string.filter((value) => value.length > 0)
 export const uuid = v.string.filter((value) =>
   !!value.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i))
+
 export const color = v.string
+  .filter((str) => /^#[0-9A-F]{6}$/i.test(str))
+  .map((str) => str.toUpperCase())
 
 export namespace Authentication {
   export const aggregate = v.object({})
@@ -90,6 +93,24 @@ export namespace Authentication {
   }
 }
 
+export namespace Tags {
+  export const aggregate = v.object({
+    id: uuid,
+    name: nonEmptyString,
+    color: color
+  })
+
+  export const queries = {
+    where: buildCommandDefinition({
+      verb: 'get',
+      model: 'tag',
+      action: 'fetch',
+      validator: v.object({}),
+      response: v.array(aggregate)
+    })
+  }
+}
+
 export namespace Feature {
   export const aggregate = v.object({
     id: uuid,
@@ -129,6 +150,16 @@ export namespace Feature {
         reason: nonEmptyString
       }),
       response: v.object({}),
+    }),
+    setTags: buildCommandDefinition({
+      verb: 'put',
+      action: 'set-tags',
+      model: 'feature',
+      validator: v.object({
+        featureId: uuid,
+        tags: v.array(Tags.aggregate)
+      }),
+      response: v.object({}),
     })
   }
 
@@ -163,4 +194,3 @@ export namespace Revision {
     })
   }
 }
-

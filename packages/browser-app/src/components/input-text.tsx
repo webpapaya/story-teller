@@ -6,7 +6,7 @@ type InputProps = {
   label: string,
   name: string,
   value?: any,
-  onChange?: (evt: React.ChangeEvent<HTMLInputElement>) => unknown
+  onChange?: (evt: React.ChangeEvent<HTMLInputElement>) => unknown,
   onKeyDown?: (evt: React.KeyboardEvent<HTMLInputElement>) => unknown
   focus?: boolean,
   error?: string,

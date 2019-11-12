@@ -16,4 +16,4 @@ export type DispatchPropsType = {
   onSubmit: UnpackThunk<typeof setTags>
 };
 
-export type OrganismPropsType = StatePropsType & Omit<DispatchPropsType, 'sideEffect'>;
+export type OrganismPropsType = OwnPropsType & StatePropsType & Omit<DispatchPropsType, 'sideEffect'>;

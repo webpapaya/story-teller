@@ -8,5 +8,6 @@ export type Action<Type extends string, Payload> = {
 }
 
 export type Actions =
+  | Action<'FEATURE/SET_TAGS/SUCCESS', { featureId: string, tags: Tag[] }>
   | Action<'TAG/FETCH/SUCCESS', Tag[]>
 

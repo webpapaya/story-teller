@@ -6,14 +6,15 @@ import { register, requestPasswordReset, resetPasswordByToken } from './authenti
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
-import { createFeature, updateFeature } from './feature/commands'
+import { createFeature, updateFeature, setFeatureTags } from './feature/commands'
 import { UserAuthentication } from './domain'
 import {
   Authentication,
   Revision,
-  Feature
+  Feature,
+  Tags
 } from '@story-teller/shared'
-import { whereFeature } from './feature/queries'
+import { whereFeature, whereTags } from './feature/queries'
 import { commandViaHTTP } from './command-via-http'
 import { Result, Ok, Err } from 'space-lift'
 import { HTTPError, Errors } from './errors'
@@ -107,6 +108,18 @@ commandViaHTTP(Feature.actions.update, {
   app,
   dependencies: { withinConnection },
   useCase: updateFeature
+})
+
+commandViaHTTP(Feature.actions.setTags, {
+  app,
+  dependencies: { withinConnection },
+  useCase: setFeatureTags
+})
+
+commandViaHTTP(Tags.queries.where, {
+  app,
+  dependencies: { withinConnection },
+  useCase: whereTags
 })
 
 commandViaHTTP(Feature.queries.where, {

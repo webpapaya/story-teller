@@ -19,7 +19,7 @@ const reducer = (state = initialState, action: Actions): Feature[] => {
     ])
 
     case "FEATURE/SET_TAGS/SUCCESS":
-        const feature = state.find((f) => f.id === action.payload.featureId)
+        const feature = state.find((f) => f.originalId === action.payload.featureId)
         if (!feature) { return state; }
 
         return uniqueBy('id', [

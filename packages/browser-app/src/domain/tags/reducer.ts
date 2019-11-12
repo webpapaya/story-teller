@@ -9,6 +9,10 @@ const reducer = (state = initialState, action: Actions): Tag[] => {
       ...state,
       ...action.payload
     ])
+    case 'FEATURE/SET_TAGS/SUCCESS': return uniqueBy('id', [
+      ...state,
+      ...action.payload.tags
+    ])
     default: return state
   }
 }

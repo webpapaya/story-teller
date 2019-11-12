@@ -10,14 +10,19 @@ import {
 
 type Option = {
   value: any,
+  search: string,
   label: string,
   key: string
 }
 export type Props = {
   label: string,
   name: string,
+  selectedOptions?: Option[],
   addNewOption?: (name: string) => Option,
-  onChange?: (e: { target: { value: Option[]} }) => unknown
+  onChange?: (e: {
+    preventDefault: () => void,
+    target: { value: Option[], name: string, }
+  }) => unknown
   options: Option[]
 }
 
@@ -30,33 +35,46 @@ type State = {
 
 export class InputMultiSelect extends React.Component<Props, State> {
   searchRef: React.Ref<HTMLInputElement> = React.createRef()
-  state = {
-    search: '',
-    selectedItems: [] as string[],
-    newOptions: [] as Option[],
-    cursor: 0,
+
+  constructor(props: Props) {
+    super(props)
+    this.state = {
+        search: '',
+        selectedItems: props.selectedOptions
+          ? props.selectedOptions.map((option) => option.key)
+          : [],
+        newOptions: [] as Option[],
+        cursor: 0,
+
+    }
   }
 
   private toggleSelectedItem = (option: Option) => {
     const selectedItems = this.state.selectedItems;
 
-    const nextSelectedItems = selectedItems.includes(option.value)
-      ? selectedItems.filter((item) => item !== option.value)
+    const nextSelectedItems = selectedItems.includes(option.key)
+      ? selectedItems.filter((item) => item !== option.key)
       : [...selectedItems, option.key]
 
-    const newItems = this.props.addNewOption && this.isUnknownOption()
+    const newItems = this.props.addNewOption && this.isUnknownOption(option)
       ? [...this.state.newOptions, option]
       : this.state.newOptions.filter((newItem) => nextSelectedItems.includes(newItem.key))
 
     this.setState({
       newOptions: newItems,
-      selectedItems: nextSelectedItems
+      selectedItems: nextSelectedItems,
     }, this.triggerChangeEvent)
   }
 
   private triggerChangeEvent = () => {
     if (!this.props.onChange) { return }
-    this.props.onChange({ target: { value: this.selectedValues }})
+    this.props.onChange({
+      preventDefault: () => {},
+      target: {
+        name: this.props.name,
+        value: this.selectedValues
+      }
+    })
   }
 
   private get selectedValues() {
@@ -123,21 +141,25 @@ export class InputMultiSelect extends React.Component<Props, State> {
     }
   }
 
-  private isUnknownOption() {
+  private isUnknownOption(option: Option) {
     return this.state.search &&
       ![...this.state.newOptions, ...this.props.options]
-        .map((option) => option.label.toLocaleLowerCase())
-        .includes(this.state.search.toLocaleLowerCase())
+        .map((option) => option.search.toLocaleLowerCase())
+        .includes(option.search.toLocaleLowerCase())
   }
 
   private get filteredOptions() {
     const filteredOptions =
       this.options.filter((option) =>
         this.state.search === '' ||
-          option.label.toLocaleLowerCase().includes(this.state.search.toLocaleLowerCase()))
+          option.search.toLocaleLowerCase().includes(this.state.search.toLocaleLowerCase()))
 
-    if (this.props.addNewOption && this.isUnknownOption()) {
-      filteredOptions.push(this.props.addNewOption(this.state.search))
+
+    if (!this.props.addNewOption) { return filteredOptions }
+    const newOption = this.props.addNewOption(this.state.search)
+
+    if (this.isUnknownOption(newOption)) {
+      filteredOptions.push(newOption)
     }
 
     return filteredOptions

@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import styles from './input.module.css'
 
 type InputProps = {
   label: string,
   name: string,
   value: any,
-  onChange: (evt: React.FormEvent) => unknown
+  onChange: (evt: ChangeEvent<HTMLInputElement>) => unknown
 }
 
 export const InputPassword = ({ name, value, onChange, label }: InputProps) => (

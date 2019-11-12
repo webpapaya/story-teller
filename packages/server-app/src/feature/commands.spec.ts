@@ -86,9 +86,9 @@ describe('setFeatureTags', () => {
 })
 
 describe('ensureTags', () => {
-  it('adds tags', t(({ withinConnection }) => {
+  it('adds tags', t(({ withinConnection, client }) => {
     return assertDifference({ withinConnection }, 'tag', 1, async () => {
-      await ensureTags({ withinConnection }, { tags: [{
+      await ensureTags({ client }, { tags: [{
         id: uuid(),
         name: 'A new feature',
         color: '#ff00ff'
@@ -96,7 +96,7 @@ describe('ensureTags', () => {
     })
   }))
 
-  it('does not recreate existing tag', t(async ({ withinConnection }) => {
+  it('does not recreate existing tag', t(async ({ withinConnection, client }) => {
     const tag = {
       id: uuid(),
       name: 'A new feature',
@@ -104,7 +104,7 @@ describe('ensureTags', () => {
     }
 
     return assertDifference({ withinConnection }, 'tag', 1, async () => {
-      await ensureTags({ withinConnection }, { tags: [tag, tag] })
+      await ensureTags({ client }, { tags: [tag, tag] })
     })
   }))
 })

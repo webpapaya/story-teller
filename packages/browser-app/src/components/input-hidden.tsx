@@ -3,7 +3,10 @@ import React, { useEffect } from 'react';
 type InputProps = {
   name: string,
   defaultValue: any,
-  onChange: (evt: React.FormEvent) => unknown
+  onChange: (evt: {
+    preventDefault: () => void,
+    target: { value: any, name: string, }
+  }) => unknown
 }
 
 export const InputHidden = ({ name, defaultValue, onChange }: InputProps) => {
@@ -11,7 +14,7 @@ export const InputHidden = ({ name, defaultValue, onChange }: InputProps) => {
     onChange({
       preventDefault: () => {},
       target: { value: defaultValue, name }
-    } as unknown as React.FormEvent)
+    })
   }, [])
 
   return (

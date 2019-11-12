@@ -1,7 +1,8 @@
 import sql from 'sql-template-tag'
 import { Result, Ok } from 'space-lift'
 import { WithinConnection } from '../lib/db'
-import { Feature } from '../domain'
+import { Feature, Tag } from '../domain'
+import { PoolClient } from 'pg'
 
 type WhereFeature = (
   deps: { withinConnection: WithinConnection },
@@ -22,5 +23,21 @@ export const whereFeature: WhereFeature = async (deps) => {
       ORDER BY original_id, version DESC;
     `)
     return Ok(result.rows as Feature[])
+  })
+}
+
+type WhereTags = (
+  deps: { withinConnection: WithinConnection },
+) => Promise<Result<never, Tag[]>>
+
+export const whereTags: WhereTags = async ({ withinConnection }) => {
+  return withinConnection(async ({ client }) => {
+    const result = await client.query(sql`
+      SELECT *
+      FROM tag
+      ORDER BY name ASC;
+    `)
+
+    return Ok(result.rows as Tag[])
   })
 }

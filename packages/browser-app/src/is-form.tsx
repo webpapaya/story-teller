@@ -10,7 +10,7 @@ interface ExternalProps<A> {
 // Props the HOC adds to the wrapped component
 export interface InjectedProps<A> {
     values: Partial<A>,
-    onValueChange: (evt: React.FormEvent) => void,
+    onValueChange: (evt: FormEvent) => void,
     onSubmit: (evt: React.FormEvent) => void
 }
 
@@ -18,6 +18,14 @@ export interface InjectedProps<A> {
 interface Options<A> {
   schema: v.Validator<A>,
   defaultValues?: Partial<A>
+}
+
+type FormEvent = {
+  preventDefault: () => void
+  target: {
+    value: any,
+    name: string
+  }
 }
 
 const isForm = <A, OriginalProps extends {}>(options: Options<A>,
@@ -32,11 +40,9 @@ const isForm = <A, OriginalProps extends {}>(options: Options<A>,
       }
     }
 
-    onValueChange = (evt: React.FormEvent) => {
+    onValueChange = (evt: FormEvent) => {
       evt.preventDefault()
-      // @ts-ignore
       const value = evt.target.value;
-      // @ts-ignore
       const name = evt.target.name;
 
       this.setState((state) => {
