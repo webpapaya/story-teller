@@ -5,11 +5,11 @@ const initialState: Tag[] = []
 
 const reducer = (state = initialState, action: Actions): Tag[] => {
   switch (action.type) {
-    case 'TAG/FETCH/SUCCESS': return uniqueBy('id', [
+    case 'TAG/FETCH/SUCCESS': return uniqueBy(['id'], [
       ...state,
       ...action.payload
     ])
-    case 'FEATURE/SET_TAGS/SUCCESS': return uniqueBy('id', [
+    case 'FEATURE/SET_TAGS/SUCCESS': return uniqueBy(['id'], [
       ...state,
       ...action.payload.tags
     ])

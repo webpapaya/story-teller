@@ -23,7 +23,10 @@ const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = 
   },
   onSubmit: async (feature) => {
     await dispatch(updateFeature(feature))
-    await dispatch(whereRevisions.unmemoized({ featureId: props.id }))
+    await Promise.all([
+      dispatch(whereFeature.unmemoized({ featureId: props.id })),
+      dispatch(whereRevisions.unmemoized({ featureId: props.id }))
+    ])
   }
 })
 
