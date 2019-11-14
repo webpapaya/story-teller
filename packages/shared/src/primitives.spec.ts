@@ -133,6 +133,21 @@ const array = <T extends AnyValidator>(schema: T) => {
   )
 }
 
+const option = <T extends AnyValidator>(validator: T) => {
+  return new Validation<
+    typeof validator['T'] | undefined,
+    typeof validator['T'] | undefined,
+    unknown
+  >(
+    'option',
+    (input) => validator.is(input),
+    (input, context) => input === undefined
+      ? Ok(input)
+      : validator.decode(input, context),
+    (input) => input
+  )
+}
+
 describe('nonEmptyString', () => {
   [
     { value: 'test', valid: true },
@@ -204,3 +219,19 @@ describe('array', () => {
       hasProperty('0', hasProperty('context', hasProperty('path', '$[0]'))))
   })
 })
+
+describe('option', () => {
+  const validator = option(string)
+
+  it('responds correct string', () => {
+    assertThat(validator.decode('a string').get(),
+      equalTo('a string'))
+  })
+
+  it('responds undefined', () => {
+    assertThat(validator.decode(undefined).get(),
+      equalTo(undefined))
+  })
+})
+
+
