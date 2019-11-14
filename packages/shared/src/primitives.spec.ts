@@ -1,5 +1,5 @@
 // @ts-ignore
-import {assertThat, equalTo, hasProperty} from 'hamjest'
+import { assertThat, equalTo, hasProperty } from 'hamjest'
 import { Result, Ok, Err } from 'space-lift'
 
 type Context = { path: string }
@@ -7,14 +7,14 @@ type Error = { message: string, context: Context }
 
 class Validation<A, O, I> {
   readonly T: O = null as any as O // Phantom type
-  constructor(
+  constructor (
     readonly name: string,
     readonly is: (input: unknown) => boolean,
     readonly _decode: (input: I, context: Context) => Result<Error[], O>,
-    readonly encode: (input: O) => A,
+    readonly encode: (input: O) => A
   ) {}
 
-  decode(input: I, context?: Context) {
+  decode (input: I, context?: Context) {
     return this._decode(input, context || { path: '$' })
   }
 }
@@ -39,10 +39,20 @@ const string = new Validation<string, string, unknown>(
   (input) => input
 )
 
-const objectKeys = <O extends object>(value: O): (keyof O)[] =>
-  Object.keys(value) as (keyof O)[]
+const getContextPath = (name: string | number, parent?: string) => {
+  const t = typeof name === 'number'
+    ? `[${name}]`
+    : `.${name}`
 
-export type RecordValidator = Record<string, Validation<any, any, any>>
+  return parent ? `${parent}${t}` : `${name}`
+}
+
+const objectKeys = <O extends object>(value: O): Array<keyof O> =>
+  Object.keys(value) as Array<keyof O>
+
+type AnyValidator = Validation<any, any, any>
+type RecordValidator = Record<string, AnyValidator>
+
 const record = <T extends RecordValidator>(validator: T) => {
   type Out = { [k in keyof T]: typeof validator[k]['T'] }
 
@@ -59,7 +69,7 @@ const record = <T extends RecordValidator>(validator: T) => {
     const result: Partial<Out> = keys.reduce((result, key) => {
       const validationResult = validator[key]
         // @ts-ignore
-        .decode(input[key], { ...context, path: `${context.path}.${key}`})
+        .decode(input[key], { ...context, path: getContextPath(key, context.path) })
 
       if (validationResult.isOk()) {
         result[key] = validationResult.get()
@@ -67,7 +77,7 @@ const record = <T extends RecordValidator>(validator: T) => {
         errors.push(...validationResult.get())
       }
       return result
-    }, {} as Partial<Out>);
+    }, {} as Partial<Out>)
 
     if (errors.length === 0) {
       return Ok(result as Out)
@@ -77,13 +87,48 @@ const record = <T extends RecordValidator>(validator: T) => {
   }
 
   return new Validation<
-    { [k in keyof T]: typeof validator[k]['T'] },
-    { [k in keyof T]: typeof validator[k]['T'] },
-    unknown
+  { [k in keyof T]: typeof validator[k]['T'] },
+  { [k in keyof T]: typeof validator[k]['T'] },
+  unknown
   >(
     'string',
-    (input) => validate(input, { path: 'irrelevant' }).isOk(),
+    (input) => validate(input, { path: '$' }).isOk(),
     validate,
+    (input) => input
+  )
+}
+
+const array = <T extends AnyValidator>(schema: T) => {
+  return new Validation<
+  Array<typeof schema['T']>,
+  Array<typeof schema['T']>,
+  unknown
+  >(
+    'array',
+    (input) => true,
+    (input, context) => {
+      if (!Array.isArray(input)) {
+        return Err([{ message: 'is not an array', context }])
+      }
+      const errors: Error[] = []
+      const result: Array<typeof schema['T']> = []
+
+      input.forEach((value, index) => {
+        const itemContext = { path: getContextPath(index, context.path) }
+        const validationResult = schema.decode(value, itemContext)
+        if (validationResult.isOk()) {
+          result.push(validationResult.get())
+        } else {
+          errors.push(...validationResult.get())
+        }
+      })
+
+      if (errors.length === 0) {
+        return Ok(result)
+      } else {
+        return Err(errors)
+      }
+    },
     (input) => input
   )
 }
@@ -92,12 +137,12 @@ describe('nonEmptyString', () => {
   [
     { value: 'test', valid: true },
     { value: '2c2182c4-5d7e-4749-99e9-c4127a2e8358', valid: true },
-    { value: null, valid: false },
-  ].forEach(({value, valid}) => {
+    { value: null, valid: false }
+  ].forEach(({ value, valid }) => {
     it(`value ${value} ${valid ? 'is valid' : 'is invalid'}`, () => {
       assertThat(nonEmptyString.decode(value).isOk(), equalTo(valid))
     })
-  });
+  })
 })
 
 describe('record', () => {
@@ -121,12 +166,12 @@ describe('record', () => {
 
     it('responds error', () => {
       assertThat(validator.decode({
-        prop: '',
-      }).isOk(), equalTo(false))
+        prop: ''
+      }).get(), hasProperty('0', hasProperty('context', hasProperty('path', '$.prop'))))
     })
   })
 
-  it('works with nested records as well' , () => {
+  it('works with nested records as well', () => {
     const validator = record({
       prop: nonEmptyString,
       nested: record({
@@ -144,154 +189,18 @@ describe('record', () => {
     assertThat(validator.decode(value).get(),
       equalTo(value))
   })
-});
+})
 
+describe('array', () => {
+  const validator = array(nonEmptyString)
 
+  it('responds correct array when valid', () => {
+    assertThat(validator.decode(['empty']).get(),
+      equalTo(['empty']))
+  })
 
-
-
-
-
-// const match = (regex: RegExp, value: unknown): value is string =>
-//   typeof value === 'string' && regex.test(value)
-
-// const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-
-// const uuid = new t.Type<string, string, unknown>(
-//   'uuid',
-//   (input: unknown): input is string => match(UUID_REGEX, input),
-//   (input, context) => (
-//     match(UUID_REGEX, input)
-//       ? t.success(input)
-//       : t.failure(input, context, 'is not a valid UUID')),
-//   t.identity
-// )
-
-// // const nonEmptyString = new t.Type<string, string, unknown>(
-// //   'nonEmptyString',
-// //   (input: unknown): input is string => typeof input === 'string' && input.length > 0,
-// //   (input, context) => (
-// //     typeof input === 'string' && input.length > 0
-// //       ? t.success(input)
-// //       : t.failure(input, context, 'can\'t be empty')),
-// //   t.identity
-// // )
-
-// const localDate = new t.Type<LocalDate, string, unknown>(
-//   'localDate',
-//   (input: unknown): input is LocalDate => input instanceof LocalDate,
-//   (input, context) => {
-//     try {
-//       return t.success(LocalDate.parse(input as unknown as string))
-//     } catch (e) {
-//       return t.failure(input, context, 'is not a valid ISO date')
-//     }
-//   },
-//   (value) => value.toString()
-// )
-
-// const zonedDateTime = new t.Type<ZonedDateTime, string, unknown>(
-//   'zonedDateTime',
-//   (input: unknown): input is ZonedDateTime => input instanceof ZonedDateTime,
-//   (input, context) => {
-//     try {
-//       return t.success(ZonedDateTime.parse(input as unknown as string))
-//     } catch (e) {
-//       return t.failure(input, context, 'is not a valid ISO date')
-//     }
-//   },
-//   (value) => value.toString()
-// )
-
-// const HEX_REGEX = /^#(?:[0-9a-f]{3}){1,2}$/i
-// const hexColor = new t.Type<string, string, unknown>(
-//   'nonEmptyString',
-//   (input: unknown): input is string => match(HEX_REGEX, input),
-//   (input, context) => match(HEX_REGEX, input)
-//     ? t.success(input.toUpperCase() as unknown as string)
-//     : t.failure(input, context, 'is not a valid HEX color'),
-//   t.identity
-// )
-
-// describe('uuid', () => {
-//   [
-//     { value: '2c2182c4-5d7e-4749-99e9-c4127a2e8358', valid: true },
-
-//     { value: 'test', valid: false },
-//     { value: null, valid: false },
-//   ].forEach(({value, valid}) => {
-//     it(`value ${value} ${valid ? 'is valid' : 'is invalid'}`, () => {
-//       assertThat(isRight(uuid.decode(value)),
-//         equalTo(valid))
-//     })
-//   })
-// })
-
-
-// describe('localDate', () => {
-//   [
-//     { value: '2000-01-01', valid: true },
-//     { value: '0001-01-01', valid: true },
-
-//     { value: 'not valid', valid: false },
-//   ].forEach(({value, valid}) => {
-//     it(`value ${value} ${valid ? 'is valid' : 'is invalid'}`, () => {
-//       assertThat(isRight(localDate.decode(value)),
-//         equalTo(valid))
-//     })
-//   });
-
-//   [
-//     { value: LocalDate.parse('2000-01-01'), valid: true },
-//     { value: new Date(), valid: false },
-//     { value: '2000-01-01', valid: false },
-//   ].forEach(({value, valid}) => {
-//     it(`value ${value} ${valid ? 'is from type localDate' : 'not from type localDate'}`, () => {
-//       assertThat(localDate.is(value), equalTo(valid))
-//     })
-//   })
-// })
-
-// describe('zonedDateTime', () => {
-//   [
-//     { value: '2000-01-01T00:00:00+00:00', valid: true },
-//     { value: 'not valid', valid: false },
-//   ].forEach(({value, valid}) => {
-//     it(`value ${value} ${valid ? 'is valid' : 'is invalid'}`, () => {
-//       assertThat(isRight(zonedDateTime.decode(value)),
-//         equalTo(valid))
-//     })
-//   });
-
-//   [
-//     { value: ZonedDateTime.parse('2000-01-01T00:00:00+00:00'), valid: true },
-//     { value: new Date(), valid: false },
-//     { value: '2000-01-01', valid: false },
-//   ].forEach(({value, valid}) => {
-//     it(`value ${value} ${valid ? 'is from type localDate' : 'not from type localDate'}`, () => {
-//       assertThat(zonedDateTime.is(value), equalTo(valid))
-//     })
-//   })
-// })
-
-// describe('hexColor', () => {
-//   [
-//     { value: '#ffffff', valid: true },
-//     { value: '#fff', valid: true },
-//     { value: '#zzzzzz', valid: false },
-//   ].forEach(({value, valid}) => {
-//     it(`value ${value} ${valid ? 'is valid' : 'is invalid'}`, () => {
-//       assertThat(isRight(hexColor.decode(value)),
-//         equalTo(valid))
-//     })
-//   })
-// })
-
-// it('type strips away additional props', () => {
-//   const schema = t.exact(t.type({
-//     prop: t.string
-//   }))
-
-//   assertThat(schema.decode({ prop: 'hallo', additionalProp: 'hallo'}),
-//     hasProperty('right', equalTo({ prop: 'hallo'})));
-// })
+  it('responds errors when invalid', () => {
+    assertThat(validator.decode(['']).get(),
+      hasProperty('0', hasProperty('context', hasProperty('path', '$[0]'))))
+  })
+})

@@ -28,7 +28,7 @@ export namespace Authentication {
       model: 'user',
       action: 'sign-out',
       validator: v.object({}),
-      response: v.object({}),
+      response: v.object({})
     }),
 
     signIn: buildCommandDefinition({
@@ -135,7 +135,7 @@ export namespace Feature {
         title: nonEmptyString,
         description: nonEmptyString
       }),
-      response: v.object({}),
+      response: v.object({})
     }),
 
     update: buildCommandDefinition({
@@ -149,7 +149,7 @@ export namespace Feature {
         originalId: uuid,
         reason: nonEmptyString
       }),
-      response: v.object({}),
+      response: v.object({})
     }),
     setTags: buildCommandDefinition({
       verb: 'put',
@@ -159,7 +159,7 @@ export namespace Feature {
         featureId: uuid,
         tags: v.array(Tags.aggregate)
       }),
-      response: v.object({}),
+      response: v.object({})
     })
   }
 
@@ -179,7 +179,7 @@ export namespace Revision {
     id: uuid,
     reason: v.string,
     featureId: uuid,
-    version: v.number,
+    version: v.number
   })
 
   export const actions = {}
