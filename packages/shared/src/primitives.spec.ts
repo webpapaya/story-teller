@@ -9,7 +9,7 @@ class Validation<A, O, I> {
   readonly T: O = null as any as O // Phantom type
   constructor (
     readonly name: string,
-    readonly is: (input: unknown) => boolean,
+    readonly _is: ((input: unknown) => boolean) | null,
     readonly _decode: (input: I, context: Context) => Result<Error[], O>,
     readonly encode: (input: O) => A
   ) {}
@@ -17,12 +17,17 @@ class Validation<A, O, I> {
   decode (input: I, context?: Context) {
     return this._decode(input, context || { path: '$' })
   }
+
+  is (input: unknown): boolean {
+    if (this._is) { return this._is(input) }
+    return this.decode(input as unknown as I).isOk()
+  }
 }
 
 type NonEmptyString = string
 const nonEmptyString = new Validation<NonEmptyString, NonEmptyString, unknown>(
   'nonEmptyString',
-  (input) => typeof input === 'string' && input.length > 0,
+  null,
   (input, context) => (
     typeof input === 'string' && input.length > 0
       ? Ok(input)
@@ -32,7 +37,7 @@ const nonEmptyString = new Validation<NonEmptyString, NonEmptyString, unknown>(
 
 const string = new Validation<string, string, unknown>(
   'string',
-  (input) => typeof input === 'string',
+  null,
   (input, context) => (
     typeof input === 'string'
       ? Ok(input)
@@ -57,44 +62,42 @@ type RecordValidator = Record<string, AnyValidator>
 const record = <T extends RecordValidator>(validator: T) => {
   type Out = { [k in keyof T]: typeof validator[k]['T'] }
 
-  const validate = (input: unknown, context: Context): Result<Error[], Out> => {
-    if (typeof input !== 'object' || input === null) {
-      return Err([{
-        message: 'must be an object',
-        context
-      }])
-    }
-
-    const errors: Error[] = []
-    const keys = objectKeys(validator)
-    const result: Partial<Out> = keys.reduce((result, key) => {
-      const validationResult = validator[key]
-        // @ts-ignore
-        .decode(input[key], { ...context, path: getContextPath(key, context.path) })
-
-      if (validationResult.isOk()) {
-        result[key] = validationResult.get()
-      } else {
-        errors.push(...validationResult.get())
-      }
-      return result
-    }, {} as Partial<Out>)
-
-    if (errors.length === 0) {
-      return Ok(result as Out)
-    } else {
-      return Err(errors)
-    }
-  }
-
   return new Validation<
-  { [k in keyof T]: typeof validator[k]['T'] },
-  { [k in keyof T]: typeof validator[k]['T'] },
-  unknown
+    { [k in keyof T]: typeof validator[k]['T'] },
+    { [k in keyof T]: typeof validator[k]['T'] },
+    unknown
   >(
     'string',
-    (input) => validate(input, { path: '$' }).isOk(),
-    validate,
+    null,
+    (input, context) => {
+      if (typeof input !== 'object' || input === null) {
+        return Err([{
+          message: 'must be an object',
+          context
+        }])
+      }
+
+      const errors: Error[] = []
+      const keys = objectKeys(validator)
+      const result: Partial<Out> = keys.reduce((result, key) => {
+        const validationResult = validator[key]
+          // @ts-ignore
+          .decode(input[key], { ...context, path: getContextPath(key, context.path) })
+
+        if (validationResult.isOk()) {
+          result[key] = validationResult.get()
+        } else {
+          errors.push(...validationResult.get())
+        }
+        return result
+      }, {} as Partial<Out>)
+
+      if (errors.length === 0) {
+        return Ok(result as Out)
+      } else {
+        return Err(errors)
+      }
+    },
     (input) => input
   )
 }
@@ -106,7 +109,7 @@ const array = <T extends AnyValidator>(schema: T) => {
   unknown
   >(
     'array',
-    (input) => Array.isArray(input),
+    null,
     (input, context) => {
       if (!Array.isArray(input)) {
         return Err([{ message: 'is not an array', context }])
@@ -141,7 +144,7 @@ const option = <T extends AnyValidator>(validator: T) => {
     unknown
   >(
     'option',
-    (input) => validator.is(input),
+    (input) => input === undefined || validator.is(input),
     (input, context) => input === undefined
       ? Ok(input)
       : validator.decode(input, context),
@@ -156,7 +159,7 @@ const literal = <Value extends Literal>(value: Value) => new Validation<
   unknown
 >(
   'literal',
-  (input) => input === value,
+  null,
   (input, context) => input === value
     ? Ok(input as Value)
     : Err([{ message: `must be literal ${value}`, context }]),
@@ -169,7 +172,7 @@ const union = <Validator extends AnyValidator>(validators: Validator[]) => new V
   unknown
 >(
   'union',
-  (input) => input === validators,
+  null,
   (input, context) => {
     const errors: string[] = []
     for (const validator of validators) {
@@ -188,6 +191,24 @@ const union = <Validator extends AnyValidator>(validators: Validator[]) => new V
   (input) => input
 )
 
+const literalUnion = <Literals extends Literal>(literals: Literals[]) => {
+  const validator = union(literals.map((value) => literal(value)))
+  return new Validation<
+    typeof validator['T'],
+    typeof validator['T'],
+    unknown
+  >(
+    'literalUnion',
+    (input) => validator.is(input),
+    (input, context) => {
+      const result = validator.decode(input, context)
+      return result.isOk()
+        ? result
+        : Err([{ message: `must be one of (${literals.join(', ')})`, context }])
+    },
+    (input) => validator.encode(input)
+  )
+}
 
 describe('nonEmptyString', () => {
   [
@@ -314,5 +335,19 @@ describe('union', () => {
       assertThat(validator.decode(1).isOk(),
         equalTo(true))
     })
+  })
+})
+
+describe('literalUnion', () => {
+  const validator = literalUnion([1, 2, 'test'])
+
+  it('responds literal when same', () => {
+    assertThat(validator.decode(1).get(),
+      equalTo(1))
+  })
+
+  it('responds error when literal differs', () => {
+    assertThat(validator.decode('').isOk(),
+      equalTo(false))
   })
 })
