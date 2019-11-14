@@ -19,9 +19,10 @@ class Validation<A, O, I> {
   }
 }
 
-const nonEmptyString = new Validation<string, string, unknown>(
+type NonEmptyString = string
+const nonEmptyString = new Validation<NonEmptyString, NonEmptyString, unknown>(
   'nonEmptyString',
-  (input): input is string => typeof input === 'string' && input.length > 0,
+  (input) => typeof input === 'string' && input.length > 0,
   (input, context) => (
     typeof input === 'string' && input.length > 0
       ? Ok(input)
@@ -31,7 +32,7 @@ const nonEmptyString = new Validation<string, string, unknown>(
 
 const string = new Validation<string, string, unknown>(
   'string',
-  (input): input is string => typeof input === 'string',
+  (input) => typeof input === 'string',
   (input, context) => (
     typeof input === 'string'
       ? Ok(input)
@@ -105,7 +106,7 @@ const array = <T extends AnyValidator>(schema: T) => {
   unknown
   >(
     'array',
-    (input) => true,
+    (input) => Array.isArray(input),
     (input, context) => {
       if (!Array.isArray(input)) {
         return Err([{ message: 'is not an array', context }])
@@ -147,6 +148,46 @@ const option = <T extends AnyValidator>(validator: T) => {
     (input) => input
   )
 }
+
+type Literal = string | number | boolean | null | undefined
+const literal = <Value extends Literal>(value: Value) => new Validation<
+  Value,
+  Value,
+  unknown
+>(
+  'literal',
+  (input) => input === value,
+  (input, context) => input === value
+    ? Ok(input as Value)
+    : Err([{ message: `must be literal ${value}`, context }]),
+  (input) => input
+)
+
+const union = <Validator extends AnyValidator>(validators: Validator[]) => new Validation<
+  typeof validators[number]['T'],
+  typeof validators[number]['T'],
+  unknown
+>(
+  'union',
+  (input) => input === validators,
+  (input, context) => {
+    const errors: string[] = []
+    for (const validator of validators) {
+      const result = validator.decode(input, context)
+      if (result.isOk()) {
+        return Ok(input)
+      } else {
+        errors.push(...result.get().map((error) => error.message))
+      }
+    }
+    return Err([{
+      message: `union must comply with one of the validators (${errors.join(',')})`,
+      context
+    }])
+  },
+  (input) => input
+)
+
 
 describe('nonEmptyString', () => {
   [
@@ -234,4 +275,44 @@ describe('option', () => {
   })
 })
 
+describe('literal', () => {
+  it('responds literal when same', () => {
+    assertThat(literal('x').decode('x').get(),
+      equalTo('x'))
+  })
 
+  it('responds error when literal differs', () => {
+    assertThat(literal('y').decode('x').isOk(),
+      equalTo(false))
+  })
+})
+
+
+describe('union', () => {
+  describe('works with literals', () => {
+    const validator = union([literal('a'), literal('b')])
+    it('responds literal when same', () => {
+      assertThat(validator.decode('a').get(),
+        equalTo('a'))
+    })
+
+    it('responds error when literal differs', () => {
+      assertThat(validator.decode('c').isOk(),
+        equalTo(false))
+    })
+  })
+
+  describe('AND other validators', () => {
+    const validator = union([nonEmptyString, literal(1)])
+
+    it('responds error for empty string', () => {
+      assertThat(validator.decode('').isOk(),
+        equalTo(false))
+    })
+
+    it('responds success for number 1', () => {
+      assertThat(validator.decode(1).isOk(),
+        equalTo(true))
+    })
+  })
+})
