@@ -5,11 +5,11 @@ import { Result, Ok, Err } from 'space-lift'
 type Context = { path: string }
 type Error = { message: string, context: Context }
 
-class Validation<A, O, I> {
+class Codec<A, O, I> {
   readonly T: O = null as any as O // Phantom type
   constructor (
     readonly name: string,
-    readonly _is: ((input: unknown) => boolean) | null,
+    readonly is: ((input: unknown) => boolean),
     readonly _decode: (input: I, context: Context) => Result<Error[], O>,
     readonly encode: (input: O) => A
   ) {}
@@ -17,33 +17,21 @@ class Validation<A, O, I> {
   decode (input: I, context?: Context) {
     return this._decode(input, context || { path: '$' })
   }
-
-  is (input: unknown): boolean {
-    if (this._is) { return this._is(input) }
-    return this.decode(input as unknown as I).isOk()
-  }
 }
 
-type NonEmptyString = string
-const nonEmptyString = new Validation<NonEmptyString, NonEmptyString, unknown>(
-  'nonEmptyString',
-  null,
-  (input, context) => (
-    typeof input === 'string' && input.length > 0
-      ? Ok(input)
-      : Err([{ message: 'can\'t be empty', context }])),
-  (input) => input
-)
-
-const string = new Validation<string, string, unknown>(
-  'string',
-  null,
-  (input, context) => (
-    typeof input === 'string'
-      ? Ok(input)
-      : Err([{ message: 'must be a string', context }])),
-  (input) => input
-)
+class Validation<T> extends Codec<T, T, unknown> {
+  constructor (
+    name: string,
+    decode: (input: unknown, context: Context) => Result<Error[], T>,
+  ) {
+    super(
+      name,
+      (input) => decode(input as unknown as T, { path: '$' }).isOk(),
+      decode,
+      (input) => input
+    )
+  }
+}
 
 const getContextPath = (name: string | number, parent?: string) => {
   const t = typeof name === 'number'
@@ -56,19 +44,30 @@ const getContextPath = (name: string | number, parent?: string) => {
 const objectKeys = <O extends object>(value: O): Array<keyof O> =>
   Object.keys(value) as Array<keyof O>
 
-type AnyValidator = Validation<any, any, any>
+const nonEmptyString = new Validation<string>(
+  'nonEmptyString',
+  (input, context) => (
+    typeof input === 'string' && input.length > 0
+      ? Ok(input)
+      : Err([{ message: 'can\'t be empty', context }])),
+)
+
+const string = new Validation<string>(
+  'string',
+  (input, context) => (
+    typeof input === 'string'
+      ? Ok(input)
+      : Err([{ message: 'must be a string', context }])),
+)
+
+type AnyValidator = Codec<any, any, any>
 type RecordValidator = Record<string, AnyValidator>
 
 const record = <T extends RecordValidator>(validator: T) => {
   type Out = { [k in keyof T]: typeof validator[k]['T'] }
 
-  return new Validation<
-    { [k in keyof T]: typeof validator[k]['T'] },
-    { [k in keyof T]: typeof validator[k]['T'] },
-    unknown
-  >(
+  return new Validation<{ [k in keyof T]: typeof validator[k]['T'] }>(
     'string',
-    null,
     (input, context) => {
       if (typeof input !== 'object' || input === null) {
         return Err([{
@@ -97,19 +96,13 @@ const record = <T extends RecordValidator>(validator: T) => {
       } else {
         return Err(errors)
       }
-    },
-    (input) => input
+    }
   )
 }
 
 const array = <T extends AnyValidator>(schema: T) => {
-  return new Validation<
-  Array<typeof schema['T']>,
-  Array<typeof schema['T']>,
-  unknown
-  >(
+  return new Validation<Array<typeof schema['T']>>(
     'array',
-    null,
     (input, context) => {
       if (!Array.isArray(input)) {
         return Err([{ message: 'is not an array', context }])
@@ -132,83 +125,81 @@ const array = <T extends AnyValidator>(schema: T) => {
       } else {
         return Err(errors)
       }
-    },
-    (input) => input
+    }
   )
 }
 
 const option = <T extends AnyValidator>(validator: T) => {
-  return new Validation<
-    typeof validator['T'] | undefined,
-    typeof validator['T'] | undefined,
-    unknown
-  >(
+  return new Validation<typeof validator['T'] | undefined>(
     'option',
-    (input) => input === undefined || validator.is(input),
     (input, context) => input === undefined
       ? Ok(input)
-      : validator.decode(input, context),
-    (input) => input
+      : validator.decode(input, context)
   )
 }
 
 type Literal = string | number | boolean | null | undefined
-const literal = <Value extends Literal>(value: Value) => new Validation<
-  Value,
-  Value,
-  unknown
->(
+const literal = <Value extends Literal>(value: Value) => new Validation<Value>(
   'literal',
-  null,
   (input, context) => input === value
     ? Ok(input as Value)
-    : Err([{ message: `must be literal ${value}`, context }]),
-  (input) => input
+    : Err([{ message: `must be literal ${value}`, context }])
 )
 
-const union = <Validator extends AnyValidator>(validators: Validator[]) => new Validation<
-  typeof validators[number]['T'],
-  typeof validators[number]['T'],
-  unknown
->(
-  'union',
-  null,
-  (input, context) => {
-    const errors: string[] = []
-    for (const validator of validators) {
-      const result = validator.decode(input, context)
-      if (result.isOk()) {
-        return Ok(input)
-      } else {
-        errors.push(...result.get().map((error) => error.message))
+const union = <Validator extends AnyValidator>(validators: Validator[]) => {
+  return new Validation<typeof validators[number]['T']>(
+    'union',
+    (input, context) => {
+      const errors: string[] = []
+      for (const validator of validators) {
+        const result = validator.decode(input, context)
+        if (result.isOk()) {
+          return Ok(input)
+        } else {
+          errors.push(...result.get().map((error) => error.message))
+        }
       }
+      return Err([{
+        message: `union must comply with one of the validators (${errors.join(',')})`,
+        context
+      }])
     }
-    return Err([{
-      message: `union must comply with one of the validators (${errors.join(',')})`,
-      context
-    }])
-  },
-  (input) => input
-)
+  )
+}
 
 const literalUnion = <Literals extends Literal>(literals: Literals[]) => {
   const validator = union(literals.map((value) => literal(value)))
-  return new Validation<
-    typeof validator['T'],
-    typeof validator['T'],
-    unknown
-  >(
+  return new Validation<typeof validator['T']>(
     'literalUnion',
-    (input) => validator.is(input),
     (input, context) => {
       const result = validator.decode(input, context)
       return result.isOk()
         ? result
         : Err([{ message: `must be one of (${literals.join(', ')})`, context }])
-    },
-    (input) => validator.encode(input)
+    }
   )
 }
+
+const nullCodec = literal(null)
+const undefinedCodec = literal(undefined)
+const number = new Validation<number>(
+  'number',
+  (input, context) => {
+    return typeof input == 'number' && !isNaN(input)
+      ? Ok(input)
+      : Err([{ message: `is not a number`, context }])
+  }
+)
+const numerical = new Codec<number, number, unknown>(
+  'numerical',
+  number.is,
+  (input, context) => {
+    return !isNaN(input as unknown as number)
+      ? Ok(parseFloat(`${input}`))
+      : Err([{ message: `is not a number`, context }])
+  },
+  (input) => input
+)
 
 describe('nonEmptyString', () => {
   [
@@ -285,55 +276,66 @@ describe('array', () => {
 describe('option', () => {
   const validator = option(string)
 
-  it('responds correct string', () => {
-    assertThat(validator.decode('a string').get(),
-      equalTo('a string'))
+  describe('decode', () => {
+    it('responds correct string', () => {
+      assertThat(validator.decode('a string').get(),
+        equalTo('a string'))
+    })
+
+    it('responds undefined', () => {
+      assertThat(validator.decode(undefined).get(),
+        equalTo(undefined))
+    })
   })
 
-  it('responds undefined', () => {
-    assertThat(validator.decode(undefined).get(),
-      equalTo(undefined))
+  describe('is', () => {
+    it('responds true for string', () => {
+      assertThat(validator.is('a string'), equalTo(true))
+    })
+
+    it('responds true for undefined', () => {
+      assertThat(validator.is(undefined), equalTo(true))
+    })
+
+    it('responds false for number', () => {
+      assertThat(validator.is(1), equalTo(false))
+    })
+  })
+
+  describe('is', () => {
+    it('decode responds value as is', () => {
+      assertThat(validator.encode('a string'), equalTo('a string'))
+    })
   })
 })
 
 describe('literal', () => {
   it('responds literal when same', () => {
-    assertThat(literal('x').decode('x').get(),
-      equalTo('x'))
+    assertThat(literal('x').decode('x').get(), equalTo('x'))
   })
 
   it('responds error when literal differs', () => {
-    assertThat(literal('y').decode('x').isOk(),
-      equalTo(false))
+    assertThat(literal('y').decode('x').isOk(), equalTo(false))
   })
 })
 
 
 describe('union', () => {
-  describe('works with literals', () => {
-    const validator = union([literal('a'), literal('b')])
-    it('responds literal when same', () => {
-      assertThat(validator.decode('a').get(),
-        equalTo('a'))
+  const validator = union([nonEmptyString, literal(1)])
+
+  describe('decode', () => {
+    it('responds as it was for valid value', () => {
+      assertThat(validator.decode(1).get(), equalTo(1))
     })
 
-    it('responds error when literal differs', () => {
-      assertThat(validator.decode('c').isOk(),
-        equalTo(false))
+    it('responds error for empty string', () => {
+      assertThat(validator.decode('').isOk(), equalTo(false))
     })
   })
 
-  describe('AND other validators', () => {
-    const validator = union([nonEmptyString, literal(1)])
-
-    it('responds error for empty string', () => {
-      assertThat(validator.decode('').isOk(),
-        equalTo(false))
-    })
-
-    it('responds success for number 1', () => {
-      assertThat(validator.decode(1).isOk(),
-        equalTo(true))
+  describe('is', () => {
+    it('responds true for valid value', () => {
+      assertThat(validator.decode('').isOk(), equalTo(false))
     })
   })
 })
@@ -341,13 +343,37 @@ describe('union', () => {
 describe('literalUnion', () => {
   const validator = literalUnion([1, 2, 'test'])
 
-  it('responds literal when same', () => {
-    assertThat(validator.decode(1).get(),
-      equalTo(1))
-  })
+  describe('encode', () => {
+    it('responds literal when valid', () => {
+      assertThat(validator.decode(1).get(), equalTo(1))
+    })
 
-  it('responds error when literal differs', () => {
-    assertThat(validator.decode('').isOk(),
-      equalTo(false))
+    it('responds error with unknown literal', () => {
+      assertThat(validator.decode('').isOk(), equalTo(false))
+    })
+  })
+})
+
+describe('nullCodec', () => {
+  describe('encode', () => {
+    it('responds literal when valid', () => {
+      assertThat(nullCodec.decode(null).get(), equalTo(null))
+    })
+
+    it('responds error with unknown literal', () => {
+      assertThat(nullCodec.decode('').isOk(), equalTo(false))
+    })
+  })
+})
+
+describe('undefinedCodec', () => {
+  describe('encode', () => {
+    it('responds literal when valid', () => {
+      assertThat(undefinedCodec.decode(undefined).get(), equalTo(undefined))
+    })
+
+    it('responds error with unknown literal', () => {
+      assertThat(undefinedCodec.decode('').isOk(), equalTo(false))
+    })
   })
 })
