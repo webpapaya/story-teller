@@ -154,3 +154,12 @@ export const boolean = new Validation<boolean>(
       ? Ok(input)
       : Err([{ message: 'must be a boolean', context }])),
 )
+
+export const matchesRegex = (name: string, regex: RegExp) => new Validation<string>(
+  name,
+  (input, context) => {
+    return typeof input === 'string' && regex.test(input)
+      ? Ok(input)
+      : Err([{ message: `must be a valid ${name}`, context }])
+  }
+)

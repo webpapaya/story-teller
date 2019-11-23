@@ -1,6 +1,6 @@
 // @ts-ignore
 import { assertThat, equalTo, hasProperty } from 'hamjest'
-import { Validation, Ok, Err } from './types'
+import { Validation, Ok, Err, Codec } from './types'
 import {
   string,
   record,
@@ -11,6 +11,8 @@ import {
   union,
   nullCodec,
   undefinedCodec,
+  matchesRegex,
+
 } from './primitives'
 
 const nonEmptyString = new Validation<string>(
@@ -195,5 +197,38 @@ describe('undefinedCodec', () => {
     it('responds error with unknown literal', () => {
       assertThat(undefinedCodec.decode('').isOk(), equalTo(false))
     })
+  })
+})
+
+describe('compose', () => {
+  // const compose = <A, O, I>(validators: Codec<A, O, I>[]): Codec<A, O, I> => {
+  //   const [firstValidator, ...otherValidators] = validators;
+
+  //   return new Codec<A, O, I>(
+  //     validators.reverse().map((validation) => validation.name).join(' > '),
+  //     (input) => validators.every((validation) => validation.is(input)),
+  //     (input, context) => {
+
+  //       let result = firstValidator.decode(input, context);
+  //       for(let validator of otherValidators) {
+  //         if (!result.isOk()) {
+  //           return result
+  //         }
+  //         result = validator.decode(input, context)
+  //       }
+  //       return result
+  //     },
+  //     (input) => {
+  //       let result = firstValidator.encode(input);
+  //       for(let validator of otherValidators) {
+  //         result = validator.encode(input)
+  //       }
+  //       return result
+  //     }
+  //   )
+  // }
+
+  it('works', () => {
+    const uuid = string.pipe(matchesRegex('uuid', /\d+/))
   })
 })

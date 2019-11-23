@@ -1,6 +1,6 @@
 import { Result } from 'space-lift'
 
-export { Ok, Err } from 'space-lift'
+export { Ok, Err, Result } from 'space-lift'
 export type Context = { path: string }
 export type Error = { message: string, context: Context }
 export type AnyCodec = Codec<any, any, any>
@@ -15,6 +15,24 @@ export class Codec<A, O, I> {
 
   decode (input: I, context?: Context) {
     return this._decode(input, context || { path: '$' })
+  }
+  pipe<B, IB, A extends IB, OB extends A>(
+    this: Codec<A, O, I>,
+    ab: Codec<B, OB, IB>,
+    name: string = `${ab.name} > ${this.name}`
+  ) {
+    return new Codec<B, O, I>(
+      name,
+      (input) => this.is(input) && ab.is(input),
+      (i, c) => {
+        const result = this.decode(i, c)
+        if (!result.isOk()) { return result; }
+        // @ts-ignore
+        return ab.decode(i)
+      },
+      // @ts-ignore
+      b => ab.encode(this.encode(b))
+    )
   }
 }
 
