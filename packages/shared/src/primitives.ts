@@ -8,13 +8,13 @@ import {
 } from './types'
 
 type RecordValidator = Record<string, AnyCodec>
-const objectKeys = <O extends object>(value: O): Array<keyof O> =>
+export const objectKeys = <O extends object>(value: O): Array<keyof O> =>
   Object.keys(value) as Array<keyof O>
 
 export const record = <T extends RecordValidator>(validator: T) => {
-  type Out = { [k in keyof T]: typeof validator[k]['T'] }
+  type Out = { [k in keyof T]: typeof validator[k]['O'] }
 
-  return new Validation<{ [k in keyof T]: typeof validator[k]['T'] }>(
+  return new Validation<{ [k in keyof T]: typeof validator[k]['O'] }>(
     'string',
     (input, context) => {
       if (typeof input !== 'object' || input === null) {
@@ -49,14 +49,14 @@ export const record = <T extends RecordValidator>(validator: T) => {
 }
 
 export const array = <T extends AnyCodec>(schema: T) => {
-  return new Validation<Array<typeof schema['T']>>(
+  return new Validation<Array<typeof schema['O']>>(
     'array',
     (input, context) => {
       if (!Array.isArray(input)) {
         return Err([{ message: 'is not an array', context }])
       }
       const errors: Error[] = []
-      const result: Array<typeof schema['T']> = []
+      const result: Array<typeof schema['O']> = []
 
       input.forEach((value, index) => {
         const itemContext = { path: getContextPath(index, context.path) }
@@ -78,7 +78,7 @@ export const array = <T extends AnyCodec>(schema: T) => {
 }
 
 export const option = <T extends AnyCodec>(validator: T) => {
-  return new Validation<typeof validator['T'] | undefined>(
+  return new Validation<typeof validator['O'] | undefined>(
     'option',
     (input, context) => input === undefined
       ? Ok(input)
@@ -95,7 +95,7 @@ export const literal = <Value extends Literal>(value: Value) => new Validation<V
 )
 
 export const union = <Validator extends AnyCodec>(validators: Validator[]) => {
-  return new Validation<typeof validators[number]['T']>(
+  return new Validation<typeof validators[number]['O']>(
     'union',
     (input, context) => {
       const errors: string[] = []
@@ -117,7 +117,7 @@ export const union = <Validator extends AnyCodec>(validators: Validator[]) => {
 
 export const literalUnion = <Literals extends Literal>(literals: Literals[]) => {
   const validator = union(literals.map((value) => literal(value)))
-  return new Validation<typeof validator['T']>(
+  return new Validation<typeof validator['O']>(
     'literalUnion',
     (input, context) => {
       const result = validator.decode(input, context)

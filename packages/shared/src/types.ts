@@ -5,7 +5,11 @@ export type Context = { path: string }
 export type Error = { message: string, context: Context }
 export type AnyCodec = Codec<any, any, any>
 export class Codec<A, O, I> {
-  readonly T: O = null as any as O // Phantom type
+   // Phantom types
+  readonly A: A = null as any as A
+  readonly O: O = null as any as O
+  readonly I: I = null as any as I
+
   constructor (
     readonly name: string,
     readonly is: ((input: unknown) => boolean),
