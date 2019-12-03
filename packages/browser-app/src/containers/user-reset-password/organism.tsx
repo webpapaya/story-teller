@@ -1,6 +1,6 @@
 import React from 'react';
 import isForm from '../../is-form';
-import * as v from 'validation.ts'
+import {v} from '@story-teller/shared'
 import { Button } from '../../components/button';
 import { InputPassword } from '../../components/input-password';
 import { Link } from '../../components/link';
@@ -10,7 +10,7 @@ const Organism = isForm({
     password: '',
     passwordConfirmation: '',
   },
-  schema: v.object({
+  schema: v.record({
     password: v.string,
     passwordConfirmation: v.string,
   }),

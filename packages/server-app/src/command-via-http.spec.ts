@@ -7,29 +7,29 @@ import {
 // @ts-ignore
 } from 'hamjest'
 
-import * as v from 'validation.ts'
+import {v} from '@story-teller/shared'
 import { executeCommand, attributeFiltering } from './command-via-http'
 import { Ok } from 'space-lift'
 
 describe('attributeFiltering', () => {
   [
     {
-      validator: v.object({ id: v.number }),
+      validator: v.record({ id: v.number }),
       value: { id: 1 },
       result: { id: 1 }
     },
     {
-      validator: v.object({ id: v.number }),
+      validator: v.record({ id: v.number }),
       value: { id: 1, whatever: 1 },
       result: { id: 1 }
     },
     {
-      validator: v.object({ nested: v.object({ value: v.number }) }),
+      validator: v.record({ nested: v.record({ value: v.number }) }),
       value: { nested: { value: 1, other: 2 } },
       result: { nested: { value: 1 } }
     },
     {
-      validator: v.array(v.object({ value: v.number })),
+      validator: v.array(v.record({ value: v.number })),
       value: [{ value: 1, other: 1 }],
       result: [{ value: 1 }]
     }
@@ -46,11 +46,11 @@ describe('executeCommand', () => {
     verb: 'get',
     model: 'user',
     action: 'session',
-    validator: v.object({
+    validator: v.record({
       id: v.number,
       userIdentifier: v.string
     }),
-    response: v.object({
+    response: v.record({
       userIdentifier: v.string
     })
   }, {

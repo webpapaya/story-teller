@@ -1,6 +1,6 @@
 import { Tags } from '@story-teller/shared'
 
-export type Tag = typeof Tags.aggregate.T
+export type Tag = typeof Tags.aggregate.O
 
 export type Action<Type extends string, Payload> = {
   type: Type

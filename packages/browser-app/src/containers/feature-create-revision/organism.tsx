@@ -1,5 +1,5 @@
 import React from 'react';
-import * as v from 'validation.ts'
+import {v} from '@story-teller/shared'
 import uuid from 'uuid'
 import isForm from '../../is-form';
 import { InputText } from '../../components/input-text';

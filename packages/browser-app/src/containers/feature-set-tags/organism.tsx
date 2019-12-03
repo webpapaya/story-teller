@@ -1,6 +1,5 @@
 import React from 'react';
-import * as v from 'validation.ts'
-import { Tags } from '@story-teller/shared'
+import { Tags, v } from '@story-teller/shared'
 import isForm from '../../is-form';
 import { OrganismPropsType } from './types';
 import { InputMultiSelect } from '../../components/input-multi-select';
@@ -17,7 +16,7 @@ const tagToOption = (tag: Tag, label?: string) => ({
 })
 
 const Organism = isForm<any, OrganismPropsType>({
-  schema: v.object({
+  schema: v.record({
     featureId: v.string,
     tags: v.array(Tags.aggregate)
   }),

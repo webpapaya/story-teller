@@ -1,7 +1,7 @@
 import { Feature, Tags } from '@story-teller/shared'
 
-export type Feature = typeof Feature.aggregate.T
-export type Tag = typeof Tags.aggregate.T
+export type Feature = typeof Feature.aggregate.O
+export type Tag = typeof Tags.aggregate.O
 
 export type Action<Type extends string, Payload> = {
   type: Type

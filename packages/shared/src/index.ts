@@ -9,7 +9,6 @@ import {
   nonEmptyString
 } from './lib'
 
-
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 export type CommandDefinition<
   A extends AnyCodec,
@@ -203,4 +202,6 @@ export namespace Revision {
   }
 }
 
-export { AnyCodec } from './lib/types'
+export { AnyCodec } from './lib/types';
+import * as _v from './lib/index';
+export const v = _v;

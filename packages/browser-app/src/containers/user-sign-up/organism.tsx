@@ -1,6 +1,6 @@
 import React from 'react';
 import isForm from '../../is-form';
-import * as v from 'validation.ts'
+import {v} from '@story-teller/shared'
 import { InputText } from '../../components/input-text';
 import { InputPassword } from '../../components/input-password';
 import { Button } from '../../components/button';

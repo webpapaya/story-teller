@@ -1,6 +1,6 @@
 import React from 'react';
 import isForm from '../../is-form';
-import * as v from 'validation.ts'
+import {v} from '@story-teller/shared'
 import { InputText } from '../../components/input-text';
 import { Button } from '../../components/button';
 import { Link } from '../../components/link';
@@ -9,7 +9,7 @@ const Organism = isForm({
   defaultValues: {
     userIdentifier: '',
   },
-  schema: v.object({
+  schema: v.record({
     userIdentifier: v.string,
   }),
 }, ({ values, onValueChange, onSubmit }) => (

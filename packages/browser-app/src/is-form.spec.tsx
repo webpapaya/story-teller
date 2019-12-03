@@ -2,13 +2,13 @@
 import { assertThat, hasProperties} from 'hamjest'
 
 import React from 'react';
-import {render, fireEvent, queryHelpers} from '@testing-library/react'
+import {render, fireEvent} from '@testing-library/react'
 import isForm from './is-form'
-import * as v from 'validation.ts'
+import {v} from '@story-teller/shared'
 
 const DummyForm = isForm({
-  schema: v.object({
-    test1: v.string.filter((x) => x.length <= 5),
+  schema: v.record({
+    test1: v.clampedString(0, 5),
   })
 }, (props) => {
   return (

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as v from 'validation.ts';
+import { AnyCodec } from '@story-teller/shared';
 
 // Props you want the resulting component to take (besides the props of the wrapped component)
 interface ExternalProps<A> {
@@ -15,9 +15,9 @@ export interface InjectedProps<A> {
 }
 
 // Options for the HOC factory that are not dependent on props values
-interface Options<A> {
-  schema: v.Validator<A>,
-  defaultValues?: Partial<A>
+interface Options<A extends AnyCodec> {
+  schema: A,
+  defaultValues?: Partial<A['O']>
 }
 
 type FormEvent = {
@@ -28,7 +28,7 @@ type FormEvent = {
   }
 }
 
-const isForm = <A, OriginalProps extends {}>(options: Options<A>,
+const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A>,
   Component: React.ComponentType<OriginalProps & InjectedProps<A>>,
 ) => {
   class HOC extends React.Component<OriginalProps & ExternalProps<A>, {values: Partial<A>, submitCount: number}> {
@@ -47,11 +47,8 @@ const isForm = <A, OriginalProps extends {}>(options: Options<A>,
 
       this.setState((state) => {
         const values = { ...state.values, [name]: value }
-        const isPropValid = options.schema.validate(values)
-          .fold(
-            (errors) => !errors.some((error) => error.context.endsWith(name)),
-            () => true
-          )
+        const isPropValid = options.schema.decode(values).isOk()
+
         if (!isPropValid) { return state }
         return ({ ...state, values: { ...state.values, [name]: value } })
       })
@@ -59,7 +56,7 @@ const isForm = <A, OriginalProps extends {}>(options: Options<A>,
 
     onSubmit = (evt: React.FormEvent) => {
       evt.preventDefault()
-      options.schema.validate(this.state.values)
+      options.schema.decode(this.state.values)
         .fold(
           (test)=>{
             console.log(test)
