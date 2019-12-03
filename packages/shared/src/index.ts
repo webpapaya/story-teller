@@ -1,6 +1,13 @@
-import { AnyCodec, Validation, Ok, Err, Codec } from './types'
-import { record, string, matchesRegex, array, number } from './primitives'
-import { LocalDate } from 'js-joda'
+import { AnyCodec } from './lib/types'
+import {
+  record,
+  string,
+  array,
+  number,
+  uuid,
+  color,
+  nonEmptyString
+} from './lib'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 export type CommandDefinition<
@@ -18,34 +25,6 @@ export const buildCommandDefinition = <
   A extends AnyCodec,
   B extends AnyCodec
 >(definition: CommandDefinition<A, B>) => definition
-
-const clampedString = (minLength: number, maxLength: number) => new Validation<string>(
-  `clampedString(min: ${minLength}, max: ${maxLength})`,
-  (input, context) => {
-    return typeof input === 'string' && input.length >= minLength && input.length <= maxLength
-      ? Ok(input)
-      : Err([{ message: `can't be longer than ${maxLength} chars`, context }])
-  }
-)
-
-export const nonEmptyString = clampedString(1, Number.POSITIVE_INFINITY)
-export const color = matchesRegex('color', /^#[0-9A-F]{6}$/i)
-export const uuid = matchesRegex('uuid', /^#[0-9A-F]{6}$/i)
-export const date = new Codec<string, LocalDate, unknown>(
-  'date',
-  (value) => value instanceof LocalDate,
-  (input, context) => {
-    const error = Err([{ message: 'needs to be an ISO string', context }])
-    if (typeof input !== 'string') { return error }
-    try {
-      return Ok(LocalDate.parse(input))
-    } catch (e) {
-      return error
-    }
-  },
-  (input) => input.toString()
-)
-
 
 export namespace Authentication {
   export const aggregate = record({})

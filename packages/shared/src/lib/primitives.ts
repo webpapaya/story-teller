@@ -1,3 +1,4 @@
+
 import {
   Codec,
   Validation,
@@ -5,11 +6,14 @@ import {
   Err,
   Error,
   AnyCodec,
-  getContextPath,
+  getContextPath
 } from './types'
 
 const objectKeys = <O extends object>(value: O): Array<keyof O> =>
   Object.keys(value) as Array<keyof O>
+
+const isObject = (input: unknown): input is object =>
+  typeof input === 'object' && input !== null
 
 type RecordValidator = Record<string, AnyCodec>
 const buildRecord = (kind: string) => <T extends RecordValidator>(validator: T) => {
@@ -17,68 +21,61 @@ const buildRecord = (kind: string) => <T extends RecordValidator>(validator: T) 
   type O = { [k in keyof T]: typeof validator[k]['O'] }
 
   return new Codec<
-    { [k in keyof T]: typeof validator[k]['A'] },
-    { [k in keyof T]: typeof validator[k]['O'] },
-    unknown
+  { [k in keyof T]: typeof validator[k]['A'] },
+  { [k in keyof T]: typeof validator[k]['O'] },
+  unknown
   >(
     kind,
     (input) => {
-      return typeof input === 'object' && input !== null && objectKeys(validator).every((key) => {
+      return isObject(input) && objectKeys(validator).every((key) => {
         // @ts-ignore
         const value = input[key]
-        return key in input && validator[key].is(value);
+        return key in input && validator[key].is(value)
       })
     },
     (input, context) => {
-      if (typeof input !== 'object' || input === null) {
-        return Err([{
-          message: 'must be an object',
-          context
-        }])
-      }
+      if (!isObject(input)) { return Err([{ message: 'must be an object', context }]) }
 
+      const result: Partial<O> = {}
       const errors: Error[] = []
-      const keys = objectKeys(validator)
-      const result: Partial<O> = keys.reduce((intermediateResult, key) => {
 
-        const validationResult = validator[key]
-          // @ts-ignore
-          .decode(input[key], { ...context, path: getContextPath(key, context.path) })
+      for (let key of objectKeys(validator)) {
+        // @ts-ignore
+        const value = input[key]
+        const propertyContext = { ...context, path: getContextPath(key as string, context.path) }
+        const validationResult = validator[key].decode(value, propertyContext)
 
         if (validationResult.isOk()) {
-          // eslint-disable-next-line no-param-reassign
-          intermediateResult[key] = validationResult.get()
+          result[key] = validationResult.get()
         } else {
           errors.push(...validationResult.get())
         }
-        return intermediateResult
-      }, {} as Partial<O>)
-
-      if (errors.length === 0) {
-        return Ok(result as O)
       }
-      return Err(errors)
+
+      return errors.length === 0
+        ? Ok(result as O)
+        : Err(errors)
     },
     (value) => {
-      return objectKeys(validator).reduce((result, key) => {
-        // eslint-disable-next-line no-param-reassign
-        result[key] = validator[key].encode(value[key]);
-        return result;
-      }, {} as A)
+      const result: Partial<A> = {}
+      for (let key of objectKeys(validator)) {
+        result[key] = validator[key].encode(value[key])
+      }
+      return result as A
     }
   )
 }
 
 export const record = buildRecord('record')
 export const valueObject = buildRecord('valueObject')
-export const entity = buildRecord('enitity')
+export const entity = buildRecord('entity')
 export const aggregate = buildRecord('aggregate')
 
 export const array = <T extends AnyCodec>(schema: T) => {
   return new Codec<
-    Array<typeof schema['A']>,
-    Array<typeof schema['O']>,
-    unknown
+  Array<typeof schema['A']>,
+  Array<typeof schema['O']>,
+  unknown
   >(
     'array',
     (value) => Array.isArray(value) && value.every((item) => schema.is(item)),
@@ -111,7 +108,7 @@ export const union = <Validator extends AnyCodec>(validators: Validator[]) => {
   return new Codec<
     typeof validators[number]['A'],
     typeof validators[number]['O'],
-    unknown
+  unknown
   >(
     'union',
     (input) => validators.some((validator) => validator.is(input)),
@@ -119,10 +116,7 @@ export const union = <Validator extends AnyCodec>(validators: Validator[]) => {
       const errors: string[] = []
       for (const validator of validators) {
         const result = validator.decode(input, context)
-        if (result.isOk()) {
-          return Ok(input)
-        }
-
+        if (result.isOk()) { return Ok(input) }
         errors.push(...result.get().map((error) => error.message))
       }
       return Err([{
@@ -172,7 +166,7 @@ export const string = new Validation<string>(
   (input, context) => (
     typeof input === 'string'
       ? Ok(input)
-      : Err([{ message: 'must be a string', context }])),
+      : Err([{ message: 'must be a string', context }]))
 )
 
 export const boolean = new Validation<boolean>(
@@ -180,7 +174,7 @@ export const boolean = new Validation<boolean>(
   (input, context) => (
     typeof input === 'boolean'
       ? Ok(input)
-      : Err([{ message: 'must be a boolean', context }])),
+      : Err([{ message: 'must be a boolean', context }]))
 )
 
 export const matchesRegex = (name: string, regex: RegExp) => new Validation<string>(

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-member-accessibility */
 import { Result } from 'space-lift'
 
 export { Ok, Err, Result } from 'space-lift'
@@ -5,7 +6,7 @@ export type Context = { path: string }
 export type Error = { message: string, context: Context }
 export type AnyCodec = Codec<any, any, any>
 export class Codec<A, O, I> {
-   // Phantom types
+  // Phantom types
   readonly A: A = null as any as A
   readonly O: O = null as any as O
   readonly I: I = null as any as I
@@ -20,7 +21,7 @@ export class Codec<A, O, I> {
   decode (input: I, context?: Context) {
     return this._decode(input, context || { path: '$' })
   }
-  pipe<B, IB, A extends IB, OB extends A>(
+  pipe<B, IB, A extends IB, OB extends A> (
     this: Codec<A, O, I>,
     ab: Codec<B, OB, IB>,
     name: string = `${ab.name} > ${this.name}`
@@ -30,7 +31,7 @@ export class Codec<A, O, I> {
       (input) => this.is(input) && ab.is(input),
       (i, c) => {
         const result = this.decode(i, c)
-        if (!result.isOk()) { return result; }
+        if (!result.isOk()) { return result }
         // @ts-ignore
         return ab.decode(i)
       },
@@ -43,11 +44,11 @@ export class Codec<A, O, I> {
 export class Validation<T> extends Codec<T, T, unknown> {
   constructor (
     name: string,
-    decode: (input: unknown, context: Context) => Result<Error[], T>,
+    decode: (input: unknown, context: Context) => Result<Error[], T>
   ) {
     super(
       name,
-      (input) => decode(input as unknown as T, { path: '$' }).isOk(),
+      (input) => decode(input as T, { path: '$' }).isOk(),
       decode,
       (input) => input
     )

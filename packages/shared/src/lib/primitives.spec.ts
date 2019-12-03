@@ -3,6 +3,7 @@ import { assertThat, equalTo, hasProperty } from 'hamjest'
 import { LocalDate } from 'js-joda'
 import { Validation, Ok, Err } from './types'
 import {
+  date,
   string,
   record,
   array,
@@ -11,16 +12,15 @@ import {
   option,
   union,
   nullCodec,
-  undefinedCodec,
-} from './primitives'
-import { date } from './index'
+  undefinedCodec
+} from './index'
 
 const nonEmptyString = new Validation<string>(
   'nonEmptyString',
   (input, context) => (
     typeof input === 'string' && input.length > 0
       ? Ok(input)
-      : Err([{ message: 'can\'t be empty', context }])),
+      : Err([{ message: 'can\'t be empty', context }]))
 )
 
 describe('nonEmptyString', () => {
@@ -57,7 +57,7 @@ describe('record', () => {
     it('responds error', () => {
       assertThat(validator.decode({
         prop: ''
-      }).get(), equalTo([{ context: { path: '$.prop' }, message: "can't be empty"}]))
+      }).get(), equalTo([{ context: { path: '$.prop' }, message: "can't be empty" }]))
     })
   })
 
@@ -85,7 +85,7 @@ describe('record', () => {
     })
 
     it('decodes dates properly', () => {
-      assertThat(schema.encode({ test: LocalDate.parse('2000-01-01')}),
+      assertThat(schema.encode({ test: LocalDate.parse('2000-01-01') }),
         equalTo({ test: '2000-01-01' }))
     })
   })
@@ -94,7 +94,7 @@ describe('record', () => {
     const schema = record({ test: date })
 
     it('verifies local date properly', () => {
-      assertThat(schema.is({ test: LocalDate.parse('2000-01-01')}), equalTo(true))
+      assertThat(schema.is({ test: LocalDate.parse('2000-01-01') }), equalTo(true))
     })
 
     it('responds false when an invalid object is passed in', () => {
@@ -104,7 +104,6 @@ describe('record', () => {
 })
 
 describe('array', () => {
-
   describe('decode', () => {
     const validator = array(nonEmptyString)
 
@@ -180,7 +179,6 @@ describe('literal', () => {
     assertThat(literal('y').decode('x').isOk(), equalTo(false))
   })
 })
-
 
 describe('union', () => {
   describe('decode', () => {
