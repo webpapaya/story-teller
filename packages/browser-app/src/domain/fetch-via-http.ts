@@ -1,12 +1,16 @@
 import { AnyAction } from 'redux'
 import { ActionCreator } from './types'
-import { CommandDefinition } from '@story-teller/shared'
+import { CommandDefinition, AnyCodec } from '@story-teller/shared'
 import { memoize } from 'redux-memoize'
 
-type FetchViaHTTP = <A extends CommandDefinition<unknown, unknown>>(
+type FetchViaHTTP = <
+  D extends AnyCodec,
+  F extends AnyCodec,
+  A extends CommandDefinition<D, F>
+>(
   definition: A
-) => ActionCreator<A['validator']['T'], void, AnyAction> & {
-  unmemoized: ActionCreator<A['validator']['T'], void, AnyAction>
+) => ActionCreator<D['O'], void, AnyAction> & {
+  unmemoized: ActionCreator<D['O'], void, AnyAction>
 }
 
 const buildRoute = (values: Array<string | undefined>) =>
