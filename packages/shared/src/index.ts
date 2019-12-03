@@ -1,5 +1,6 @@
-import { AnyCodec, Validation, Ok, Err } from './types'
+import { AnyCodec, Validation, Ok, Err, Codec } from './types'
 import { record, string, matchesRegex, array, number } from './primitives'
+import { LocalDate } from 'js-joda'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 export type CommandDefinition<
@@ -27,9 +28,24 @@ const clampedString = (minLength: number, maxLength: number) => new Validation<s
   }
 )
 
-const nonEmptyString = clampedString(1, Number.POSITIVE_INFINITY)
-const color = matchesRegex('color', /^#[0-9A-F]{6}$/i)
-const uuid = matchesRegex('uuid', /^#[0-9A-F]{6}$/i)
+export const nonEmptyString = clampedString(1, Number.POSITIVE_INFINITY)
+export const color = matchesRegex('color', /^#[0-9A-F]{6}$/i)
+export const uuid = matchesRegex('uuid', /^#[0-9A-F]{6}$/i)
+export const date = new Codec<string, LocalDate, unknown>(
+  'date',
+  (value) => value instanceof LocalDate,
+  (input, context) => {
+    const error = Err([{ message: 'needs to be an ISO string', context }])
+    if (typeof input !== 'string') { return error }
+    try {
+      return Ok(LocalDate.parse(input))
+    } catch (e) {
+      return error
+    }
+  },
+  (input) => input.toString()
+)
+
 
 export namespace Authentication {
   export const aggregate = record({})

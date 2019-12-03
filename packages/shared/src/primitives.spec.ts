@@ -1,6 +1,7 @@
 // @ts-ignore
 import { assertThat, equalTo, hasProperty } from 'hamjest'
-import { Validation, Ok, Err, Codec } from './types'
+import { LocalDate } from 'js-joda'
+import { Validation, Ok, Err } from './types'
 import {
   string,
   record,
@@ -11,9 +12,8 @@ import {
   union,
   nullCodec,
   undefinedCodec,
-  matchesRegex,
-
 } from './primitives'
+import { date } from './index'
 
 const nonEmptyString = new Validation<string>(
   'nonEmptyString',
@@ -36,7 +36,7 @@ describe('nonEmptyString', () => {
 })
 
 describe('record', () => {
-  describe('simple validator', () => {
+  describe('decode', () => {
     const validator = record({
       prop: nonEmptyString
     })
@@ -47,7 +47,7 @@ describe('record', () => {
       }).get(), equalTo({ prop: 'not empty' }))
     })
 
-    it('removes to additional properties', () => {
+    it('removes additional properties', () => {
       assertThat(validator.decode({
         prop: 'not empty',
         additionalProp: 'test'
@@ -57,7 +57,7 @@ describe('record', () => {
     it('responds error', () => {
       assertThat(validator.decode({
         prop: ''
-      }).get(), hasProperty('0', hasProperty('context', hasProperty('path', '$.prop'))))
+      }).get(), equalTo([{ context: { path: '$.prop' }, message: "can't be empty"}]))
     })
   })
 
@@ -76,22 +76,64 @@ describe('record', () => {
       }
     }
 
-    assertThat(validator.decode(value).get(),
-      equalTo(value))
+    assertThat(validator.decode(value).get(), equalTo(value))
+  })
+
+  describe('encode', () => {
+    const schema = record({
+      test: date
+    })
+
+    it('decodes dates properly', () => {
+      assertThat(schema.encode({ test: LocalDate.parse('2000-01-01')}),
+        equalTo({ test: '2000-01-01' }))
+    })
+  })
+
+  describe('is', () => {
+    const schema = record({ test: date })
+
+    it('verifies local date properly', () => {
+      assertThat(schema.is({ test: LocalDate.parse('2000-01-01')}), equalTo(true))
+    })
+
+    it('responds false when an invalid object is passed in', () => {
+      assertThat(schema.is({ test: 'whatever' }), equalTo(false))
+    })
   })
 })
 
 describe('array', () => {
-  const validator = array(nonEmptyString)
 
-  it('responds correct array when valid', () => {
-    assertThat(validator.decode(['empty']).get(),
-      equalTo(['empty']))
+  describe('decode', () => {
+    const validator = array(nonEmptyString)
+
+    it('responds correct array when valid', () => {
+      assertThat(validator.decode(['empty']).get(), equalTo(['empty']))
+    })
+
+    it('responds errors when invalid', () => {
+      assertThat(validator.decode(['']).get(), hasProperty('length', 1))
+    })
   })
 
-  it('responds errors when invalid', () => {
-    assertThat(validator.decode(['']).get(),
-      hasProperty('0', hasProperty('context', hasProperty('path', '$[0]'))))
+  describe('is', () => {
+    const validator = array(date)
+    it('returns true when all elements comply to schema', () => {
+      assertThat(validator.is([LocalDate.parse('2000-01-01')]), equalTo(true))
+    })
+
+    it('returns false when one elements does not comply to schema', () => {
+      assertThat(validator.is([LocalDate.parse('2000-01-01'), '2000-01-01']), equalTo(false))
+    })
+  })
+
+  describe('encode', () => {
+    const validator = array(date)
+
+    it('encodes recursively', () => {
+      assertThat(validator.encode([LocalDate.parse('2000-01-01')]), equalTo(['2000-01-01']))
+    })
   })
 })
 
@@ -100,13 +142,11 @@ describe('option', () => {
 
   describe('decode', () => {
     it('responds correct string', () => {
-      assertThat(validator.decode('a string').get(),
-        equalTo('a string'))
+      assertThat(validator.decode('a string').get(), equalTo('a string'))
     })
 
     it('responds undefined', () => {
-      assertThat(validator.decode(undefined).get(),
-        equalTo(undefined))
+      assertThat(validator.decode(undefined).get(), equalTo(undefined))
     })
   })
 
@@ -124,7 +164,7 @@ describe('option', () => {
     })
   })
 
-  describe('is', () => {
+  describe('encode', () => {
     it('decode responds value as is', () => {
       assertThat(validator.encode('a string'), equalTo('a string'))
     })
@@ -143,9 +183,8 @@ describe('literal', () => {
 
 
 describe('union', () => {
-  const validator = union([nonEmptyString, literal(1)])
-
   describe('decode', () => {
+    const validator = union([nonEmptyString, literal(1)])
     it('responds as it was for valid value', () => {
       assertThat(validator.decode(1).get(), equalTo(1))
     })
@@ -156,8 +195,16 @@ describe('union', () => {
   })
 
   describe('is', () => {
+    const validator = union([nonEmptyString, literal(1)])
     it('responds true for valid value', () => {
       assertThat(validator.decode('').isOk(), equalTo(false))
+    })
+  })
+
+  describe('encode', () => {
+    const validator = union([date, literal(1)])
+    it('responds true for valid value', () => {
+      assertThat(validator.encode(LocalDate.parse('2000-01-01')), equalTo('2000-01-01'))
     })
   })
 })
@@ -199,4 +246,3 @@ describe('undefinedCodec', () => {
     })
   })
 })
-

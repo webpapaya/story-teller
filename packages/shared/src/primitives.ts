@@ -1,4 +1,5 @@
 import {
+  Codec,
   Validation,
   Ok,
   Err,
@@ -7,15 +8,27 @@ import {
   getContextPath,
 } from './types'
 
-type RecordValidator = Record<string, AnyCodec>
-export const objectKeys = <O extends object>(value: O): Array<keyof O> =>
+const objectKeys = <O extends object>(value: O): Array<keyof O> =>
   Object.keys(value) as Array<keyof O>
 
-export const record = <T extends RecordValidator>(validator: T) => {
-  type Out = { [k in keyof T]: typeof validator[k]['O'] }
+type RecordValidator = Record<string, AnyCodec>
+const buildRecord = (kind: string) => <T extends RecordValidator>(validator: T) => {
+  type A = { [k in keyof T]: typeof validator[k]['A'] }
+  type O = { [k in keyof T]: typeof validator[k]['O'] }
 
-  return new Validation<{ [k in keyof T]: typeof validator[k]['O'] }>(
-    'string',
+  return new Codec<
+    { [k in keyof T]: typeof validator[k]['A'] },
+    { [k in keyof T]: typeof validator[k]['O'] },
+    unknown
+  >(
+    kind,
+    (input) => {
+      return typeof input === 'object' && input !== null && objectKeys(validator).every((key) => {
+        // @ts-ignore
+        const value = input[key]
+        return key in input && validator[key].is(value);
+      })
+    },
     (input, context) => {
       if (typeof input !== 'object' || input === null) {
         return Err([{
@@ -26,31 +39,49 @@ export const record = <T extends RecordValidator>(validator: T) => {
 
       const errors: Error[] = []
       const keys = objectKeys(validator)
-      const result: Partial<Out> = keys.reduce((result, key) => {
+      const result: Partial<O> = keys.reduce((intermediateResult, key) => {
+
         const validationResult = validator[key]
           // @ts-ignore
           .decode(input[key], { ...context, path: getContextPath(key, context.path) })
 
         if (validationResult.isOk()) {
-          result[key] = validationResult.get()
+          // eslint-disable-next-line no-param-reassign
+          intermediateResult[key] = validationResult.get()
         } else {
           errors.push(...validationResult.get())
         }
-        return result
-      }, {} as Partial<Out>)
+        return intermediateResult
+      }, {} as Partial<O>)
 
       if (errors.length === 0) {
-        return Ok(result as Out)
-      } else {
-        return Err(errors)
+        return Ok(result as O)
       }
+      return Err(errors)
+    },
+    (value) => {
+      return objectKeys(validator).reduce((result, key) => {
+        // eslint-disable-next-line no-param-reassign
+        result[key] = validator[key].encode(value[key]);
+        return result;
+      }, {} as A)
     }
   )
 }
 
+export const record = buildRecord('record')
+export const valueObject = buildRecord('valueObject')
+export const entity = buildRecord('enitity')
+export const aggregate = buildRecord('aggregate')
+
 export const array = <T extends AnyCodec>(schema: T) => {
-  return new Validation<Array<typeof schema['O']>>(
+  return new Codec<
+    Array<typeof schema['A']>,
+    Array<typeof schema['O']>,
+    unknown
+  >(
     'array',
+    (value) => Array.isArray(value) && value.every((item) => schema.is(item)),
     (input, context) => {
       if (!Array.isArray(input)) {
         return Err([{ message: 'is not an array', context }])
@@ -68,21 +99,42 @@ export const array = <T extends AnyCodec>(schema: T) => {
         }
       })
 
-      if (errors.length === 0) {
-        return Ok(result)
-      } else {
-        return Err(errors)
-      }
-    }
+      return errors.length === 0
+        ? Ok(result)
+        : Err(errors)
+    },
+    (input) => input.map((value) => schema.encode(value))
   )
 }
 
-export const option = <T extends AnyCodec>(validator: T) => {
-  return new Validation<typeof validator['O'] | undefined>(
-    'option',
-    (input, context) => input === undefined
-      ? Ok(input)
-      : validator.decode(input, context)
+export const union = <Validator extends AnyCodec>(validators: Validator[]) => {
+  return new Codec<
+    typeof validators[number]['A'],
+    typeof validators[number]['O'],
+    unknown
+  >(
+    'union',
+    (input) => validators.some((validator) => validator.is(input)),
+    (input, context) => {
+      const errors: string[] = []
+      for (const validator of validators) {
+        const result = validator.decode(input, context)
+        if (result.isOk()) {
+          return Ok(input)
+        }
+
+        errors.push(...result.get().map((error) => error.message))
+      }
+      return Err([{
+        message: `union must comply with one of the validators (${errors.join(',')})`,
+        context
+      }])
+    },
+    (input) => {
+      return validators
+        .find((validator) => validator.is(input))!
+        .encode(input)
+    }
   )
 }
 
@@ -94,46 +146,22 @@ export const literal = <Value extends Literal>(value: Value) => new Validation<V
     : Err([{ message: `must be literal ${value}`, context }])
 )
 
-export const union = <Validator extends AnyCodec>(validators: Validator[]) => {
-  return new Validation<typeof validators[number]['O']>(
-    'union',
-    (input, context) => {
-      const errors: string[] = []
-      for (const validator of validators) {
-        const result = validator.decode(input, context)
-        if (result.isOk()) {
-          return Ok(input)
-        } else {
-          errors.push(...result.get().map((error) => error.message))
-        }
-      }
-      return Err([{
-        message: `union must comply with one of the validators (${errors.join(',')})`,
-        context
-      }])
-    }
-  )
-}
-
-export const literalUnion = <Literals extends Literal>(literals: Literals[]) => {
-  const validator = union(literals.map((value) => literal(value)))
-  return new Validation<typeof validator['O']>(
-    'literalUnion',
-    (input, context) => {
-      const result = validator.decode(input, context)
-      return result.isOk()
-        ? result
-        : Err([{ message: `must be one of (${literals.join(', ')})`, context }])
-    }
-  )
-}
+export const literalUnion = <Literals extends Literal>(literals: Literals[]) =>
+  union(literals.map((value) => literal(value)))
 
 export const nullCodec = literal(null)
 export const undefinedCodec = literal(undefined)
+
+export const option = <T extends AnyCodec>(validator: T) =>
+  union([validator, undefinedCodec])
+
+export const nullable = <T extends AnyCodec>(validator: T) =>
+  union([validator, nullCodec])
+
 export const number = new Validation<number>(
   'number',
   (input, context) => {
-    return typeof input == 'number' && !isNaN(input)
+    return typeof input === 'number' && !Number.isNaN(input)
       ? Ok(input)
       : Err([{ message: `is not a number`, context }])
   }
