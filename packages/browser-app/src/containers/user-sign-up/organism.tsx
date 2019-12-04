@@ -13,7 +13,7 @@ const Organism = isForm({
     password: '',
     passwordConfirmation: ''
   },
-  schema: v.object({
+  schema: v.record({
     userIdentifier: v.string,
     password: v.string,
     passwordConfirmation: v.string,

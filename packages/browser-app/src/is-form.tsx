@@ -29,7 +29,7 @@ type FormEvent = {
 }
 
 const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A>,
-  Component: React.ComponentType<OriginalProps & InjectedProps<A>>,
+  Component: React.ComponentType<OriginalProps & InjectedProps<A['O']>>,
 ) => {
   class HOC extends React.Component<OriginalProps & ExternalProps<A>, {values: Partial<A>, submitCount: number}> {
     constructor(props: OriginalProps & ExternalProps<A>) {

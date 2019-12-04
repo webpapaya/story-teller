@@ -11,7 +11,7 @@ const SignIn = isForm({
     userIdentifier: '',
     password: ''
   },
-  schema: v.object({
+  schema: v.record({
     userIdentifier: v.string,
     password: v.string,
   }),

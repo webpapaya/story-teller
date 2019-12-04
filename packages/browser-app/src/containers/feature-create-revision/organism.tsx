@@ -9,7 +9,7 @@ import styles from './organism.module.css'
 import { InputHidden } from '../../components/input-hidden';
 
 const Organism = isForm<any, any>({
-  schema: v.object({
+  schema: v.record({
     id: v.string,
     title: v.string,
     description: v.string,

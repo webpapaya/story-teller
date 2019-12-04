@@ -14,7 +14,7 @@ const Organism = isForm<any, OrganismPropsType>({
     title: '',
     description: ''
   },
-  schema: v.object({
+  schema: v.record({
     id: v.string,
     title: v.string,
     description: v.string,
