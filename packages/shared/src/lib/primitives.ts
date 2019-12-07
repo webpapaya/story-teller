@@ -63,7 +63,11 @@ const buildRecord = (kind: string) => <T extends RecordValidator>(validator: T) 
       }
       return result as A
     },
-    () => ({ type: 'object', properties: validator })
+    () => ({
+      type: 'object',
+      required: Object.keys(validator).filter((prop) => prop !== 'undefined'),
+      properties: validator,
+    })
   )
 }
 
@@ -141,7 +145,15 @@ export const literal = <Value extends Literal>(value: Value) => new Validation<V
   (input, context) => input === value
     ? Ok(input as Value)
     : Err([{ message: `must be literal ${value}`, context }]),
-  () => ({ const: value })
+  () => {
+    if (typeof value === 'undefined') {
+      return ({ const: `undefined` })
+    } else if (value === null) {
+      return ({ const: 'null' })
+    } else {
+      return ({ const: value })
+    }
+  }
 )
 
 export const literalUnion = <Literals extends Literal>(literals: Literals[]) =>

@@ -37,8 +37,9 @@ describe('nonEmptyString', () => {
 
 describe('record', () => {
   it('stringifies record, properly', () => {
+
     const validator = record({
-      prop: nonEmptyString,
+      prop: option(nonEmptyString),
       nested: record({
         prop: nonEmptyString
       })
@@ -46,12 +47,18 @@ describe('record', () => {
 
     assertThat(JSON.stringify(validator), equalTo(JSON.stringify({
       type: 'object',
+      required: ['prop', 'nested'],
       properties: {
         prop: {
-          type: 'nonEmptyString'
+          oneOf: [{
+            type: 'nonEmptyString'
+          }, {
+            const: 'undefined'
+          }]
         },
         nested: {
           type: 'object',
+          required: ['prop'],
           properties: {
             prop: {
               type: 'nonEmptyString'
@@ -250,6 +257,11 @@ describe('union', () => {
 
 describe('literalUnion', () => {
   const validator = literalUnion([1, 2, 'test'])
+
+  it('stringifies union properly', () => {
+    assertThat(JSON.stringify(validator),
+      '{"oneOf":[{"const":1},{"const":2},{"const":"test"}]}')
+  })
 
   describe('encode', () => {
     it('responds literal when valid', () => {
