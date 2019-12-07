@@ -62,7 +62,8 @@ const buildRecord = (kind: string) => <T extends RecordValidator>(validator: T) 
         result[key] = validator[key].encode(value[key])
       }
       return result as A
-    }
+    },
+    () => ({ type: "object", properties: validator })
   )
 }
 
@@ -100,7 +101,8 @@ export const array = <T extends AnyCodec>(schema: T) => {
         ? Ok(result)
         : Err(errors)
     },
-    (input) => input.map((value) => schema.encode(value))
+    (input) => input.map((value) => schema.encode(value)),
+    () => ({ type: 'array', items: schema })
   )
 }
 
@@ -128,7 +130,8 @@ export const union = <Validator extends AnyCodec>(validators: Validator[]) => {
       return validators
         .find((validator) => validator.is(input))!
         .encode(input)
-    }
+    },
+    () => ({ 'oneOf': validators })
   )
 }
 
@@ -137,8 +140,10 @@ export const literal = <Value extends Literal>(value: Value) => new Validation<V
   'literal',
   (input, context) => input === value
     ? Ok(input as Value)
-    : Err([{ message: `must be literal ${value}`, context }])
+    : Err([{ message: `must be literal ${value}`, context }]),
+  () => ({const: value})
 )
+
 
 export const literalUnion = <Literals extends Literal>(literals: Literals[]) =>
   union(literals.map((value) => literal(value)))

@@ -36,6 +36,32 @@ describe('nonEmptyString', () => {
 })
 
 describe('record', () => {
+  it('stringifies record, properly', () => {
+    const validator = record({
+      prop: nonEmptyString,
+      nested: record({
+        prop: nonEmptyString
+      })
+    })
+
+    assertThat(JSON.stringify(validator), equalTo(JSON.stringify({
+      "type": "object",
+      "properties": {
+        "prop": {
+          "type": "nonEmptyString"
+        },
+        "nested": {
+          "type": "object",
+          "properties": {
+            "prop": {
+              "type": "nonEmptyString"
+            }
+          }
+        }
+      }
+    })))
+  })
+
   describe('decode', () => {
     const validator = record({
       prop: nonEmptyString
@@ -104,6 +130,15 @@ describe('record', () => {
 })
 
 describe('array', () => {
+  it('stringifies union properly', () => {
+    const validator = array(nonEmptyString)
+    assertThat(JSON.stringify(validator), JSON.stringify({
+      type: 'array',
+      items: {
+        type: 'nonEmptyString'
+      }
+    }))
+  })
   describe('decode', () => {
     const validator = array(nonEmptyString)
 
@@ -181,6 +216,12 @@ describe('literal', () => {
 })
 
 describe('union', () => {
+  it('stringifies union properly', () => {
+    const validator = union([nonEmptyString, literal(1)])
+    assertThat(JSON.stringify(validator),
+      '{"oneOf":[{"type":"nonEmptyString"},{"const":1}]}')
+  })
+
   describe('decode', () => {
     const validator = union([nonEmptyString, literal(1)])
     it('responds as it was for valid value', () => {

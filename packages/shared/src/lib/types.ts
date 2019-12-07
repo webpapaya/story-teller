@@ -15,8 +15,13 @@ export class Codec<A, O, I> {
     readonly name: string,
     readonly is: ((input: unknown) => boolean),
     readonly _decode: (input: I, context: Context) => Result<Error[], O>,
-    readonly encode: (input: O) => A
+    readonly encode: (input: O) => A,
+    readonly _toJSON?: () => any,
   ) {}
+
+  toJSON() {
+    return this._toJSON ? this._toJSON() : {type: this.name};
+  }
 
   decode (input: I, context?: Context) {
     return this._decode(input, context || { path: '$' })
@@ -44,13 +49,15 @@ export class Codec<A, O, I> {
 export class Validation<T> extends Codec<T, T, unknown> {
   constructor (
     name: string,
-    decode: (input: unknown, context: Context) => Result<Error[], T>
+    decode: (input: unknown, context: Context) => Result<Error[], T>,
+    toJSON?: () => any,
   ) {
     super(
       name,
       (input) => decode(input as T, { path: '$' }).isOk(),
       decode,
-      (input) => input
+      (input) => input,
+      toJSON
     )
   }
 }
