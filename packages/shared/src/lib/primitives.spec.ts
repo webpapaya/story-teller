@@ -45,16 +45,16 @@ describe('record', () => {
     })
 
     assertThat(JSON.stringify(validator), equalTo(JSON.stringify({
-      "type": "object",
-      "properties": {
-        "prop": {
-          "type": "nonEmptyString"
+      type: 'object',
+      properties: {
+        prop: {
+          type: 'nonEmptyString'
         },
-        "nested": {
-          "type": "object",
-          "properties": {
-            "prop": {
-              "type": "nonEmptyString"
+        nested: {
+          type: 'object',
+          properties: {
+            prop: {
+              type: 'nonEmptyString'
             }
           }
         }

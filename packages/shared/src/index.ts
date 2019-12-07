@@ -8,6 +8,7 @@ import {
   color,
   nonEmptyString
 } from './lib'
+import * as _v from './lib/index'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 export type CommandDefinition<
@@ -202,6 +203,5 @@ export namespace Revision {
   }
 }
 
-export { AnyCodec } from './lib/types';
-import * as _v from './lib/index';
-export const v = _v;
+export { AnyCodec } from './lib/types'
+export const v = _v
