@@ -130,10 +130,21 @@ export namespace Project {
     create: buildCommandDefinition({
       verb: 'post',
       action: 'create',
-      model: 'feature',
+      model: 'project',
       validator: record({
         id: uuid,
-        name: nonEmptyString
+        name: nonEmptyString,
+        contributorId: uuid
+      }),
+      response: aggregate
+    }),
+    assignContributor: buildCommandDefinition({
+      verb: 'post',
+      action: 'assign-contributor',
+      model: 'project',
+      validator: record({
+        projectId: uuid,
+        contributorId: uuid
       }),
       response: aggregate
     }),
@@ -166,7 +177,6 @@ export namespace Feature {
       }),
       response: record({})
     }),
-
     update: buildCommandDefinition({
       verb: 'put',
       action: 'update',

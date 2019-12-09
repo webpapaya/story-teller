@@ -12,13 +12,15 @@ import {
   Authentication,
   Revision,
   Feature,
-  Tags
+  Tags,
+  Project
 } from '@story-teller/shared'
 import { whereFeature, whereTags } from './feature/queries'
 import { commandViaHTTP } from './command-via-http'
 import { Result, Ok, Err } from 'space-lift'
 import { HTTPError, Errors } from './errors'
 import { whereRevision } from './revisions/queries'
+import { createProject } from './project/commands'
 
 const app = express()
 const port = process.env.API_PORT
