@@ -120,6 +120,26 @@ export namespace Tags {
   }
 }
 
+export namespace Project {
+  export const aggregate = record({
+    id: uuid,
+    name: nonEmptyString,
+  })
+
+  export const actions = {
+    create: buildCommandDefinition({
+      verb: 'post',
+      action: 'create',
+      model: 'feature',
+      validator: record({
+        id: uuid,
+        name: nonEmptyString
+      }),
+      response: aggregate
+    }),
+  }
+}
+
 export namespace Feature {
   export const aggregate = record({
     id: uuid,

@@ -1,5 +1,5 @@
 import { LocalDateTime } from 'js-joda'
-import { Revision } from '@story-teller/shared'
+import { Revision, Project as DomainProject } from '@story-teller/shared'
 
 type UUID = string
 
@@ -34,3 +34,4 @@ export type Tag = {
 }
 
 export type FeatureRevision = typeof Revision.aggregate['O']
+export type Project = typeof DomainProject.aggregate['O']
