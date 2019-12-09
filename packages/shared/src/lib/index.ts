@@ -1,4 +1,4 @@
-import { LocalDate } from 'js-joda'
+import { LocalDate, LocalDateTime } from 'js-joda'
 import { Validation, Ok, Err, Codec } from './types'
 import { matchesRegex } from './primitives'
 
@@ -22,6 +22,21 @@ export const date = new Codec<string, LocalDate, unknown>(
     if (typeof input !== 'string') { return error }
     try {
       return Ok(LocalDate.parse(input))
+    } catch (e) {
+      return error
+    }
+  },
+  (input) => input.toString()
+)
+
+export const localDateTime = new Codec<string, LocalDateTime, unknown>(
+  'localDateTime',
+  (value) => value instanceof LocalDateTime,
+  (input, context) => {
+    const error = Err([{ message: 'needs to be an ISO string', context }])
+    if (typeof input !== 'string') { return error }
+    try {
+      return Ok(LocalDateTime.parse(input))
     } catch (e) {
       return error
     }

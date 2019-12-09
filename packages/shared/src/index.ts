@@ -6,7 +6,8 @@ import {
   number,
   uuid,
   color,
-  nonEmptyString
+  nonEmptyString,
+  localDateTime
 } from './lib'
 import * as _v from './lib/index'
 
@@ -187,7 +188,8 @@ export namespace Revision {
     id: uuid,
     reason: string,
     featureId: uuid,
-    version: number
+    version: number,
+    createdAt: localDateTime
   })
 
   export const actions = {}

@@ -1,4 +1,5 @@
 import { LocalDateTime } from 'js-joda'
+import { Revision } from '@story-teller/shared'
 
 type UUID = string
 
@@ -32,10 +33,4 @@ export type Tag = {
   color: string
 }
 
-export type FeatureRevision = {
-  id: UUID
-  reason?: string
-  featureId: UUID
-  createdAt: LocalDateTime
-  version: number
-}
+export type FeatureRevision = typeof Revision.aggregate['O']
