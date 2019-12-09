@@ -1,4 +1,5 @@
 import { connect } from 'react-redux'
+import uuid from 'uuid'
 import { DispatchPropsType, OwnPropsType, StatePropsType } from './types'
 import { MapDispatchToProps, MapStateToProps } from '../../domain/types'
 import { whereFeature, updateFeature } from '../../domain/feature/actions'
@@ -22,7 +23,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = 
     ])
   },
   onSubmit: async (feature) => {
-    await dispatch(updateFeature(feature))
+    await dispatch(updateFeature({ ...feature, id: uuid() }))
     await Promise.all([
       dispatch(whereFeature.unmemoized({ featureId: props.id })),
       dispatch(whereRevisions.unmemoized({ featureId: props.id }))
