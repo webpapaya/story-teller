@@ -22,33 +22,28 @@ import { Err } from 'space-lift'
 const sendMail = sinon.spy()
 
 describe('findUserById', () => {
-  it('when known userId is passed in', t(async ({ withinConnection }) => {
-    const auth = await createUserAuthenticationFactory({ withinConnection },
+  it('when known userId is passed in', t(async ({ client }) => {
+    const auth = await createUserAuthenticationFactory({ client },
       userAuthenticationFactory.build())
 
-    const result = await withinConnection(({ client }) => {
-      return findUserById({ client }, { id: auth.id })
-    })
+    const result = await findUserById({ client }, { id: auth.id })
     assertThat(result.get(), hasProperties({
       userIdentifier: equalTo(auth.userIdentifier)
     }))
   }))
 
-  it('when undefined is passed in', t(async ({ withinConnection }) => {
-    await createUserAuthenticationFactory({ withinConnection },
+  it('when undefined is passed in', t(async ({ client }) => {
+    await createUserAuthenticationFactory({ client },
       userAuthenticationFactory.build())
 
-    const result = await withinConnection(({ client }) => {
-      return findUserById({ client }, { id: undefined as unknown as string })
-    })
-
+    const result = await findUserById({ client }, { id: undefined as unknown as string })
     assertThat(result, equalTo(Err('NOT_FOUND')))
   }))
 })
 
 describe('findUserByAuthentication', () => {
-  it('when password matches, returns user', t(async ({ withinConnection, client }) => {
-    await register({ withinConnection, sendMail }, {
+  it('when password matches, returns user', t(async ({ client }) => {
+    await register({ client, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
@@ -58,8 +53,8 @@ describe('findUserByAuthentication', () => {
     })).get(), present())
   }))
 
-  it('when password does NOT match, returns undefined', t(async ({ withinConnection, client }) => {
-    await register({ withinConnection, sendMail }, {
+  it('when password does NOT match, returns undefined', t(async ({ client }) => {
+    await register({ client, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
@@ -73,9 +68,9 @@ describe('findUserByAuthentication', () => {
 })
 
 describe('findUserByAuthenticationToken', () => {
-  it('when password was not reset yet, returns user', t(async ({ withinConnection, client }) => {
+  it('when password was not reset yet, returns user', t(async ({ client }) => {
     return withMockedDate('2000-01-02', async () => {
-      const auth = await createUserAuthenticationFactory({ withinConnection },
+      const auth = await createUserAuthenticationFactory({ client },
         userAuthenticationFactory.build())
 
       const token: AuthenticationToken = {
@@ -90,8 +85,8 @@ describe('findUserByAuthenticationToken', () => {
     })
   }))
 
-  it('when password changed after token created, returns undefined', t(async ({ withinConnection, client }) => {
-    const auth = await createUserAuthenticationFactory({ withinConnection },
+  it('when password changed after token created, returns undefined', t(async ({client }) => {
+    const auth = await createUserAuthenticationFactory({ client },
       userAuthenticationFactory.build({ passwordChangedAt: LocalDateTime.of(2000, 1, 2) }))
 
     const token: AuthenticationToken = {
@@ -103,8 +98,8 @@ describe('findUserByAuthenticationToken', () => {
     assertThat(await findUserByAuthenticationToken({ client }, token), equalTo(Err('NOT_FOUND')))
   }))
 
-  it('when password changed before token created, returns user', t(async ({ withinConnection, client }) => {
-    const auth = await createUserAuthenticationFactory({ withinConnection },
+  it('when password changed before token created, returns user', t(async ({client }) => {
+    const auth = await createUserAuthenticationFactory({ client },
       userAuthenticationFactory.build({ passwordChangedAt: LocalDateTime.of(2000, 1, 1) }))
 
     const token: AuthenticationToken = {

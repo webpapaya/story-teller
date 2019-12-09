@@ -2,7 +2,6 @@ import sql from 'sql-template-tag'
 import { Result, Ok } from 'space-lift'
 import { WithinConnection } from '../lib/db'
 import { FeatureRevision } from '../domain'
-import { Revision } from '@story-teller/shared'
 
 type WhereRevision = (
   deps: { withinConnection: WithinConnection },

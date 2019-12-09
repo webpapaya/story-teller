@@ -28,21 +28,21 @@ import { Err } from 'space-lift'
 const sendMail = sinon.spy()
 
 describe('user/register', () => {
-  it('when identifier is used twice, returns error', t(async ({ withinConnection }) => {
-    await register({ withinConnection, sendMail }, {
+  it('when identifier is used twice, returns error', t(async ({ client }) => {
+    await register({ client, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
-    const result = await register({ withinConnection, sendMail }, {
+    const result = await register({ client, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
     assertThat(result, equalTo(Err('User Identifier already taken')))
   }))
 
-  it('sends a registration email', t(async ({ withinConnection }) => {
+  it('sends a registration email', t(async ({ client }) => {
     const sendMail = sinon.spy()
-    await register({ withinConnection, sendMail }, {
+    await register({ client, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
@@ -55,29 +55,27 @@ describe('user/register', () => {
 })
 
 describe('user/confirm', () => {
-  it('when token was found, sets confirmationToken to null', t(async ({ withinConnection }) => {
-    const auth = await createUserAuthenticationFactory({ withinConnection },
+  it('when token was found, sets confirmationToken to null', t(async ({ client }) => {
+    const auth = await createUserAuthenticationFactory({ client },
       userAuthenticationFactory.build(unconfirmed))
 
-    await confirm({ withinConnection }, {
+    await confirm({ client }, {
       userIdentifier: auth.userIdentifier,
       token: DUMMY_TOKEN
     })
 
-    return withinConnection(async ({ client }) => {
-      const result = await client.query('select * from user_authentication')
-      assertThat(result.rows, everyItem(hasProperties({
-        confirmationToken: null,
-        confirmedAt: present()
-      })))
-    })
+    const result = await client.query('select * from user_authentication')
+    assertThat(result.rows, everyItem(hasProperties({
+      confirmationToken: null,
+      confirmedAt: present()
+    })))
   }))
 
-  it('when token was NOT found, returns token not found error', t(async ({ withinConnection }) => {
-    const auth = await createUserAuthenticationFactory({ withinConnection },
+  it('when token was NOT found, returns token not found error', t(async ({ client }) => {
+    const auth = await createUserAuthenticationFactory({ client },
       userAuthenticationFactory.build(unconfirmed))
 
-    const result = await confirm({ withinConnection }, {
+    const result = await confirm({ client }, {
       userIdentifier: auth.userIdentifier,
       token: 'unknown token'
     })
@@ -85,8 +83,8 @@ describe('user/confirm', () => {
     assertThat(result, equalTo(Err('NOT_FOUND')))
   }))
 
-  it('when user was not found', t(async ({ withinConnection }) => {
-    const result = await confirm({ withinConnection }, {
+  it('when user was not found', t(async ({ client }) => {
+    const result = await confirm({ client }, {
       userIdentifier: 'unknown user',
       token: 'invalid token'
     })
@@ -96,10 +94,10 @@ describe('user/confirm', () => {
 })
 
 describe('user/requestPasswordReset', () => {
-  it('sends a pw reset email', t(async ({ withinConnection }) => {
+  it('sends a pw reset email', t(async ({ client }) => {
     const sendMail = sinon.spy()
-    await createUserAuthenticationFactory({ withinConnection }, userAuthenticationFactory.build())
-    await requestPasswordReset({ withinConnection, sendMail }, {
+    await createUserAuthenticationFactory({ client }, userAuthenticationFactory.build())
+    await requestPasswordReset({ client, sendMail }, {
       userIdentifier: 'sepp'
     })
     assertThat(sendMail.lastCall.args[0], hasProperties({
@@ -108,36 +106,35 @@ describe('user/requestPasswordReset', () => {
     }))
   }))
 
-  it('does not send an email on unknown user', t(async ({ withinConnection }) => {
+  it('does not send an email on unknown user', t(async ({ client }) => {
     const sendMail = sinon.spy()
-    await requestPasswordReset({ withinConnection, sendMail }, {
+    await requestPasswordReset({ client, sendMail }, {
       userIdentifier: 'unknown user'
     })
     assertThat(sendMail.callCount, equalTo(0))
   }))
 
-  it('sets passwordResetCreatedAt', t(async ({ withinConnection }) => {
+  it('sets passwordResetCreatedAt', t(async ({ client }) => {
     return withMockedDate('2000-01-01', async () => {
-      await createUserAuthenticationFactory({ withinConnection }, userAuthenticationFactory.build())
-      await requestPasswordReset({ withinConnection, sendMail }, {
+      await createUserAuthenticationFactory({ client }, userAuthenticationFactory.build())
+      await requestPasswordReset({ client, sendMail }, {
         userIdentifier: 'sepp'
       })
-      return withinConnection(async ({ client }) => {
-        const result = await client.query('select * from user_authentication')
-        assertThat(result.rows[0], hasProperties({
-          passwordResetCreatedAt: LocalDateTime.from(nativeJs(new Date()))
-        }))
-      })
+
+      const result = await client.query('select * from user_authentication')
+      assertThat(result.rows[0], hasProperties({
+        passwordResetCreatedAt: LocalDateTime.from(nativeJs(new Date()))
+      }))
     })
   }))
 })
 
 describe('user/resetPasswordByToken', () => {
-  it('after success, user can sign in with new password', t(async ({ withinConnection, client }) => {
-    const auth = await createUserAuthenticationFactory({ withinConnection },
+  it('after success, user can sign in with new password', t(async ({ client }) => {
+    const auth = await createUserAuthenticationFactory({ client },
       userAuthenticationFactory.build(requestedPasswordReset))
 
-    await resetPasswordByToken({ withinConnection }, {
+    await resetPasswordByToken({ client }, {
       userIdentifier: auth.userIdentifier,
       token: DUMMY_TOKEN,
       password: 'new password'
@@ -149,29 +146,27 @@ describe('user/resetPasswordByToken', () => {
     }), present())
   }))
 
-  it('after success, relevant attributes are set to null', t(async ({ withinConnection }) => {
-    const auth = await createUserAuthenticationFactory({ withinConnection },
+  it('after success, relevant attributes are set to null', t(async ({ client }) => {
+    const auth = await createUserAuthenticationFactory({ client },
       userAuthenticationFactory.build(requestedPasswordReset))
 
-    await resetPasswordByToken({ withinConnection }, {
+    await resetPasswordByToken({ client }, {
       userIdentifier: auth.userIdentifier,
       token: DUMMY_TOKEN,
       password: 'new password'
     })
 
-    return withinConnection(async ({ client }) => {
-      const result = await client.query('select * from user_authentication')
-      assertThat(result.rows[0], hasProperties({
-        passwordResetCreatedAt: null,
-        passwordResetToken: null,
-        passwordChangedAt: present()
-      }))
-    })
+    const result = await client.query('select * from user_authentication')
+    assertThat(result.rows[0], hasProperties({
+      passwordResetCreatedAt: null,
+      passwordResetToken: null,
+      passwordChangedAt: present()
+    }))
   }))
 
-  it('after token expired, pw is not resetted', t(async ({ withinConnection, client }) => {
+  it('after token expired, pw is not resetted', t(async ({ client }) => {
     await withMockedDate('2000-01-01', async (remockDate) => {
-      const auth = await createUserAuthenticationFactory({ withinConnection },
+      const auth = await createUserAuthenticationFactory({ client },
         userAuthenticationFactory.build({
           ...requestedPasswordReset,
           passwordResetCreatedAt: LocalDateTime.from(nativeJs(new Date()))
@@ -179,7 +174,7 @@ describe('user/resetPasswordByToken', () => {
 
       remockDate('2000-01-02')
 
-      await resetPasswordByToken({ withinConnection }, {
+      await resetPasswordByToken({ client }, {
         userIdentifier: auth.userIdentifier,
         token: DUMMY_TOKEN,
         password: 'new password'

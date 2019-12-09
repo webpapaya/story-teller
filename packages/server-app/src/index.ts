@@ -20,7 +20,7 @@ import { commandViaHTTP } from './command-via-http'
 import { Result, Ok, Err } from 'space-lift'
 import { HTTPError, Errors } from './errors'
 import { whereRevision } from './revisions/queries'
-import { createProject } from './project/commands'
+import { createProject, assignContributorToProject } from './project/commands'
 
 const app = express()
 const port = process.env.API_PORT
@@ -59,19 +59,31 @@ commandViaHTTP(Authentication.queries.session, {
 commandViaHTTP(Authentication.actions.signUp, {
   app,
   dependencies: () => ({ withinConnection, sendMail }),
-  useCase: register
+  useCase: async (deps, params) => {
+    return deps.withinConnection(({ client }) => {
+      return register({ ...deps, client }, params)
+    })
+  }
 })
 
 commandViaHTTP(Authentication.actions.requestPasswordReset, {
   app,
   dependencies: { withinConnection, sendMail },
-  useCase: requestPasswordReset
+  useCase: async (deps, params) => {
+    return deps.withinConnection(({ client }) => {
+      return requestPasswordReset({ ...deps, client }, params)
+    })
+  }
 })
 
 commandViaHTTP(Authentication.actions.resetPasswordByToken, {
   app,
   dependencies: { withinConnection },
-  useCase: resetPasswordByToken
+  useCase: async (deps, params) => {
+    return deps.withinConnection(({ client }) => {
+      return resetPasswordByToken({ client }, params)
+    })
+  }
 })
 
 commandViaHTTP(Authentication.actions.signIn, {
@@ -134,6 +146,26 @@ commandViaHTTP(Revision.queries.where, {
   app,
   dependencies: { withinConnection },
   useCase: whereRevision
+})
+
+commandViaHTTP(Project.actions.create, {
+  app,
+  dependencies: { withinConnection },
+  useCase: async (deps, params) => {
+    return deps.withinConnection(({ client }) => {
+      return createProject({ client }, params)
+    })
+  }
+})
+
+commandViaHTTP(Project.actions.assignContributor, {
+  app,
+  dependencies: { withinConnection },
+  useCase: async (deps, params) => {
+    return deps.withinConnection(({ client }) => {
+      return assignContributorToProject({ client }, params)
+    })
+  }
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

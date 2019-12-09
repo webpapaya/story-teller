@@ -7,7 +7,7 @@ import {
 // @ts-ignore
 } from 'hamjest'
 
-import {v} from '@story-teller/shared'
+import { v } from '@story-teller/shared'
 import { executeCommand, attributeFiltering } from './command-via-http'
 import { Ok } from 'space-lift'
 

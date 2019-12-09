@@ -1,4 +1,4 @@
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { UserAuthentication } from './domain'
 import { CommandDefinition, AnyCodec } from '@story-teller/shared'
 import { NextFunction, Request, Response } from 'express'

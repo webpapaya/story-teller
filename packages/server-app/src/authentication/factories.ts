@@ -1,8 +1,8 @@
 import * as Factory from 'factory.ts'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import snakeCase from 'snake-case'
-import { WithinConnection } from '../lib/db'
 import { UserAuthentication } from '../domain'
+import { PoolClient } from 'pg'
 import uuid = require('uuid');
 
 export const DUMMY_TOKEN = '0fb339b556d1a822f68785bff7e67362e235563d'
@@ -29,17 +29,15 @@ export const userAuthenticationFactory = Factory.Sync.makeFactory<UserAuthentica
   passwordChangedAt: null
 })
 
-export const create = async (dependencies: { withinConnection: WithinConnection }, factory: UserAuthentication) => {
-  return dependencies.withinConnection(async ({ client }) => {
-    const keys = Object.keys(factory)
-    // @ts-ignore
-    const values = keys.map((key) => factory[key])
-    const authentication = await client.query(`
-      INSERT INTO user_authentication (${keys.map((v) => snakeCase(v)).join(', ')})
-      VALUES (${values.map((_, i) => `$${i + 1}`).join(', ')})
-      RETURNING *
-    `, values)
+export const create = async (dependencies: { client: PoolClient }, factory: UserAuthentication) => {
+  const keys = Object.keys(factory)
+  // @ts-ignore
+  const values = keys.map((key) => factory[key])
+  const authentication = await dependencies.client.query(`
+    INSERT INTO user_authentication (${keys.map((v) => snakeCase(v)).join(', ')})
+    VALUES (${values.map((_, i) => `$${i + 1}`).join(', ')})
+    RETURNING *
+  `, values)
 
-    return authentication.rows[0] as UserAuthentication
-  })
+  return authentication.rows[0] as UserAuthentication
 }

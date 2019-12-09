@@ -23,14 +23,14 @@ type UpsertProject = (
 ) => Promise<Result<never, Project>>
 
 export const upsertProject: UpsertProject = async (deps, params) => {
-    const result = await deps.client.query(sql`
+  const result = await deps.client.query(sql`
       INSERT INTO project (id, name)
       VALUES (${params.id}, ${params.name})
       ON CONFLICT (id) DO UPDATE
       SET name=EXCLUDED.name
       RETURNING id, name
     `)
-    return Ok(result.rows[0])
+  return Ok(result.rows[0])
 }
 
 type AssignContributorToProject = (
