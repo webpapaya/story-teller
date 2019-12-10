@@ -27,7 +27,7 @@ describe('createProject', () => {
       await createProject({ client }, {
         id: uuid(),
         name: 'A new project',
-        contributorId: (await createUser({ withinConnection, client })).id
+        userId: (await createUser({ withinConnection, client })).id
       })
     })
   }))
@@ -37,7 +37,7 @@ describe('createProject', () => {
       await createProject({ client }, {
         id: uuid(),
         name: 'A new project',
-        contributorId: (await createUser({ withinConnection, client })).id
+        userId: (await createUser({ withinConnection, client })).id
       })
     })
   }))
@@ -46,7 +46,7 @@ describe('createProject', () => {
     assertThat(Project.aggregate.is((await createProject({ client }, {
       id: uuid(),
       name: 'A new project',
-      contributorId: (await createUser({ withinConnection, client })).id
+      userId: (await createUser({ withinConnection, client })).id
     })).get()), equalTo(true))
   }))
 
@@ -54,7 +54,7 @@ describe('createProject', () => {
     const project = {
       id: uuid(),
       name: 'A new project',
-      contributorId: (await createUser({ withinConnection, client })).id
+      userId: (await createUser({ withinConnection, client })).id
     }
 
     await createProject({ client }, project)
@@ -69,27 +69,27 @@ describe('removeContributor', () => {
   describe('when only one contributor present', () => {
     it('returns correct error code', t(async ({ withinConnection, client }) => {
       const projectId = uuid()
-      const contributorId = (await createUser({ withinConnection, client })).id
+      const userId = (await createUser({ withinConnection, client })).id
       const project = await createProject({ client }, {
         id: projectId,
         name: 'A new project',
-        contributorId
+        userId
       })
-      const result = await removeContributorFromProject({ client }, { contributorId, projectId})
+      const result = await removeContributorFromProject({ client }, { userId, projectId})
       assertThat(result.get(), equalTo('AT_LEAST_ONE_CONTRIBUTOR_REQUIRED'))
     }))
 
     it('AND does not delete contributor', t(async ({ withinConnection, client }) => {
       const projectId = uuid()
-      const contributorId = (await createUser({ withinConnection, client })).id
+      const userId = (await createUser({ withinConnection, client })).id
       await createProject({ client }, {
         id: projectId,
         name: 'A new project',
-        contributorId
+        userId
       })
 
       return assertDifference({ withinConnection }, 'contributor', 0, async () => {
-        return removeContributorFromProject({ client }, { contributorId, projectId})
+        return removeContributorFromProject({ client }, { userId, projectId})
       })
     }))
   })
@@ -102,11 +102,11 @@ describe('removeContributor', () => {
     await createProject({ client }, {
       id: projectId,
       name: 'A new project',
-      contributorId: contributor1Id
+      userId: contributor1Id
     })
-    await assignContributorToProject({ client }, { contributorId: contributor2Id, projectId })
+    await assignContributorToProject({ client }, { userId: contributor2Id, projectId })
     return assertDifference({ withinConnection }, 'contributor', -1, async () => {
-      await removeContributorFromProject({ client }, { projectId, contributorId: contributor2Id })
+      await removeContributorFromProject({ client }, { projectId, userId: contributor2Id })
     })
   }))
 })

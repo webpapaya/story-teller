@@ -5,21 +5,21 @@ import { PoolClient } from 'pg'
 
 type CreateProject = (
   deps: { client: PoolClient },
-  params: Project & { contributorId: string }
+  params: { id: string, name: string, userId: string }
 ) => Promise<Result<never, Project>>
 
 export const createProject: CreateProject = async (deps, params) => {
   const project = await upsertProject(deps, params)
   await assignContributorToProject(deps, {
     projectId: params.id,
-    contributorId: params.contributorId
+    userId: params.userId
   })
   return project
 }
 
 type UpsertProject = (
   deps: { client: PoolClient },
-  params: Project
+  params: { id: string, name: string }
 ) => Promise<Result<never, Project>>
 
 export const upsertProject: UpsertProject = async (deps, params) => {
@@ -35,13 +35,13 @@ export const upsertProject: UpsertProject = async (deps, params) => {
 
 type AssignContributorToProject = (
   deps: { client: PoolClient },
-  params: { projectId: string, contributorId: string }
+  params: { projectId: string, userId: string }
 ) => Promise<Result<never, void>>
 
 export const assignContributorToProject: AssignContributorToProject = async (deps, params) => {
   await deps.client.query(sql`
-    INSERT INTO contributor (project_id, contributor_id)
-    VALUES (${params.projectId}, ${params.contributorId})
+    INSERT INTO contributor (project_id, user_id)
+    VALUES (${params.projectId}, ${params.userId})
     ON CONFLICT DO NOTHING
   `)
   return Ok(undefined)
@@ -49,14 +49,14 @@ export const assignContributorToProject: AssignContributorToProject = async (dep
 
 type RemoveContributorToProject = (
   deps: { client: PoolClient },
-  params: { projectId: string, contributorId: string }
+  params: { projectId: string, userId: string }
 ) => Promise<Result<'AT_LEAST_ONE_CONTRIBUTOR_REQUIRED', void>>
 
 export const removeContributorFromProject: RemoveContributorToProject = async (deps, params) => {
   const result = await deps.client.query(sql`
     DELETE FROM contributor
     WHERE project_id=${params.projectId}
-      AND contributor_id=${params.contributorId}
+      AND user_id=${params.userId}
       AND (SELECT count(id)
            FROM contributor
            WHERE project_id=${params.projectId}) >= 2

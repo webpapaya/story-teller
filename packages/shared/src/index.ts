@@ -123,7 +123,7 @@ export namespace Tags {
 export namespace Project {
   export const aggregate = record({
     id: uuid,
-    name: nonEmptyString,
+    name: nonEmptyString
   })
 
   export const actions = {
@@ -134,7 +134,7 @@ export namespace Project {
       validator: record({
         id: uuid,
         name: nonEmptyString,
-        contributorId: uuid
+        userId: uuid
       }),
       response: aggregate
     }),
@@ -144,7 +144,7 @@ export namespace Project {
       model: 'project',
       validator: record({
         projectId: uuid,
-        contributorId: uuid
+        userId: uuid
       }),
       response: aggregate
     }),
