@@ -1,5 +1,5 @@
 import sql from 'sql-template-strings'
-import { Result, Ok } from 'space-lift'
+import { Result, Ok, Err} from 'space-lift'
 import { Project } from '../domain'
 import { PoolClient } from 'pg'
 
@@ -29,7 +29,7 @@ export const upsertProject: UpsertProject = async (deps, params) => {
       ON CONFLICT (id) DO UPDATE
       SET name=EXCLUDED.name
       RETURNING id, name
-    `)
+  `)
   return Ok(result.rows[0])
 }
 
@@ -45,4 +45,25 @@ export const assignContributorToProject: AssignContributorToProject = async (dep
     ON CONFLICT DO NOTHING
   `)
   return Ok(undefined)
+}
+
+type RemoveContributorToProject = (
+  deps: { client: PoolClient },
+  params: { projectId: string, contributorId: string }
+) => Promise<Result<'AT_LEAST_ONE_CONTRIBUTOR_REQUIRED', void>>
+
+export const removeContributorFromProject: RemoveContributorToProject = async (deps, params) => {
+  const result = await deps.client.query(sql`
+    DELETE FROM contributor
+    WHERE project_id=${params.projectId}
+      AND contributor_id=${params.contributorId}
+      AND (SELECT count(id)
+           FROM contributor
+           WHERE project_id=${params.projectId}) >= 2
+    RETURNING *
+  `)
+
+  return result.rowCount === 0
+    ? Err('AT_LEAST_ONE_CONTRIBUTOR_REQUIRED')
+    : Ok(void 0)
 }
