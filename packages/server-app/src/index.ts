@@ -21,6 +21,7 @@ import { Result, Ok, Err } from 'space-lift'
 import { HTTPError, Errors } from './errors'
 import { whereRevision } from './revisions/queries'
 import { createProject, assignContributorToProject } from './project/commands'
+import { queryProject } from './project/queries'
 
 const app = express()
 const port = process.env.API_PORT
@@ -154,6 +155,16 @@ commandViaHTTP(Project.actions.create, {
   useCase: async (deps, params) => {
     return deps.withinConnection(({ client }) => {
       return createProject({ client }, params)
+    })
+  }
+})
+
+commandViaHTTP(Project.queries.whereProjects, {
+  app,
+  dependencies: { withinConnection },
+  useCase: async (deps) => {
+    return deps.withinConnection(({ client }) => {
+      return queryProject({ client }, { userId: deps.auth.user!.id })
     })
   }
 })

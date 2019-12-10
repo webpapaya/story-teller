@@ -35,3 +35,8 @@ export type Tag = {
 
 export type FeatureRevision = typeof Revision.aggregate['O']
 export type Project = typeof DomainProject.aggregate['O']
+export type Contributor = {
+  userId: string,
+  projectId: string,
+  name: string,
+}

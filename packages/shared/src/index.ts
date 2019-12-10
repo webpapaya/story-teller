@@ -149,6 +149,27 @@ export namespace Project {
       response: aggregate
     }),
   }
+
+  export const queries = {
+    whereProjects: buildCommandDefinition({
+      verb: 'get',
+      action: 'fetch',
+      model: 'project',
+      validator: record({}),
+      response: array(aggregate)
+    }),
+    whereContributors: buildCommandDefinition({
+      verb: 'get',
+      action: 'fetch',
+      model: 'project-contributors',
+      validator: record({ projectId: uuid }),
+      response: array(record({
+        userId: uuid,
+        projectId: uuid,
+        name: nonEmptyString,
+      }))
+    })
+  }
 }
 
 export namespace Feature {
