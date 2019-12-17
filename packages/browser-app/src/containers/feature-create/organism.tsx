@@ -21,7 +21,6 @@ const Organism = isForm<any, OrganismPropsType>({
   }),
 }, ({ fields, onSubmit }) => (
   <form onSubmit={onSubmit} className={styles.form}>
-    { console.log(fields) }
     <InputHidden
       name="id"
       defaultValue={uuid()}

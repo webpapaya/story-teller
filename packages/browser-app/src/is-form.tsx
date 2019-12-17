@@ -68,7 +68,6 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
         const errors = validationResult.isOk()
           ? []
           : validationResult.get()
-        console.log(errors)
         return ({
           ...state,
           errors,
@@ -79,7 +78,6 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
 
     onFieldBlur = (evt: FormEvent) => {
       const name = evt.target.name;
-      console.log('blur', name)
       const touchedFields = Array.from(new Set([...this.state.touchedFields, name as keyof A]))
       this.setState({ touchedFields })
     }
@@ -105,6 +103,7 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
                   ...options.defaultValues,
                   ...this.props.defaultValues
                 },
+                touchedFields: [],
                 submitCount: this.state.submitCount + 1
               })
             }
@@ -121,7 +120,7 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
         }
         return result
       }, {} as { [key in keyof A['O']]: string })
-      console.log(this.state, errors)
+
 
       const fields = objectKeys(options.schema.toJSON().properties).reduce((result, key: keyof A['O']) => {
         result[key] = {
