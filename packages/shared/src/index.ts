@@ -7,7 +7,8 @@ import {
   uuid,
   color,
   nonEmptyString,
-  localDateTime
+  localDateTime,
+  union
 } from './lib'
 import * as _v from './lib/index'
 

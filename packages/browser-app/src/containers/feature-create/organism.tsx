@@ -19,7 +19,7 @@ const Organism = isForm<any, OrganismPropsType>({
     title: v.string,
     description: v.string,
   }),
-}, ({ values, onValueChange, onSubmit }) => (
+}, ({ values, errors, onValueChange, onSubmit }) => (
   <form onSubmit={onSubmit} className={styles.form}>
     <InputHidden
       name="id"
@@ -30,12 +30,14 @@ const Organism = isForm<any, OrganismPropsType>({
       label="Title"
       name="title"
       value={values.title}
+      error={errors.title}
       onChange={onValueChange}
     />
     <InputText
       label="Description"
       name="description"
       value={values.description}
+      error={errors.description}
       onChange={onValueChange}
     />
     <Button type="submit">Save</Button>

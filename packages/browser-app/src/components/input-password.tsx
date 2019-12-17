@@ -5,10 +5,11 @@ type InputProps = {
   label: string,
   name: string,
   value: any,
+  error?: string,
   onChange: (evt: ChangeEvent<HTMLInputElement>) => unknown
 }
 
-export const InputPassword = ({ name, value, onChange, label }: InputProps) => (
+export const InputPassword = ({ name, error, value, onChange, label }: InputProps) => (
   <>
     <label className={styles.label} htmlFor={name}>
       { label }
@@ -20,5 +21,6 @@ export const InputPassword = ({ name, value, onChange, label }: InputProps) => (
       value={value}
       onChange={onChange}
     />
+    {error && (<span className={styles.error}>{error}</span>)}
   </>
 )

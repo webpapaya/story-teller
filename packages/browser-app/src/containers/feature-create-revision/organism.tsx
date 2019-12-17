@@ -10,13 +10,13 @@ import { InputHidden } from '../../components/input-hidden';
 
 const Organism = isForm<any, any>({
   schema: v.record({
-    id: v.string,
-    title: v.string,
-    description: v.string,
-    originalId: v.string,
-    reason: v.string,
+    id: v.uuid,
+    title: v.nonEmptyString,
+    description: v.nonEmptyString,
+    originalId: v.uuid,
+    reason: v.nonEmptyString,
   })
-}, ({ onSubmit, onValueChange, values, id }) => {
+}, ({ onSubmit, onValueChange, values, errors, id }) => {
   return (
     <form onSubmit={onSubmit} className={styles.form}>
       <InputHidden
@@ -33,18 +33,21 @@ const Organism = isForm<any, any>({
         label="Title"
         name="title"
         value={values.title}
+        error={errors.title}
         onChange={onValueChange}
       />
       <InputText
         label="Description"
         name="description"
         value={values.description}
+        error={errors.description}
         onChange={onValueChange}
       />
       <InputText
         label="Reason"
         name="reason"
         value={values.reason}
+        error={errors.reason}
         onChange={onValueChange}
       />
       <Button type="submit">Save</Button>

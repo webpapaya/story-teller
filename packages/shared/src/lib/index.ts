@@ -14,6 +14,9 @@ export const clampedString = (minLength: number, maxLength: number) => new Valid
 export const nonEmptyString = clampedString(1, Number.POSITIVE_INFINITY)
 export const color = matchesRegex('color', /^#[0-9A-F]{6}$/i)
 export const uuid = matchesRegex('uuid', /([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}/i)
+
+
+
 export const date = new Codec<string, LocalDate, unknown>(
   'date',
   (value) => value instanceof LocalDate,
@@ -62,3 +65,5 @@ export {
   boolean,
   matchesRegex
 } from './primitives'
+
+

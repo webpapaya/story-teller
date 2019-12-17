@@ -7,9 +7,12 @@ interface ExternalProps<A> {
     onSubmit?: (params: A) => Promise<void> | void
 }
 
+type ValidationError = { message: string, context: { path: string }}
+
 // Props the HOC adds to the wrapped component
-export interface InjectedProps<A> {
+export interface InjectedProps<A extends object> {
     values: Partial<A>,
+    errors: {[key in keyof A]?: string },
     onValueChange: (evt: FormEvent) => void,
     onSubmit: (evt: React.FormEvent) => void
 }
@@ -31,12 +34,17 @@ type FormEvent = {
 const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A>,
   Component: React.ComponentType<OriginalProps & InjectedProps<A['O']>>,
 ) => {
-  class HOC extends React.Component<OriginalProps & ExternalProps<A>, {values: Partial<A>, submitCount: number}> {
+  class HOC extends React.Component<OriginalProps & ExternalProps<A>, {
+    values: Partial<A>,
+    submitCount: number,
+    errors: ValidationError[]
+}> {
     constructor(props: OriginalProps & ExternalProps<A>) {
       super(props)
       this.state = {
         submitCount: 0,
         values: { ...options.defaultValues, ...props.defaultValues },
+        errors: []
       }
     }
 
@@ -47,10 +55,12 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
 
       this.setState((state) => {
         const values = { ...state.values, [name]: value }
-        const isPropValid = options.schema.decode(values).isOk()
+        const validationResult = options.schema.decode(values)
+        const errors = validationResult.isOk()
+          ? []
+          : validationResult.get()
 
-        if (!isPropValid) { return state }
-        return ({ ...state, values: { ...state.values, [name]: value } })
+        return ({ ...state, errors, values: { ...state.values, [name]: value } })
       })
     }
 
@@ -82,6 +92,11 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
           key={this.state.submitCount}
           onSubmit={this.onSubmit}
           values={this.state.values}
+          errors={this.state.errors.reduce((result, error) => {
+            // @ts-ignore
+            result[error.context.path.replace('$.', '')] = error.message
+            return result
+          }, {})}
           onValueChange={this.onValueChange}
         />
       )
