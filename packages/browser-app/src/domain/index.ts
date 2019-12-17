@@ -7,6 +7,7 @@ import featureReducer from './feature/reducer'
 import revisionReducer from './revision/reducer'
 import tagReducer from './tags/reducer'
 import createHTTPInstance from '../utils/create-http-connection'
+import { cache } from './cache'
 
 export const rootReducer = combineReducers({
   authentication: authenticationReducer,
@@ -17,7 +18,7 @@ export const rootReducer = combineReducers({
 
 export const store = createStore(rootReducer, composeWithDevTools(
   applyMiddleware(
-    createMemoizeMiddleware({ ttl: 999999 }),
+    createMemoizeMiddleware({ ttl: 999999, cache }),
     ReduxThunk.withExtraArgument({
       http: createHTTPInstance({ baseURL: process.env.REACT_APP_SERVER_URL as string })
     }))

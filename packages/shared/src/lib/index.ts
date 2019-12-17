@@ -5,17 +5,20 @@ import { matchesRegex } from './primitives'
 export const clampedString = (minLength: number, maxLength: number) => new Validation<string>(
   `clampedString(min: ${minLength}, max: ${maxLength})`,
   (input, context) => {
+    const message =
+      maxLength === Number.POSITIVE_INFINITY
+        ? `needs to be longer than ${minLength} characters`
+        : `needs to be between ${minLength} and ${maxLength} characters`
+
     return typeof input === 'string' && input.length >= minLength && input.length <= maxLength
       ? Ok(input)
-      : Err([{ message: `can't be longer than ${maxLength} chars`, context }])
+      : Err([{ message, context }])
   }
 )
 
 export const nonEmptyString = clampedString(1, Number.POSITIVE_INFINITY)
 export const color = matchesRegex('color', /^#[0-9A-F]{6}$/i)
 export const uuid = matchesRegex('uuid', /([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}/i)
-
-
 
 export const date = new Codec<string, LocalDate, unknown>(
   'date',

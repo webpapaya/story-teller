@@ -2,7 +2,8 @@
 declare module 'redux-memoize' {
   import { Middleware } from 'redux'
   type Options = {
-    ttl: number
+    ttl: number,
+    cache?: any
   }
 
   export default createMemoizeMiddleware = (options: Options) => Middleware
