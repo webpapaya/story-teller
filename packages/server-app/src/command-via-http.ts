@@ -85,7 +85,7 @@ export const commandViaHTTP: CommandViaHTTP = (definition, { app, useCase, middl
       : dependencies
 
     const command = await executeCommand(definition, {
-      dependencies: { ...deps, res },
+      dependencies: { ...deps, res, auth: req.auth },
       auth: req.auth,
       // @ts-ignore
       useCase

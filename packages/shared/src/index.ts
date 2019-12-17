@@ -135,7 +135,6 @@ export namespace Project {
       validator: record({
         id: uuid,
         name: nonEmptyString,
-        userId: uuid
       }),
       response: aggregate
     }),

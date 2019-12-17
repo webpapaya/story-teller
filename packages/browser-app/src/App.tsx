@@ -11,6 +11,7 @@ import FeatureList from './containers/feature-list'
 import FeatureUpdate from './containers/feature-create-revision'
 import FeatureRevisionList from './containers/feature-revision-list'
 import FeatureSetTags from './containers/feature-set-tags'
+import ProjectCreate from './containers/project-create'
 
 import ProtectedRoute from './containers/protected-route';
 import Navigation from './containers/navigation';
@@ -54,7 +55,12 @@ const App = () => (
               <FeatureRevisionList id={props.match.params.id} />
             </>
           )} />
-          <ProtectedRoute path='/' component={FeatureList} />
+          <ProtectedRoute path='/' render={({history}) => (
+            <>
+              <FeatureList />
+              <ProjectCreate history={history}/>
+            </>
+          )} />
         </Switch>
     </Provider>
   </BrowserRouter>

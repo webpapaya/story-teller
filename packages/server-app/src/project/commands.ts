@@ -30,6 +30,7 @@ export const upsertProject: UpsertProject = async (deps, params) => {
       SET name=EXCLUDED.name
       RETURNING id, name
   `)
+
   return Ok(result.rows[0])
 }
 

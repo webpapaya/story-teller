@@ -115,52 +115,60 @@ commandViaHTTP(Authentication.actions.signOut, {
 
 commandViaHTTP(Feature.actions.create, {
   app,
+  middlewares: [isAuthenticated],
   dependencies: { withinConnection },
   useCase: createFeature
 })
 
 commandViaHTTP(Feature.actions.update, {
   app,
+  middlewares: [isAuthenticated],
   dependencies: { withinConnection },
   useCase: updateFeature
 })
 
 commandViaHTTP(Feature.actions.setTags, {
   app,
+  middlewares: [isAuthenticated],
   dependencies: { withinConnection },
   useCase: setFeatureTags
 })
 
 commandViaHTTP(Tags.queries.where, {
   app,
+  middlewares: [isAuthenticated],
   dependencies: { withinConnection },
   useCase: whereTags
 })
 
 commandViaHTTP(Feature.queries.where, {
   app,
+  middlewares: [isAuthenticated],
   dependencies: { withinConnection },
   useCase: whereFeature
 })
 
 commandViaHTTP(Revision.queries.where, {
   app,
+  middlewares: [isAuthenticated],
   dependencies: { withinConnection },
   useCase: whereRevision
 })
 
 commandViaHTTP(Project.actions.create, {
   app,
+  middlewares: [isAuthenticated],
   dependencies: { withinConnection },
   useCase: async (deps, params) => {
     return deps.withinConnection(({ client }) => {
-      return createProject({ client }, params)
+      return createProject({ client }, {...params, userId: deps.auth!.user!.id})
     })
   }
 })
 
 commandViaHTTP(Project.queries.whereProjects, {
   app,
+  middlewares: [isAuthenticated],
   dependencies: { withinConnection },
   useCase: async (deps) => {
     return deps.withinConnection(({ client }) => {
@@ -171,6 +179,7 @@ commandViaHTTP(Project.queries.whereProjects, {
 
 commandViaHTTP(Project.actions.assignContributor, {
   app,
+  middlewares: [isAuthenticated],
   dependencies: { withinConnection },
   useCase: async (deps, params) => {
     return deps.withinConnection(({ client }) => {
