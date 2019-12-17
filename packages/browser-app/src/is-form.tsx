@@ -68,11 +68,8 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
         const errors = validationResult.isOk()
           ? []
           : validationResult.get()
-        return ({
-          ...state,
-          errors,
-          values: { ...state.values, [name]: value }
-        })
+
+        return ({ ...state, errors, values })
       })
     }
 
@@ -92,9 +89,7 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
       evt.preventDefault()
       options.schema.decode(this.state.values)
         .fold(
-          (test)=>{
-            console.log(test)
-          },
+          (errors) => this.setState({ errors }),
           async (values) => {
             if (this.props.onSubmit) {
               await this.props.onSubmit(values)
@@ -110,9 +105,8 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
           })
     }
 
-    render() {
-      // const properties = options.schema.toJSON().properties as keyof A['o']
-      const errors = this.state.errors.reduce((result, error) => {
+    get errors() {
+      return this.state.errors.reduce((result, error) => {
         const name = error.context.path.replace('$.', '')
         if (this.state.touchedFields.includes(name)) {
           // @ts-ignore
@@ -120,24 +114,27 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
         }
         return result
       }, {} as { [key in keyof A['O']]: string })
+    }
 
-
-      const fields = objectKeys(options.schema.toJSON().properties).reduce((result, key: keyof A['O']) => {
+    get fields() {
+      return objectKeys(options.schema.toJSON().properties).reduce((result, key: keyof A['O']) => {
         result[key] = {
           value: this.state.values[key],
-          error: errors[key],
+          error: this.errors[key],
           onBlur: this.onFieldBlur,
           onFocus: this.onFieldFocus,
           onChange: this.onValueChange
         }
         return result
       }, {} as { [key in keyof A['O']]: any })
+    }
 
+    render() {
       return (
         <Component
           {...this.props}
           key={this.state.submitCount}
-          fields={fields}
+          fields={this.fields}
           onSubmit={this.onSubmit}
         />
       )
