@@ -15,30 +15,27 @@ const Organism = isForm<any, OrganismPropsType>({
     description: ''
   },
   schema: v.record({
-    id: v.string,
-    title: v.string,
-    description: v.string,
+    id: v.uuid,
+    title: v.nonEmptyString,
+    description: v.nonEmptyString,
   }),
-}, ({ values, errors, onValueChange, onSubmit }) => (
+}, ({ fields, onSubmit }) => (
   <form onSubmit={onSubmit} className={styles.form}>
+    { console.log(fields) }
     <InputHidden
       name="id"
       defaultValue={uuid()}
-      onChange={onValueChange}
+      {...fields.id}
     />
     <InputText
       label="Title"
       name="title"
-      value={values.title}
-      error={errors.title}
-      onChange={onValueChange}
+      {...fields.title}
     />
     <InputText
       label="Description"
       name="description"
-      value={values.description}
-      error={errors.description}
-      onChange={onValueChange}
+      {...fields.description}
     />
     <Button type="submit">Save</Button>
   </form>

@@ -12,14 +12,12 @@ const Organism = isForm({
   schema: v.record({
     userIdentifier: v.string,
   }),
-}, ({ values, onValueChange, errors, onSubmit }) => (
+}, ({ fields, onSubmit }) => (
   <form onSubmit={onSubmit}>
     <InputText
       label="E-Mail"
       name="userIdentifier"
-      error={errors.userIdentifier}
-      value={values.userIdentifier}
-      onChange={onValueChange}
+      {...fields.userIdentifier}
     />
     <Button block marginBottom>Submit</Button>
     <Link to="/sign-in" variant="link" block>

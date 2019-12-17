@@ -23,13 +23,13 @@ const Organism = isForm<any, OrganismPropsType>({
   defaultValues: {
     tags: []
   }
-}, ({ feature, tags, onValueChange, onSubmit }) => {
+}, ({ feature, tags, fields, onSubmit }) => {
   return (
     <form onSubmit={onSubmit}>
       <InputHidden
         defaultValue={feature.originalId}
         name="featureId"
-        onChange={onValueChange}
+        {...fields.featureId}
       />
       <InputMultiSelect
         label="Tags"
@@ -40,7 +40,7 @@ const Organism = isForm<any, OrganismPropsType>({
           name: label,
           color: '#001100'
         }, `"${label}" does not exist and will be created`)}
-        onChange={onValueChange}
+        {...fields.tags}
         options={tags.map((option) => tagToOption(option))}
       />
       <Button type="submit">Set Tags</Button>

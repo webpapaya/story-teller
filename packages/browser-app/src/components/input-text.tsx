@@ -8,6 +8,8 @@ type InputProps = {
   value?: any,
   onChange?: (evt: React.ChangeEvent<HTMLInputElement>) => unknown,
   onKeyDown?: (evt: React.KeyboardEvent<HTMLInputElement>) => unknown
+  onFocus?: (evt: React.ChangeEvent<HTMLInputElement>) => unknown,
+  onBlur?: (evt: React.ChangeEvent<HTMLInputElement>) => unknown
   focus?: boolean,
   error?: string,
   variant?: 'form' | 'title',
@@ -20,7 +22,9 @@ export const InputText = React.forwardRef<HTMLInputElement, InputProps>(({
   label ,
   onKeyDown,
   error,
-  variant='form'
+  variant='form',
+  onFocus,
+  onBlur
 }, ref) => {
   switch(variant) {
     case 'title': return (
@@ -36,6 +40,8 @@ export const InputText = React.forwardRef<HTMLInputElement, InputProps>(({
           onChange={onChange}
           onKeyDown={onKeyDown}
           placeholder={label}
+          onFocus={onFocus}
+          onBlur={onBlur}
         />
     )
     case 'form': return (
@@ -55,6 +61,8 @@ export const InputText = React.forwardRef<HTMLInputElement, InputProps>(({
           value={value}
           onChange={onChange}
           onKeyDown={onKeyDown}
+          onFocus={onFocus}
+          onBlur={onBlur}
         />
         {error && (<span className={styles.error}>{error}</span>)}
       </>

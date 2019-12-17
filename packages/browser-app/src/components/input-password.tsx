@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, FormEvent } from 'react';
 import styles from './input.module.css'
 
 type InputProps = {
@@ -6,10 +6,12 @@ type InputProps = {
   name: string,
   value: any,
   error?: string,
-  onChange: (evt: ChangeEvent<HTMLInputElement>) => unknown
+  onChange: (evt: ChangeEvent<HTMLInputElement>) => unknown,
+  onFocus?: (evt: ChangeEvent<HTMLInputElement>) => unknown,
+  onBlur?: (evt: ChangeEvent<HTMLInputElement>) => unknown
 }
 
-export const InputPassword = ({ name, error, value, onChange, label }: InputProps) => (
+export const InputPassword = ({ name, error, value, onChange, label, onBlur, onFocus }: InputProps) => (
   <>
     <label className={styles.label} htmlFor={name}>
       { label }
@@ -20,6 +22,8 @@ export const InputPassword = ({ name, error, value, onChange, label }: InputProp
       name={name}
       value={value}
       onChange={onChange}
+      onFocus={onFocus}
+      onBlur={onBlur}
     />
     {error && (<span className={styles.error}>{error}</span>)}
   </>

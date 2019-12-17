@@ -14,21 +14,17 @@ const Organism = isForm({
     password: v.string,
     passwordConfirmation: v.string,
   }),
-}, ({ values, errors, onValueChange, onSubmit }) => (
+}, ({ fields, onSubmit }) => (
   <form onSubmit={onSubmit}>
     <InputPassword
       label="New password"
       name="password"
-      value={values.password}
-      error={errors.password}
-      onChange={onValueChange}
+      {...fields.password}
     />
     <InputPassword
       label="Password confirmation"
       name="passwordConfirmation"
-      value={values.passwordConfirmation}
-      error={errors.passwordConfirmation}
-      onChange={onValueChange}
+      {...fields.passwordConfirmation}
     />
     <Button block marginBottom>Submit</Button>
     <Link to="/" variant="link" block>

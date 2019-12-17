@@ -16,39 +16,33 @@ const Organism = isForm<any, any>({
     originalId: v.uuid,
     reason: v.nonEmptyString,
   })
-}, ({ onSubmit, onValueChange, values, errors, id }) => {
+}, ({ onSubmit, fields, id }) => {
   return (
     <form onSubmit={onSubmit} className={styles.form}>
       <InputHidden
         name="id"
         defaultValue={uuid()}
-        onChange={onValueChange}
+        {...fields.id}
       />
       <InputHidden
         name="originalId"
         defaultValue={id}
-        onChange={onValueChange}
+        {...fields.originalId}
       />
       <InputText
         label="Title"
         name="title"
-        value={values.title}
-        error={errors.title}
-        onChange={onValueChange}
+        {...fields.title}
       />
       <InputText
         label="Description"
         name="description"
-        value={values.description}
-        error={errors.description}
-        onChange={onValueChange}
+        {...fields.description}
       />
       <InputText
         label="Reason"
         name="reason"
-        value={values.reason}
-        error={errors.reason}
-        onChange={onValueChange}
+        {...fields.reason}
       />
       <Button type="submit">Save</Button>
     </form>

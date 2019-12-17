@@ -16,8 +16,7 @@ const DummyForm = isForm({
       data-testid="test1"
       type="text"
       name="test1"
-      value={props.values.test1}
-      onChange={props.onValueChange}
+      {...props.fields.test1}
     />
 )})
 

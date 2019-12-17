@@ -15,21 +15,17 @@ const SignIn = isForm({
     userIdentifier: v.string,
     password: v.string,
   }),
-}, ({ values, errors, onValueChange, onSubmit }) => (
+}, ({ fields, onSubmit }) => (
   <form onSubmit={onSubmit}>
     <InputText
       label="E-Mail/Username"
       name="userIdentifier"
-      value={values.userIdentifier}
-      error={errors.userIdentifier}
-      onChange={onValueChange}
+      {...fields.userIdentifier}
     />
     <InputPassword
       label="Password"
       name="password"
-      value={values.password}
-      error={errors.password}
-      onChange={onValueChange}
+      {...fields.password}
     />
     <Button block marginBottom>Sign in</Button>
     <Link to="/sign-up" variant="link" block>
