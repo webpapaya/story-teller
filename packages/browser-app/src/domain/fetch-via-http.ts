@@ -9,6 +9,14 @@ type FetchViaHTTP = <
   A extends CommandDefinition<D, F>
 >(
   definition: A
+) => ActionCreator<D['O'], void, AnyAction>
+
+type FetchMemoizedViaHTTP = <
+  D extends AnyCodec,
+  F extends AnyCodec,
+  A extends CommandDefinition<D, F>
+>(
+  definition: A
 ) => ActionCreator<D['O'], void, AnyAction> & {
   unmemoized: ActionCreator<D['O'], void, AnyAction>
 }
@@ -19,7 +27,7 @@ const buildRoute = (values: Array<string | undefined>) =>
 const buildType = (values: string[]) =>
   buildRoute(values).replace(/-/g, '_').toUpperCase()
 
-const fetchViaHTTP: FetchViaHTTP = (definition) => memoize((body) => async (dispatch, _, { http }) => {
+const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _, { http }) => {
   const route = buildRoute([
     definition.model,
     definition.action
@@ -58,6 +66,8 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => memoize((body) => async (disp
     })
     return body
   }
-})
+}
+
+export const fetchMemoizedViaHTTP: FetchMemoizedViaHTTP = (definition) => memoize(fetchViaHTTP(definition))
 
 export default fetchViaHTTP

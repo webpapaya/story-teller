@@ -1,4 +1,4 @@
 import { Revision } from '@story-teller/shared'
-import fetchViaHTTP from '../fetch-via-http'
+import fetchViaHTTP, { fetchMemoizedViaHTTP } from '../fetch-via-http'
 
-export const whereRevisions = fetchViaHTTP(Revision.queries.where)
+export const whereRevisions = fetchMemoizedViaHTTP(Revision.queries.where)

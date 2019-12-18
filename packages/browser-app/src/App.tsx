@@ -12,11 +12,11 @@ import FeatureUpdate from './containers/feature-create-revision'
 import FeatureRevisionList from './containers/feature-revision-list'
 import FeatureSetTags from './containers/feature-set-tags'
 import ProjectCreate from './containers/project-create'
+import ProjectList from './containers/project-list'
 
 import ProtectedRoute from './containers/protected-route';
 import Navigation from './containers/navigation';
 import CenteredPanel from './components/centered-panel';
-
 
 const App = () => (
   <BrowserRouter>
@@ -59,6 +59,7 @@ const App = () => (
             <>
               <FeatureList />
               <ProjectCreate history={history}/>
+              <ProjectList />
             </>
           )} />
         </Switch>

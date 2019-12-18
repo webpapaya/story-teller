@@ -22,7 +22,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = 
     ])
   },
   onSubmit: async (values) => {
-    await dispatch(setTags.unmemoized(values))
+    await dispatch(setTags(values))
   }
 })
 
