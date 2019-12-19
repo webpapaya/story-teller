@@ -2,7 +2,7 @@
 import { assertThat, equalTo } from 'hamjest'
 import { t, assertDifference } from '../spec-helpers'
 import uuid from 'uuid'
-import { createProject, removeContributorFromProject, assignContributorToProject, addFeatureToProject } from './commands'
+import { createProject, removeContributorFromProject, assignContributorToProject, addFeatureToProject, removeFeatureFromProject } from './commands'
 import { Project } from '@story-teller/shared'
 import { register } from '../authentication/commands'
 import { findUserByIdentifier } from '../authentication/queries'
@@ -125,7 +125,7 @@ describe('addFeature', () => {
       description: 'A feature description'
     })
 
-    assertDifference({ withinConnection }, 'project_feature', 2, async () => {
+    await assertDifference({ withinConnection }, 'project_feature', 1, async () => {
       await addFeatureToProject({ client }, {
         projectId: project.get().id,
         featureId: feature.get().id
@@ -145,13 +145,40 @@ describe('addFeature', () => {
       description: 'A feature description'
     })
 
-    assertDifference({ withinConnection }, 'project_feature', 2, async () => {
+    await assertDifference({ withinConnection }, 'project_feature', 1, async () => {
       await addFeatureToProject({ client }, {
         projectId: project.get().id,
         featureId: feature.get().id
       })
 
       await addFeatureToProject({ client }, {
+        projectId: project.get().id,
+        featureId: feature.get().id
+      })
+    })
+  }))
+})
+
+describe('removeFeatureFromProject', () => {
+  it('removes feature from project',  t(async ({ withinConnection, client }) => {
+    const project = await createProject({ client }, {
+      id: uuid(),
+      name: 'A new project',
+      userId: (await createUser({ withinConnection, client })).id
+    })
+    const feature = await createFeature({ withinConnection }, {
+      id: uuid(),
+      title: 'A feature',
+      description: 'A feature description'
+    })
+
+    await addFeatureToProject({ client }, {
+      projectId: project.get().id,
+      featureId: feature.get().id
+    })
+
+    await assertDifference({ withinConnection }, 'project_feature', -1, async () => {
+      await removeFeatureFromProject({ client }, {
         projectId: project.get().id,
         featureId: feature.get().id
       })
