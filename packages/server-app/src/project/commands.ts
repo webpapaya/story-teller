@@ -68,3 +68,21 @@ export const removeContributorFromProject: RemoveContributorToProject = async (d
     ? Err('AT_LEAST_ONE_CONTRIBUTOR_REQUIRED')
     : Ok(void 0)
 }
+
+type AddFeatureToProject = (
+  deps: { client: PoolClient },
+  params: { projectId: string, featureId: string }
+) => Promise<Result<'AT_LEAST_ONE_CONTRIBUTOR_REQUIRED', void>>
+
+export const addFeatureToProject: AddFeatureToProject = async (deps, params) => {
+  const result = await deps.client.query(sql`
+    INSERT INTO contributor (project_id, feature_id)
+    VALUES (${params.projectId}, ${params.featureId})
+    ON CONFLICT DO NOTHING
+  `)
+
+  return result.rowCount === 0
+    ? Err('AT_LEAST_ONE_CONTRIBUTOR_REQUIRED')
+    : Ok(void 0)
+}
+
