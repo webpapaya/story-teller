@@ -12,9 +12,9 @@
     "db:migrate:down": "npm run env -- db-migrate down",
     "db:migrate:redo": "npm run db:migrate:down && npm run db:migrate:up",
     "db:migrate:dump": "npm run env -- schemats generate -c postgres://compup:password@localhost:15432/compup_development -s public -o osm.ts -C",
-    "start": "npm run infrastructure:up && npm run env -- ts-node-dev --inspect --notify=0 --respawn ./src/index.ts",
+    "start": "npm run infrastructure:up && npm run env -- ts-node-dev --notify=0 --respawn ./src/index.ts",
     "lint": "eslint --ext js,ts --ignore-path .gitignore .",
-    "test": "ENV_FILE=.env.test npm run env -- mocha -r ts-node/register --timeout 500000 --watch-extensions ts $(find src -name '*.spec.ts')",
+    "test": "ENV_FILE=.env.test npm run env -- mocha -r ts-node/register --exit --watch-extensions ts $(find src -name '*.spec.ts')",
     "tsc": "tsc"
   },
   "pre-commit": [

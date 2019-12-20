@@ -6,7 +6,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "lint": "eslint --ext js,ts --ignore-path .gitignore .",
-    "test": "mocha -r ts-node/register --timeout 500000 --inspect-brk --watch-extensions ts $(find src -name '*.spec.ts')",
+    "test": "mocha -r ts-node/register --watch-extensions ts $(find src -name '*.spec.ts')",
     "start": "npm run build -- --watch",
     "build": "tsc"
   },

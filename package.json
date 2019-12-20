@@ -4,6 +4,7 @@
   "scripts": {
     "lint": "lerna run lint -- --fix",
     "start": "lerna run start --parallel",
+    "test": "lerna run --stream --concurrency=1 test",
     "build": "lerna run build --parallel"
   },
   "devDependencies": {
