@@ -5,9 +5,9 @@ import uuid from 'uuid'
 import { createFeature, updateFeature, setFeatureTags, ensureTags } from './commands'
 
 describe('createFeature', () => {
-  it('creates a new record', t(async ({ withinConnection }) => {
+  it('creates a new record', t(async ({ withinConnection, client }) => {
     return assertDifference({ withinConnection }, 'feature', 1, async () => {
-      await createFeature({ withinConnection }, {
+      await createFeature({ client }, {
         id: uuid(),
         title: 'A new feature',
         description: 'A feature description'
@@ -17,14 +17,14 @@ describe('createFeature', () => {
 })
 
 describe('createFeatureRevision', () => {
-  it('creates a new record', t(async ({ withinConnection }) => {
+  it('creates a new record', t(async ({ client }) => {
     const feature = {
       id: uuid(),
       title: 'A new feature',
       description: 'A feature description'
     }
 
-    await createFeature({ withinConnection }, feature)
+    await createFeature({ client }, feature)
 
     const updatedFeature = {
       ...feature,
@@ -35,21 +35,21 @@ describe('createFeatureRevision', () => {
       reason: 'Fixed typo'
     }
 
-    const result = await updateFeature({ withinConnection }, updatedFeature)
+    const result = await updateFeature({ client }, updatedFeature)
     assertThat(result.get(), hasProperties(updatedFeature))
   }))
 })
 
 describe('setFeatureTags', () => {
-  it('adds tagto feature', t(async ({ withinConnection }) => {
-    const feature = (await createFeature({ withinConnection }, {
+  it('adds tagto feature', t(async ({ withinConnection, client }) => {
+    const feature = (await createFeature({ client }, {
       id: uuid(),
       title: 'A new feature',
       description: 'A feature description'
     })).get()
 
     await assertDifference({ withinConnection }, 'tag_for_feature', 1, async () => {
-      await setFeatureTags({ withinConnection }, {
+      await setFeatureTags({ client }, {
         featureId: feature.id,
         tags: [{
           id: uuid(),
@@ -60,14 +60,14 @@ describe('setFeatureTags', () => {
     })
   }))
 
-  it('removes tag when not provided', t(async ({ withinConnection }) => {
-    const feature = (await createFeature({ withinConnection }, {
+  it('removes tag when not provided', t(async ({ withinConnection, client }) => {
+    const feature = (await createFeature({ client }, {
       id: uuid(),
       title: 'A new feature',
       description: 'A feature description'
     })).get()
 
-    await setFeatureTags({ withinConnection }, {
+    await setFeatureTags({ client }, {
       featureId: feature.id,
       tags: [{
         id: uuid(),
@@ -77,7 +77,7 @@ describe('setFeatureTags', () => {
     })
 
     await assertDifference({ withinConnection }, 'tag_for_feature', -1, async () => {
-      await setFeatureTags({ withinConnection }, {
+      await setFeatureTags({ client }, {
         featureId: feature.id,
         tags: []
       })

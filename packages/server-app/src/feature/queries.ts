@@ -1,15 +1,15 @@
 import sql from 'sql-template-tag'
-import { Result, Ok } from 'space-lift'
+import { Result, Ok, Err } from 'space-lift'
 import { WithinConnection } from '../lib/db'
-import { Feature, Tag } from '../domain'
+import { Tags, Feature } from '@story-teller/shared'
+import { PoolClient } from 'pg'
 
 type WhereFeature = (
-  deps: { withinConnection: WithinConnection },
-) => Promise<Result<never, Feature[]>>
+  deps: { client: PoolClient },
+) => Promise<Result<'DOMAIN_ERROR', typeof Feature.aggregate['O'][]>>
 
 export const whereFeature: WhereFeature = async (deps) => {
-  return deps.withinConnection(async ({ client }) => {
-    const result = await client.query(sql`
+    const result = await deps.client.query(sql`
       SELECT DISTINCT ON (original_id) *, tags
       FROM feature f, LATERAL (
         SELECT ARRAY (
@@ -21,22 +21,27 @@ export const whereFeature: WhereFeature = async (deps) => {
       ) t
       ORDER BY original_id, version DESC;
     `)
-    return Ok(result.rows as Feature[])
-  })
+
+    if (Feature.aggregate.isCollection(result.rows)) {
+      return Ok(result.rows)
+    }
+    return Err('DOMAIN_ERROR' as const)
+
 }
 
 type WhereTags = (
-  deps: { withinConnection: WithinConnection },
-) => Promise<Result<never, Tag[]>>
+  deps: { client: PoolClient },
+) => Promise<Result<'DOMAIN_ERROR', typeof Tags.aggregate['O'][]>>
 
-export const whereTags: WhereTags = async ({ withinConnection }) => {
-  return withinConnection(async ({ client }) => {
+export const whereTags: WhereTags = async ({ client }) => {
     const result = await client.query(sql`
       SELECT *
       FROM tag
       ORDER BY name ASC;
     `)
 
-    return Ok(result.rows as Tag[])
-  })
+    if(Tags.aggregate.isCollection(result.rows)) {
+      return Ok(result.rows)
+    }
+    return Err('DOMAIN_ERROR' as const)
 }

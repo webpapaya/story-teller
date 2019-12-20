@@ -62,7 +62,7 @@ export const register: Register = async (dependencies, params) => {
     return Ok(void 0)
   } catch (e) {
     if (e.code === '23505') {
-      return Err<RegisterErrors>('User Identifier already taken')
+      return Err('User Identifier already taken' as const)
     }
     throw e
   }
@@ -79,7 +79,7 @@ export const confirm: Confirm = async (dependencies, params) => {
   const record = result.get()
 
   if (!(await comparePassword(params.token, record.confirmationToken))) {
-    return Err<RepositoryError>('NOT_FOUND')
+    return Err('NOT_FOUND' as const)
   }
 
   await dependencies.client.query(sql`
@@ -128,11 +128,11 @@ type ResetPasswordByToken = (
 
 export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, params) => {
   const result = await findUserByIdentifier(dependencies, params)
-  if (!result.isOk()) { return Err<TokenErrors>('TOKEN_NOT_FOUND') }
+  if (!result.isOk()) { return Err('TOKEN_NOT_FOUND' as const) }
   const record = result.get()
 
   if (!await comparePassword(params.token, record.passwordResetToken)) {
-    return Err<TokenErrors>('TOKEN_INVALID')
+    return Err('TOKEN_INVALID' as const)
   }
 
   const isTokenToOld = record.passwordResetCreatedAt && LocalDateTime.from(nativeJs(new Date()))
@@ -147,7 +147,7 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
             password_reset_created_at=null
         WHERE id=${record.id}
       `)
-    return Err<TokenErrors>('TOKEN_EXPIRED')
+    return Err('TOKEN_EXPIRED' as const)
   }
 
   const hashedPassword = await hashPassword(params.password)

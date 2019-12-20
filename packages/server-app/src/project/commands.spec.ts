@@ -119,7 +119,7 @@ describe('addFeature', () => {
       name: 'A new project',
       userId: (await createUser({ withinConnection, client })).id
     })
-    const feature = await createFeature({ withinConnection }, {
+    const feature = await createFeature({ client }, {
       id: uuid(),
       title: 'A feature',
       description: 'A feature description'
@@ -139,7 +139,7 @@ describe('addFeature', () => {
       name: 'A new project',
       userId: (await createUser({ withinConnection, client })).id
     })
-    const feature = await createFeature({ withinConnection }, {
+    const feature = await createFeature({ client }, {
       id: uuid(),
       title: 'A feature',
       description: 'A feature description'
@@ -166,7 +166,7 @@ describe('removeFeatureFromProject', () => {
       name: 'A new project',
       userId: (await createUser({ withinConnection, client })).id
     })
-    const feature = await createFeature({ withinConnection }, {
+    const feature = await createFeature({ client }, {
       id: uuid(),
       title: 'A feature',
       description: 'A feature description'

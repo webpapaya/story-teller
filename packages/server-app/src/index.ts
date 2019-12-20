@@ -98,7 +98,7 @@ commandViaHTTP(Authentication.actions.signIn, {
         return user
       } else {
         res.clearCookie('session')
-        return Err<HTTPError>('UNAUTHORIZED')
+        return Err('UNAUTHORIZED' as const)
       }
     })
   }
@@ -117,35 +117,55 @@ commandViaHTTP(Feature.actions.create, {
   app,
   middlewares: [isAuthenticated],
   dependencies: { withinConnection },
-  useCase: createFeature
+  useCase: async (deps, params) => {
+    return deps.withinConnection(({ client }) => {
+      return createFeature({ client }, params)
+    })
+  }
 })
 
 commandViaHTTP(Feature.actions.update, {
   app,
   middlewares: [isAuthenticated],
   dependencies: { withinConnection },
-  useCase: updateFeature
+  useCase: async (deps, params) => {
+    return deps.withinConnection(({ client }) => {
+      return updateFeature({ client }, params)
+    })
+  }
 })
 
 commandViaHTTP(Feature.actions.setTags, {
   app,
   middlewares: [isAuthenticated],
   dependencies: { withinConnection },
-  useCase: setFeatureTags
+  useCase: async (deps, params) => {
+    return deps.withinConnection(({ client }) => {
+      return setFeatureTags({ client }, params)
+    })
+  }
 })
 
 commandViaHTTP(Tags.queries.where, {
   app,
   middlewares: [isAuthenticated],
   dependencies: { withinConnection },
-  useCase: whereTags
+  useCase: async (deps) => {
+    return deps.withinConnection(({ client }) => {
+      return whereTags({ client })
+    })
+  }
 })
 
 commandViaHTTP(Feature.queries.where, {
   app,
   middlewares: [isAuthenticated],
   dependencies: { withinConnection },
-  useCase: whereFeature
+  useCase: async (deps) => {
+    return deps.withinConnection(({ client }) => {
+      return whereFeature({ client })
+    })
+  }
 })
 
 commandViaHTTP(Revision.queries.where, {

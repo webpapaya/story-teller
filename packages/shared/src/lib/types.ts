@@ -13,11 +13,19 @@ export class Codec<A, O, I> {
 
   constructor (
     readonly name: string,
-    readonly is: ((input: unknown) => boolean),
+    readonly _is: ((input: unknown) => boolean),
     readonly _decode: (input: I, context: Context) => Result<Error[], O>,
     readonly encode: (input: O) => A,
     readonly _toJSON?: () => any
   ) {}
+
+  is(input: unknown): input is O {
+    return this._is(input)
+  }
+
+  isCollection(input: unknown[]): input is O[] {
+    return input.every((input) => this._is(input))
+  }
 
   toJSON () {
     return this._toJSON ? this._toJSON() : { type: this.name }

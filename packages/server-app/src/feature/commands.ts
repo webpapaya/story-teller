@@ -6,7 +6,7 @@ import { uniqueBy } from '../utils/unique-by'
 import { PoolClient } from 'pg'
 
 type CreateFeature = (
-  deps: { withinConnection: WithinConnection },
+  deps: { client: PoolClient },
   params: Feature
 ) => Promise<Result<never, Feature>>
 
@@ -19,31 +19,29 @@ export const createFeature: CreateFeature = async (deps, params) => {
 }
 
 type UpdateFeature = (
-  deps: { withinConnection: WithinConnection },
+  deps: { client: PoolClient },
   params: Feature & { originalId: string, reason: string }
 ) => Promise<Result<never, Feature>>
 
-export const updateFeature: UpdateFeature = async (deps, params) => {
-  return deps.withinConnection(async ({ client }) => {
-    const result = await client.query(sql`
-      INSERT INTO feature (id, title, description, original_id, reason, version)
-      VALUES (
-        ${params.id},
-        ${params.title},
-        ${params.description},
-        ${params.originalId},
-        ${params.reason},
-        (
-          SELECT count(*)
-          FROM feature
-          WHERE original_id = ${params.originalId}
-        )
+export const updateFeature: UpdateFeature = async ({ client }, params) => {
+  const result = await client.query(sql`
+    INSERT INTO feature (id, title, description, original_id, reason, version)
+    VALUES (
+      ${params.id},
+      ${params.title},
+      ${params.description},
+      ${params.originalId},
+      ${params.reason},
+      (
+        SELECT count(*)
+        FROM feature
+        WHERE original_id = ${params.originalId}
       )
-      RETURNING *
-    `)
+    )
+    RETURNING *
+  `)
 
-    return Ok(result.rows[0])
-  })
+  return Ok(result.rows[0])
 }
 
 type UnassignTagsFromFeature = (
@@ -85,18 +83,16 @@ const assignTagsToFeature: AssignTagsToFeature = async ({ client }, params) => {
 }
 
 type SetFeatureTags = (
-  deps: { withinConnection: WithinConnection },
+  deps: { client: PoolClient },
   params: { featureId: string, tags: Tag[] }
 ) => Promise<Result<never, Tag[]>>
 
-export const setFeatureTags: SetFeatureTags = async (deps, params) => {
-  return deps.withinConnection(async ({ client }) => {
-    await ensureTags({ client }, { tags: params.tags })
-    await unassignTagsFromFeature({ client }, params)
-    await assignTagsToFeature({ client }, params)
+export const setFeatureTags: SetFeatureTags = async ({ client }, params) => {
+  await ensureTags({ client }, { tags: params.tags })
+  await unassignTagsFromFeature({ client }, params)
+  await assignTagsToFeature({ client }, params)
 
-    return Ok(params.tags)
-  })
+  return Ok(params.tags)
 }
 
 type EnsureTags = (

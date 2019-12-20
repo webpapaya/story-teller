@@ -194,7 +194,8 @@ export namespace Feature {
       validator: record({
         id: uuid,
         title: nonEmptyString,
-        description: nonEmptyString
+        description: nonEmptyString,
+        projectId: uuid
       }),
       response: record({})
     }),
