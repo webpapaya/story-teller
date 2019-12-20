@@ -29,9 +29,6 @@ jobs:
         ./node_modules/.bin/lerna link
         ./node_modules/.bin/lerna bootstrap
         ./node_modules/.bin/lerna run --scope @story-teller/shared build
-        ENV_FILE=.env.test ./node_modules/.bin/lerna run --scope @story-teller/server-app infrastructure:up
-        ENV_FILE=.env.test ./node_modules/.bin/lerna run --scope @story-teller/server-app db:migrate:up
-        ENV_FILE=.env.test npm run test
     - name: linting
       run: |
         npm run lint
