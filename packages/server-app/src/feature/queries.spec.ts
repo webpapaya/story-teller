@@ -20,7 +20,7 @@ describe('whereFeature', () => {
     }))
   }))
 
-  it('returns latest revision only', t(async ({ withinConnection, client }) => {
+  it('returns latest revision only', t(async ({ client }) => {
     const feature = {
       id: uuid(),
       title: 'A new feature',
@@ -55,7 +55,7 @@ describe('whereFeature', () => {
     assertThat(result.get(), everyItem(hasProperty('originalId', feature.id)))
   }))
 
-  it('returns tags', t(async ({ withinConnection, client }) => {
+  it('returns tags', t(async ({ client }) => {
     const feature = {
       id: uuid(),
       title: 'A new feature',

@@ -7,12 +7,11 @@ import { Project } from '@story-teller/shared'
 import { register } from '../authentication/commands'
 import { findUserByIdentifier } from '../authentication/queries'
 import { PoolClient } from 'pg'
-import { WithinConnection } from '../lib/db'
 import { UserAuthentication } from '../domain'
 import { createFeature } from '../feature/commands'
 
 let counter = 0
-const createUser = async (deps: { withinConnection: WithinConnection, client: PoolClient }) => {
+const createUser = async (deps: { client: PoolClient }) => {
   const userIdentifier = `sepp${counter++}`
   await register({ ...deps, sendMail: async () => {} }, {
     userIdentifier,
@@ -23,43 +22,43 @@ const createUser = async (deps: { withinConnection: WithinConnection, client: Po
 }
 
 describe('createProject', () => {
-  it('creates a new record', t(async ({ withinConnection, client }) => {
-    return assertDifference({ withinConnection }, 'project', 1, async () => {
+  it('creates a new record', t(async ({ client }) => {
+    return assertDifference({ client }, 'project', 1, async () => {
       await createProject({ client }, {
         id: uuid(),
         name: 'A new project',
-        userId: (await createUser({ withinConnection, client })).id
+        userId: (await createUser({ client })).id
       })
     })
   }))
 
-  it('assigns contributor to project', t(async ({ withinConnection, client }) => {
-    return assertDifference({ withinConnection }, 'contributor', 1, async () => {
+  it('assigns contributor to project', t(async ({ client }) => {
+    return assertDifference({ client }, 'contributor', 1, async () => {
       await createProject({ client }, {
         id: uuid(),
         name: 'A new project',
-        userId: (await createUser({ withinConnection, client })).id
+        userId: (await createUser({ client })).id
       })
     })
   }))
 
-  it('returns a valid project object', t(async ({ withinConnection, client }) => {
+  it('returns a valid project object', t(async ({ client }) => {
     assertThat(Project.aggregate.is((await createProject({ client }, {
       id: uuid(),
       name: 'A new project',
-      userId: (await createUser({ withinConnection, client })).id
+      userId: (await createUser({ client })).id
     })).get()), equalTo(true))
   }))
 
-  it('upserts record when it already exists', t(async ({ withinConnection, client }) => {
+  it('upserts record when it already exists', t(async ({ client }) => {
     const project = {
       id: uuid(),
       name: 'A new project',
-      userId: (await createUser({ withinConnection, client })).id
+      userId: (await createUser({ client })).id
     }
 
     await createProject({ client }, project)
-    return assertDifference({ withinConnection }, 'project', 0, async () => {
+    return assertDifference({ client }, 'project', 0, async () => {
       await createProject({ client }, project)
     })
   }))
@@ -68,9 +67,9 @@ describe('createProject', () => {
 
 describe('removeContributor', () => {
   describe('when only one contributor present', () => {
-    it('returns correct error code', t(async ({ withinConnection, client }) => {
+    it('returns correct error code', t(async ({ client }) => {
       const projectId = uuid()
-      const userId = (await createUser({ withinConnection, client })).id
+      const userId = (await createUser({ client })).id
       const project = await createProject({ client }, {
         id: projectId,
         name: 'A new project',
@@ -80,44 +79,44 @@ describe('removeContributor', () => {
       assertThat(result.get(), equalTo('AT_LEAST_ONE_CONTRIBUTOR_REQUIRED'))
     }))
 
-    it('AND does not delete contributor', t(async ({ withinConnection, client }) => {
+    it('AND does not delete contributor', t(async ({ client }) => {
       const projectId = uuid()
-      const userId = (await createUser({ withinConnection, client })).id
+      const userId = (await createUser({ client })).id
       await createProject({ client }, {
         id: projectId,
         name: 'A new project',
         userId
       })
 
-      return assertDifference({ withinConnection }, 'contributor', 0, async () => {
+      return assertDifference({ client }, 'contributor', 0, async () => {
         return removeContributorFromProject({ client }, { userId, projectId})
       })
     }))
   })
 
 
-  it('with more than one contributor left, removes record', t(async ({ withinConnection, client }) => {
+  it('with more than one contributor left, removes record', t(async ({ client }) => {
     const projectId = uuid()
-    const contributor1Id = (await createUser({ withinConnection, client })).id
-    const contributor2Id = (await createUser({ withinConnection, client })).id
+    const contributor1Id = (await createUser({ client })).id
+    const contributor2Id = (await createUser({ client })).id
     await createProject({ client }, {
       id: projectId,
       name: 'A new project',
       userId: contributor1Id
     })
     await assignContributorToProject({ client }, { userId: contributor2Id, projectId })
-    return assertDifference({ withinConnection }, 'contributor', -1, async () => {
+    return assertDifference({ client }, 'contributor', -1, async () => {
       await removeContributorFromProject({ client }, { projectId, userId: contributor2Id })
     })
   }))
 })
 
 describe('addFeature', () => {
-  it('adds feature to project',  t(async ({ withinConnection, client }) => {
+  it('adds feature to project',  t(async ({ client }) => {
     const project = await createProject({ client }, {
       id: uuid(),
       name: 'A new project',
-      userId: (await createUser({ withinConnection, client })).id
+      userId: (await createUser({ client })).id
     })
     const feature = await createFeature({ client }, {
       id: uuid(),
@@ -125,7 +124,7 @@ describe('addFeature', () => {
       description: 'A feature description'
     })
 
-    await assertDifference({ withinConnection }, 'project_feature', 1, async () => {
+    await assertDifference({ client }, 'project_feature', 1, async () => {
       await addFeatureToProject({ client }, {
         projectId: project.get().id,
         featureId: feature.get().id
@@ -133,11 +132,11 @@ describe('addFeature', () => {
     })
   }))
 
-  it('AND add feature is idempotent',  t(async ({ withinConnection, client }) => {
+  it('AND add feature is idempotent',  t(async ({ client }) => {
     const project = await createProject({ client }, {
       id: uuid(),
       name: 'A new project',
-      userId: (await createUser({ withinConnection, client })).id
+      userId: (await createUser({ client })).id
     })
     const feature = await createFeature({ client }, {
       id: uuid(),
@@ -145,7 +144,7 @@ describe('addFeature', () => {
       description: 'A feature description'
     })
 
-    await assertDifference({ withinConnection }, 'project_feature', 1, async () => {
+    await assertDifference({ client }, 'project_feature', 1, async () => {
       await addFeatureToProject({ client }, {
         projectId: project.get().id,
         featureId: feature.get().id
@@ -160,11 +159,11 @@ describe('addFeature', () => {
 })
 
 describe('removeFeatureFromProject', () => {
-  it('removes feature from project',  t(async ({ withinConnection, client }) => {
+  it('removes feature from project',  t(async ({ client }) => {
     const project = await createProject({ client }, {
       id: uuid(),
       name: 'A new project',
-      userId: (await createUser({ withinConnection, client })).id
+      userId: (await createUser({ client })).id
     })
     const feature = await createFeature({ client }, {
       id: uuid(),
@@ -177,7 +176,7 @@ describe('removeFeatureFromProject', () => {
       featureId: feature.get().id
     })
 
-    await assertDifference({ withinConnection }, 'project_feature', -1, async () => {
+    await assertDifference({ client }, 'project_feature', -1, async () => {
       await removeFeatureFromProject({ client }, {
         projectId: project.get().id,
         featureId: feature.get().id

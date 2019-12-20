@@ -172,7 +172,11 @@ commandViaHTTP(Revision.queries.where, {
   app,
   middlewares: [isAuthenticated],
   dependencies: { withinConnection },
-  useCase: whereRevision
+  useCase: async (deps, params) => {
+    return deps.withinConnection(({ client }) => {
+      return whereRevision({ client }, params)
+    })
+  }
 })
 
 commandViaHTTP(Project.actions.create, {

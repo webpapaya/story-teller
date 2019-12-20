@@ -8,7 +8,7 @@ import { createProject } from './commands'
 import { queryProject, queryContributors } from './queries'
 
 describe('queryProject', () => {
-  it('returns a valid object', t(async ({ withinConnection, client }) => {
+  it('returns a valid object', t(async ({ client }) => {
     const user = await createUser({ client }, userAuthenticationFactory.build())
     const project = (await createProject({ client }, {
       ...projectFactory.build(),
@@ -23,7 +23,7 @@ describe('queryProject', () => {
     }))
   }))
 
-  it('returns empty result when not a member in a project', t(async ({ withinConnection, client }) => {
+  it('returns empty result when not a member in a project', t(async ({ client }) => {
     const user = await createUser({ client }, userAuthenticationFactory.build())
     const project = (await createProject({ client }, {
       ...projectFactory.build(),
@@ -36,7 +36,7 @@ describe('queryProject', () => {
 })
 
 describe('queryContributors', () => {
-  it('returns a valid object', t(async ({ withinConnection, client }) => {
+  it('returns a valid object', t(async ({ client }) => {
     const user = await createUser({ client }, userAuthenticationFactory.build())
     const project = (await createProject({ client }, {
       ...projectFactory.build(),

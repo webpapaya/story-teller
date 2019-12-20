@@ -1,6 +1,5 @@
 import sql from 'sql-template-strings'
 import { Result, Ok } from 'space-lift'
-import { WithinConnection } from '../lib/db'
 import { Feature, Tag } from '../domain'
 import { uniqueBy } from '../utils/unique-by'
 import { PoolClient } from 'pg'

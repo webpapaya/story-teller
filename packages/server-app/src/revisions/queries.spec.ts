@@ -8,7 +8,7 @@ import { whereRevision } from './queries'
 import { LocalDateTime } from 'js-joda'
 
 describe('whereFeature', () => {
-  it('finds queries in a db', t(async ({ withinConnection }) => {
+  it('finds queries in a db', t(async ({ client }) => {
     const feature = {
       id: uuid(),
       title: 'A new feature',
@@ -23,10 +23,10 @@ describe('whereFeature', () => {
       reason: 'Fixed typo'
     }
 
-    await createFeature({ withinConnection }, feature)
-    await updateFeature({ withinConnection }, revision)
+    await createFeature({ client }, feature)
+    await updateFeature({ client }, revision)
 
-    const features = await whereRevision({ withinConnection }, { featureId: feature.id })
+    const features = await whereRevision({ client }, { featureId: feature.id })
 
     assertThat(features.get(), hasProperties({
       0: hasProperties({
@@ -45,16 +45,16 @@ describe('whereFeature', () => {
     }))
   }))
 
-  it('returns features for featureId only', t(async ({ withinConnection }) => {
+  it('returns features for featureId only', t(async ({ client }) => {
     const feature = {
       id: uuid(),
       title: 'A new feature',
       description: 'A feature description'
     }
 
-    await createFeature({ withinConnection }, feature)
+    await createFeature({ client }, feature)
 
-    const features = await whereRevision({ withinConnection }, { featureId: uuid() })
+    const features = await whereRevision({ client }, { featureId: uuid() })
 
     assertThat(features.get(), equalTo([]))
   }))

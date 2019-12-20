@@ -1,6 +1,5 @@
 import sql from 'sql-template-tag'
 import { Result, Ok, Err } from 'space-lift'
-import { WithinConnection } from '../lib/db'
 import { Tags, Feature } from '@story-teller/shared'
 import { PoolClient } from 'pg'
 
