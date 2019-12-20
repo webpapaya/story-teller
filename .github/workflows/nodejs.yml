@@ -29,6 +29,8 @@ jobs:
     - name: npm install, build, and test
       run: |
         npm install
+        ./node_modules/.bin/lerna link
+        ./node_modules/.bin/lerna bootstrap
         ENV_FILE=.env.test npm run test
       env:
         CI: true
