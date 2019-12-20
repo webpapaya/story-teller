@@ -44,6 +44,7 @@
     "nodemailer": "^6.3.0",
     "pg": "^7.11.0",
     "pg-camelcase": "0.0.3",
+    "pg-native": "^3.0.0",
     "pg-query-stream": "^2.0.0",
     "snake-case": "^2.1.0",
     "space-lift": "^0.8.7",
