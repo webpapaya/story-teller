@@ -23,7 +23,7 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - name: npm install, build, and test
+    - name: npm install, build
       run: |
         npm install
         ./node_modules/.bin/lerna link
@@ -32,5 +32,11 @@ jobs:
         ENV_FILE=.env.test ./node_modules/.bin/lerna run --scope @story-teller/server-app infrastructure:up
         ENV_FILE=.env.test ./node_modules/.bin/lerna run --scope @story-teller/server-app db:migrate:up
         ENV_FILE=.env.test npm run test
-      env:
-        CI: true
+    - name: linting
+      run: |
+        npm run lint
+    - name: tests
+      run: |
+        ENV_FILE=.env.test ./node_modules/.bin/lerna run --scope @story-teller/server-app infrastructure:up
+        ENV_FILE=.env.test ./node_modules/.bin/lerna run --scope @story-teller/server-app db:migrate:up
+        ENV_FILE=.env.test npm run test
