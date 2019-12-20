@@ -5,7 +5,8 @@
     "lint": "lerna run lint -- --fix",
     "start": "lerna run start --parallel",
     "test": "lerna run --stream --concurrency=1 test",
-    "build": "lerna run build --parallel"
+    "build": "lerna run build --parallel",
+    "postinstall": "./node_modules/.bin/lerna link && ./node_modules/.bin/lerna bootstrap"
   },
   "devDependencies": {
     "lerna": "^3.16.4",
