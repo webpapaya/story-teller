@@ -18,7 +18,7 @@ import {
 import { whereFeature, whereTags } from './feature/queries'
 import { commandViaHTTP } from './command-via-http'
 import { Result, Ok, Err } from 'space-lift'
-import { HTTPError, Errors } from './errors'
+import { Errors } from './errors'
 import { whereRevision } from './revisions/queries'
 import { createProject, assignContributorToProject } from './project/commands'
 import { queryProject } from './project/queries'
@@ -185,7 +185,7 @@ commandViaHTTP(Project.actions.create, {
   dependencies: { withinConnection },
   useCase: async (deps, params) => {
     return deps.withinConnection(({ client }) => {
-      return createProject({ client }, {...params, userId: deps.auth!.user!.id})
+      return createProject({ client }, { ...params, userId: deps.auth.user!.id })
     })
   }
 })

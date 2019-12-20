@@ -25,10 +25,10 @@ describe('queryProject', () => {
 
   it('returns empty result when not a member in a project', t(async ({ client }) => {
     const user = await createUser({ client }, userAuthenticationFactory.build())
-    const project = (await createProject({ client }, {
+    await createProject({ client }, {
       ...projectFactory.build(),
       userId: user.id
-    })).get()
+    })
 
     const result = await queryProject({ client }, { userId: uuid() })
     assertThat(result.get(), hasProperties({ length: 0 }))

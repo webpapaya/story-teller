@@ -85,7 +85,7 @@ describe('findUserByAuthenticationToken', () => {
     })
   }))
 
-  it('when password changed after token created, returns undefined', t(async ({client }) => {
+  it('when password changed after token created, returns undefined', t(async ({ client }) => {
     const auth = await createUserAuthenticationFactory({ client },
       userAuthenticationFactory.build({ passwordChangedAt: LocalDateTime.of(2000, 1, 2) }))
 
@@ -98,7 +98,7 @@ describe('findUserByAuthenticationToken', () => {
     assertThat(await findUserByAuthenticationToken({ client }, token), equalTo(Err('NOT_FOUND')))
   }))
 
-  it('when password changed before token created, returns user', t(async ({client }) => {
+  it('when password changed before token created, returns user', t(async ({ client }) => {
     const auth = await createUserAuthenticationFactory({ client },
       userAuthenticationFactory.build({ passwordChangedAt: LocalDateTime.of(2000, 1, 1) }))
 

@@ -64,18 +64,17 @@ describe('createProject', () => {
   }))
 })
 
-
 describe('removeContributor', () => {
   describe('when only one contributor present', () => {
     it('returns correct error code', t(async ({ client }) => {
       const projectId = uuid()
       const userId = (await createUser({ client })).id
-      const project = await createProject({ client }, {
+      await createProject({ client }, {
         id: projectId,
         name: 'A new project',
         userId
       })
-      const result = await removeContributorFromProject({ client }, { userId, projectId})
+      const result = await removeContributorFromProject({ client }, { userId, projectId })
       assertThat(result.get(), equalTo('AT_LEAST_ONE_CONTRIBUTOR_REQUIRED'))
     }))
 
@@ -89,11 +88,10 @@ describe('removeContributor', () => {
       })
 
       return assertDifference({ client }, 'contributor', 0, async () => {
-        return removeContributorFromProject({ client }, { userId, projectId})
+        return removeContributorFromProject({ client }, { userId, projectId })
       })
     }))
   })
-
 
   it('with more than one contributor left, removes record', t(async ({ client }) => {
     const projectId = uuid()
@@ -112,7 +110,7 @@ describe('removeContributor', () => {
 })
 
 describe('addFeature', () => {
-  it('adds feature to project',  t(async ({ client }) => {
+  it('adds feature to project', t(async ({ client }) => {
     const project = await createProject({ client }, {
       id: uuid(),
       name: 'A new project',
@@ -132,7 +130,7 @@ describe('addFeature', () => {
     })
   }))
 
-  it('AND add feature is idempotent',  t(async ({ client }) => {
+  it('AND add feature is idempotent', t(async ({ client }) => {
     const project = await createProject({ client }, {
       id: uuid(),
       name: 'A new project',
@@ -159,7 +157,7 @@ describe('addFeature', () => {
 })
 
 describe('removeFeatureFromProject', () => {
-  it('removes feature from project',  t(async ({ client }) => {
+  it('removes feature from project', t(async ({ client }) => {
     const project = await createProject({ client }, {
       id: uuid(),
       name: 'A new project',

@@ -1,5 +1,5 @@
 import sql from 'sql-template-strings'
-import { Result, Ok, Err} from 'space-lift'
+import { Result, Ok, Err } from 'space-lift'
 import { Project } from '../domain'
 import { PoolClient } from 'pg'
 

@@ -5,10 +5,10 @@ import { PoolClient } from 'pg'
 
 type WhereFeature = (
   deps: { client: PoolClient },
-) => Promise<Result<'DOMAIN_ERROR', typeof Feature.aggregate['O'][]>>
+) => Promise<Result<'DOMAIN_ERROR', Array<typeof Feature.aggregate['O']>>>
 
 export const whereFeature: WhereFeature = async (deps) => {
-    const result = await deps.client.query(sql`
+  const result = await deps.client.query(sql`
       SELECT DISTINCT ON (original_id) *, tags
       FROM feature f, LATERAL (
         SELECT ARRAY (
@@ -21,26 +21,25 @@ export const whereFeature: WhereFeature = async (deps) => {
       ORDER BY original_id, version DESC;
     `)
 
-    if (Feature.aggregate.isCollection(result.rows)) {
-      return Ok(result.rows)
-    }
-    return Err('DOMAIN_ERROR' as const)
-
+  if (Feature.aggregate.isCollection(result.rows)) {
+    return Ok(result.rows)
+  }
+  return Err('DOMAIN_ERROR' as const)
 }
 
 type WhereTags = (
   deps: { client: PoolClient },
-) => Promise<Result<'DOMAIN_ERROR', typeof Tags.aggregate['O'][]>>
+) => Promise<Result<'DOMAIN_ERROR', Array<typeof Tags.aggregate['O']>>>
 
 export const whereTags: WhereTags = async ({ client }) => {
-    const result = await client.query(sql`
+  const result = await client.query(sql`
       SELECT *
       FROM tag
       ORDER BY name ASC;
     `)
 
-    if(Tags.aggregate.isCollection(result.rows)) {
-      return Ok(result.rows)
-    }
-    return Err('DOMAIN_ERROR' as const)
+  if (Tags.aggregate.isCollection(result.rows)) {
+    return Ok(result.rows)
+  }
+  return Err('DOMAIN_ERROR' as const)
 }

@@ -38,5 +38,4 @@ export const assertDifference = async (deps: { client: PoolClient }, table: stri
   const after = await deps.client.query(`select count(*) as count from ${table};`)
   assertThat(parseInt(after.rows[0].count),
     equalTo(parseInt(before.rows[0].count) + difference))
-
 }
