@@ -66,7 +66,7 @@ const buildRecord = (kind: string) => <T extends RecordValidator>(validator: T) 
     () => ({
       type: 'object',
       required: Object.keys(validator).filter((prop) => prop !== 'undefined'),
-      properties: validator,
+      properties: validator
     })
   )
 }

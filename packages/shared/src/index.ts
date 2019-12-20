@@ -7,8 +7,7 @@ import {
   uuid,
   color,
   nonEmptyString,
-  localDateTime,
-  union
+  localDateTime
 } from './lib'
 import * as _v from './lib/index'
 
@@ -134,7 +133,7 @@ export namespace Project {
       model: 'project',
       validator: record({
         id: uuid,
-        name: nonEmptyString,
+        name: nonEmptyString
       }),
       response: aggregate
     }),
@@ -147,7 +146,7 @@ export namespace Project {
         userId: uuid
       }),
       response: aggregate
-    }),
+    })
   }
 
   export const queries = {
@@ -166,7 +165,7 @@ export namespace Project {
       response: array(record({
         userId: uuid,
         projectId: uuid,
-        name: nonEmptyString,
+        name: nonEmptyString
       }))
     })
   }

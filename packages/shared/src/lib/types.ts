@@ -19,11 +19,11 @@ export class Codec<A, O, I> {
     readonly _toJSON?: () => any
   ) {}
 
-  is(input: unknown): input is O {
+  is (input: unknown): input is O {
     return this._is(input)
   }
 
-  isCollection(input: unknown[]): input is O[] {
+  isCollection (input: unknown[]): input is O[] {
     return input.every((input) => this._is(input))
   }
 

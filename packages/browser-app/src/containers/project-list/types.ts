@@ -1,4 +1,4 @@
-import { Project } from '../../domain/project/types';
+import { Project } from '../../domain/project/types'
 
 export type OwnPropsType = {};
 

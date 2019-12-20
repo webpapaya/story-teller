@@ -37,7 +37,6 @@ describe('nonEmptyString', () => {
 
 describe('record', () => {
   it('stringifies record, properly', () => {
-
     const validator = record({
       prop: option(nonEmptyString),
       nested: record({

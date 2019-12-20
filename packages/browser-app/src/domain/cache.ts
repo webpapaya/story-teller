@@ -1,22 +1,24 @@
+/* eslint-disable @typescript-eslint/explicit-member-accessibility */
+
 export class ClearableWeakMap {
   _wm: WeakMap<any, any>
 
-  constructor() {
+  constructor () {
     this._wm = new WeakMap()
   }
-  clear() {
+  clear () {
     this._wm = new WeakMap()
   }
-  delete(k: any) {
+  delete (k: any) {
     return this._wm.delete(k)
   }
-  get(k: any) {
+  get (k: any) {
     return this._wm.get(k)
   }
-  has(k: any) {
+  has (k: any) {
     return this._wm.has(k)
   }
-  set(k: any, v: any) {
+  set (k: any, v: any) {
     this._wm.set(k, v)
     return this
   }

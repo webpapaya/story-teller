@@ -1,6 +1,6 @@
 import { UnpackThunk } from '../../domain/types'
 import { History } from 'history'
-import { createProject } from '../../domain/project/actions';
+import { createProject } from '../../domain/project/actions'
 
 export type OwnPropsType = {
   history: History

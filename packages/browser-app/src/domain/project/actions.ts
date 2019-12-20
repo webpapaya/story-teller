@@ -1,4 +1,4 @@
-import { Tags, Project } from '@story-teller/shared'
+import { Project } from '@story-teller/shared'
 import fetchViaHTTP, { fetchMemoizedViaHTTP } from '../fetch-via-http'
 
 export const whereProjects = fetchMemoizedViaHTTP(Project.queries.whereProjects)

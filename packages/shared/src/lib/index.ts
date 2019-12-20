@@ -68,5 +68,3 @@ export {
   boolean,
   matchesRegex
 } from './primitives'
-
-
