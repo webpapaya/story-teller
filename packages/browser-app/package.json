@@ -37,6 +37,7 @@
     "env": "env $(cat $ENV_FILE | sed '/^#/ d')",
     "start": "npm run env -- react-scripts start",
     "analyze": "npm run build && source-map-explorer 'build/static/js/*.js'",
+    "test": "npm run env -- react-scripts test",
     "build": "npm run env -- react-scripts build",
     "lint": "eslint --ext js,ts --ignore-path .gitignore .",
     "storybook": "start-storybook -p 9009 -s public",

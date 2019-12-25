@@ -64,9 +64,11 @@ describe('when enter is clicked', () => {
     const searchBox = container.querySelector('input[name="tags"]')!
 
     fireEvent.keyDown(searchBox, { key: 'Enter' });
-    assertThat(onChange, lastCallArgs(equalTo([{ target: { value: [
-      OPTIONS[0].value
-    ]}}])))
+
+    assertThat(onChange, lastCallArgs(hasProperty('0', hasProperty("target", equalTo({
+      name:'tags',
+      value:['first value']
+    })))))
   })
 })
 
