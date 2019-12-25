@@ -7,27 +7,10 @@ import styles from './organism.module.css'
 import { css } from '../../utils/css';
 
 const Organism = (props: OrganismPropsType) => {
-  const x = React.createRef<HTMLInputElement>()
-  return (
-    <input
-      ref={x}
-      className={css(
-        styles.input
-      )}
-      type="checkbox"
-      name="sepp"
-      value={props.projects[0].id}
-      onChange={() => {
-        throw new Error('hallo')
-        console.log('hallo')
-      }}
-    />
-
-  )
   return (
     <nav className={css(styles.navigationWrp)}>
-      {/* <details> */}
-        {/* <summary className={css(styles.selectedProjects)}>
+      <details>
+        <summary className={css(styles.selectedProjects)}>
           {
             props.projects
               .filter((p) => props.selectedProjects.includes(p.id))
@@ -37,7 +20,7 @@ const Organism = (props: OrganismPropsType) => {
         </summary>
 
           <form>
-        <fieldset className={css(styles.projectSelection)}> */}
+        <fieldset className={css(styles.projectSelection)}>
           { props.projects.map((project) => (
             <label
               className={styles.projectLabel}
@@ -45,24 +28,23 @@ const Organism = (props: OrganismPropsType) => {
             >
               <input
                 type="text"
-                // name={project.name}
-                // checked={props.selectedProjects.includes(project.id)}
+                name={project.name}
+                checked={props.selectedProjects.includes(project.id)}
                 value={project.id}
-                onChange={() => {
-                  console.log('hallo')
-                }}
-                // onChange={(e) => {
+                onChange={(e) => {
+                  const nextSelectedProjects = e.target.checked
+                    ? [ ...props.selectedProjects, project.id ]
+                    : props.selectedProjects.filter((projectId) => projectId !== project.id)
 
-                //   // console.log(e.target.checked)
-                //   // props.onProjectsSelected([ project.id ])
-                // }}
+                  props.onProjectsSelected(nextSelectedProjects)
+                }}
               />
               { project.name}
             </label>
           ))}
-        {/* </fieldset>
+        </fieldset>
         </form>
-      </details> */}
+      </details>
 
       <ExitToApp onClick={() => props.onSignOut({})} aria-label='sign out' />
     </nav>
