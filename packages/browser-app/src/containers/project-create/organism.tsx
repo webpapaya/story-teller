@@ -29,7 +29,7 @@ const Organism = isForm<any, OrganismPropsType>({
       name="name"
       {...fields.name}
     />
-    <Button type="submit">Save</Button>
+    <Button type="submit">Create project</Button>
   </form>
 ))
 

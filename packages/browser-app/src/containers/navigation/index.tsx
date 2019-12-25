@@ -1,14 +1,19 @@
 import { connect } from 'react-redux';
-import { DispatchPropsType, OwnPropsType } from './types';
-import { MapDispatchToProps } from '../../domain/types';
+import { DispatchPropsType, OwnPropsType, StatePropsType } from './types';
+import { MapDispatchToProps, MapStateToProps } from '../../domain/types';
 import Organism from './organism'
 import { signOut } from '../../domain/authentication/actions';
-import {  } from '../user-sign-in/types';
+
+const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state, props) => ({
+  projects: state.projects,
+  selectedProjects: []
+})
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch) => {
   return {
+    onProjectsSelected: (t) => { console.log('TODO: implement', t) },
     onSignOut: () => dispatch(signOut({}))
   }
 }
 
-export default connect(null, mapDispatchToProps)(Organism)
+export default connect(mapStateToProps, mapDispatchToProps)(Organism)
