@@ -4,9 +4,9 @@ import sinon from 'sinon'
 // @ts-ignore
 import { assertThat, equalTo } from 'hamjest'
 import { render, fireEvent, cleanup } from '@testing-library/react'
-import Organism from './organism'
-import { OrganismPropsType } from './types'
-import { lastCallNthArg } from '../../utils/test-helpers'
+import Organism from './project-selection'
+import { OrganismPropsType } from '../types'
+import { lastCallNthArg } from '../../../utils/test-helpers'
 
 const projects = [
   { id: uuid(), name: 'Project A' },
@@ -16,9 +16,8 @@ const projects = [
 
 const renderInputMultiSelect = (props: Partial<OrganismPropsType> = {}) => render(
     <Organism
-      onSignOut={async () => {}}
       onProjectsSelected={() => { console.log('hallo')}}
-      selectedProjects={[projects[0].id, projects[2].id]}
+      activeProjects={[projects[0].id, projects[2].id]}
       projects={projects}
       {...props}
     />
@@ -29,33 +28,32 @@ afterEach(cleanup);
 describe('onProjectsSelected', () => {
   it('emits first project id, WHEN no projects selected and first project clicked, ', async () => {
     const onProjectsSelected = sinon.spy()
-    const { container } = renderInputMultiSelect({ onProjectsSelected, selectedProjects: [] })
+    const { container } = renderInputMultiSelect({ onProjectsSelected, activeProjects: [] })
     const projectInput = container.querySelector(`input[value="${projects[0].id}"]`)!
 
-    fireEvent.change(projectInput, { target: { value: '', checked: true } })
+    fireEvent.click(projectInput)
     assertThat(onProjectsSelected, lastCallNthArg(0, equalTo([projects[0].id])))
   })
 
-
   it('emits no projects, WHEN first project selected and first project clicked', async () => {
     const onProjectsSelected = sinon.spy()
-    const { container } = renderInputMultiSelect({ onProjectsSelected, selectedProjects: [
+    const { container } = renderInputMultiSelect({ onProjectsSelected, activeProjects: [
       projects[0].id
     ] })
     const projectInput = container.querySelector(`input[value="${projects[0].id}"]`)!
 
-    fireEvent.change(projectInput, { target: { value: '', checked: false } })
+    fireEvent.click(projectInput)
     assertThat(onProjectsSelected, lastCallNthArg(0, equalTo([])))
   })
 
   it('emits both projects, WHEN first project selected and second project clicked, ', async () => {
     const onProjectsSelected = sinon.spy()
-    const { container } = renderInputMultiSelect({ onProjectsSelected, selectedProjects: [
+    const { container } = renderInputMultiSelect({ onProjectsSelected, activeProjects: [
       projects[0].id
     ] })
     const projectInput = container.querySelector(`input[value="${projects[1].id}"]`)!
 
-    fireEvent.change(projectInput, { target: { value: '', checked: true } })
+    fireEvent.click(projectInput)
     assertThat(onProjectsSelected, lastCallNthArg(0, equalTo([projects[0].id, projects[1].id])))
   })
 })

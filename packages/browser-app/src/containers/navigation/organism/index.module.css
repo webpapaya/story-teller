@@ -1,0 +1,14 @@
+.navigationWrp {
+  background: var(--color-primary-500);
+  padding: var(--space-md);
+  color: var(--color-white);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-2);
+  position: fixed;
+  z-index: 10;
+  width: 100%;
+  left: 0;
+  top: 0;
+}

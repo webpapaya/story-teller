@@ -1,17 +1,8 @@
-.navigationWrp {
-  background: var(--color-primary-500);
-  padding: var(--space-md);
-  color: var(--color-white);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: var(--shadow-2);
-}
-
 .projectSelection {
   display: flex;
   flex-direction: column;
   position: absolute;
+  z-index: 20;
   background: var(--color-white);
   color: var(--color-grey-500);
   box-shadow: var(--shadow-4);

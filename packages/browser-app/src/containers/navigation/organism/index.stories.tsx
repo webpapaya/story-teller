@@ -1,7 +1,7 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions'
-import { storiesOf } from '../../storybook';
-import Organism from './organism';
+import { storiesOf } from '../../../storybook';
+import Organism from '../organism';
 import uuid from 'uuid';
 
 const projects = [
@@ -17,7 +17,7 @@ storiesOf('Navigation', module)
       onSignOut={action('onSubmit')}
       // @ts-ignore
       onProjectsSelected={action('onProjectsSelected')}
-      selectedProjects={[projects[0].id, projects[2].id]}
+      activeProjects={[projects[0].id, projects[2].id]}
       projects={projects}
     />
   ))
