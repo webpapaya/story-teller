@@ -9,6 +9,8 @@
   margin-top: var(--space-md);
   margin-left: calc(var(--space-xs) * -1);
   border-radius: 3px;
+  max-height: 80vh;
+  overflow: scroll;
 }
 
 .selectedProjects {

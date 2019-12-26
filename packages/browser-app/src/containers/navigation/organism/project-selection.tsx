@@ -1,7 +1,9 @@
 import React from 'react';
 import { OrganismPropsType } from '../types';
+import {Button} from '../../../components/button'
 import styles from './project-selection.module.css'
 import { css } from '../../../utils/css';
+import { Link } from '../../../components/link';
 
 const ProjectSelection = (props: Pick<OrganismPropsType, 'activeProjects' | 'projects' | 'onProjectsSelected'>) => (
   <details>
@@ -36,6 +38,7 @@ const ProjectSelection = (props: Pick<OrganismPropsType, 'activeProjects' | 'pro
           { project.name}
         </label>
       ))}
+      <Link variant="link" to="/project/new">Add new project</Link>
     </fieldset>
   </details>
 )
