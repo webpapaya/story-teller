@@ -47,6 +47,9 @@ const App = () => (
               </CenteredPanel>
             )}
           />
+          <ProtectedRoute path='/project/create' render={({ history }) => {
+            return <ProjectCreate history={history}/>
+          }} />
           <ProtectedRoute path='/feature/create' component={FeatureCreate} />
           <ProtectedRoute path='/feature/:id' component={(props: any) => (
             <>
@@ -58,7 +61,6 @@ const App = () => (
           <ProtectedRoute path='/' render={({history}) => (
             <>
               <FeatureList />
-              <ProjectCreate history={history}/>
               <ProjectList />
             </>
           )} />

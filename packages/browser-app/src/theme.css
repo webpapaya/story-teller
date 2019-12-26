@@ -104,7 +104,8 @@
 }
 
 html, body, #root{
-  min-height: 100vh;
+  min-height: 100% !important;
+  height: 100%;
   overflow: auto;
   background: var(--color-grey-100);
 }

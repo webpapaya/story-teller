@@ -38,7 +38,7 @@ const ProjectSelection = (props: Pick<OrganismPropsType, 'activeProjects' | 'pro
           { project.name}
         </label>
       ))}
-      <Link variant="link" to="/project/new">Add new project</Link>
+      <Link variant="link" to="/project/create">Add new project</Link>
     </fieldset>
   </details>
 )
