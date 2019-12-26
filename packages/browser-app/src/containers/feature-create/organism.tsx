@@ -7,6 +7,7 @@ import { Button } from '../../components/button';
 import { OrganismPropsType } from './types';
 import styles from './organism.module.css'
 import { InputHidden } from '../../components/input-hidden';
+import { useTranslations } from './translations';
 
 const Organism = isForm<any, OrganismPropsType>({
   defaultValues: {
@@ -19,7 +20,9 @@ const Organism = isForm<any, OrganismPropsType>({
     title: v.nonEmptyString,
     description: v.nonEmptyString,
   }),
-}, ({ fields, onSubmit }) => (
+}, ({ fields, onSubmit }) => {
+  const {t} = useTranslations()
+  return (
   <form onSubmit={onSubmit} className={styles.form}>
     <InputHidden
       name="id"
@@ -27,17 +30,18 @@ const Organism = isForm<any, OrganismPropsType>({
       {...fields.id}
     />
     <InputText
-      label="Title"
+      label={t('title')}
       name="title"
       {...fields.title}
     />
     <InputText
-      label="Description"
+      label={t('description')}
       name="description"
       {...fields.description}
     />
-    <Button type="submit">Save</Button>
+    <Button type="submit">{t('submit')}</Button>
   </form>
-))
+)
+})
 
 export default Organism

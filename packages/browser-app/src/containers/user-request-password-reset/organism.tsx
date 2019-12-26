@@ -4,6 +4,7 @@ import {v} from '@story-teller/shared'
 import { InputText } from '../../components/input-text';
 import { Button } from '../../components/button';
 import { Link } from '../../components/link';
+import { useTranslations } from './translations';
 
 const Organism = isForm({
   defaultValues: {
@@ -12,21 +13,24 @@ const Organism = isForm({
   schema: v.record({
     userIdentifier: v.string,
   }),
-}, ({ fields, onSubmit }) => (
+}, ({ fields, onSubmit }) => {
+  const {t} = useTranslations()
+  return (
   <form onSubmit={onSubmit}>
     <InputText
-      label="E-Mail"
+      label={t('email')}
       name="userIdentifier"
       {...fields.userIdentifier}
     />
     <Button block marginBottom>Submit</Button>
     <Link to="/sign-in" variant="link" block>
-      Sign in
+      {t('signIn')}
     </Link>
     <Link to="/sign-up" variant="link" block>
-      Sign up
+      {t('signUp')}
     </Link>
   </form>
-))
+)
+})
 
 export default Organism

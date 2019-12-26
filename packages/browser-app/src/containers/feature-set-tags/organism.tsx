@@ -7,6 +7,7 @@ import uuid from 'uuid';
 import { Tag } from '../../domain/tags/types';
 import { Button } from '../../components/button';
 import { InputHidden } from '../../components/input-hidden';
+import { useTranslations } from './translations';
 
 const tagToOption = (tag: Tag, label?: string) => ({
   key: tag.id,
@@ -24,6 +25,7 @@ const Organism = isForm<any, OrganismPropsType>({
     tags: []
   }
 }, ({ feature, tags, fields, onSubmit }) => {
+  const {t} = useTranslations()
   return (
     <form onSubmit={onSubmit}>
       <InputHidden
@@ -32,18 +34,18 @@ const Organism = isForm<any, OrganismPropsType>({
         {...fields.featureId}
       />
       <InputMultiSelect
-        label="Tags"
+        label={t('tags')}
         name="tags"
         selectedOptions={feature.tags.map((option) => tagToOption(option))}
         addNewOption={(label) => tagToOption({
           id: uuid(),
           name: label,
           color: '#001100'
-        }, `"${label}" does not exist and will be created`)}
+        }, t('nonExistingTag', { label }))}
         {...fields.tags}
         options={tags.map((option) => tagToOption(option))}
       />
-      <Button type="submit">Set Tags</Button>
+      <Button type="submit">{t('submit')}</Button>
     </form>
   )
 })

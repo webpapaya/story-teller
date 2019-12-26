@@ -1,6 +1,6 @@
 
 import qs from 'qs'
-import {History} from 'history';
+import { History } from 'history'
 
 export const readQSFromLocation = <T>(history: History, key: string, defaultValue: T) => {
   const queryString = history.location.search.replace(/^\?/, '')

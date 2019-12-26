@@ -5,7 +5,7 @@ import { InputText } from '../../components/input-text';
 import { InputPassword } from '../../components/input-password';
 import { Button } from '../../components/button';
 import { Link } from '../../components/link';
-
+import { useTranslations } from './translations';
 
 const Organism = isForm({
   defaultValues: {
@@ -18,32 +18,35 @@ const Organism = isForm({
     password: v.string,
     passwordConfirmation: v.string,
   }),
-}, ({ fields, onSubmit }) => (
-  <form onSubmit={onSubmit}>
-    <InputText
-      label="E-Mail/Username"
-      name="userIdentifier"
-      {...fields.userIdentifier}
-    />
-    <InputPassword
-      label="Password"
-      name="password"
-      {...fields.password}
-    />
-    <InputPassword
-      label="Password Confirmation"
-      name="passwordConfirmation"
-      {...fields.passwordConfirmation}
-    />
-    <Button block marginBottom>Sign up</Button>
+}, ({ fields, onSubmit }) => {
+  const {t} = useTranslations()
+  return (
+    <form onSubmit={onSubmit}>
+      <InputText
+        label={t('userIdentifier')}
+        name="userIdentifier"
+        {...fields.userIdentifier}
+      />
+      <InputPassword
+        label={t('password')}
+        name="password"
+        {...fields.password}
+      />
+      <InputPassword
+        label={t('passwordConfirmation')}
+        name="passwordConfirmation"
+        {...fields.passwordConfirmation}
+      />
+      <Button block marginBottom>{t('signUp')}</Button>
 
-    <Link to="/sign-in" variant="link" block>
-      Sign in
-    </Link>
-    <Link to="/request-password-reset" variant="link" block>
-      Request password reset
-    </Link>
-  </form>
-))
+      <Link to="/sign-in" variant="link" block>
+        {t('signIn')}
+      </Link>
+      <Link to="/request-password-reset" variant="link" block>
+        {t('requestPasswordReset')}
+      </Link>
+    </form>
+  )
+})
 
 export default Organism

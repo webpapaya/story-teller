@@ -6,18 +6,25 @@ import {
 import styles from './index.module.css'
 import { css } from '../../../utils/css';
 import ProjectSelection from './project-selection';
+import { useTranslations } from './translations';
 
 const Organism = (props: OrganismPropsType) => {
   const ref = React.createRef<HTMLDivElement>()
+  const {t} = useTranslations()
   useEffect(() => {
+    const htmlDOM = document.querySelector("html")!
     const setHTMLPadding = () => {
       if (!ref.current) { return }
       const padding = ref.current.offsetHeight || 0
-      document.querySelector("html")!.style.paddingTop = `${padding}px`
+      htmlDOM.style.paddingTop = `${padding}px`
     }
     setHTMLPadding()
     window.addEventListener('resize', setHTMLPadding);
-    return () => window.removeEventListener('resize', setHTMLPadding);
+
+    return () => {
+      htmlDOM.style.paddingTop = `0px`
+      window.removeEventListener('resize', setHTMLPadding)
+    };
   }, [ref.current])
 
   return (
@@ -27,7 +34,7 @@ const Organism = (props: OrganismPropsType) => {
         projects={props.projects}
         activeProjects={props.activeProjects}
       />
-      <ExitToApp onClick={() => props.onSignOut({})} aria-label='sign out' />
+      <ExitToApp onClick={() => props.onSignOut({})} aria-label={t('signOut')} />
     </nav>
   )
 }

@@ -7,6 +7,7 @@ import { Button } from '../../components/button';
 import { OrganismPropsType } from './types';
 import styles from './organism.module.css'
 import { InputHidden } from '../../components/input-hidden';
+import { useTranslations } from './translations';
 
 const Organism = isForm<any, any>({
   schema: v.record({
@@ -17,6 +18,7 @@ const Organism = isForm<any, any>({
     reason: v.nonEmptyString,
   })
 }, ({ onSubmit, fields, id }) => {
+  const {t} = useTranslations()
   return (
     <form onSubmit={onSubmit} className={styles.form}>
       <InputHidden
@@ -30,21 +32,21 @@ const Organism = isForm<any, any>({
         {...fields.originalId}
       />
       <InputText
-        label="Title"
+        label={t('title')}
         name="title"
         {...fields.title}
       />
       <InputText
-        label="Description"
+        label={t('description')}
         name="description"
         {...fields.description}
       />
       <InputText
-        label="Reason"
+        label={t('reason')}
         name="reason"
         {...fields.reason}
       />
-      <Button type="submit">Save</Button>
+      <Button type="submit">{t('submit')}</Button>
     </form>
   )
 })

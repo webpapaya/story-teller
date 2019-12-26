@@ -4,8 +4,11 @@ import {Button} from '../../../components/button'
 import styles from './project-selection.module.css'
 import { css } from '../../../utils/css';
 import { Link } from '../../../components/link';
+import { useTranslations } from './translations'
 
-const ProjectSelection = (props: Pick<OrganismPropsType, 'activeProjects' | 'projects' | 'onProjectsSelected'>) => (
+const ProjectSelection = (props: Pick<OrganismPropsType, 'activeProjects' | 'projects' | 'onProjectsSelected'>) => {
+  const { t } = useTranslations()
+  return (
   <details>
     <summary className={css(styles.selectedProjects)}>
       {
@@ -38,9 +41,10 @@ const ProjectSelection = (props: Pick<OrganismPropsType, 'activeProjects' | 'pro
           { project.name}
         </label>
       ))}
-      <Link variant="link" to="/project/create">Add new project</Link>
+      <Link variant="link" to="/project/create">{t('createProject')}</Link>
     </fieldset>
   </details>
 )
+}
 
 export default ProjectSelection

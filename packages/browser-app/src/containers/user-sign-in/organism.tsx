@@ -5,6 +5,7 @@ import { InputText } from '../../components/input-text';
 import { InputPassword } from '../../components/input-password';
 import { Button } from '../../components/button';
 import { Link } from '../../components/link';
+import { useTranslations } from './translations';
 
 const SignIn = isForm({
   defaultValues: {
@@ -15,26 +16,28 @@ const SignIn = isForm({
     userIdentifier: v.string,
     password: v.string,
   }),
-}, ({ fields, onSubmit }) => (
+}, ({ fields, onSubmit }) => {
+  const {t} = useTranslations()
+  return (
   <form onSubmit={onSubmit}>
     <InputText
-      label="E-Mail/Username"
+      label={t('userIdentifier')}
       name="userIdentifier"
       {...fields.userIdentifier}
     />
     <InputPassword
-      label="Password"
+      label={t('password')}
       name="password"
       {...fields.password}
     />
     <Button block marginBottom>Sign in</Button>
     <Link to="/sign-up" variant="link" block>
-      Sign up
+      {t('signUp')}
     </Link>
     <Link to="/request-password-reset" variant="link" block>
-      Request password reset
+      {t('requestPasswordReset')}
     </Link>
   </form>
-))
+)})
 
 export default SignIn
