@@ -12,6 +12,7 @@ type LinkProps = {
   to: string,
   block?: boolean
   disabled?: boolean
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void
 }
 
 export const Link = ({
@@ -21,10 +22,12 @@ export const Link = ({
   block = false,
   disabled = false,
   variant = 'link',
+  onClick,
   to,
 }: LinkProps) => (
   <ReactRouterLink
     to={to}
+    onClick={onClick}
     className={
       css(
         theme[color],
