@@ -22,6 +22,7 @@ const buildRecord = (name: string) => <T extends RecordSchema>(schema: T) => {
   type O = { [k in keyof T]: typeof schema[k]['O'] }
 
   return new RecordCodec<
+  typeof schema,
   { [k in keyof T]: typeof schema[k]['A'] },
   { [k in keyof T]: typeof schema[k]['O'] },
   unknown
@@ -202,4 +203,4 @@ export const matchesRegex = (name: string, regex: RegExp) => new Validation<stri
       ? Ok(input)
       : Err([{ message: `must be a valid ${name}`, context }])
   }
-)
+);

@@ -49,8 +49,8 @@ export class Codec<A, O, I> {
 }
 
 export type RecordSchema = Record<string, AnyCodec>
-export class RecordCodec<A, O, I> extends Codec<A, O, I> {
-  readonly schema: RecordSchema
+export class RecordCodec<Schema, A, O, I> extends Codec<A, O, I> {
+  readonly schema: Schema
 
   constructor (props: {
     name: string,
@@ -58,7 +58,7 @@ export class RecordCodec<A, O, I> extends Codec<A, O, I> {
     decode: (input: I, context: Context) => Result<Error[], O>,
     encode: (input: O) => A,
     toJSON?: () => any,
-    schema: RecordSchema
+    schema: Schema
   }) {
     super(props)
     this.schema = props.schema

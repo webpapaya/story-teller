@@ -133,6 +133,14 @@ describe('record', () => {
       assertThat(schema.is({ test: 'whatever' }), equalTo(false))
     })
   })
+
+  it('can be nested', () => {
+    const schema = record({
+      ...record({ a: string }).schema,
+      ...record({ b: string }).schema,
+    })
+    assertThat(schema.is({ a: 'whatever', b: 'whatever' }), equalTo(true))
+  })
 })
 
 describe('array', () => {
