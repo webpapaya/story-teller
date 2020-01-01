@@ -46,6 +46,22 @@ export class Codec<A, O, I> {
   decode (input: I, context?: Context) {
     return this._decode(input, context || { path: '$' })
   }
+
+  pipe(props: {
+    name?: string,
+    decode: (input: O, context: Context) => Result<Error[], O>,
+  }) {
+    return new Codec<A, O, I>({
+      name: props.name || this.name,
+      is: (input) => this.is(input) && props.decode(input, { path: '$' }).isOk(),
+      decode: (i, c) => {
+        const result = this.decode(i, c)
+        if (!result.isOk() || !this.is(i)) { return result }
+        return props.decode(i, c)
+      },
+      encode: this.encode.bind(this)
+    })
+  }
 }
 
 export type RecordSchema = Record<string, AnyCodec>

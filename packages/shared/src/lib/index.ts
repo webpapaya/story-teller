@@ -1,6 +1,6 @@
 import { LocalDate, LocalDateTime } from 'js-joda'
 import { Validation, Ok, Err, Codec } from './types'
-import { matchesRegex } from './primitives'
+import { matchesRegex, union } from './primitives'
 
 export const clampedString = (minLength: number, maxLength: number) => new Validation<string>(
   `clampedString(min: ${minLength}, max: ${maxLength})`,
@@ -34,6 +34,40 @@ export const date = new Codec<string, LocalDate, unknown>({
   },
   encode: (input) => input.toString()
 })
+
+export const dateInFuture = date.pipe({
+  name: 'dateInFuture',
+  decode: (input, context) => {
+    const now = LocalDate.now()
+    return input.isAfter(now)
+      ? Ok(input)
+      : Err([{ message: 'date must be in the future', context }])
+  },
+})
+
+export const dateInPast = date.pipe({
+  name: 'dateInPast',
+  decode: (input, context) => {
+    const now = LocalDate.now()
+    return input.isBefore(now)
+      ? Ok(input)
+      : Err([{ message: 'date must be in the past', context }])
+  },
+})
+
+export const dateToday = date.pipe({
+  name: 'dateToday',
+  decode: (input, context) => {
+    const now = LocalDate.now()
+    return input.isEqual(now)
+      ? Ok(input)
+      : Err([{ message: 'date must be today', context }])
+  },
+})
+
+export const dateInFutureOrToday = union([dateToday, dateInFuture])
+export const dateInPastOrToday = union([dateToday, dateInPast])
+
 
 export const localDateTime = new Codec<string, LocalDateTime, unknown>({
   name: 'localDateTime',
