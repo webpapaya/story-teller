@@ -20,10 +20,10 @@ export const nonEmptyString = clampedString(1, Number.POSITIVE_INFINITY)
 export const color = matchesRegex('color', /^#[0-9A-F]{6}$/i)
 export const uuid = matchesRegex('uuid', /([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}/i)
 
-export const date = new Codec<string, LocalDate, unknown>(
-  'date',
-  (value) => value instanceof LocalDate,
-  (input, context) => {
+export const date = new Codec<string, LocalDate, unknown>({
+  name: 'date',
+  is: (value) => value instanceof LocalDate,
+  decode: (input, context) => {
     const error = Err([{ message: 'needs to be an ISO string', context }])
     if (typeof input !== 'string') { return error }
     try {
@@ -32,13 +32,13 @@ export const date = new Codec<string, LocalDate, unknown>(
       return error
     }
   },
-  (input) => input.toString()
-)
+  encode: (input) => input.toString()
+})
 
-export const localDateTime = new Codec<string, LocalDateTime, unknown>(
-  'localDateTime',
-  (value) => value instanceof LocalDateTime,
-  (input, context) => {
+export const localDateTime = new Codec<string, LocalDateTime, unknown>({
+  name: 'localDateTime',
+  is: (value) => value instanceof LocalDateTime,
+  decode: (input, context) => {
     const error = Err([{ message: 'needs to be an ISO string', context }])
     if (typeof input !== 'string') { return error }
     try {
@@ -47,8 +47,8 @@ export const localDateTime = new Codec<string, LocalDateTime, unknown>(
       return error
     }
   },
-  (input) => input.toString()
-)
+  encode: (input) => input.toString()
+})
 
 export {
   record,
