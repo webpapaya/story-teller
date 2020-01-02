@@ -319,4 +319,14 @@ describe('build', () => {
     assertThat(values.map((y) => schema.is(y())),
       everyItem(equalTo(true)))
   })
+
+  it('record', () => {
+    const schema = record({
+      a: option(literal(1)),
+      b: option(literal(2)),
+      c: literal(3),
+    })
+    const values = schema.build()
+    assertThat(values, hasProperty('length', 4))
+  })
 })

@@ -11,6 +11,23 @@ import {
   RecordSchema
 } from './types'
 
+function cartesianProduct<T>(...array: T[][]): T[][] {
+  var results = [[]];
+  for (var i = 0; i < array.length; i++) {
+    var currentSubArray: T[] = array[i];
+    var temp: T[] = [];
+    for (var j = 0; j < results.length; j++) {
+      for (var k = 0; k < currentSubArray.length; k++) {
+        // @ts-ignore
+        temp.push(results[j].concat(currentSubArray[k]));
+      }
+    }
+    // @ts-ignore
+    results = temp;
+  }
+  return results;
+}
+
 const objectKeys = <O extends object>(value: O): Array<keyof O> =>
   Object.keys(value) as Array<keyof O>
 
@@ -70,7 +87,24 @@ const buildRecord = (name: string) => <T extends RecordSchema>(schema: T) => {
       type: 'object',
       required: Object.keys(schema).filter((prop) => prop !== 'undefined'),
       properties: schema
-    })
+    }),
+    build: () => {
+      const result: any = []
+      const keys = objectKeys(schema)
+      const permutations = cartesianProduct(...keys.map((key) => schema[key].build()))
+
+      permutations.forEach((permutation) => {
+        result.push(() => {
+          const record: Partial<() => O> = {}
+          keys.forEach((key, i) => {
+            // @ts-ignore
+            record[key] = permutation[i]()
+          })
+          return record as O
+        })
+      })
+      return result
+    }
   })
 }
 

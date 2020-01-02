@@ -82,7 +82,8 @@ export class RecordCodec<Schema, A, O, I> extends Codec<A, O, I> {
     decode: (input: I, context: Context) => Result<Error[], O>,
     encode: (input: O) => A,
     toJSON?: () => any,
-    schema: Schema
+    schema: Schema,
+    build?: () => Array<() => O>
   }) {
     super(props)
     this.schema = props.schema
