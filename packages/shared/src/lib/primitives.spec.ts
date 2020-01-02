@@ -1,5 +1,5 @@
 // @ts-ignore
-import { assertThat, equalTo, hasProperty } from 'hamjest'
+import { assertThat, equalTo, hasProperty, everyItem, instanceOf, string as isString } from 'hamjest'
 import { LocalDate } from 'js-joda'
 import { Validation, Ok, Err } from './types'
 import {
@@ -302,5 +302,21 @@ describe('undefinedCodec', () => {
     it('responds error with unknown literal', () => {
       assertThat(undefinedCodec.decode('').isOk(), equalTo(false))
     })
+  })
+})
+
+
+describe('build', () => {
+  it('string', () => {
+    const values = string.build()
+    assertThat(values.map((y) => string.is(y())),
+      everyItem(equalTo(true)))
+  })
+
+  it('union', () => {
+    const schema = union([literal(1), literal('hallo'), option(literal(3))])
+    const values = schema.build()
+    assertThat(values.map((y) => schema.is(y())),
+      everyItem(equalTo(true)))
   })
 })

@@ -16,19 +16,22 @@ export class Codec<A, O, I> {
   readonly _decode: (input: I, context: Context) => Result<Error[], O>;
   readonly encode: (input: O) => A;
   readonly _toJSON: (() => any) | undefined;
+  readonly _build: (() => Array<() => O>) | undefined;
 
   constructor (props: {
     name: string,
     is: ((input: unknown) => boolean),
     decode: (input: I, context: Context) => Result<Error[], O>,
     encode: (input: O) => A,
-    toJSON?: () => any
+    toJSON?: () => any,
+    build?: () => Array<() => O>
   }) {
     this.name = props.name
     this._is = props.is
     this._decode = props.decode
     this.encode = props.encode
     this._toJSON = props.toJSON
+    this._build = props.build
   }
 
   is (input: unknown): input is O {
@@ -45,6 +48,11 @@ export class Codec<A, O, I> {
 
   decode (input: I, context?: Context) {
     return this._decode(input, context || { path: '$' })
+  }
+
+  build() {
+    if (!this._build) { throw new Error('No build defined') }
+    return this._build()
   }
 
   pipe(props: {
@@ -85,14 +93,16 @@ export class Validation<T> extends Codec<T, T, unknown> {
   constructor (
     name: string,
     decode: (input: unknown, context: Context) => Result<Error[], T>,
-    toJSON?: () => any
+    toJSON?: () => any,
+    build?: () => Array<() => T>
   ) {
     super({
       name,
       is: (input) => decode(input as T, { path: '$' }).isOk(),
       decode,
       encode: (input) => input,
-      toJSON
+      toJSON,
+      build
     })
   }
 }

@@ -138,7 +138,14 @@ export const union = <Validator extends AnyCodec>(validators: Validator[]) => {
         .find((validator) => validator.is(input))!
         .encode(input)
     },
-    toJSON: () => ({ 'oneOf': validators })
+    toJSON: () => ({ 'oneOf': validators }),
+    build: () => {
+      const result: Array<() => typeof validators[number]['O']> = []
+      for (const validator of validators) {
+        result.push(...validator.build())
+      }
+      return result
+    }
   })
 }
 
@@ -156,7 +163,8 @@ export const literal = <Value extends Literal>(value: Value) => new Validation<V
     } else {
       return ({ const: value })
     }
-  }
+  },
+  () => [() => value]
 )
 
 export const literalUnion = <Literals extends Literal>(literals: Literals[]) =>
@@ -185,7 +193,12 @@ export const string = new Validation<string>(
   (input, context) => (
     typeof input === 'string'
       ? Ok(input)
-      : Err([{ message: 'must be a string', context }]))
+      : Err([{ message: 'must be a string', context }])),
+  undefined,
+  () => [
+    () => '',
+    () => 'A simple string'
+  ]
 )
 
 export const boolean = new Validation<boolean>(
