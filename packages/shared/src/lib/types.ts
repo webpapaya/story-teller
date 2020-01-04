@@ -24,7 +24,7 @@ export class Codec<A, O, I> {
     decode: (input: I, context: Context) => Result<Error[], O>
     encode: (input: O) => A
     toJSON?: () => any
-    build?: () => Array<() => O>
+    build: () => Array<() => O>
   }) {
     this.name = props.name
     this._is = props.is

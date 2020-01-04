@@ -1,4 +1,4 @@
-import { LocalDate, LocalDateTime } from 'js-joda'
+import { LocalDate, LocalDateTime, ZoneOffset } from 'js-joda'
 import { Validation, Ok, Err, Codec } from './types'
 import { matchesRegex, union } from './primitives'
 import { randBetween } from './utils'
@@ -108,7 +108,10 @@ export const localDateTime = new Codec<string, LocalDateTime, unknown>({
       return error
     }
   },
-  encode: (input) => input.toString()
+  encode: (input) => input.toString(),
+  build: () => [
+    () => LocalDateTime.ofEpochSecond(randBetween(0, Number.MAX_SAFE_INTEGER), ZoneOffset.UTC)
+  ]
 })
 
 export {

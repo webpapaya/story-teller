@@ -145,7 +145,30 @@ export const array = <T extends AnyCodec>(schema: T) => {
         : Err(errors)
     },
     encode: (input) => input.map((value) => schema.encode(value)),
-    toJSON: () => ({ type: 'array', items: schema })
+    toJSON: () => ({ type: 'array', items: schema }),
+    build: () => {
+      const result: any = []
+      const buildFns = schema.build()
+
+      result.push(() => [])
+
+      // every buildFn as single item array
+      buildFns.forEach((buildFn) => {
+        result.push(() => [buildFn()])
+      })
+
+      result.push(() => {
+        const permutationResult = Array.from({ length: randBetween(1, 100) })
+        permutationResult.forEach((_, i) => {
+          const idx = randBetween(0, buildFns.length)
+          // @ts-ignore
+          permutationResult[i] = buildFns[idx]()
+        })
+        return permutationResult
+      })
+
+      return result
+    }
   })
 }
 

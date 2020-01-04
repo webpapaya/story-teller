@@ -331,6 +331,7 @@ describe('build', () => {
     dateInFuture,
     dateInPast,
     dateToday,
+    array(union([literal(1), literal('hallo')])),
   ].map((validator: AnyCodec) => {
     it(validator.name, () => {
       const values = validator.build()
