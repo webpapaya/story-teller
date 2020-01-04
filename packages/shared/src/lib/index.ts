@@ -2,9 +2,9 @@ import { LocalDate, LocalDateTime } from 'js-joda'
 import { Validation, Ok, Err, Codec } from './types'
 import { matchesRegex, union } from './primitives'
 
-export const clampedString = (minLength: number, maxLength: number) => new Validation<string>(
-  `clampedString(min: ${minLength}, max: ${maxLength})`,
-  (input, context) => {
+export const clampedString = (minLength: number, maxLength: number) => new Validation<string>({
+  name: `clampedString(min: ${minLength}, max: ${maxLength})`,
+  decode: (input, context) => {
     const message =
       maxLength === Number.POSITIVE_INFINITY
         ? `needs to be longer than ${minLength} characters`
@@ -14,7 +14,7 @@ export const clampedString = (minLength: number, maxLength: number) => new Valid
       ? Ok(input)
       : Err([{ message, context }])
   }
-)
+})
 
 export const nonEmptyString = clampedString(1, Number.POSITIVE_INFINITY)
 export const color = matchesRegex('color', /^#[0-9A-F]{6}$/i)

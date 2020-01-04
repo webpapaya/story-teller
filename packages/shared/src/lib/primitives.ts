@@ -184,12 +184,12 @@ export const union = <Validator extends AnyCodec>(validators: Validator[]) => {
 }
 
 type Literal = string | number | boolean | null | undefined
-export const literal = <Value extends Literal>(value: Value) => new Validation<Value>(
-  'literal',
-  (input, context) => input === value
+export const literal = <Value extends Literal>(value: Value) => new Validation<Value>({
+  name: 'literal',
+  decode: (input, context) => input === value
     ? Ok(input as Value)
     : Err([{ message: `must be literal ${value}`, context }]),
-  () => {
+  toJSON: () => {
     if (typeof value === 'undefined') {
       return ({ const: `undefined` })
     } else if (value === null) {
@@ -198,8 +198,8 @@ export const literal = <Value extends Literal>(value: Value) => new Validation<V
       return ({ const: value })
     }
   },
-  () => [() => value]
-)
+  build: () => [() => value]
+})
 
 export const literalUnion = <Literals extends Literal>(literals: Literals[]) =>
   union(literals.map((value) => literal(value)))
@@ -213,41 +213,40 @@ export const option = <T extends AnyCodec>(validator: T) =>
 export const nullable = <T extends AnyCodec>(validator: T) =>
   union([validator, nullCodec])
 
-export const number = new Validation<number>(
-  'number',
-  (input, context) => {
+export const number = new Validation<number>({
+  name: 'number',
+  decode: (input, context) => {
     return typeof input === 'number' && !Number.isNaN(input)
       ? Ok(input)
       : Err([{ message: `is not a number`, context }])
   }
-)
+})
 
-export const string = new Validation<string>(
-  'string',
-  (input, context) => (
+export const string = new Validation<string>({
+  name: 'string',
+  decode: (input, context) => (
     typeof input === 'string'
       ? Ok(input)
       : Err([{ message: 'must be a string', context }])),
-  undefined,
-  () => [
+  build: () => [
     () => '',
     () => 'A simple string'
   ]
-)
+})
 
-export const boolean = new Validation<boolean>(
-  'boolean',
-  (input, context) => (
+export const boolean = new Validation<boolean>({
+  name: 'boolean',
+  decode: (input, context) => (
     typeof input === 'boolean'
       ? Ok(input)
       : Err([{ message: 'must be a boolean', context }]))
-)
+})
 
-export const matchesRegex = (name: string, regex: RegExp) => new Validation<string>(
-  name,
-  (input, context) => {
+export const matchesRegex = (name: string, regex: RegExp) => new Validation<string>({
+  name: name,
+  decode: (input, context) => {
     return typeof input === 'string' && regex.test(input)
       ? Ok(input)
       : Err([{ message: `must be a valid ${name}`, context }])
   }
-);
+})

@@ -91,19 +91,16 @@ export class RecordCodec<Schema, A, O, I> extends Codec<A, O, I> {
 }
 
 export class Validation<T> extends Codec<T, T, unknown> {
-  constructor (
+  constructor (props: {
     name: string,
     decode: (input: unknown, context: Context) => Result<Error[], T>,
     toJSON?: () => any,
     build?: () => Array<() => T>
-  ) {
+  }) {
     super({
-      name,
-      is: (input) => decode(input as T, { path: '$' }).isOk(),
-      decode,
+      ...props,
       encode: (input) => input,
-      toJSON,
-      build
+      is: (input) => props.decode(input as T, { path: '$' }).isOk(),
     })
   }
 }

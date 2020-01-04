@@ -15,13 +15,13 @@ import {
   undefinedCodec
 } from './index'
 
-const nonEmptyString = new Validation<string>(
-  'nonEmptyString',
-  (input, context) => (
+const nonEmptyString = new Validation<string>({
+  name: 'nonEmptyString',
+  decode: (input, context) => (
     typeof input === 'string' && input.length > 0
       ? Ok(input)
       : Err([{ message: 'can\'t be empty', context }]))
-)
+})
 
 describe('nonEmptyString', () => {
   [
