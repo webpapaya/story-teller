@@ -57,7 +57,8 @@ export class Codec<A, O, I> {
 
   pipe (props: {
     name?: string
-    decode: (input: O, context: Context) => Result<Error[], O>
+    decode: (input: O, context: Context) => Result<Error[], O>,
+    build?: (() => Array<() => O>);
   }) {
     return new Codec<A, O, I>({
       name: props.name || this.name,
@@ -67,7 +68,8 @@ export class Codec<A, O, I> {
         if (!result.isOk() || !this.is(i)) { return result }
         return props.decode(i, c)
       },
-      encode: this.encode.bind(this)
+      encode: this.encode.bind(this),
+      build: props.build || this.build.bind(this)
     })
   }
 }
@@ -83,7 +85,7 @@ export class RecordCodec<Schema, A, O, I> extends Codec<A, O, I> {
     encode: (input: O) => A
     toJSON?: () => any
     schema: Schema
-    build?: () => Array<() => O>
+    build: () => Array<() => O>
   }) {
     super(props)
     this.schema = props.schema
@@ -95,7 +97,7 @@ export class Validation<T> extends Codec<T, T, unknown> {
     name: string
     decode: (input: unknown, context: Context) => Result<Error[], T>
     toJSON?: () => any
-    build?: () => Array<() => T>
+    build: () => Array<() => T>
   }) {
     super({
       ...props,

@@ -1,7 +1,7 @@
 // @ts-ignore
 import { assertThat, equalTo, hasProperty, everyItem } from 'hamjest'
 import { LocalDate } from 'js-joda'
-import { Validation, Ok, Err } from './types'
+import { Validation, Ok, Err, AnyCodec } from './types'
 import {
   date,
   string,
@@ -12,15 +12,25 @@ import {
   option,
   union,
   nullCodec,
-  undefinedCodec
+  undefinedCodec,
+  uuid,
+  dateInFuture,
+  dateInPast,
+  dateToday,
+  clampedString
 } from './index'
+import { number } from './primitives'
+import RandExp from 'randexp'
 
 const nonEmptyString = new Validation<string>({
   name: 'nonEmptyString',
   decode: (input, context) => (
     typeof input === 'string' && input.length > 0
       ? Ok(input)
-      : Err([{ message: 'can\'t be empty', context }]))
+      : Err([{ message: 'can\'t be empty', context }])),
+  build: () => [
+    () => new RandExp(/.+/).gen()
+  ]
 })
 
 describe('nonEmptyString', () => {
@@ -306,26 +316,26 @@ describe('undefinedCodec', () => {
 })
 
 describe('build', () => {
-  it('string', () => {
-    const values = string.build()
-    assertThat(values.map((y) => string.is(y())),
-      everyItem(equalTo(true)))
-  })
-
-  it('union', () => {
-    const schema = union([literal(1), literal('hallo'), option(literal(3))])
-    const values = schema.build()
-    assertThat(values.map((y) => schema.is(y())),
-      everyItem(equalTo(true)))
-  })
-
-  it('record', () => {
-    const schema = record({
+  [
+    string,
+    clampedString(1, 1000),
+    number,
+    union([literal(1), literal('hallo'), option(literal(3))]),
+    record({
       a: option(literal(1)),
       b: option(literal(2)),
       c: literal(3)
+    }),
+    uuid,
+    date,
+    dateInFuture,
+    dateInPast,
+    dateToday,
+  ].map((validator: AnyCodec) => {
+    it(validator.name, () => {
+      const values = validator.build()
+      assertThat(values.map((y) => validator.is(y())),
+        everyItem(equalTo(true)))
     })
-    const values = schema.build()
-    assertThat(values, hasProperty('length', 4))
   })
 })

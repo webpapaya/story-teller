@@ -10,6 +10,8 @@ import {
   RecordCodec,
   RecordSchema
 } from './types'
+import RandExp from 'randexp'
+import { randBetween } from './utils'
 
 function cartesianProduct<T> (...array: T[][]): T[][] {
   var results = [[]]
@@ -219,7 +221,11 @@ export const number = new Validation<number>({
     return typeof input === 'number' && !Number.isNaN(input)
       ? Ok(input)
       : Err([{ message: `is not a number`, context }])
-  }
+  },
+  build: () => [
+    () => randBetween(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER) + Math.random(),
+    () => randBetween(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+  ]
 })
 
 export const string = new Validation<string>({
@@ -239,7 +245,11 @@ export const boolean = new Validation<boolean>({
   decode: (input, context) => (
     typeof input === 'boolean'
       ? Ok(input)
-      : Err([{ message: 'must be a boolean', context }]))
+      : Err([{ message: 'must be a boolean', context }])),
+  build: () => [
+    () => true,
+    () => false
+  ]
 })
 
 export const matchesRegex = (name: string, regex: RegExp) => new Validation<string>({
@@ -248,5 +258,8 @@ export const matchesRegex = (name: string, regex: RegExp) => new Validation<stri
     return typeof input === 'string' && regex.test(input)
       ? Ok(input)
       : Err([{ message: `must be a valid ${name}`, context }])
-  }
+  },
+  build: () => [
+    () => new RandExp(regex).gen()
+  ]
 })
