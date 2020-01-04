@@ -19,11 +19,11 @@ export class Codec<A, O, I> {
   readonly _build: (() => Array<() => O>) | undefined;
 
   constructor (props: {
-    name: string,
-    is: ((input: unknown) => boolean),
-    decode: (input: I, context: Context) => Result<Error[], O>,
-    encode: (input: O) => A,
-    toJSON?: () => any,
+    name: string
+    is: ((input: unknown) => boolean)
+    decode: (input: I, context: Context) => Result<Error[], O>
+    encode: (input: O) => A
+    toJSON?: () => any
     build?: () => Array<() => O>
   }) {
     this.name = props.name
@@ -50,14 +50,14 @@ export class Codec<A, O, I> {
     return this._decode(input, context || { path: '$' })
   }
 
-  build() {
+  build () {
     if (!this._build) { throw new Error('No build defined') }
     return this._build()
   }
 
-  pipe(props: {
-    name?: string,
-    decode: (input: O, context: Context) => Result<Error[], O>,
+  pipe (props: {
+    name?: string
+    decode: (input: O, context: Context) => Result<Error[], O>
   }) {
     return new Codec<A, O, I>({
       name: props.name || this.name,
@@ -77,12 +77,12 @@ export class RecordCodec<Schema, A, O, I> extends Codec<A, O, I> {
   readonly schema: Schema
 
   constructor (props: {
-    name: string,
-    is: ((input: unknown) => boolean),
-    decode: (input: I, context: Context) => Result<Error[], O>,
-    encode: (input: O) => A,
-    toJSON?: () => any,
-    schema: Schema,
+    name: string
+    is: ((input: unknown) => boolean)
+    decode: (input: I, context: Context) => Result<Error[], O>
+    encode: (input: O) => A
+    toJSON?: () => any
+    schema: Schema
     build?: () => Array<() => O>
   }) {
     super(props)
@@ -92,15 +92,15 @@ export class RecordCodec<Schema, A, O, I> extends Codec<A, O, I> {
 
 export class Validation<T> extends Codec<T, T, unknown> {
   constructor (props: {
-    name: string,
-    decode: (input: unknown, context: Context) => Result<Error[], T>,
-    toJSON?: () => any,
+    name: string
+    decode: (input: unknown, context: Context) => Result<Error[], T>
+    toJSON?: () => any
     build?: () => Array<() => T>
   }) {
     super({
       ...props,
       encode: (input) => input,
-      is: (input) => props.decode(input as T, { path: '$' }).isOk(),
+      is: (input) => props.decode(input as T, { path: '$' }).isOk()
     })
   }
 }

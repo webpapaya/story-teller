@@ -11,21 +11,21 @@ import {
   RecordSchema
 } from './types'
 
-function cartesianProduct<T>(...array: T[][]): T[][] {
-  var results = [[]];
+function cartesianProduct<T> (...array: T[][]): T[][] {
+  var results = [[]]
   for (var i = 0; i < array.length; i++) {
-    var currentSubArray: T[] = array[i];
-    var temp: T[] = [];
+    var currentSubArray: T[] = array[i]
+    var temp: T[] = []
     for (var j = 0; j < results.length; j++) {
       for (var k = 0; k < currentSubArray.length; k++) {
         // @ts-ignore
-        temp.push(results[j].concat(currentSubArray[k]));
+        temp.push(results[j].concat(currentSubArray[k]))
       }
     }
     // @ts-ignore
-    results = temp;
+    results = temp
   }
-  return results;
+  return results
 }
 
 const objectKeys = <O extends object>(value: O): Array<keyof O> =>
@@ -39,7 +39,7 @@ const buildRecord = (name: string) => <T extends RecordSchema>(schema: T) => {
   type O = { [k in keyof T]: typeof schema[k]['O'] }
 
   return new RecordCodec<
-  typeof schema,
+    typeof schema,
   { [k in keyof T]: typeof schema[k]['A'] },
   { [k in keyof T]: typeof schema[k]['O'] },
   unknown

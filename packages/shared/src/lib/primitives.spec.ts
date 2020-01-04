@@ -1,5 +1,5 @@
 // @ts-ignore
-import { assertThat, equalTo, hasProperty, everyItem, instanceOf, string as isString } from 'hamjest'
+import { assertThat, equalTo, hasProperty, everyItem } from 'hamjest'
 import { LocalDate } from 'js-joda'
 import { Validation, Ok, Err } from './types'
 import {
@@ -137,7 +137,7 @@ describe('record', () => {
   it('can be nested', () => {
     const schema = record({
       ...record({ a: string }).schema,
-      ...record({ b: string }).schema,
+      ...record({ b: string }).schema
     })
     assertThat(schema.is({ a: 'whatever', b: 'whatever' }), equalTo(true))
   })
@@ -305,7 +305,6 @@ describe('undefinedCodec', () => {
   })
 })
 
-
 describe('build', () => {
   it('string', () => {
     const values = string.build()
@@ -324,7 +323,7 @@ describe('build', () => {
     const schema = record({
       a: option(literal(1)),
       b: option(literal(2)),
-      c: literal(3),
+      c: literal(3)
     })
     const values = schema.build()
     assertThat(values, hasProperty('length', 4))

@@ -42,7 +42,7 @@ export const dateInFuture = date.pipe({
     return input.isAfter(now)
       ? Ok(input)
       : Err([{ message: 'date must be in the future', context }])
-  },
+  }
 })
 
 export const dateInPast = date.pipe({
@@ -52,7 +52,7 @@ export const dateInPast = date.pipe({
     return input.isBefore(now)
       ? Ok(input)
       : Err([{ message: 'date must be in the past', context }])
-  },
+  }
 })
 
 export const dateToday = date.pipe({
@@ -62,12 +62,11 @@ export const dateToday = date.pipe({
     return input.isEqual(now)
       ? Ok(input)
       : Err([{ message: 'date must be today', context }])
-  },
+  }
 })
 
 export const dateInFutureOrToday = union([dateToday, dateInFuture])
 export const dateInPastOrToday = union([dateToday, dateInPast])
-
 
 export const localDateTime = new Codec<string, LocalDateTime, unknown>({
   name: 'localDateTime',
