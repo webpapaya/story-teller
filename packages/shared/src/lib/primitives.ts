@@ -11,30 +11,7 @@ import {
   RecordSchema
 } from './types'
 import RandExp from 'randexp'
-import { randBetween } from './utils'
-
-function cartesianProduct<T> (...array: T[][]): T[][] {
-  var results = [[]]
-  for (var i = 0; i < array.length; i++) {
-    var currentSubArray: T[] = array[i]
-    var temp: T[] = []
-    for (var j = 0; j < results.length; j++) {
-      for (var k = 0; k < currentSubArray.length; k++) {
-        // @ts-ignore
-        temp.push(results[j].concat(currentSubArray[k]))
-      }
-    }
-    // @ts-ignore
-    results = temp
-  }
-  return results
-}
-
-const objectKeys = <O extends object>(value: O): Array<keyof O> =>
-  Object.keys(value) as Array<keyof O>
-
-const isObject = (input: unknown): input is object =>
-  typeof input === 'object' && input !== null
+import { randBetween, cartesianProduct, objectKeys, isObject } from './utils'
 
 const buildRecord = (name: string) => <T extends RecordSchema>(schema: T) => {
   type A = { [k in keyof T]: typeof schema[k]['A'] }

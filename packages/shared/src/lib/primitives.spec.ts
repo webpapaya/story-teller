@@ -340,7 +340,7 @@ describe('positiveInteger', () => {
     [
       { input: -1, isValid: false },
       { input: 0, isValid: true },
-      { input: 1, isValid: true },
+      { input: 1, isValid: true }
     ].forEach(({ input, isValid }) => {
       it(`${input} is ${isValid ? 'valid' : 'invalid'}`, () => {
         assertThat(positiveInteger.decode(input).isOk(), equalTo(isValid))
@@ -354,7 +354,7 @@ describe('negativeInteger', () => {
     [
       { input: -1, isValid: true },
       { input: 0, isValid: true },
-      { input: 1, isValid: false },
+      { input: 1, isValid: false }
     ].forEach(({ input, isValid }) => {
       it(`${input} is ${isValid ? 'valid' : 'invalid'}`, () => {
         assertThat(negativeInteger.decode(input).isOk(), equalTo(isValid))
@@ -379,7 +379,7 @@ describe('build', () => {
     dateInFuture,
     dateInPast,
     dateToday,
-    array(union([literal(1), literal('hallo')])),
+    array(union([literal(1), literal('hallo')]))
   ].map((validator: AnyCodec) => {
     it(validator.name, () => {
       const values = validator.build()

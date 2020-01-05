@@ -57,8 +57,8 @@ export class Codec<A, O, I> {
 
   pipe (props: {
     name?: string
-    decode: (input: O, context: Context) => Result<Error[], O>,
-    build?: (() => Array<() => O>);
+    decode: (input: O, context: Context) => Result<Error[], O>
+    build?: (() => Array<() => O>)
   }) {
     return new Codec<A, O, I>({
       name: props.name || this.name,
