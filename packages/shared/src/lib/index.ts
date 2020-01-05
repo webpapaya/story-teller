@@ -19,10 +19,10 @@ export const clampedString = (minLength: number, maxLength: number) => new Valid
   build: () => [
     () => {
       const length = maxLength === Number.POSITIVE_INFINITY
-        ? Number.MAX_SAFE_INTEGER
+        ? 1000
         : maxLength
 
-      return new RandExp(new RegExp(`.{${minLength}, ${length}}`)).gen()
+      return new RandExp(new RegExp(`.{${randBetween(minLength, length)}}`)).gen()
     }
   ]
 })

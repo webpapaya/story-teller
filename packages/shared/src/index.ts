@@ -3,13 +3,13 @@ import {
   record,
   string,
   array,
-  number,
   uuid,
   color,
   nonEmptyString,
   localDateTime
 } from './lib'
 import * as _v from './lib/index'
+import { positiveInteger } from './lib/primitives'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 export type CommandDefinition<
@@ -177,7 +177,7 @@ export namespace Feature {
     title: nonEmptyString,
     description: nonEmptyString,
     originalId: uuid,
-    version: number,
+    version: positiveInteger,
     tags: array(record({
       id: uuid,
       name: nonEmptyString,
@@ -239,7 +239,7 @@ export namespace Revision {
     id: uuid,
     reason: string,
     featureId: uuid,
-    version: number,
+    version: positiveInteger,
     createdAt: localDateTime
   })
 

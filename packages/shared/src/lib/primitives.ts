@@ -251,6 +251,33 @@ export const number = new Validation<number>({
   ]
 })
 
+export const integer = new Validation<number>({
+  name: 'integer',
+  decode: (input, context) => {
+    return Number(input) === input && input % 1 === 0
+      ? Ok(input)
+      : Err([{ message: `is not an integer`, context }])
+  },
+  build: () => [
+    () => randBetween(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+  ]
+})
+
+export const clampedInteger = (min: number, max: number) => integer.pipe({
+  name: `clampedInteger(${min}, ${max})`,
+  decode: (input, context) => {
+    return input >= min && input <= max
+      ? Ok(input)
+      : Err([{ message: `needs to be between ${min} and ${max}`, context }])
+  },
+  build: () => [
+    () => randBetween(min, max)
+  ]
+})
+
+export const positiveInteger = clampedInteger(0, Number.MAX_SAFE_INTEGER)
+export const negativeInteger = clampedInteger(Number.MIN_SAFE_INTEGER, 0)
+
 export const string = new Validation<string>({
   name: 'string',
   decode: (input, context) => (

@@ -19,7 +19,7 @@ import {
   dateToday,
   clampedString
 } from './index'
-import { number } from './primitives'
+import { number, integer, positiveInteger, negativeInteger } from './primitives'
 import RandExp from 'randexp'
 
 const nonEmptyString = new Validation<string>({
@@ -311,6 +311,54 @@ describe('undefinedCodec', () => {
 
     it('responds error with unknown literal', () => {
       assertThat(undefinedCodec.decode('').isOk(), equalTo(false))
+    })
+  })
+})
+
+describe('integer', () => {
+  describe('decode', () => {
+    [
+      { input: -1, isValid: true },
+      { input: 0, isValid: true },
+      { input: 1, isValid: true },
+      { input: '1', isValid: false },
+      { input: 1.2, isValid: false },
+      { input: '1.2', isValid: false },
+      { input: NaN, isValid: false },
+      { input: Number.POSITIVE_INFINITY, isValid: false },
+      { input: undefined, isValid: false }
+    ].forEach(({ input, isValid }) => {
+      it(`${input} is ${isValid ? 'valid' : 'invalid'}`, () => {
+        assertThat(integer.decode(input).isOk(), equalTo(isValid))
+      })
+    })
+  })
+})
+
+describe('positiveInteger', () => {
+  describe('decode', () => {
+    [
+      { input: -1, isValid: false },
+      { input: 0, isValid: true },
+      { input: 1, isValid: true },
+    ].forEach(({ input, isValid }) => {
+      it(`${input} is ${isValid ? 'valid' : 'invalid'}`, () => {
+        assertThat(positiveInteger.decode(input).isOk(), equalTo(isValid))
+      })
+    })
+  })
+})
+
+describe('negativeInteger', () => {
+  describe('decode', () => {
+    [
+      { input: -1, isValid: true },
+      { input: 0, isValid: true },
+      { input: 1, isValid: false },
+    ].forEach(({ input, isValid }) => {
+      it(`${input} is ${isValid ? 'valid' : 'invalid'}`, () => {
+        assertThat(negativeInteger.decode(input).isOk(), equalTo(isValid))
+      })
     })
   })
 })
