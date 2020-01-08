@@ -1,26 +1,10 @@
 import React from 'react';
 import { storiesOf } from '../../../storybook';
 import Organism from '.';
-import uuid from 'uuid';
+import { Feature } from '@story-teller/shared';
 
 storiesOf('FeatureList', module)
   .add('default', () => (
-    <Organism features={[
-      {
-        id: uuid(),
-        title: 'A Feature',
-        description: 'Irrelevant',
-        originalId: uuid(),
-        version: 0,
-        tags: []
-      }, {
-        id: uuid(),
-        title: 'A Feature',
-        description: 'Irrelevant',
-        originalId: uuid(),
-        version: 0,
-        tags: []
-      }
-    ]}/>
+    <Organism features={Feature.aggregate.build().map((x) => x())}/>
   ))
 

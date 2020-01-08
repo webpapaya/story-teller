@@ -3,8 +3,19 @@ import { assertThat, hasProperties } from 'hamjest'
 import { t, assertDifference } from '../spec-helpers'
 import uuid from 'uuid'
 import { createFeature, updateFeature, setFeatureTags, ensureTags } from './commands'
+import { Feature } from '@story-teller/shared'
 
 describe('createFeature', () => {
+  it('creates a new record', async () => {
+    for (const feature of Feature.aggregate.build()) {
+      await t(async ({ client }) => {
+        return assertDifference({ client }, 'project', 1, async () => {
+          await createFeature({ client }, feature())
+        })
+      })
+    }
+  })
+
   it('creates a new record', t(async ({ client }) => {
     return assertDifference({ client }, 'feature', 1, async () => {
       await createFeature({ client }, {

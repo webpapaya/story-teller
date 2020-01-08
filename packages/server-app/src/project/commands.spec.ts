@@ -22,15 +22,18 @@ const createUser = async (deps: { client: PoolClient }) => {
 }
 
 describe('createProject', () => {
-  it('creates a new record', t(async ({ client }) => {
-    return assertDifference({ client }, 'project', 1, async () => {
-      await createProject({ client }, {
-        id: uuid(),
-        name: 'A new project',
-        userId: (await createUser({ client })).id
+  it('creates a new record', async () => {
+    for (const project of Project.aggregate.build()) {
+      await t(async ({ client }) => {
+        return assertDifference({ client }, 'project', 1, async () => {
+          await createProject({ client }, {
+            ...project(),
+            userId: (await createUser({ client })).id
+          })
+        })
       })
-    })
-  }))
+    }
+  })
 
   it('assigns contributor to project', t(async ({ client }) => {
     return assertDifference({ client }, 'contributor', 1, async () => {
