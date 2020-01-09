@@ -9,6 +9,7 @@ import { findUserByIdentifier } from '../authentication/queries'
 import { PoolClient } from 'pg'
 import { UserAuthentication } from '../domain'
 import { createFeature } from '../feature/commands'
+import { AnyCodec } from '@story-teller/shared/dist/lib/types'
 
 let counter = 0
 const createUser = async (deps: { client: PoolClient }) => {
@@ -21,19 +22,35 @@ const createUser = async (deps: { client: PoolClient }) => {
   return (await findUserByIdentifier(deps, { userIdentifier })).get() as unknown as UserAuthentication
 }
 
+const assertProperty = async <Codec extends AnyCodec>(codec: Codec, fn: (arg: Codec['O']) => any) => {
+  const arg1List = codec.build()
+  await Promise.all(arg1List.map((arg1) => fn(arg1())))
+}
+
+const assertDBProperty = async <Codec extends AnyCodec>(
+  codec: Codec,
+  fn: (deps: {client: PoolClient}, arg: Codec['O']
+) => any) => {
+  const arg1List = codec.build()
+  await Promise.all(arg1List.map(async (arg1) => {
+    await t(async ({ client }) => {
+      await fn({client}, arg1())
+    })
+  }))
+}
+
 describe('createProject', () => {
-  it('creates a new record', async () => {
-    for (const project of Project.aggregate.build()) {
-      await t(async ({ client }) => {
-        return assertDifference({ client }, 'project', 1, async () => {
-          await createProject({ client }, {
-            ...project(),
-            userId: (await createUser({ client })).id
-          })
+  it.only('creates a new record', async () => {
+    await assertDBProperty(Project.aggregate, async ({client}, project) => {
+      return assertDifference({ client }, 'project', 1, async () => {
+        await createProject({ client }, {
+          ...project,
+          userId: (await createUser({ client })).id
         })
       })
-    }
+    })
   })
+
 
   it('assigns contributor to project', t(async ({ client }) => {
     return assertDifference({ client }, 'contributor', 1, async () => {
