@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fp-ts": "^2.1.2",
     "io-ts": "^2.0.1",
     "js-joda": "^1.11.0",
     "randexp": "^0.5.3",
