@@ -45,6 +45,26 @@ describe('nonEmptyString', () => {
   })
 })
 
+describe('string', () => {
+  describe('sink', () => {
+    it('returns string truncated by last character', () => {
+      const value = 'AB'
+      assertThat(string.sink(value).get(),
+        equalTo('A'))
+    })
+
+    it('returns string with 1 character returns empty string', () => {
+      assertThat(string.sink('A').get(),
+        equalTo(''))
+    })
+
+    it('empty string returns error', () => {
+      assertThat(string.sink('').isOk(),
+        equalTo(false))
+    })
+  })
+})
+
 describe('record', () => {
   it('stringifies record, properly', () => {
     const validator = record({

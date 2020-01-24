@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
-import { Result } from 'space-lift'
+import { Result, Err, Ok } from 'space-lift'
 
 export { Ok, Err, Result } from 'space-lift'
 export type Context = { path: string }
@@ -17,6 +17,7 @@ export class Codec<A, O, I> {
   readonly encode: (input: O) => A;
   readonly _toJSON: (() => any) | undefined;
   readonly _build: (() => Array<() => O>) | undefined;
+  readonly _sink?: (input: O) => Result<undefined, O>
 
   constructor (props: {
     name: string
@@ -24,7 +25,8 @@ export class Codec<A, O, I> {
     decode: (input: I, context: Context) => Result<Error[], O>
     encode: (input: O) => A
     toJSON?: () => any
-    build: () => Array<() => O>
+    build: () => Array<() => O>,
+    sink?: (input: O) => Result<undefined, O>
   }) {
     this.name = props.name
     this._is = props.is
@@ -32,6 +34,7 @@ export class Codec<A, O, I> {
     this.encode = props.encode
     this._toJSON = props.toJSON
     this._build = props.build
+    this._sink = props.sink
   }
 
   is (input: unknown): input is O {
@@ -53,6 +56,13 @@ export class Codec<A, O, I> {
   build () {
     if (!this._build) { throw new Error('No build defined') }
     return this._build()
+  }
+
+  sink(input: O) {
+    if (!this._sink) { return Err(undefined) }
+    const nextValue = this._sink(input)
+    if (nextValue.isOk() && this.is(nextValue.get())) { return Ok(nextValue.get()) }
+    return Err(undefined)
   }
 
   pipe (props: {
@@ -85,7 +95,8 @@ export class RecordCodec<Schema, A, O, I> extends Codec<A, O, I> {
     encode: (input: O) => A
     toJSON?: () => any
     schema: Schema
-    build: () => Array<() => O>
+    build: () => Array<() => O>,
+    sink?: (input: O) => Result<undefined, O>
   }) {
     super(props)
     this.schema = props.schema
@@ -97,7 +108,8 @@ export class Validation<T> extends Codec<T, T, unknown> {
     name: string
     decode: (input: unknown, context: Context) => Result<Error[], T>
     toJSON?: () => any
-    build: () => Array<() => T>
+    build: () => Array<() => T>,
+    sink?: (input: T) => Result<undefined, T>
   }) {
     super({
       ...props,

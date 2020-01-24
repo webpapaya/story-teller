@@ -249,7 +249,8 @@ export const clampedInteger = (min: number, max: number) => integer.pipe({
   },
   build: () => [
     () => randBetween(min, max)
-  ]
+  ],
+
 })
 
 export const positiveInteger = clampedInteger(0, Number.MAX_SAFE_INTEGER)
@@ -264,7 +265,12 @@ export const string = new Validation<string>({
   build: () => [
     () => '',
     () => 'A simple string'
-  ]
+  ],
+  sink: (input) => {
+    return input.length === 0
+      ? Err(undefined)
+      : Ok(input.slice(0, input.length - 1))
+  }
 })
 
 export const boolean = new Validation<boolean>({
@@ -276,7 +282,7 @@ export const boolean = new Validation<boolean>({
   build: () => [
     () => true,
     () => false
-  ]
+  ],
 })
 
 export const matchesRegex = (name: string, regex: RegExp) => new Validation<string>({
