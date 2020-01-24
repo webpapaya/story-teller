@@ -17,7 +17,7 @@ export class Codec<A, O, I> {
   readonly encode: (input: O) => A;
   readonly _toJSON: (() => any) | undefined;
   readonly _build: (() => Array<() => O>) | undefined;
-  readonly _sink?: (input: O) => Result<undefined, O>
+  readonly _shrink?: (input: O) => Result<undefined, O>
 
   constructor (props: {
     name: string
@@ -26,7 +26,7 @@ export class Codec<A, O, I> {
     encode: (input: O) => A
     toJSON?: () => any
     build: () => Array<() => O>,
-    sink?: (input: O) => Result<undefined, O>
+    shrink?: (input: O) => Result<undefined, O>
   }) {
     this.name = props.name
     this._is = props.is
@@ -34,7 +34,7 @@ export class Codec<A, O, I> {
     this.encode = props.encode
     this._toJSON = props.toJSON
     this._build = props.build
-    this._sink = props.sink
+    this._shrink = props.shrink
   }
 
   is (input: unknown): input is O {
@@ -58,9 +58,9 @@ export class Codec<A, O, I> {
     return this._build()
   }
 
-  sink(input: O) {
-    if (!this._sink) { return Err(undefined) }
-    const nextValue = this._sink(input)
+  shrink(input: O) {
+    if (!this._shrink) { return Err(undefined) }
+    const nextValue = this._shrink(input)
     if (nextValue.isOk() && this.is(nextValue.get())) { return Ok(nextValue.get()) }
     return Err(undefined)
   }
@@ -96,7 +96,7 @@ export class RecordCodec<Schema, A, O, I> extends Codec<A, O, I> {
     toJSON?: () => any
     schema: Schema
     build: () => Array<() => O>,
-    sink?: (input: O) => Result<undefined, O>
+    shrink?: (input: O) => Result<undefined, O>
   }) {
     super(props)
     this.schema = props.schema
@@ -109,7 +109,7 @@ export class Validation<T> extends Codec<T, T, unknown> {
     decode: (input: unknown, context: Context) => Result<Error[], T>
     toJSON?: () => any
     build: () => Array<() => T>,
-    sink?: (input: T) => Result<undefined, T>
+    shrink?: (input: T) => Result<undefined, T>
   }) {
     super({
       ...props,

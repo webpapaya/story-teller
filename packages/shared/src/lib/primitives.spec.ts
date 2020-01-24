@@ -1,7 +1,7 @@
 // @ts-ignore
 import { assertThat, equalTo, hasProperty, everyItem } from 'hamjest'
 import { LocalDate } from 'js-joda'
-import { Validation, Ok, Err, AnyCodec } from './types'
+import { AnyCodec } from './types'
 import {
   date,
   string,
@@ -17,21 +17,10 @@ import {
   dateInFuture,
   dateInPast,
   dateToday,
-  clampedString
+  clampedString,
+  nonEmptyString
 } from './index'
 import { number, integer, positiveInteger, negativeInteger } from './primitives'
-import RandExp from 'randexp'
-
-const nonEmptyString = new Validation<string>({
-  name: 'nonEmptyString',
-  decode: (input, context) => (
-    typeof input === 'string' && input.length > 0
-      ? Ok(input)
-      : Err([{ message: 'can\'t be empty', context }])),
-  build: () => [
-    () => new RandExp(/.+/).gen()
-  ]
-})
 
 describe('nonEmptyString', () => {
   [
@@ -46,20 +35,20 @@ describe('nonEmptyString', () => {
 })
 
 describe('string', () => {
-  describe('sink', () => {
+  describe('shrink', () => {
     it('returns string truncated by last character', () => {
       const value = 'AB'
-      assertThat(string.sink(value).get(),
+      assertThat(string.shrink(value).get(),
         equalTo('A'))
     })
 
     it('returns string with 1 character returns empty string', () => {
-      assertThat(string.sink('A').get(),
+      assertThat(string.shrink('A').get(),
         equalTo(''))
     })
 
     it('empty string returns error', () => {
-      assertThat(string.sink('').isOk(),
+      assertThat(string.shrink('').isOk(),
         equalTo(false))
     })
   })
@@ -80,7 +69,7 @@ describe('record', () => {
       properties: {
         prop: {
           oneOf: [{
-            type: 'nonEmptyString'
+            type: 'clampedString(min: 1, max: Infinity)'
           }, {
             const: 'undefined'
           }]
@@ -90,7 +79,7 @@ describe('record', () => {
           required: ['prop'],
           properties: {
             prop: {
-              type: 'nonEmptyString'
+              type: 'clampedString(min: 1, max: Infinity)'
             }
           }
         }
@@ -119,7 +108,7 @@ describe('record', () => {
     it('responds error', () => {
       assertThat(validator.decode({
         prop: ''
-      }).get(), equalTo([{ context: { path: '$.prop' }, message: "can't be empty" }]))
+      }).get(), equalTo([{ context: { path: '$.prop' }, message: "needs to be longer than 1 characters" }]))
     })
   })
 
@@ -179,7 +168,7 @@ describe('array', () => {
     assertThat(JSON.stringify(validator), JSON.stringify({
       type: 'array',
       items: {
-        type: 'nonEmptyString'
+        type: 'clampedString(min: 1, max: Infinity)'
       }
     }))
   })
@@ -247,6 +236,12 @@ describe('option', () => {
       assertThat(validator.encode('a string'), equalTo('a string'))
     })
   })
+
+  describe('shrink', () => {
+    it('decode responds value as is', () => {
+      assertThat(validator.encode('a string'), equalTo('a string'))
+    })
+  })
 })
 
 describe('literal', () => {
@@ -263,7 +258,7 @@ describe('union', () => {
   it('stringifies union properly', () => {
     const validator = union([nonEmptyString, literal(1)])
     assertThat(JSON.stringify(validator),
-      '{"oneOf":[{"type":"nonEmptyString"},{"const":1}]}')
+      '{"oneOf":[{"type":"clampedString(min: 1, max: Infinity)"},{"const":1}]}')
   })
 
   describe('decode', () => {

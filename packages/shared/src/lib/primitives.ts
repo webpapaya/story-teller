@@ -266,7 +266,7 @@ export const string = new Validation<string>({
     () => '',
     () => 'A simple string'
   ],
-  sink: (input) => {
+  shrink: (input) => {
     return input.length === 0
       ? Err(undefined)
       : Ok(input.slice(0, input.length - 1))
