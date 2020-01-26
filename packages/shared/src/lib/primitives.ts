@@ -145,6 +145,10 @@ export const array = <T extends AnyCodec>(schema: T) => {
       })
 
       return result
+    },
+    shrink: (input) => {
+      if (input.length === 0) return Err(undefined)
+      return Ok(input.slice(0, -1))
     }
   })
 }

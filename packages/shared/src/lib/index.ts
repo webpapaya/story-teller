@@ -25,7 +25,11 @@ export const clampedString = (minLength: number, maxLength: number) => new Valid
       return new RandExp(new RegExp(`.{${randBetween(minLength, length)}}`)).gen()
     }
   ],
-  // shrink: (input) => input.slice(0, input.length - 2)
+  shrink: (input) => {
+    return input.length === 0
+      ? Err(undefined)
+      : Ok(input.slice(0, input.length - 1))
+  }
 })
 
 export const nonEmptyString = clampedString(1, Number.POSITIVE_INFINITY)

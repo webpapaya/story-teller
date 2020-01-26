@@ -1,5 +1,5 @@
 // @ts-ignore
-import { assertThat, equalTo, hasProperty, everyItem } from 'hamjest'
+import { assertThat, equalTo, hasProperty, everyItem, hasItem, not, allOf } from 'hamjest'
 import { LocalDate } from 'js-joda'
 import { AnyCodec } from './types'
 import {
@@ -200,6 +200,19 @@ describe('array', () => {
 
     it('encodes recursively', () => {
       assertThat(validator.encode([LocalDate.parse('2000-01-01')]), equalTo(['2000-01-01']))
+    })
+  })
+
+  describe('shrink', () => {
+    const validator = array(nonEmptyString)
+
+    it('empty array returns error', () => {
+      assertThat(validator.shrink([]).isOk(), equalTo(false))
+    })
+
+    it('with removes last item from array', () => {
+      const items = ['first', 'second']
+      assertThat(validator.shrink(items).get(), hasProperty('length', items.length - 1))
     })
   })
 })
