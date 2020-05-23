@@ -40,7 +40,7 @@ const assertDBProperty = async <Codec extends AnyCodec>(
 }
 
 describe('createProject', () => {
-  it.only('creates a new record', async () => {
+  it('creates a new record', async () => {
     await assertDBProperty(Project.aggregate, async ({client}, project) => {
       return assertDifference({ client }, 'project', 1, async () => {
         await createProject({ client }, {
