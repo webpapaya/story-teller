@@ -156,12 +156,12 @@ describe('record', () => {
 describe('array', () => {
   it('stringifies union properly', () => {
     const validator = array(nonEmptyString)
-    assertThat(JSON.stringify(validator), JSON.stringify({
+    assertThat(JSON.stringify(validator), equalTo(JSON.stringify({
       type: 'array',
       items: {
         type: 'nonEmptyString'
       }
-    }))
+    })))
   })
   describe('decode', () => {
     const validator = array(nonEmptyString)
@@ -242,8 +242,8 @@ describe('literal', () => {
 describe('union', () => {
   it('stringifies union properly', () => {
     const validator = union([nonEmptyString, literal(1)])
-    assertThat(JSON.stringify(validator),
-      '{"oneOf":[{"type":"nonEmptyString"},{"const":1}]}')
+    assertThat(JSON.stringify(validator), equalTo(
+      '{"oneOf":[{"type":"nonEmptyString"},{"const":1}]}'))
   })
 
   describe('decode', () => {
@@ -276,8 +276,8 @@ describe('literalUnion', () => {
   const validator = literalUnion([1, 2, 'test'])
 
   it('stringifies union properly', () => {
-    assertThat(JSON.stringify(validator),
-      '{"oneOf":[{"const":1},{"const":2},{"const":"test"}]}')
+    assertThat(JSON.stringify(validator), equalTo(
+      '{"oneOf":[{"const":1},{"const":2},{"const":"test"}]}'))
   })
 
   describe('encode', () => {
@@ -388,3 +388,5 @@ describe('build', () => {
     })
   })
 })
+
+
