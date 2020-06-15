@@ -23,11 +23,16 @@ class ReaderMonad<A, B> {
 }
 
 class ReaderWithArg<A, B, Arg> {
-  constructor(public runReader: (a: A, arg: Arg) => B) {
+  constructor(public runReader: (a: A, arg: Arg) => B, private precondition: ((a: A, arg: Arg) => boolean) = () => true) {
+  }
+
+  preCondition(func: (a: A, arg: Arg) => boolean): ReaderWithArg<A, B, Arg> {
+    return new ReaderWithArg<A, B, Arg>((a, arg) => this.runReader(a, arg), func);
   }
 
   map<C>(func: (b: B, arg: Arg) => C): ReaderWithArg<A, C, Arg> {
     return new ReaderWithArg<A, C, Arg>((a: A, arg: Arg) => {
+      if (!this.precondition(a, arg)) { throw new Error('precondition not met')}
       const b = this.runReader(a, arg);
       return func(b, arg);
     });
