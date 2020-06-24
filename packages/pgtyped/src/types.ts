@@ -1,0 +1,185 @@
+// Default types
+import {
+  isAlias,
+  isEnum,
+  isImport,
+  MappableType,
+  Type,
+} from '@pgtyped/query/lib/type';
+
+const String: Type = { name: 'string' };
+const Number: Type = { name: 'number' };
+const Boolean: Type = { name: 'boolean' };
+const Bytes: Type = { name: 'Buffer' };
+const Void: Type = { name: 'undefined' };
+const Json: Type = {
+  name: 'Json',
+  definition:
+    'null | boolean | number | string | Json[] | { [key: string]: Json }',
+};
+
+const ZonedDateTime = { name: 'ZonedDateTime', from: 'js-joda' };
+const LocalDate = { name: 'LocalDate', from: 'js-joda' };
+const LocalTime = { name: 'LocalTime', from: 'js-joda' };
+const LocalDateTime = { name: 'LocalDateTime', from: 'js-joda' };
+const Duration = { name: 'Duration', from: 'js-joda' };
+
+export const DefaultTypeMapping = Object.freeze({
+  // Integer types
+  int2: Number,
+  int4: Number,
+  int8: Number,
+  smallint: Number,
+  int: Number,
+  bigint: String,
+
+  // Precision types
+  real: Number,
+  float4: Number,
+  float: Number,
+  float8: Number,
+  numeric: Number,
+  decimal: Number,
+
+  // Serial types
+  smallserial: Number,
+  serial: Number,
+  bigserial: String,
+
+  // Common string types
+  uuid: String,
+  text: String,
+  varchar: String,
+  char: String,
+  citext: String,
+
+  // Bool types
+  bit: Boolean, // TODO: better bit array support
+  bool: Boolean,
+  boolean: Boolean,
+
+  // Dates and times
+  date: LocalDate,
+  timestamp: LocalDateTime,
+  timestamptz: ZonedDateTime,
+  time: LocalTime,
+  timetz: LocalTime,
+  interval: Duration,
+
+  // Network address types
+  inet: String,
+  cidr: String,
+  macaddr: String,
+  macaddr8: String,
+
+  // Extra types
+  money: Number,
+  void: Void,
+
+  // JSON types
+  json: Json,
+  jsonb: Json,
+
+  // Bytes
+  bytea: Bytes,
+});
+
+export type BuiltinTypes = keyof typeof DefaultTypeMapping;
+
+export type TypeMapping = Record<BuiltinTypes, Type> & Record<string, Type>;
+
+export function TypeMapping(overrides?: Partial<TypeMapping>): TypeMapping {
+  return { ...DefaultTypeMapping, ...overrides };
+}
+
+function declareImport([...names]: Set<string>, from: string): string {
+  return `import { ${names.join(', ')} } from '${from}';\n`;
+}
+
+function declareAlias(name: string, definition: string): string {
+  return `export type ${name} = ${definition};\n`;
+}
+
+function declareStringUnion(name: string, values: string[]) {
+  return declareAlias(name, values.map(v => `'${v}'`).join(' | '));
+}
+
+function declareEnum(name: string, values: string[]) {
+  return `export const enum ${name} {\n${values
+    .map((v) => `  ${v} = '${v}',`)
+    .join('\n')}\n}\n`;
+}
+
+/** Wraps a TypeMapping to track which types have been used, to accumulate errors,
+ * and emit necessary type definitions. */
+export class TypeAllocator {
+  errors: Error[] = [];
+  // from -> names
+  imports: { [k: string]: Set<string> } = {};
+  // name -> definition (if any)
+  types: { [k: string]: Type } = {};
+
+  constructor(
+    private mapping: TypeMapping,
+    private allowUnmappedTypes?: boolean,
+  ) {
+  }
+
+  isMappedType(name: string): name is keyof TypeMapping {
+    return name in this.mapping;
+  }
+
+  /** Lookup a database-provided type name in the allocator's map */
+  use(typeNameOrType: MappableType): string {
+    let typ: Type;
+
+    if (typeof typeNameOrType == 'string') {
+      if (!this.isMappedType(typeNameOrType)) {
+        if (this.allowUnmappedTypes) {
+          return typeNameOrType;
+        }
+        this.errors.push(
+          new Error(
+            `Postgres type '${typeNameOrType}' is not supported by mapping`,
+          ),
+        );
+        return 'never';
+      }
+      typ = this.mapping[typeNameOrType];
+    } else {
+      typ = typeNameOrType;
+    }
+
+    // Track type on first occurrence
+    this.types[typ.name] = this.types[typ.name] ?? typ;
+
+    // Merge imports
+    if (isImport(typ)) {
+      this.imports[typ.from] = (this.imports[typ.from] ?? new Set()).add(
+        typ.name,
+      );
+    }
+
+    return typ.name;
+  }
+
+  /** Emit a typescript definition for all types that have been used */
+  declaration(): string {
+    const imports = Object.entries(this.imports)
+      .map(([from, names]) => declareImport(names, from))
+      .join('\n');
+
+    // Declare database enums as string unions to maintain assignability of their values between query files
+    const enums = Object.values(this.types)
+      .filter(isEnum)
+      .map((t) => declareStringUnion(t.name, t.enumValues))
+      .join('\n');
+
+    const aliases = Object.values(this.types)
+      .filter(isAlias)
+      .map((t) => declareAlias(t.name, t.definition))
+      .join('\n');
+
+    return [imports, enums, aliases].filter((s) => s).join('\n');
+  }
+}
