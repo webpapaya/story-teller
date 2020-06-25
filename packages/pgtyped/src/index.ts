@@ -2,7 +2,7 @@
 
 import { AsyncQueue, startup } from '@pgtyped/query';
 import chokidar from 'chokidar';
-import fs from 'fs';
+import * as fs from 'fs';
 import glob from 'glob';
 import minimist from 'minimist';
 import nun from 'nunjucks';

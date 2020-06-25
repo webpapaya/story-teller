@@ -88,7 +88,7 @@ export async function queryToTypeDeclarations(
   returnTypes.forEach(({ returnName, type, nullable }) => {
     let tsTypeName = types.use(type);
     if (nullable) {
-      tsTypeName += ' | null';
+      tsTypeName += ' | null | undefined';
     }
 
     returnFieldTypes.push({

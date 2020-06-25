@@ -8,6 +8,7 @@
     "infrastructure:ready": "npm run env -- until docker-compose -p $ENV_FILE exec db pg_isready -U postgres",
     "infrastructure:down": "npm run env -- docker-compose -p $ENV_FILE down",
     "infrastructure:implode": "npm run infrastructure:down -- -v",
+    "db:build:queries": "PGPORT=25432 PGDATABASE=compup_test PGUSER=compup PGPASSWORD=password  ./node_modules/.bin/pgtyped -c pgtyped.config.json",
     "db:migrate:create": "npm run env -- db-migrate create",
     "db:migrate:up": "npm run env -- db-migrate up",
     "db:migrate:down": "npm run env -- db-migrate down",
@@ -56,6 +57,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@pgtyped/cli": "^0.7.3",
     "@story-teller/shared": "*",
     "@types/expect": "^1.20.4",
     "@types/mocha": "^5.2.7",

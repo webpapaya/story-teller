@@ -4,6 +4,9 @@ import { matchesRegex, union } from './primitives'
 import { randBetween } from './utils'
 import RandExp from 'randexp'
 
+const isJSJodaType = <T>(name: string, input: any): input is T =>
+  typeof input === 'object' && input !== null && input.constructor.toString().includes(name)
+
 export const clampedString = (minLength: number, maxLength: number) => new Validation<string>({
   name: `clampedString(min: ${minLength}, max: ${maxLength})`,
   decode: (input, context) => {
@@ -33,9 +36,10 @@ export const uuid = matchesRegex('uuid', /([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F
 
 export const date = new Codec<string, LocalDate, unknown>({
   name: 'date',
-  is: (value) => value instanceof LocalDate,
+  is: (value) => isJSJodaType<LocalDate>('LocalDate', value),
   decode: (input, context) => {
     const error = Err([{ message: 'needs to be an ISO string', context }])
+    if (isJSJodaType<LocalDate>('LocalDate', input)) { return Ok(input) }
     if (typeof input !== 'string') { return error }
     try {
       return Ok(LocalDate.parse(input))
@@ -98,9 +102,10 @@ export const dateInPastOrToday = union([dateToday, dateInPast])
 
 export const localDateTime = new Codec<string, LocalDateTime, unknown>({
   name: 'localDateTime',
-  is: (value) => value instanceof LocalDateTime,
+  is: (value) => isJSJodaType<LocalDateTime>('LocalDateTime', value),
   decode: (input, context) => {
     const error = Err([{ message: 'needs to be an ISO string', context }])
+    if (isJSJodaType<LocalDateTime>('LocalDateTime', input)) { return Ok(input) }
     if (typeof input !== 'string') { return error }
     try {
       return Ok(LocalDateTime.parse(input))

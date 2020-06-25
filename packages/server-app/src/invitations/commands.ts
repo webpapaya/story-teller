@@ -36,7 +36,7 @@ import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 // })
 
 // context invitations
-const invitationAggregate = v.aggregate({
+export const invitationAggregate = v.aggregate({
   id: v.uuid,
   companyName: v.nonEmptyString,
   companyId: v.uuid,
@@ -48,6 +48,8 @@ const invitationAggregate = v.aggregate({
     answeredAt: v.localDateTime
   }))
 })
+
+export type Invitation = typeof invitationAggregate['O']
 
 export const actions = {
   inviteToCompany: v.record({

@@ -8,12 +8,12 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "tsc --declaration",
+    "build": "tsc",
     "check": "tsc --noEmit",
     "watch": "tsc --declaration --watch --preserveWatchOutput"
   },
   "bin": {
-    "pgtyped": "./lib/index.js"
+    "pgtyped": "./src/index.js"
   },
   "jest": {
     "roots": [
