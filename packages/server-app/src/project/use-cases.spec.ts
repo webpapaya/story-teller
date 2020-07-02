@@ -106,7 +106,7 @@ export const addUserContact = useCaseWithArgFromCodec(userCodec, contactCodec)
   })
 
 
-describe.only('user', () => {
+describe('user', () => {
   it('enables a user', () => {
     const disabledUser: UserT = {
       name: 'sepp',

@@ -1,62 +1,58 @@
-import { assertThat, hasProperties, equalTo, hasProperty } from 'hamjest'
-import { t, assertDifference } from '../spec-helpers'
-import { ensureInvitation } from './repository.types'
-import uuid from 'uuid'
-import { Invitation, invitationAggregate } from './commands'
-import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
-import { PreparedQuery, } from '@pgtyped/query';
+import { PreparedQuery } from '@pgtyped/query'
 import { PoolClient } from 'pg'
+import { ensureInvitation, deleteInvitationById, findInvitationById, IFindInvitationByIdResult } from './repository.types'
+import { Invitation, invitationAggregate } from './commands'
 
-const buildRepository = <DomainObject, DBType, Params>(config: {
-  query: PreparedQuery<Params, DBType>,
-  toRepository: (input: DomainObject) => Params,
-  toDomain: (input: DBType) => DomainObject,
-}) => async (input: DomainObject, client: PoolClient) => {
-  const repository = config.toRepository(input)
-  const result = await config.query.run(repository, client)
+const buildRepository = <DomainObject, DBParam, DomainResult, DBResult>(config: {
+  dbFunction: PreparedQuery<DBParam, DBResult>,
+  toRepository: (domainObject: DomainObject) => DBParam,
+  toDomain: (dbResult: DBResult) => DomainResult
+}) => async (params: DomainObject, client: PoolClient) => {
+  const repository = config.toRepository(params)
+  const result = await config.dbFunction.run(repository, client)
   return result.map((item) => config.toDomain(item))
 }
 
-const ensure = buildRepository({
-  query: ensureInvitation,
+const toDomain = (response: IFindInvitationByIdResult) => {
+  const { kind, answeredAt, ...invitation } = response
+  const result = {
+    ...invitation,
+    response: kind && answeredAt ? { kind, answeredAt } : undefined
+  }
+
+  if (invitationAggregate.is(result)) { return result }
+  throw new Error('Decoding error')
+}
+
+export const ensure = buildRepository({
+  dbFunction: ensureInvitation,
   toRepository: (invitation: Invitation) => {
     const {response, ...rest} = invitation
     const kind = response?.kind
     const answeredAt = response?.answeredAt
     const invitedAt = rest.invitedAt
-    return { ...rest, invitedAt, answeredAt, kind }
-  },
-  toDomain: (response) => {
-    const { kind, answeredAt, ...invitation } = response
-    const result = {
-      ...invitation,
-      response: kind && answeredAt ? { kind, answeredAt } : undefined
+    return {
+      ...rest,
+      invitedAt,
+      answeredAt,
+      kind
     }
-
-    if (invitationAggregate.is(result)) { return result }
-    throw new Error('Decoding error')
-  }
-
+  },
+  toDomain
 })
 
-describe.only('ensureInvitation', () => {
-  const invitation: Invitation = {
-    id: uuid(),
-    companyName: 'hallo',
-    companyId: uuid(),
-    inviteeId: uuid(),
-    inviterId: uuid(),
-    invitedAt: LocalDateTime.now().withNano(0),
-    response: {
-      kind: 'accepted',
-      answeredAt: LocalDateTime.now().withNano(0)
-    },
-  }
+export const destroy = buildRepository({
+  dbFunction: deleteInvitationById,
+  toRepository: (invitation: Invitation) => {
+    return { id: invitation.id }
+  },
+  toDomain
+})
 
-  it('creates a new record', t(async ({ client }) => {
-    await assertDifference({ client }, 'invitation', 1, async () => {
-      const result = await ensure(invitation, client)
-      assertThat(result, hasProperty('0.id', invitation.id))
-    })
-  }))
+export const whereById = buildRepository({
+  dbFunction: findInvitationById,
+  toRepository: (id: Invitation['id']) => {
+    return { id }
+  },
+  toDomain
 })

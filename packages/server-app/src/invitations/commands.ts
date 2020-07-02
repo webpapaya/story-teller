@@ -3,39 +3,6 @@ import { useCaseWithArgFromCodec, useCaseFromCodec } from '../project/use-case'
 import { nonEmptyString } from '@story-teller/shared/dist/lib'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 
-// const nonEmptyString = v.clampedString(1, Number.POSITIVE_INFINITY)
-// const signIn = v.record({
-//   userIdentifier: v.string,
-//   password: v.string
-// })
-// const signUp = v.record({
-//   userIdentifier: v.string,
-//   password: v.string,
-//   termsAccepted: v.string,
-// })
-
-// const company = v.aggregate({
-//   id: v.uuid,
-//   name: nonEmptyString,
-//   ownerId: v.uuid,
-// })
-
-// const createCompany = v.record({
-//   id: v.uuid,
-//   name: nonEmptyString,
-//   ownerId: v.uuid
-// })
-
-// const leaveCompany = v.record({
-//   companyId: v.uuid,
-// })
-
-// const renameCompany = v.record({
-//   companyId: v.uuid,
-//   name: v.uuid,
-// })
-
-// context invitations
 export const invitationAggregate = v.aggregate({
   id: v.uuid,
   companyName: v.nonEmptyString,

@@ -3,7 +3,7 @@ import { inviteToCompany, acceptInvitation, rejectInvitation } from './commands'
 import uuid from 'uuid'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 
-describe.only('invitation', () => {
+describe('invitation', () => {
   const invitation = {
     id: uuid(),
     inviteeId: uuid(),

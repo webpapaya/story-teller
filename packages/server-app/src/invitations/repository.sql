@@ -1,7 +1,6 @@
 /* @name findInvitationById */
 SELECT * FROM invitation WHERE id = :id;
 
-
 /* @name ensureInvitation */
 INSERT INTO invitation (
   id,
@@ -22,4 +21,10 @@ DO UPDATE
       invited_at = EXCLUDED.invited_at,
       kind = EXCLUDED.kind,
       answered_at = EXCLUDED.answered_at
+RETURNING *;
+
+
+/* @name deleteInvitationById */
+DELETE FROM invitation
+WHERE id = :id
 RETURNING *;
