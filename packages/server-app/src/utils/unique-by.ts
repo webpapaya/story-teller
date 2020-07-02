@@ -5,3 +5,6 @@ export function uniqueBy<Type, Key extends keyof Type> (key: Key, array: Type[])
     return result
   }, {}))
 }
+
+export const unique = <Type>(array: Type[]): Type[] =>
+  [...new Set(array)]
