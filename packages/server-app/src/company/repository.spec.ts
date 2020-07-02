@@ -1,10 +1,10 @@
 import uuid from 'uuid'
 import { t, assertDifference } from '../spec-helpers'
-import { ensure } from './repository'
+import { ensure, destroy } from './repository'
 import { Company, companyAggregate, addEmployee } from './commands'
 import { assertThat, truthy, hasProperty } from 'hamjest'
 
-describe.only('invitation repository', () => {
+describe('invitation repository', () => {
   const company: Company = {
     id: uuid(),
     name: 'Some company',
@@ -47,6 +47,22 @@ describe.only('invitation repository', () => {
         })
       }))
     })
+  })
+
+  describe('destroy', () => {
+    it('removes company', t(async ({ client }) => {
+      await ensure(company, client)
+      await assertDifference({ client }, 'company', -1, async () => {
+        await destroy(company.id, client)
+      })
+    }))
+
+    it('removes employees', t(async ({ client }) => {
+      await ensure(company, client)
+      await assertDifference({ client }, 'company_employee', -1, async () => {
+        await destroy(company.id, client)
+      })
+    }))
   })
 })
 

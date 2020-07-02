@@ -1,6 +1,6 @@
 import { PreparedQuery } from '@pgtyped/query'
 import { PoolClient } from 'pg'
-import { ensureCompany } from './repository.types'
+import { ensureCompany, deleteCompanyById } from './repository.types'
 import { Company } from './commands'
 
 const buildRepository = <DomainObject, DBParam, DomainResult, DBResult>(config: {
@@ -28,4 +28,10 @@ export const ensure = buildRepository({
   }
 })
 
-
+export const destroy = buildRepository({
+  dbFunction: deleteCompanyById,
+  toRepository: (id: Company['id']) => {
+    return { id: id }
+  },
+  toDomain: () => {}
+})

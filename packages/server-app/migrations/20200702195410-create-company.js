@@ -12,7 +12,7 @@ exports.up = function (db) {
     public.company_employee (
       id             uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
       role           text NOT NULL,
-      company_id     uuid REFERENCES public.company(id) ON DELETE SET NULL
+      company_id     uuid REFERENCES public.company(id) ON DELETE CASCADE
     );
   `)
 }

@@ -3,7 +3,7 @@ import { Company, addEmployee, removeEmployee, setEmployeeRole, rename } from '.
 import uuid from 'uuid'
 
 
-describe('invitation', () => {
+describe('company', () => {
   const company: Company = {
     id: uuid(),
     name: 'Some company',
@@ -14,7 +14,7 @@ describe('invitation', () => {
     it('WHEN employee not already added, adds employee to company', () => {
       const personId = uuid()
       assertThat(addEmployee.runReader(company, { companyId: company.id, personId }), hasProperties({
-        employees: [personId]
+        employees: [{id: personId, role: 'employee'}]
       }))
     })
 

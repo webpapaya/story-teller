@@ -57,3 +57,28 @@ const ensureCompanyIR: any = {"name":"ensureCompany","params":[{"name":"employee
 export const ensureCompany = new PreparedQuery<IEnsureCompanyParams,IEnsureCompanyResult>(ensureCompanyIR);
 
 
+/** 'deleteCompanyById' parameters type */
+export interface IDeleteCompanyByIdParams {
+  id: string | null | void;
+}
+
+/** 'deleteCompanyById' return type */
+export type IDeleteCompanyByIdResult = void;
+
+/** 'deleteCompanyById' query type */
+export interface IDeleteCompanyByIdQuery {
+  params: IDeleteCompanyByIdParams;
+  result: IDeleteCompanyByIdResult;
+}
+
+const deleteCompanyByIdIR: any = {"name":"deleteCompanyById","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":814,"b":815,"line":32,"col":32}]}}],"usedParamSet":{"id":true},"statement":{"body":"delete from company where id = :id","loc":{"a":782,"b":815,"line":32,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * delete from company where id = :id
+ * ```
+ */
+export const deleteCompanyById = new PreparedQuery<IDeleteCompanyByIdParams,IDeleteCompanyByIdResult>(deleteCompanyByIdIR);
+
+

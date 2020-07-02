@@ -25,3 +25,8 @@ WITH company_insert as (
 )
 from company_insert;
 
+
+/*
+  @name deleteCompanyById
+*/
+delete from company where id = :id;

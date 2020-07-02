@@ -53,7 +53,7 @@ export const rename = useCaseWithArgFromCodec(companyAggregate, actions.rename)
 
 export const addEmployee = useCaseWithArgFromCodec(companyAggregate, actions.addEmployee)
   .preCondition((company, cmd) => cmd.companyId === company.id)
-  .map((company, cmd) => ({ ...company, employees: uniqueBy('id', [...company.employees, { id: cmd.personId, role: 'employee' }]) }))
+  .map((company, cmd) => ({ ...company, employees: uniqueBy('id', [{ id: cmd.personId, role: 'employee' }, ...company.employees]) }))
 
 export const removeEmployee = useCaseWithArgFromCodec(companyAggregate, actions.removeEmployee)
   .preCondition((company, cmd) => cmd.companyId === company.id)
