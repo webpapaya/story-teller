@@ -23,16 +23,15 @@ export const actions = {
     companyName: nonEmptyString,
     companyId: v.uuid,
     inviteeId: v.uuid,
-    inviterId: v.uuid,
+    inviterId: v.uuid
   }),
   acceptInvitation: v.record({
-    id: v.uuid,
+    id: v.uuid
   }),
   rejectInvitation: v.record({
     id: v.uuid
   })
 } as const
-
 
 export const inviteToCompany = useCaseFromCodec(actions.inviteToCompany)
   .map((payload) => ({ ...payload, invitedAt: LocalDateTime.now(), response: undefined }))

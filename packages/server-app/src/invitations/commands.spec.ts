@@ -12,7 +12,7 @@ describe('invitation', () => {
     companyName: 'A company',
     invitedAt: LocalDateTime.now(),
     response: undefined
-  };
+  }
 
   describe('inviteToCompany', () => {
     it('creates a new invitation with given values', () => {
@@ -20,7 +20,7 @@ describe('invitation', () => {
         ...invitation,
         id: string(),
         invitedAt: instanceOf(LocalDateTime),
-        response: undefined,
+        response: undefined
       }))
     })
 

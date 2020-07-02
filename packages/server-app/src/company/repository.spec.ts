@@ -8,8 +8,8 @@ describe('invitation repository', () => {
   const company: Company = {
     id: uuid(),
     name: 'Some company',
-    employees: [{ id: uuid(), role: 'employee' }],
-  };
+    employees: [{ id: uuid(), role: 'employee' }]
+  }
 
   describe('ensure', () => {
     describe('WHEN record does not exist', () => {
@@ -33,7 +33,7 @@ describe('invitation repository', () => {
         await ensure(company, client)
         await assertDifference({ client }, 'company_employee', 0, async () => {
           const updatedName = 'updated'
-          const result = await ensure({...company, name: updatedName}, client)
+          const result = await ensure({ ...company, name: updatedName }, client)
           assertThat(result, hasProperty('0.name', updatedName))
         })
       }))
@@ -42,7 +42,7 @@ describe('invitation repository', () => {
         await ensure(addEmployee.runReader(company, { personId: uuid(), companyId: company.id }), client)
         await assertDifference({ client }, 'company_employee', -1, async () => {
           const updatedName = 'updated'
-          const result = await ensure({...company, name: updatedName}, client)
+          const result = await ensure({ ...company, name: updatedName }, client)
           assertThat(result, hasProperty('0.name', updatedName))
         })
       }))
@@ -65,5 +65,3 @@ describe('invitation repository', () => {
     }))
   })
 })
-
-

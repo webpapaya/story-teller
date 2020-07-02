@@ -17,7 +17,7 @@ describe('invitation repository', () => {
     response: {
       kind: 'accepted',
       answeredAt: LocalDateTime.now().withNano(0)
-    },
+    }
   }
 
   describe('find', () => {
@@ -43,7 +43,7 @@ describe('invitation repository', () => {
       await ensure(invitation, client)
       await assertDifference({ client }, 'invitation', 0, async () => {
         const updatedCompanyName = 'updated'
-        const result = await ensure({...invitation, companyName: updatedCompanyName }, client)
+        const result = await ensure({ ...invitation, companyName: updatedCompanyName }, client)
         assertThat(result, hasProperty('0.companyName', updatedCompanyName))
       })
     }))

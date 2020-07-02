@@ -2,12 +2,11 @@ import { Lens, Optional } from 'monocle-ts'
 import { v, AnyCodec } from '@story-teller/shared'
 import deepEqual from 'deep-equal'
 import { assertThat, equalTo, hasProperty, allOf, throws } from 'hamjest'
-import { literal } from '@story-teller/shared/dist/lib';
-import { some, none } from 'fp-ts/lib/Option';
-import { useCaseFromCodec, useCaseWithArgFromCodec } from './use-case';
+import { literal } from '@story-teller/shared/dist/lib'
+import { some, none } from 'fp-ts/lib/Option'
+import { useCaseFromCodec, useCaseWithArgFromCodec } from './use-case'
 
 const nonEmptyString = v.clampedString(1, Number.POSITIVE_INFINITY)
-const emailValueCodec = nonEmptyString
 
 const addressCodec = v.record({
   kind: literal('address'),
@@ -16,33 +15,33 @@ const addressCodec = v.record({
   zipCode: v.clampedString(4, 5),
   country: v.union([
     v.literal('at'),
-    v.literal('de'),
+    v.literal('de')
   ])
 })
 type AddressT = typeof addressCodec.O
 
 const emailCodec = v.record({
   kind: literal('email'),
-  value: nonEmptyString,
+  value: nonEmptyString
 })
 type EmailT = typeof emailCodec.O
 
 const phoneCodec = v.record({
   kind: literal('phone'),
-  value: nonEmptyString,
+  value: nonEmptyString
 })
 type PhoneT = typeof phoneCodec.O
 
 const contactCodec = v.union([
   emailCodec,
   addressCodec,
-  phoneCodec,
+  phoneCodec
 ])
 type ContactT = typeof contactCodec.O
 
 const withRequiredStandardCodec = (codec: AnyCodec) => v.record({
-  standard: contactCodec,
-  others: v.array(contactCodec)
+  standard: codec,
+  others: v.array(codec)
 })
 
 const userCodec = v.record({
@@ -68,9 +67,9 @@ const otherContacts = new Lens<UserT, ContactT[]>(
 const standardContact = new Optional<UserT, ContactT>(
   (user) => user.contact?.standard ? some(user.contact.standard) : none,
   (standard) => (user) => {
-    const contacts = otherContacts.get(user);
-    const others = contacts.filter((contact) => !deepEqual(contact, standard));
-    return ({ ...user, contact: { others, standard }})
+    const contacts = otherContacts.get(user)
+    const others = contacts.filter((contact) => !deepEqual(contact, standard))
+    return ({ ...user, contact: { others, standard } })
   }
 )
 
@@ -104,7 +103,6 @@ export const addUserContact = useCaseWithArgFromCodec(userCodec, contactCodec)
     const nextContacts = [...contacts, contactToAdd]
     return otherContacts.set(nextContacts)(user)
   })
-
 
 describe('user', () => {
   it('enables a user', () => {
@@ -187,10 +185,9 @@ describe('user', () => {
       const newEmail = { kind: 'email', value: 'whatever@test.com' }
       assertThat(changeStandardContact.runReader(enabledUser, { kind: 'email', value: 'whatever@test.com' }), allOf(
         hasProperty('contact.standard', equalTo(newEmail)),
-        hasProperty('contact.others', equalTo([enabledUser.contact!.standard]))),
+        hasProperty('contact.others', equalTo([enabledUser.contact!.standard])))
       )
     })
-
 
     it('when no contact exists', () => {
       const enabledUser: UserT = {
@@ -202,7 +199,7 @@ describe('user', () => {
       const newEmail = { kind: 'email', value: 'whatever@test.com' }
       assertThat(changeStandardContact.runReader(enabledUser, { kind: 'email', value: 'whatever@test.com' }), allOf(
         hasProperty('contact.standard', equalTo(newEmail)),
-        hasProperty('contact.others', equalTo([])),
+        hasProperty('contact.others', equalTo([]))
       ))
     })
   })
@@ -236,4 +233,3 @@ describe('user', () => {
     })
   })
 })
-

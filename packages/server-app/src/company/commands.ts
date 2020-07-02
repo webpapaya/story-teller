@@ -1,9 +1,8 @@
 import { v } from '@story-teller/shared'
 import { useCaseWithArgFromCodec } from '../project/use-case'
-import { unique, uniqueBy } from '../utils/unique-by'
+import { uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
 import { array } from 'fp-ts/lib/Array'
-
 
 const employeeRoles = v.union([v.literal('manager'), v.literal('employee')])
 
@@ -24,21 +23,21 @@ export type Company = typeof companyAggregate['O']
 export const actions = {
   rename: v.record({
     companyId: v.uuid,
-    name: v.nonEmptyString,
+    name: v.nonEmptyString
   }),
   addEmployee: v.record({
     companyId: v.uuid,
-    personId: v.uuid,
+    personId: v.uuid
   }),
   removeEmployee: v.record({
     companyId: v.uuid,
-    personId: v.uuid,
+    personId: v.uuid
   }),
   setEmployeeRole: v.record({
     companyId: v.uuid,
     personId: v.uuid,
-    role: employeeRoles,
-  }),
+    role: employeeRoles
+  })
 } as const
 
 const employeeRole = Lens.fromProp<Employee>()('role')

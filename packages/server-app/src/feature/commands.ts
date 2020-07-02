@@ -117,6 +117,5 @@ export const ensureTags: EnsureTags = async ({ client }, params) => {
   `)
   await client.query(query)
 
-
   return Ok(params.tags)
 }
