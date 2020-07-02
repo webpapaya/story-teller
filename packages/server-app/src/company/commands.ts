@@ -1,6 +1,6 @@
 import { v } from '@story-teller/shared'
 import { useCaseWithArgFromCodec } from '../project/use-case'
-import { unique } from '../utils/unique-by'
+import { unique, uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
 import { array } from 'fp-ts/lib/Array'
 
@@ -16,7 +16,7 @@ export type Employee = typeof employeeEntity['O']
 export const companyAggregate = v.aggregate({
   id: v.uuid,
   name: v.nonEmptyString,
-  employeeIds: v.array(employeeEntity)
+  employees: v.array(employeeEntity)
 })
 
 export type Company = typeof companyAggregate['O']
@@ -42,7 +42,7 @@ export const actions = {
 } as const
 
 const employeeRole = Lens.fromProp<Employee>()('role')
-const employees = Lens.fromProp<Company>()('employeeIds')
+const employees = Lens.fromProp<Company>()('employees')
 const employeeTraversal = fromTraversable(array)<Employee>()
 const employeePrism = (id: string): Prism<Employee, Employee> => Prism.fromPredicate(child => child.id === id)
 const nameLens = Lens.fromProp<Company>()('name')
@@ -53,11 +53,11 @@ export const rename = useCaseWithArgFromCodec(companyAggregate, actions.rename)
 
 export const addEmployee = useCaseWithArgFromCodec(companyAggregate, actions.addEmployee)
   .preCondition((company, cmd) => cmd.companyId === company.id)
-  .map((company, cmd) => ({ ...company, employeeIds: unique([...company.employeeIds, cmd.personId]) }))
+  .map((company, cmd) => ({ ...company, employees: uniqueBy('id', [...company.employees, { id: cmd.personId, role: 'employee' }]) }))
 
 export const removeEmployee = useCaseWithArgFromCodec(companyAggregate, actions.removeEmployee)
   .preCondition((company, cmd) => cmd.companyId === company.id)
-  .map((company, cmd) => ({ ...company, employeeIds: company.employeeIds.filter((personId: { id: string }) => personId.id !== cmd.personId) }))
+  .map((company, cmd) => ({ ...company, employees: company.employees.filter((personId: { id: string }) => personId.id !== cmd.personId) }))
 
 export const setEmployeeRole = useCaseWithArgFromCodec(companyAggregate, actions.setEmployeeRole)
   .preCondition((company, cmd) => cmd.companyId === company.id)

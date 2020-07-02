@@ -7,21 +7,21 @@ describe('invitation', () => {
   const company: Company = {
     id: uuid(),
     name: 'Some company',
-    employeeIds: [],
+    employees: [],
   };
 
   describe('addEmployee', () => {
     it('WHEN employee not already added, adds employee to company', () => {
       const personId = uuid()
       assertThat(addEmployee.runReader(company, { companyId: company.id, personId }), hasProperties({
-        employeeIds: [personId]
+        employees: [personId]
       }))
     })
 
     it('WHEN employee is already present in company, does not add employee twice', () => {
       const personId = uuid()
-      assertThat(addEmployee.runReader({ ...company, employeeIds: [{ id: personId, role: 'manager'}] }, { companyId: company.id, personId }),
-        hasProperty('employeeIds.0', { id: personId, role: 'manager' }))
+      assertThat(addEmployee.runReader({ ...company, employees: [{ id: personId, role: 'manager'}] }, { companyId: company.id, personId }),
+        hasProperty('employees.0', { id: personId, role: 'manager' }))
     })
 
     it('WHEN companyID in cmd is different, throws error', () => {
@@ -33,14 +33,14 @@ describe('invitation', () => {
     it('WHEN employee not already added, does nothing', () => {
       const personId = uuid()
       assertThat(removeEmployee.runReader(company, { companyId: company.id, personId }), hasProperties({
-        employeeIds: []
+        employees: []
       }))
     })
 
     it('WHEN employee is in company, removes it', () => {
       const personId = uuid()
-      assertThat(removeEmployee.runReader({ ...company, employeeIds: [{ id: personId, role: 'manager'}]  }, { companyId: company.id, personId }), hasProperties({
-        employeeIds: []
+      assertThat(removeEmployee.runReader({ ...company, employees: [{ id: personId, role: 'manager'}]  }, { companyId: company.id, personId }), hasProperties({
+        employees: []
       }))
     })
   })
@@ -55,14 +55,14 @@ describe('invitation', () => {
   describe('setEmployeeRole', () => {
     it('WHEN employee exists, sets role', () => {
       const personId = uuid()
-      assertThat(setEmployeeRole.runReader({ ...company, employeeIds: [{ id: personId, role: 'manager'}] }, { companyId: company.id, personId, role: 'employee' }),
-        hasProperty('employeeIds.0.role', 'employee'))
+      assertThat(setEmployeeRole.runReader({ ...company, employees: [{ id: personId, role: 'manager'}] }, { companyId: company.id, personId, role: 'employee' }),
+        hasProperty('employees.0.role', 'employee'))
     })
 
     it('WHEN employee does not exists, does nothing', () => {
       const personId = uuid()
-      assertThat(setEmployeeRole.runReader({ ...company, employeeIds: [] }, { companyId: company.id, personId, role: 'employee' }),
-        hasProperty('employeeIds', []))
+      assertThat(setEmployeeRole.runReader({ ...company, employees: [] }, { companyId: company.id, personId, role: 'employee' }),
+        hasProperty('employees', []))
     })
   })
 })
