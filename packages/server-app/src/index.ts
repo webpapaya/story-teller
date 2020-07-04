@@ -6,7 +6,6 @@ import { register, requestPasswordReset, resetPasswordByToken } from './authenti
 import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
-import { createFeature, updateFeature, setFeatureTags } from './feature/commands'
 import { UserAuthentication } from './domain'
 import {
   Authentication,
@@ -15,13 +14,9 @@ import {
   Tags,
   Project
 } from '@story-teller/shared'
-import { whereFeature, whereTags } from './feature/queries'
 import { commandViaHTTP } from './command-via-http'
 import { Result, Ok, Err } from 'space-lift'
 import { Errors } from './errors'
-import { whereRevision } from './revisions/queries'
-import { createProject, assignContributorToProject } from './project/commands'
-import { queryProject } from './project/queries'
 
 const app = express()
 const port = process.env.API_PORT
@@ -110,105 +105,6 @@ commandViaHTTP(Authentication.actions.signOut, {
   useCase: async ({ res }) => {
     res.clearCookie('session')
     return Ok({})
-  }
-})
-
-commandViaHTTP(Feature.actions.create, {
-  app,
-  middlewares: [isAuthenticated],
-  dependencies: { withinConnection },
-  useCase: async (deps, params) => {
-    return deps.withinConnection(({ client }) => {
-      return createFeature({ client }, params)
-    })
-  }
-})
-
-commandViaHTTP(Feature.actions.update, {
-  app,
-  middlewares: [isAuthenticated],
-  dependencies: { withinConnection },
-  useCase: async (deps, params) => {
-    return deps.withinConnection(({ client }) => {
-      return updateFeature({ client }, params)
-    })
-  }
-})
-
-commandViaHTTP(Feature.actions.setTags, {
-  app,
-  middlewares: [isAuthenticated],
-  dependencies: { withinConnection },
-  useCase: async (deps, params) => {
-    return deps.withinConnection(({ client }) => {
-      return setFeatureTags({ client }, params)
-    })
-  }
-})
-
-commandViaHTTP(Tags.queries.where, {
-  app,
-  middlewares: [isAuthenticated],
-  dependencies: { withinConnection },
-  useCase: async (deps) => {
-    return deps.withinConnection(({ client }) => {
-      return whereTags({ client })
-    })
-  }
-})
-
-commandViaHTTP(Feature.queries.where, {
-  app,
-  middlewares: [isAuthenticated],
-  dependencies: { withinConnection },
-  useCase: async (deps) => {
-    return deps.withinConnection(({ client }) => {
-      return whereFeature({ client })
-    })
-  }
-})
-
-commandViaHTTP(Revision.queries.where, {
-  app,
-  middlewares: [isAuthenticated],
-  dependencies: { withinConnection },
-  useCase: async (deps, params) => {
-    return deps.withinConnection(({ client }) => {
-      return whereRevision({ client }, params)
-    })
-  }
-})
-
-commandViaHTTP(Project.actions.create, {
-  app,
-  middlewares: [isAuthenticated],
-  dependencies: { withinConnection },
-  useCase: async (deps, params) => {
-    return deps.withinConnection(({ client }) => {
-      return createProject({ client }, { ...params, userId: deps.auth.user!.id })
-    })
-  }
-})
-
-commandViaHTTP(Project.queries.whereProjects, {
-  app,
-  middlewares: [isAuthenticated],
-  dependencies: { withinConnection },
-  useCase: async (deps) => {
-    return deps.withinConnection(({ client }) => {
-      return queryProject({ client }, { userId: deps.auth.user!.id })
-    })
-  }
-})
-
-commandViaHTTP(Project.actions.assignContributor, {
-  app,
-  middlewares: [isAuthenticated],
-  dependencies: { withinConnection },
-  useCase: async (deps, params) => {
-    return deps.withinConnection(({ client }) => {
-      return assignContributorToProject({ client }, params)
-    })
   }
 })
 

@@ -1,5 +1,5 @@
 import { v } from '@story-teller/shared'
-import { useCaseWithArgFromCodec, useCaseFromCodec } from '../project/use-case'
+import { useCaseWithArgFromCodec, useCaseFromCodec } from '../utils/use-case'
 import { nonEmptyString } from '@story-teller/shared/dist/lib'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 

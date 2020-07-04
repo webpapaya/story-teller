@@ -1,5 +1,5 @@
 import { v } from '@story-teller/shared'
-import { useCaseWithArgFromCodec } from '../project/use-case'
+import { useCaseWithArgFromCodec } from '../utils/use-case'
 import { uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
 import { array } from 'fp-ts/lib/Array'
