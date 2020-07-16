@@ -1,6 +1,6 @@
 import { v } from '@story-teller/shared'
-import { useCaseWithArgFromCodec, useCaseFromCodec } from '../utils/use-case'
-import { nonEmptyString } from '@story-teller/shared/dist/lib'
+import { useCase, useCaseWithoutAggregate } from '../utils/use-case'
+import { nonEmptyString, aggregate } from '@story-teller/shared/dist/lib'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 
 export const invitationAggregate = v.aggregate({
@@ -20,6 +20,7 @@ export type Invitation = typeof invitationAggregate['O']
 
 export const actions = {
   inviteToCompany: v.record({
+    id: v.uuid,
     companyName: nonEmptyString,
     companyId: v.uuid,
     inviteeId: v.uuid,
@@ -33,13 +34,29 @@ export const actions = {
   })
 } as const
 
-export const inviteToCompany = useCaseFromCodec(actions.inviteToCompany)
-  .map((payload) => ({ ...payload, invitedAt: LocalDateTime.now(), response: undefined }))
 
-export const acceptInvitation = useCaseWithArgFromCodec(invitationAggregate, actions.acceptInvitation)
-  .preCondition((aggregate, action) => aggregate.id === action.id)
-  .map((payload) => ({ ...payload, response: { kind: 'accepted', answeredAt: LocalDateTime.now() } }))
+export const inviteToCompany = useCaseWithoutAggregate({
+  action: actions.inviteToCompany,
+  aggregate: invitationAggregate,
+  execute: ({ action }) => ({ ...action, invitedAt: LocalDateTime.now(), response: undefined })
+})
 
-export const rejectInvitation = useCaseWithArgFromCodec(invitationAggregate, actions.rejectInvitation)
-  .preCondition((aggregate, action) => aggregate.id === action.id)
-  .map((payload) => ({ ...payload, response: { kind: 'rejected', answeredAt: LocalDateTime.now() } }))
+export const acceptInvitation = useCase({
+  aggregate: invitationAggregate,
+  action: actions.acceptInvitation,
+  preCondition: ({ aggregate, action }) => aggregate.id === action.id,
+  execute: ({ aggregate }) => ({
+    ...aggregate,
+    response: { kind: 'accepted' as const, answeredAt: LocalDateTime.now() }
+  })
+})
+
+export const rejectInvitation = useCase({
+  aggregate: invitationAggregate,
+  action: actions.acceptInvitation,
+  preCondition: ({ aggregate, action }) => aggregate.id === action.id,
+  execute: ({ aggregate }) => ({
+    ...aggregate,
+    response: { kind: 'rejected' as const, answeredAt: LocalDateTime.now() }
+  })
+})

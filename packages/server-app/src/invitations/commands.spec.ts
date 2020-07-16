@@ -15,9 +15,16 @@ describe('invitation', () => {
   }
 
   describe('inviteToCompany', () => {
+    const invite = {
+      id: uuid(),
+      inviteeId: uuid(),
+      inviterId: uuid(),
+      companyId: uuid(),
+      companyName: 'A company',
+    }
     it('creates a new invitation with given values', () => {
-      assertThat(inviteToCompany.runReader(invitation), hasProperties({
-        ...invitation,
+      assertThat(inviteToCompany({ action: invite }), hasProperties({
+        ...invite,
         id: string(),
         invitedAt: instanceOf(LocalDateTime),
         response: undefined
@@ -25,33 +32,33 @@ describe('invitation', () => {
     })
 
     it('WHEN company name is empty, throws error', () => {
-      assertThat(() => inviteToCompany.runReader({ ...invitation, companyName: '' }), throws())
+      assertThat(() => inviteToCompany({ action: { ...invite, companyName: '' }}), throws())
     })
   })
 
   describe('acceptInvitation', () => {
     it('sets kind to `accepted` and the current timestamp', () => {
-      assertThat(acceptInvitation.runReader(invitation, { id: invitation.id }), hasProperty('response', hasProperties({
+      assertThat(acceptInvitation({aggregate: invitation, action: { id: invitation.id }}), hasProperty('response', hasProperties({
         kind: 'accepted',
         answeredAt: instanceOf(LocalDateTime)
       })))
     })
 
     it('WHEN `id` does not match invitation, throws', () => {
-      assertThat(() => acceptInvitation.runReader(invitation, { id: uuid() }), throws())
+      assertThat(() => acceptInvitation({aggregate: invitation, action: { id: uuid() }}), throws())
     })
   })
 
   describe('rejectInvitation', () => {
     it('sets kind to `rejected` and the current timestamp', () => {
-      assertThat(rejectInvitation.runReader(invitation, { id: invitation.id }), hasProperty('response', hasProperties({
+      assertThat(rejectInvitation({ aggregate: invitation, action: { id: invitation.id }}), hasProperty('response', hasProperties({
         kind: 'rejected',
         answeredAt: instanceOf(LocalDateTime)
       })))
     })
 
     it('WHEN `id` does not match invitation, throws', () => {
-      assertThat(() => rejectInvitation.runReader(invitation, { id: uuid() }), throws())
+      assertThat(() => rejectInvitation({aggregate: invitation, action: { id: uuid() }}), throws())
     })
   })
 })

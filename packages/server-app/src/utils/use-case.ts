@@ -1,53 +1,65 @@
 import { AnyCodec } from '@story-teller/shared'
 
-class ReaderMonad<A, B> {
-  constructor (public runReader: (a: A) => B, private precondition: ((a: A) => boolean) = () => true) {
+export const useCaseWithoutAggregate = <
+  Action extends AnyCodec,
+  Aggregate extends AnyCodec,
+  Result
+>(options: {
+  action: Action,
+  aggregate: Aggregate,
+  preCondition?: (opts: { action: Action['O'] }) => boolean,
+  execute: (opts: { action: Action['O'] }) => Result
+}) => (
+  payload: { action: Action['O'] },
+): Aggregate['O'] => {
+  if(!options.action.is(payload.action)) {
+    throw new Error('Invalid Action')
   }
 
-  preCondition (func: (a: A) => boolean): ReaderMonad<A, B> {
-    return new ReaderMonad<A, B>((a) => this.runReader(a), func)
+  if(options.preCondition && !options.preCondition(payload)) {
+    throw new Error('Invalid Precondition')
   }
 
-  map<C> (func: (b: B) => C): ReaderMonad<A, C> {
-    return new ReaderMonad<A, C>((a: A) => {
-      if (!this.precondition(a)) { throw new Error('precondition not met') }
-      const b = this.runReader(a)
-      return func(b)
-    })
+  const updatedAggregate = options.execute(payload)
+
+  if(!options.aggregate.is(updatedAggregate)) {
+    throw new Error('Aggregate invalid after use case')
   }
+
+  return updatedAggregate
 }
 
-class ReaderWithArg<A, B, Arg> {
-  constructor (public runReader: (a: A, arg: Arg) => B, private precondition: ((a: A, arg: Arg) => boolean) = () => true) {
+export const useCase = <
+  Action extends AnyCodec,
+  Aggregate extends AnyCodec
+>(options: {
+  action: Action,
+  aggregate: Aggregate,
+  preCondition?: (opts: { aggregate: Aggregate['O'], action: Action['O'] }) => boolean,
+  execute: (opts: { aggregate: Aggregate['O'], action: Action['O'] }) => Aggregate['O']
+}) => (
+  payload: {
+    action: Action['O'],
+    aggregate: Aggregate['O'],
+  }
+): Aggregate['O'] => {
+  if(!options.action.is(payload.action)) {
+    throw new Error('Invalid Action')
   }
 
-  preCondition (func: (a: A, arg: Arg) => boolean): ReaderWithArg<A, B, Arg> {
-    return new ReaderWithArg<A, B, Arg>((a, arg) => this.runReader(a, arg), func)
+  if(!options.aggregate.is(payload.aggregate)) {
+    throw new Error('Invalid Aggregate')
   }
 
-  map<C> (func: (b: B, arg: Arg) => C): ReaderWithArg<A, C, Arg> {
-    return new ReaderWithArg<A, C, Arg>((a: A, arg: Arg) => {
-      if (!this.precondition(a, arg)) { throw new Error('precondition not met') }
-      const b = this.runReader(a, arg)
-      return func(b, arg)
-    })
+  if(options.preCondition && !options.preCondition(payload)) {
+    throw new Error('Invalid Precondition')
   }
-}
 
-export const useCaseFromCodec = <Codec extends AnyCodec>(codec: Codec) => {
-  return new ReaderMonad((value: Codec['O']) => {
-    if (codec.is(value)) {
-      return value
-    }
-    throw new Error('Invalid Domain object')
-  })
-}
+  const updatedAggregate = options.execute(payload)
 
-export const useCaseWithArgFromCodec = <EntityCodec extends AnyCodec, ArgCodec extends AnyCodec>(codec: EntityCodec, arcCodec: ArgCodec) => {
-  return new ReaderWithArg((value: EntityCodec['O'], arg: ArgCodec['O']) => {
-    if (codec.is(value)) {
-      return value
-    }
-    throw new Error('Invalid Domain object')
-  })
+  if(!options.aggregate.is(updatedAggregate)) {
+    throw new Error('Aggregate invalid after use case')
+  }
+
+  return updatedAggregate
 }

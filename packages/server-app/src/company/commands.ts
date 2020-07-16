@@ -1,5 +1,5 @@
 import { v } from '@story-teller/shared'
-import { useCaseWithArgFromCodec } from '../utils/use-case'
+import { useCase } from '../utils/use-case'
 import { uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
 import { array } from 'fp-ts/lib/Array'
@@ -46,22 +46,40 @@ const employeeTraversal = fromTraversable(array)<Employee>()
 const employeePrism = (id: string): Prism<Employee, Employee> => Prism.fromPredicate(child => child.id === id)
 const nameLens = Lens.fromProp<Company>()('name')
 
-export const rename = useCaseWithArgFromCodec(companyAggregate, actions.rename)
-  .preCondition((company, cmd) => cmd.companyId === company.id)
-  .map((company, cmd) => nameLens.set(cmd.name)(company))
+export const rename = useCase({
+  aggregate: companyAggregate,
+  action: actions.rename,
+  preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
+  execute: ({ action, aggregate }) => nameLens.set(action.name)(aggregate)
+})
 
-export const addEmployee = useCaseWithArgFromCodec(companyAggregate, actions.addEmployee)
-  .preCondition((company, cmd) => cmd.companyId === company.id)
-  .map((company, cmd) => ({ ...company, employees: uniqueBy('id', [{ id: cmd.personId, role: 'employee' }, ...company.employees]) }))
+export const addEmployee = useCase({
+  aggregate: companyAggregate,
+  action: actions.addEmployee,
+  preCondition: ({aggregate, action}) => action.companyId === aggregate.id,
+  execute: ({ aggregate, action }) => ({
+    ...aggregate,
+    employees: uniqueBy('id', [{
+      id: action.personId,
+      role: 'employee' as const
+    }, ...aggregate.employees])
+  })
+})
 
-export const removeEmployee = useCaseWithArgFromCodec(companyAggregate, actions.removeEmployee)
-  .preCondition((company, cmd) => cmd.companyId === company.id)
-  .map((company, cmd) => ({ ...company, employees: company.employees.filter((personId: { id: string }) => personId.id !== cmd.personId) }))
+export const removeEmployee = useCase({
+  aggregate: companyAggregate,
+  action: actions.removeEmployee,
+  preCondition: ({aggregate, action}) => action.companyId === aggregate.id,
+  execute: ({ aggregate, action }) => ({ ...aggregate, employees: aggregate.employees.filter((personId: { id: string }) => personId.id !== action.personId) })
+})
 
-export const setEmployeeRole = useCaseWithArgFromCodec(companyAggregate, actions.setEmployeeRole)
-  .preCondition((company, cmd) => cmd.companyId === company.id)
-  .map((company, cmd) => employees
+export const setEmployeeRole = useCase({
+  aggregate: companyAggregate,
+  action: actions.setEmployeeRole,
+  preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
+  execute: ({ aggregate, action }) => employees
     .composeTraversal(employeeTraversal)
-    .composePrism(employeePrism(cmd.personId))
+    .composePrism(employeePrism(action.personId))
     .composeLens(employeeRole)
-    .set(cmd.role)(company))
+    .set(action.role)(aggregate)
+})
