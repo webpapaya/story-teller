@@ -1,8 +1,9 @@
-import { v } from '@story-teller/shared'
-import { useCase } from '../utils/use-case'
+import { v, AnyCodec } from '@story-teller/shared'
+import { useCase, domainEventToUseCase } from '../utils/use-case'
 import { uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
 import { array } from 'fp-ts/lib/Array'
+import { invitationAggregate } from '../invitations/commands'
 
 const employeeRoles = v.union([v.literal('manager'), v.literal('employee')])
 
@@ -40,6 +41,13 @@ export const actions = {
   })
 } as const
 
+export const events = {
+  employeeRoleSet: v.record({
+    companyId: v.uuid,
+    role: v.nonEmptyString
+  }),
+} as const
+
 const employeeRole = Lens.fromProp<Employee>()('role')
 const employees = Lens.fromProp<Company>()('employees')
 const employeeTraversal = fromTraversable(array)<Employee>()
@@ -70,16 +78,41 @@ export const removeEmployee = useCase({
   aggregate: companyAggregate,
   action: actions.removeEmployee,
   preCondition: ({aggregate, action}) => action.companyId === aggregate.id,
-  execute: ({ aggregate, action }) => ({ ...aggregate, employees: aggregate.employees.filter((personId: { id: string }) => personId.id !== action.personId) })
+  execute: ({ aggregate, action }) => ({
+    ...aggregate,
+    employees: aggregate
+      .employees
+      .filter((personId) => personId.id !== action.personId)
+  })
 })
 
 export const setEmployeeRole = useCase({
   aggregate: companyAggregate,
   action: actions.setEmployeeRole,
+  events: [
+    {
+      event: events.employeeRoleSet,
+      mapper: ({ aggregateAfter, action }) => ({
+        companyId: aggregateAfter.id,
+        role: action.role
+      })
+    },
+  ],
   preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
   execute: ({ aggregate, action }) => employees
     .composeTraversal(employeeTraversal)
     .composePrism(employeePrism(action.personId))
     .composeLens(employeeRole)
     .set(action.role)(aggregate)
+})
+
+// ------------
+
+export const reactToInvitationAccepted = domainEventToUseCase({
+  event: { aggregate: invitationAggregate },
+  useCase: addEmployee,
+  mapper: (invitationAccepted) => ({
+    companyId: invitationAccepted.companyId,
+    personId: invitationAccepted.inviterId
+  })
 })

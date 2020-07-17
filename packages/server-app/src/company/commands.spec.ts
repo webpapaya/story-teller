@@ -1,14 +1,22 @@
 import { assertThat, throws, hasProperties, hasProperty } from 'hamjest'
-import { Company, addEmployee, removeEmployee, setEmployeeRole, rename } from './commands'
+import {
+  Company,
+  addEmployee,
+  removeEmployee,
+  setEmployeeRole,
+  rename,
+  reactToInvitationAccepted
+} from './commands'
 import uuid from 'uuid'
+import { LocalDateTime } from 'js-joda'
+
+const company: Company = {
+  id: uuid(),
+  name: 'Some company',
+  employees: []
+}
 
 describe('company', () => {
-  const company: Company = {
-    id: uuid(),
-    name: 'Some company',
-    employees: []
-  }
-
   describe('addEmployee', () => {
     it('WHEN employee not already added, adds employee to company', () => {
       const personId = uuid()
@@ -81,3 +89,25 @@ describe('company', () => {
     })
   })
 })
+
+describe('reactions', () => {
+  it('reactToInvitationAccepted', () => {
+    const invitation = {
+      id: uuid(),
+      inviteeId: uuid(),
+      inviterId: uuid(),
+      companyId: company.id,
+      companyName: 'A company',
+      invitedAt: LocalDateTime.now(),
+      response: undefined
+    }
+
+    const companyWithEmployee = reactToInvitationAccepted({
+      event: { aggregate: invitation },
+      aggregate: company
+    })
+
+    assertThat(companyWithEmployee, hasProperty('employees.length', 1))
+  })
+})
+
