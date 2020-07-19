@@ -1,6 +1,6 @@
 import { v } from '@story-teller/shared'
 import { useCase, useCaseWithoutAggregate } from '../utils/use-case'
-import { nonEmptyString, aggregate } from '@story-teller/shared/dist/lib'
+import { nonEmptyString } from '@story-teller/shared/dist/lib'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 
 export const invitationAggregate = v.aggregate({
@@ -34,16 +34,25 @@ export const actions = {
   })
 } as const
 
+export const events = {
+  invitationAccepted: v.record({
+    companyId: v.uuid,
+    inviteeId: v.uuid,
+  }),
+} as const
+
 
 export const inviteToCompany = useCaseWithoutAggregate({
   action: actions.inviteToCompany,
   aggregate: invitationAggregate,
+  events: [],
   execute: ({ action }) => ({ ...action, invitedAt: LocalDateTime.now(), response: undefined })
 })
 
 export const acceptInvitation = useCase({
   aggregate: invitationAggregate,
   action: actions.acceptInvitation,
+  events: [],
   preCondition: ({ aggregate, action }) => aggregate.id === action.id,
   execute: ({ aggregate }) => ({
     ...aggregate,
@@ -54,6 +63,7 @@ export const acceptInvitation = useCase({
 export const rejectInvitation = useCase({
   aggregate: invitationAggregate,
   action: actions.acceptInvitation,
+  events: [],
   preCondition: ({ aggregate, action }) => aggregate.id === action.id,
   execute: ({ aggregate }) => ({
     ...aggregate,

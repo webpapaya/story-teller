@@ -39,10 +39,12 @@ describe('invitation repository', () => {
       }))
 
       it('removes additional employees', t(async ({ client }) => {
-        await ensure(addEmployee({
+        const [updatedCompany] = addEmployee({
           aggregate: company,
           action: { personId: uuid(), companyId: company.id }
-        }), client)
+        })
+
+        await ensure(updatedCompany, client)
         await assertDifference({ client }, 'company_employee', -1, async () => {
           const updatedName = 'updated'
           const result = await ensure({ ...company, name: updatedName }, client)

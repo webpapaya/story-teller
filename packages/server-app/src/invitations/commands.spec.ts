@@ -2,6 +2,7 @@ import { assertThat, throws, hasProperties, hasProperty, instanceOf, string } fr
 import { inviteToCompany, acceptInvitation, rejectInvitation } from './commands'
 import uuid from 'uuid'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
+import { hasAggregate } from '../utils/has-aggregate'
 
 describe('invitation', () => {
   const invitation = {
@@ -23,12 +24,12 @@ describe('invitation', () => {
       companyName: 'A company',
     }
     it('creates a new invitation with given values', () => {
-      assertThat(inviteToCompany({ action: invite }), hasProperties({
+      assertThat(inviteToCompany({ action: invite }), hasAggregate(hasProperties({
         ...invite,
         id: string(),
         invitedAt: instanceOf(LocalDateTime),
         response: undefined
-      }))
+      })))
     })
 
     it('WHEN company name is empty, throws error', () => {
@@ -38,10 +39,10 @@ describe('invitation', () => {
 
   describe('acceptInvitation', () => {
     it('sets kind to `accepted` and the current timestamp', () => {
-      assertThat(acceptInvitation({aggregate: invitation, action: { id: invitation.id }}), hasProperty('response', hasProperties({
+      assertThat(acceptInvitation({aggregate: invitation, action: { id: invitation.id }}), hasAggregate(hasProperty('response', hasProperties({
         kind: 'accepted',
         answeredAt: instanceOf(LocalDateTime)
-      })))
+      }))))
     })
 
     it('WHEN `id` does not match invitation, throws', () => {
@@ -51,10 +52,10 @@ describe('invitation', () => {
 
   describe('rejectInvitation', () => {
     it('sets kind to `rejected` and the current timestamp', () => {
-      assertThat(rejectInvitation({ aggregate: invitation, action: { id: invitation.id }}), hasProperty('response', hasProperties({
+      assertThat(rejectInvitation({ aggregate: invitation, action: { id: invitation.id }}), hasAggregate(hasProperty('response', hasProperties({
         kind: 'rejected',
         answeredAt: instanceOf(LocalDateTime)
-      })))
+      }))))
     })
 
     it('WHEN `id` does not match invitation, throws', () => {

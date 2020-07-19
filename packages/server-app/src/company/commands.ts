@@ -41,12 +41,6 @@ export const actions = {
   })
 } as const
 
-export const events = {
-  employeeRoleSet: v.record({
-    companyId: v.uuid,
-    role: v.nonEmptyString
-  }),
-} as const
 
 const employeeRole = Lens.fromProp<Employee>()('role')
 const employees = Lens.fromProp<Company>()('employees')
@@ -57,6 +51,7 @@ const nameLens = Lens.fromProp<Company>()('name')
 export const rename = useCase({
   aggregate: companyAggregate,
   action: actions.rename,
+  events: [],
   preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
   execute: ({ action, aggregate }) => nameLens.set(action.name)(aggregate)
 })
@@ -64,6 +59,7 @@ export const rename = useCase({
 export const addEmployee = useCase({
   aggregate: companyAggregate,
   action: actions.addEmployee,
+  events: [],
   preCondition: ({aggregate, action}) => action.companyId === aggregate.id,
   execute: ({ aggregate, action }) => ({
     ...aggregate,
@@ -77,6 +73,7 @@ export const addEmployee = useCase({
 export const removeEmployee = useCase({
   aggregate: companyAggregate,
   action: actions.removeEmployee,
+  events: [],
   preCondition: ({aggregate, action}) => action.companyId === aggregate.id,
   execute: ({ aggregate, action }) => ({
     ...aggregate,
@@ -89,15 +86,7 @@ export const removeEmployee = useCase({
 export const setEmployeeRole = useCase({
   aggregate: companyAggregate,
   action: actions.setEmployeeRole,
-  events: [
-    {
-      event: events.employeeRoleSet,
-      mapper: ({ aggregateAfter, action }) => ({
-        companyId: aggregateAfter.id,
-        role: action.role
-      })
-    },
-  ],
+  events: [],
   preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
   execute: ({ aggregate, action }) => employees
     .composeTraversal(employeeTraversal)
