@@ -21,7 +21,7 @@ describe('invitation', () => {
       inviteeId: uuid(),
       inviterId: uuid(),
       companyId: uuid(),
-      companyName: 'A company',
+      companyName: 'A company'
     }
     it('creates a new invitation with given values', () => {
       assertThat(inviteToCompany({ action: invite }), hasAggregate(hasProperties({
@@ -33,33 +33,33 @@ describe('invitation', () => {
     })
 
     it('WHEN company name is empty, throws error', () => {
-      assertThat(() => inviteToCompany({ action: { ...invite, companyName: '' }}), throws())
+      assertThat(() => inviteToCompany({ action: { ...invite, companyName: '' } }), throws())
     })
   })
 
   describe('acceptInvitation', () => {
     it('sets kind to `accepted` and the current timestamp', () => {
-      assertThat(acceptInvitation({aggregate: invitation, action: { id: invitation.id }}), hasAggregate(hasProperty('response', hasProperties({
+      assertThat(acceptInvitation({ aggregate: invitation, action: { id: invitation.id } }), hasAggregate(hasProperty('response', hasProperties({
         kind: 'accepted',
         answeredAt: instanceOf(LocalDateTime)
       }))))
     })
 
     it('WHEN `id` does not match invitation, throws', () => {
-      assertThat(() => acceptInvitation({aggregate: invitation, action: { id: uuid() }}), throws())
+      assertThat(() => acceptInvitation({ aggregate: invitation, action: { id: uuid() } }), throws())
     })
   })
 
   describe('rejectInvitation', () => {
     it('sets kind to `rejected` and the current timestamp', () => {
-      assertThat(rejectInvitation({ aggregate: invitation, action: { id: invitation.id }}), hasAggregate(hasProperty('response', hasProperties({
+      assertThat(rejectInvitation({ aggregate: invitation, action: { id: invitation.id } }), hasAggregate(hasProperty('response', hasProperties({
         kind: 'rejected',
         answeredAt: instanceOf(LocalDateTime)
       }))))
     })
 
     it('WHEN `id` does not match invitation, throws', () => {
-      assertThat(() => rejectInvitation({aggregate: invitation, action: { id: uuid() }}), throws())
+      assertThat(() => rejectInvitation({ aggregate: invitation, action: { id: uuid() } }), throws())
     })
   })
 })

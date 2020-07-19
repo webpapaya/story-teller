@@ -17,7 +17,6 @@ const company: Company = {
   employees: []
 }
 
-
 describe('company', () => {
   describe('addEmployee', () => {
     it('WHEN employee not already added, adds employee to company', () => {
@@ -59,7 +58,6 @@ describe('company', () => {
     it('WHEN employee is in company, removes it', () => {
       const personId = uuid()
 
-
       assertThat(removeEmployee({
         aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
         action: { companyId: company.id, personId }
@@ -72,7 +70,7 @@ describe('company', () => {
   describe('rename', () => {
     it('renames company', () => {
       const updatedName = 'updated'
-      assertThat(rename({ aggregate: company, action: { companyId: company.id, name: updatedName }}),
+      assertThat(rename({ aggregate: company, action: { companyId: company.id, name: updatedName } }),
         hasAggregate(hasProperty('name', updatedName)))
     })
   })
@@ -116,4 +114,3 @@ describe('reactions', () => {
     }), hasAggregate(hasProperty('employees.length', 1)))
   })
 })
-

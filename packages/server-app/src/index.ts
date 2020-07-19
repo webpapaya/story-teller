@@ -7,13 +7,7 @@ import { withinConnection } from './lib/db'
 import { sendMail } from './authentication/emails'
 import { findUserByAuthentication, findUserByAuthenticationToken } from './authentication/queries'
 import { UserAuthentication } from './domain'
-import {
-  Authentication,
-  Revision,
-  Feature,
-  Tags,
-  Project
-} from '@story-teller/shared'
+import { Authentication } from '@story-teller/shared'
 import { commandViaHTTP } from './command-via-http'
 import { Result, Ok, Err } from 'space-lift'
 import { Errors } from './errors'

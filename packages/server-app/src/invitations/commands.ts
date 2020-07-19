@@ -37,10 +37,9 @@ export const actions = {
 export const events = {
   invitationAccepted: v.record({
     companyId: v.uuid,
-    inviteeId: v.uuid,
-  }),
+    inviteeId: v.uuid
+  })
 } as const
-
 
 export const inviteToCompany = useCaseWithoutAggregate({
   action: actions.inviteToCompany,

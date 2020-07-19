@@ -2,7 +2,6 @@ import { ensureInvitation, deleteInvitationById, findInvitationById, IFindInvita
 import { Invitation, invitationAggregate } from './commands'
 import { buildRepository } from '../utils/build-repository'
 
-
 const toDomain = (response: IFindInvitationByIdResult) => {
   const { kind, answeredAt, ...invitation } = response
   const result = {

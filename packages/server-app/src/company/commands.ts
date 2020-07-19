@@ -1,4 +1,4 @@
-import { v, AnyCodec } from '@story-teller/shared'
+import { v } from '@story-teller/shared'
 import { useCase, domainEventToUseCase } from '../utils/use-case'
 import { uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
@@ -41,7 +41,6 @@ export const actions = {
   })
 } as const
 
-
 const employeeRole = Lens.fromProp<Employee>()('role')
 const employees = Lens.fromProp<Company>()('employees')
 const employeeTraversal = fromTraversable(array)<Employee>()
@@ -60,7 +59,7 @@ export const addEmployee = useCase({
   aggregate: companyAggregate,
   action: actions.addEmployee,
   events: [],
-  preCondition: ({aggregate, action}) => action.companyId === aggregate.id,
+  preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
   execute: ({ aggregate, action }) => ({
     ...aggregate,
     employees: uniqueBy('id', [{
@@ -74,7 +73,7 @@ export const removeEmployee = useCase({
   aggregate: companyAggregate,
   action: actions.removeEmployee,
   events: [],
-  preCondition: ({aggregate, action}) => action.companyId === aggregate.id,
+  preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
   execute: ({ aggregate, action }) => ({
     ...aggregate,
     employees: aggregate
