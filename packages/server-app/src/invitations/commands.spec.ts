@@ -2,7 +2,7 @@ import { assertThat, throws, hasProperties, hasProperty, instanceOf, string } fr
 import { inviteToCompany, acceptInvitation, rejectInvitation } from './commands'
 import uuid from 'uuid'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
-import { hasAggregate } from '../utils/has-aggregate'
+import { hasAggregate, hasEvents } from '../utils/custom-matcher'
 
 describe('invitation', () => {
   const invitation = {
@@ -47,6 +47,10 @@ describe('invitation', () => {
 
     it('WHEN `id` does not match invitation, throws', () => {
       assertThat(() => acceptInvitation({ aggregate: invitation, action: { id: uuid() } }), throws())
+    })
+
+    it('emits an invitation accepted event', () => {
+      assertThat(acceptInvitation({ aggregate: invitation, action: { id: invitation.id } }), hasEvents(hasProperty('length', 1)))
     })
   })
 

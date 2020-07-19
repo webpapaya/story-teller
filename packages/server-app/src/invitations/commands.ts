@@ -51,7 +51,13 @@ export const inviteToCompany = useCaseWithoutAggregate({
 export const acceptInvitation = useCase({
   aggregate: invitationAggregate,
   action: actions.acceptInvitation,
-  events: [],
+  events: [{
+    event: events.invitationAccepted,
+    mapper: ({ aggregateAfter }) => ({
+      companyId: aggregateAfter.companyId,
+      inviteeId: aggregateAfter.inviteeId
+    })
+  }],
   preCondition: ({ aggregate, action }) => aggregate.id === action.id,
   execute: ({ aggregate }) => ({
     ...aggregate,

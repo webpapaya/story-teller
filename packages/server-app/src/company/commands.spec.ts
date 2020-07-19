@@ -9,7 +9,7 @@ import {
 } from './commands'
 import uuid from 'uuid'
 import { LocalDateTime } from 'js-joda'
-import { hasAggregate } from '../utils/has-aggregate'
+import { hasAggregate } from '../utils/custom-matcher'
 
 const company: Company = {
   id: uuid(),
