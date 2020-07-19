@@ -21,7 +21,7 @@ describe('company', () => {
   describe('addEmployee', () => {
     it('WHEN employee not already added, adds employee to company', () => {
       const personId = uuid()
-      assertThat(addEmployee({
+      assertThat(addEmployee.run({
         aggregate: company,
         action: { companyId: company.id, personId }
       }), hasAggregate(hasProperties({
@@ -31,14 +31,14 @@ describe('company', () => {
 
     it('WHEN employee is already present in company, does not add employee twice', () => {
       const personId = uuid()
-      assertThat(addEmployee({
+      assertThat(addEmployee.run({
         aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
         action: { companyId: company.id, personId }
       }), hasAggregate(hasProperty('employees.0', { id: personId, role: 'manager' })))
     })
 
     it('WHEN companyID in cmd is different, throws error', () => {
-      assertThat(() => addEmployee({
+      assertThat(() => addEmployee.run({
         aggregate: company,
         action: { companyId: 'whatever', personId: uuid() }
       }), throws())
@@ -49,7 +49,7 @@ describe('company', () => {
     it('WHEN employee not already added, does nothing', () => {
       const personId = uuid()
 
-      assertThat(removeEmployee({
+      assertThat(removeEmployee.run({
         aggregate: company,
         action: { companyId: company.id, personId }
       }), hasAggregate(hasProperties({ employees: [] })))
@@ -58,7 +58,7 @@ describe('company', () => {
     it('WHEN employee is in company, removes it', () => {
       const personId = uuid()
 
-      assertThat(removeEmployee({
+      assertThat(removeEmployee.run({
         aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
         action: { companyId: company.id, personId }
       }), hasAggregate(hasProperties({
@@ -70,7 +70,7 @@ describe('company', () => {
   describe('rename', () => {
     it('renames company', () => {
       const updatedName = 'updated'
-      assertThat(rename({ aggregate: company, action: { companyId: company.id, name: updatedName } }),
+      assertThat(rename.run({ aggregate: company, action: { companyId: company.id, name: updatedName } }),
         hasAggregate(hasProperty('name', updatedName)))
     })
   })
@@ -79,7 +79,7 @@ describe('company', () => {
     it('WHEN employee exists, sets role', () => {
       const personId = uuid()
 
-      assertThat(setEmployeeRole({
+      assertThat(setEmployeeRole.run({
         aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
         action: { companyId: company.id, personId, role: 'employee' }
       }), hasAggregate(hasProperty('employees.0.role', 'employee')))
@@ -88,7 +88,7 @@ describe('company', () => {
     it('WHEN employee does not exists, does nothing', () => {
       const personId = uuid()
 
-      assertThat(setEmployeeRole({
+      assertThat(setEmployeeRole.run({
         aggregate: { ...company, employees: [] },
         action: { companyId: company.id, personId, role: 'employee' }
       }), hasAggregate(hasProperty('employees', [])))

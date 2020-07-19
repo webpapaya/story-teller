@@ -24,7 +24,7 @@ describe('invitation', () => {
       companyName: 'A company'
     }
     it('creates a new invitation with given values', () => {
-      assertThat(inviteToCompany({ action: invite }), hasAggregate(hasProperties({
+      assertThat(inviteToCompany.run({ action: invite }), hasAggregate(hasProperties({
         ...invite,
         id: string(),
         invitedAt: instanceOf(LocalDateTime),
@@ -33,37 +33,37 @@ describe('invitation', () => {
     })
 
     it('WHEN company name is empty, throws error', () => {
-      assertThat(() => inviteToCompany({ action: { ...invite, companyName: '' } }), throws())
+      assertThat(() => inviteToCompany.run({ action: { ...invite, companyName: '' } }), throws())
     })
   })
 
   describe('acceptInvitation', () => {
     it('sets kind to `accepted` and the current timestamp', () => {
-      assertThat(acceptInvitation({ aggregate: invitation, action: { id: invitation.id } }), hasAggregate(hasProperty('response', hasProperties({
+      assertThat(acceptInvitation.run({ aggregate: invitation, action: { id: invitation.id } }), hasAggregate(hasProperty('response', hasProperties({
         kind: 'accepted',
         answeredAt: instanceOf(LocalDateTime)
       }))))
     })
 
     it('WHEN `id` does not match invitation, throws', () => {
-      assertThat(() => acceptInvitation({ aggregate: invitation, action: { id: uuid() } }), throws())
+      assertThat(() => acceptInvitation.run({ aggregate: invitation, action: { id: uuid() } }), throws())
     })
 
     it('emits an invitation accepted event', () => {
-      assertThat(acceptInvitation({ aggregate: invitation, action: { id: invitation.id } }), hasEvents(hasProperty('length', 1)))
+      assertThat(acceptInvitation.run({ aggregate: invitation, action: { id: invitation.id } }), hasEvents(hasProperty('length', 1)))
     })
   })
 
   describe('rejectInvitation', () => {
     it('sets kind to `rejected` and the current timestamp', () => {
-      assertThat(rejectInvitation({ aggregate: invitation, action: { id: invitation.id } }), hasAggregate(hasProperty('response', hasProperties({
+      assertThat(rejectInvitation.run({ aggregate: invitation, action: { id: invitation.id } }), hasAggregate(hasProperty('response', hasProperties({
         kind: 'rejected',
         answeredAt: instanceOf(LocalDateTime)
       }))))
     })
 
     it('WHEN `id` does not match invitation, throws', () => {
-      assertThat(() => rejectInvitation({ aggregate: invitation, action: { id: uuid() } }), throws())
+      assertThat(() => rejectInvitation.run({ aggregate: invitation, action: { id: uuid() } }), throws())
     })
   })
 })

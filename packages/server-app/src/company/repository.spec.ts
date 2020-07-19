@@ -39,7 +39,7 @@ describe('invitation repository', () => {
       }))
 
       it('removes additional employees', t(async ({ client }) => {
-        const [updatedCompany] = addEmployee({
+        const [updatedCompany] = addEmployee.run({
           aggregate: company,
           action: { personId: uuid(), companyId: company.id }
         })
