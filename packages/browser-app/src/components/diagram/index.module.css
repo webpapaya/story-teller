@@ -1,0 +1,88 @@
+.tree {
+  position: relative;
+}
+
+.tree .tree:before {
+  content: '';
+  display: block;
+  border-color: var(--color-grey-400);
+  border-width: 0;
+  border-top-width: 2px;
+  border-style: solid;
+  position: absolute;
+  width: 5px;
+  top: 50%;
+  left: -5px;
+}
+
+.node:after, .node:before {
+  display: block;
+  border-color: var(--color-grey-400);
+  border-width: 0;
+  border-left-width: 2px;
+  border-style: solid;
+  position: absolute;
+  height: 50%;
+  width: 5px;
+  left: 0;
+}
+
+.tree .tree .node:before, .tree .tree .node:after {
+  content: '';
+}
+
+.node:after {
+  top: 0;
+}
+
+.node:first-child:after {
+  border-left-width: 0;
+}
+
+.node:first-child:before {
+  border-top-width: 2px;
+  border-top-left-radius: 5px;
+}
+
+.node:before {
+  bottom: 0;
+  border-top-width: 2px;
+
+}
+
+.node:last-child:before {
+  border-left-width: 0;
+  border-top-width: 0;
+
+}
+
+.node:last-child:after {
+  border-bottom-width: 2px;
+}
+
+.node + .node:last-child:after {
+  border-bottom-width: 2px;
+  border-bottom-left-radius: 5px;
+}
+
+.node {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.description {
+  padding: var(--space-xs) var(--space-sm);
+  position: relative;
+  border-radius: 2px;
+  box-shadow: var(--shadow-1);
+  font: var(--font-regular);
+  background: var(--color-white);
+  margin: var(--space-xxs) var(--space-sm);
+  width: 200px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+

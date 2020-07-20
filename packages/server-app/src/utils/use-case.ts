@@ -17,6 +17,7 @@ type Events<
   Event2 extends AnyCodec,
   Event3 extends AnyCodec,
   Event4 extends AnyCodec,
+  Event5 extends AnyCodec,
 > = [] | [
   EventConfig<Event1, Aggregate, Action>,
 ] | [
@@ -31,7 +32,27 @@ type Events<
   EventConfig<Event2, Aggregate, Action>,
   EventConfig<Event3, Aggregate, Action>,
   EventConfig<Event4, Aggregate, Action>,
+] | [
+  EventConfig<Event1, Aggregate, Action>,
+  EventConfig<Event2, Aggregate, Action>,
+  EventConfig<Event3, Aggregate, Action>,
+  EventConfig<Event4, Aggregate, Action>,
+  EventConfig<Event5, Aggregate, Action>,
 ]
+
+type UseCaseConfig<
+  Action extends AnyCodec,
+  Aggregate extends AnyCodec,
+  Event1 extends AnyCodec,
+  Event2 extends AnyCodec,
+  Event3 extends AnyCodec,
+  Event4 extends AnyCodec,
+  Event5 extends AnyCodec,
+> = {
+  action: Action
+  aggregate: Aggregate
+  events: Events<Action, Aggregate, Event1, Event2, Event3, Event4, Event5>
+}
 
 export const useCaseWithoutAggregate = <
   Action extends AnyCodec,
@@ -40,33 +61,36 @@ export const useCaseWithoutAggregate = <
   Event2 extends AnyCodec,
   Event3 extends AnyCodec,
   Event4 extends AnyCodec,
->(options: {
-  action: Action
-  aggregate: Aggregate
-  events: Events<Action, Aggregate, Event1, Event2, Event3, Event4>
-  preCondition?: (opts: { action: Action['O'] }) => boolean
-  execute: (opts: { action: Action['O'] }) => Aggregate['O']
+  Event5 extends AnyCodec,
+>(config: UseCaseConfig<Action, Aggregate, Event1, Event2, Event3, Event4, Event5> & {
+  preCondition?: (opts: { action: Action['O'] }) => boolean,
+  execute: (opts: { action: Action['O'] }) => Aggregate['O'],
 }) => ({
+  config: {
+    action: config.action,
+    aggregate: config.aggregate,
+    events: config.events
+  },
   run: (
     payload: { action: Action['O'] }
-  ): [Aggregate['O'], Array<typeof options.events[number]['event']>] => {
-    if (!options.action.is(payload.action)) {
+  ): [Aggregate['O'], Array<typeof config.events[number]['event']>] => {
+    if (!config.action.is(payload.action)) {
       throw new Error('Invalid Action')
     }
 
-    if (options.preCondition && !options.preCondition(payload)) {
+    if (config.preCondition && !config.preCondition(payload)) {
       throw new Error('Invalid Precondition')
     }
 
-    const updatedAggregate = options.execute(payload)
+    const updatedAggregate = config.execute(payload)
 
-    if (!options.aggregate.is(updatedAggregate)) {
+    if (!config.aggregate.is(updatedAggregate)) {
       throw new Error('Aggregate invalid after use case')
     }
 
-    const events: Array<Event1 | Event2 | Event3 | Event4> = []
-    if (options.events) {
-      options.events
+    const events: Array<Event1 | Event2 | Event3 | Event4 | Event5> = []
+    if (config.events) {
+      config.events
         // @ts-ignore
         .forEach((eventConfig) => {
           const mappedEvent = eventConfig.mapper({ aggregateBefore: updatedAggregate, aggregateAfter: updatedAggregate, action: payload.action })
@@ -88,40 +112,43 @@ export const useCase = <
   Event2 extends AnyCodec,
   Event3 extends AnyCodec,
   Event4 extends AnyCodec,
->(options: {
-  action: Action
-  aggregate: Aggregate
-  events: Events<Action, Aggregate, Event1, Event2, Event3, Event4>
-  preCondition?: (opts: { aggregate: Aggregate['O'], action: Action['O'] }) => boolean
-  execute: (opts: { aggregate: Aggregate['O'], action: Action['O'] }) => Aggregate['O']
+  Event5 extends AnyCodec,
+>(config: UseCaseConfig<Action, Aggregate, Event1, Event2, Event3, Event4, Event5> & {
+  preCondition?: (opts: { aggregate: Aggregate['O'], action: Action['O'] }) => boolean,
+  execute: (opts: { aggregate: Aggregate['O'], action: Action['O'] }) => Aggregate['O'],
 }) => ({
+  config: {
+    action: config.action,
+    aggregate: config.aggregate,
+    events: config.events
+  },
   run: (
     payload: {
       action: Action['O']
       aggregate: Aggregate['O']
     }
-  ): [Aggregate['O'], Array<typeof options.events[number]['event']>] => {
-    if (!options.action.is(payload.action)) {
+  ): [Aggregate['O'], Array<typeof config.events[number]['event']>] => {
+    if (!config.action.is(payload.action)) {
       throw new Error('Invalid Action')
     }
 
-    if (!options.aggregate.is(payload.aggregate)) {
+    if (!config.aggregate.is(payload.aggregate)) {
       throw new Error('Invalid Aggregate')
     }
 
-    if (options.preCondition && !options.preCondition(payload)) {
+    if (config.preCondition && !config.preCondition(payload)) {
       throw new Error('Invalid Precondition')
     }
 
-    const updatedAggregate = options.execute(deepFreeze(payload))
+    const updatedAggregate = config.execute(deepFreeze(payload))
 
-    if (!options.aggregate.is(updatedAggregate)) {
+    if (!config.aggregate.is(updatedAggregate)) {
       throw new Error('Aggregate invalid after use case')
     }
 
-    const events: Array<Event1 | Event2 | Event3 | Event4> = []
-    if (options.events) {
-      options.events
+    const events: Array<Event1 | Event2 | Event3 | Event4 | Event5> = []
+    if (config.events) {
+      config.events
         // @ts-ignore
         .forEach((eventConfig) => {
           const mappedEvent = eventConfig.mapper({ aggregateBefore: payload.aggregate, aggregateAfter: updatedAggregate, action: payload.action })
@@ -155,3 +182,8 @@ export const domainEventToUseCase = <
   const action = config.mapper(payload.event.aggregate)
   return config.useCase.run({ aggregate: payload.aggregate, action })
 }
+
+
+// type Eventss = any
+// type UseCase = any
+// type Reactions = { useCaseFrom: any, event: any, useCaseTo: any }
