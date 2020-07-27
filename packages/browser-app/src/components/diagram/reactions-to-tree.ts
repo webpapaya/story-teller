@@ -1,4 +1,4 @@
-import { Reaction, ReactionNode } from ".";
+import { Reaction, ReactionNode } from "./index";
 
 export const reactionsToTree = (
   arr: Reaction[],

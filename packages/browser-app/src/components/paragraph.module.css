@@ -1,0 +1,6 @@
+.default {
+  font: var(--font-regular);
+  margin-bottom: var(--space-md);
+  color: var(--color-grey-600);
+  line-height: 1.5;
+}
