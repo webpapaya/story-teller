@@ -47,7 +47,7 @@
 .node:before {
   bottom: 0;
   border-top-width: 2px;
-
+  transform: translateY(2px);
 }
 
 .node:last-child:before {
