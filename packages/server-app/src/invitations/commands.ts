@@ -1,5 +1,5 @@
 import { v } from '@story-teller/shared'
-import { useCase, useCaseWithoutAggregate } from '../utils/use-case'
+import { useCase, aggregateFactory } from '../utils/use-case'
 import { nonEmptyString } from '@story-teller/shared/dist/lib'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 
@@ -41,9 +41,10 @@ export const events = {
   })
 } as const
 
-export const inviteToCompany = useCaseWithoutAggregate({
+export const inviteToCompany = aggregateFactory({
   action: actions.inviteToCompany,
-  aggregate: invitationAggregate,
+  aggregateFrom: v.undefinedCodec,
+  aggregateTo: invitationAggregate,
   events: [],
   execute: ({ action }) => ({ ...action, invitedAt: LocalDateTime.now(), response: undefined })
 })

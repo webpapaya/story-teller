@@ -24,7 +24,7 @@ describe('invitation', () => {
       companyName: 'A company'
     }
     it('creates a new invitation with given values', () => {
-      assertThat(inviteToCompany.run({ action: invite }), hasAggregate(hasProperties({
+      assertThat(inviteToCompany.run({ aggregate: undefined, action: invite }), hasAggregate(hasProperties({
         ...invite,
         id: string(),
         invitedAt: instanceOf(LocalDateTime),
@@ -33,7 +33,7 @@ describe('invitation', () => {
     })
 
     it('WHEN company name is empty, throws error', () => {
-      assertThat(() => inviteToCompany.run({ action: { ...invite, companyName: '' } }), throws())
+      assertThat(() => inviteToCompany.run({ aggregate: undefined, action: { ...invite, companyName: '' } }), throws())
     })
   })
 
