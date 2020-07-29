@@ -23,7 +23,7 @@ describe('company', () => {
       const personId = uuid()
       assertThat(addEmployee.run({
         aggregate: company,
-        action: { companyId: company.id, personId }
+        command: { companyId: company.id, personId }
       }), hasAggregate(hasProperties({
         employees: [{ id: personId, role: 'employee' }]
       })))
@@ -33,14 +33,14 @@ describe('company', () => {
       const personId = uuid()
       assertThat(addEmployee.run({
         aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
-        action: { companyId: company.id, personId }
+        command: { companyId: company.id, personId }
       }), hasAggregate(hasProperty('employees.0', { id: personId, role: 'manager' })))
     })
 
     it('WHEN companyID in cmd is different, throws error', () => {
       assertThat(() => addEmployee.run({
         aggregate: company,
-        action: { companyId: 'whatever', personId: uuid() }
+        command: { companyId: 'whatever', personId: uuid() }
       }), throws())
     })
   })
@@ -51,7 +51,7 @@ describe('company', () => {
 
       assertThat(removeEmployee.run({
         aggregate: company,
-        action: { companyId: company.id, personId }
+        command: { companyId: company.id, personId }
       }), hasAggregate(hasProperties({ employees: [] })))
     })
 
@@ -60,7 +60,7 @@ describe('company', () => {
 
       assertThat(removeEmployee.run({
         aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
-        action: { companyId: company.id, personId }
+        command: { companyId: company.id, personId }
       }), hasAggregate(hasProperties({
         employees: []
       })))
@@ -70,7 +70,7 @@ describe('company', () => {
   describe('rename', () => {
     it('renames company', () => {
       const updatedName = 'updated'
-      assertThat(rename.run({ aggregate: company, action: { companyId: company.id, name: updatedName } }),
+      assertThat(rename.run({ aggregate: company, command: { companyId: company.id, name: updatedName } }),
         hasAggregate(hasProperty('name', updatedName)))
     })
   })
@@ -81,7 +81,7 @@ describe('company', () => {
 
       assertThat(setEmployeeRole.run({
         aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
-        action: { companyId: company.id, personId, role: 'employee' }
+        command: { companyId: company.id, personId, role: 'employee' }
       }), hasAggregate(hasProperty('employees.0.role', 'employee')))
     })
 
@@ -90,7 +90,7 @@ describe('company', () => {
 
       assertThat(setEmployeeRole.run({
         aggregate: { ...company, employees: [] },
-        action: { companyId: company.id, personId, role: 'employee' }
+        command: { companyId: company.id, personId, role: 'employee' }
       }), hasAggregate(hasProperty('employees', [])))
     })
   })

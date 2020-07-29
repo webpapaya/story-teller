@@ -42,16 +42,16 @@ export const events = {
 } as const
 
 export const inviteToCompany = aggregateFactory({
-  action: actions.inviteToCompany,
+  command: actions.inviteToCompany,
   aggregateFrom: v.undefinedCodec,
   aggregateTo: invitationAggregate,
   events: [],
-  execute: ({ action }) => ({ ...action, invitedAt: LocalDateTime.now(), response: undefined })
+  execute: ({ command: action }) => ({ ...action, invitedAt: LocalDateTime.now(), response: undefined })
 })
 
 export const acceptInvitation = useCase({
   aggregate: invitationAggregate,
-  action: actions.acceptInvitation,
+  command: actions.acceptInvitation,
   events: [{
     event: events.invitationAccepted,
     mapper: ({ aggregateAfter }) => ({
@@ -59,7 +59,7 @@ export const acceptInvitation = useCase({
       inviteeId: aggregateAfter.inviteeId
     })
   }],
-  preCondition: ({ aggregate, action }) => aggregate.id === action.id,
+  preCondition: ({ aggregate, command: action }) => aggregate.id === action.id,
   execute: ({ aggregate }) => ({
     ...aggregate,
     response: { kind: 'accepted' as const, answeredAt: LocalDateTime.now() }
@@ -68,9 +68,9 @@ export const acceptInvitation = useCase({
 
 export const rejectInvitation = useCase({
   aggregate: invitationAggregate,
-  action: actions.acceptInvitation,
+  command: actions.acceptInvitation,
   events: [],
-  preCondition: ({ aggregate, action }) => aggregate.id === action.id,
+  preCondition: ({ aggregate, command: action }) => aggregate.id === action.id,
   execute: ({ aggregate }) => ({
     ...aggregate,
     response: { kind: 'rejected' as const, answeredAt: LocalDateTime.now() }

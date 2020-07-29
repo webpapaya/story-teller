@@ -4,14 +4,14 @@ import deepFreeze from 'deep-freeze'
 type EventConfig<
   Event extends AnyCodec,
   Aggregate extends AnyCodec,
-  Action extends AnyCodec
+  Command extends AnyCodec
 > = {
   event: Event
-  mapper: ((payload: { aggregateBefore: Aggregate['O'], aggregateAfter: Aggregate['O'], action: Action['O']}) => Event['O'] | undefined)
+  mapper: ((payload: { aggregateBefore: Aggregate['O'], aggregateAfter: Aggregate['O'], command: Command['O']}) => Event['O'] | undefined)
 }
 
 type Events<
-  Action extends AnyCodec,
+  Command extends AnyCodec,
   Aggregate extends AnyCodec,
   Event1 extends AnyCodec,
   Event2 extends AnyCodec,
@@ -19,60 +19,49 @@ type Events<
   Event4 extends AnyCodec,
   Event5 extends AnyCodec,
 > = [] | [
-  EventConfig<Event1, Aggregate, Action>,
+  EventConfig<Event1, Aggregate, Command>,
 ] | [
-  EventConfig<Event1, Aggregate, Action>,
-  EventConfig<Event2, Aggregate, Action>,
+  EventConfig<Event1, Aggregate, Command>,
+  EventConfig<Event2, Aggregate, Command>,
 ] | [
-  EventConfig<Event1, Aggregate, Action>,
-  EventConfig<Event2, Aggregate, Action>,
-  EventConfig<Event3, Aggregate, Action>,
+  EventConfig<Event1, Aggregate, Command>,
+  EventConfig<Event2, Aggregate, Command>,
+  EventConfig<Event3, Aggregate, Command>,
 ] | [
-  EventConfig<Event1, Aggregate, Action>,
-  EventConfig<Event2, Aggregate, Action>,
-  EventConfig<Event3, Aggregate, Action>,
-  EventConfig<Event4, Aggregate, Action>,
+  EventConfig<Event1, Aggregate, Command>,
+  EventConfig<Event2, Aggregate, Command>,
+  EventConfig<Event3, Aggregate, Command>,
+  EventConfig<Event4, Aggregate, Command>,
 ] | [
-  EventConfig<Event1, Aggregate, Action>,
-  EventConfig<Event2, Aggregate, Action>,
-  EventConfig<Event3, Aggregate, Action>,
-  EventConfig<Event4, Aggregate, Action>,
-  EventConfig<Event5, Aggregate, Action>,
+  EventConfig<Event1, Aggregate, Command>,
+  EventConfig<Event2, Aggregate, Command>,
+  EventConfig<Event3, Aggregate, Command>,
+  EventConfig<Event4, Aggregate, Command>,
+  EventConfig<Event5, Aggregate, Command>,
 ]
 
-type UseCaseConfig<
-  Action extends AnyCodec,
-  Aggregate extends AnyCodec,
-  Event1 extends AnyCodec,
-  Event2 extends AnyCodec,
-  Event3 extends AnyCodec,
-  Event4 extends AnyCodec,
-  Event5 extends AnyCodec,
-> = {
-  action: Action
-  aggregate: Aggregate
-  events: Events<Action, Aggregate, Event1, Event2, Event3, Event4, Event5>
-}
-
 export const useCase = <
-  Action extends AnyCodec,
+  Command extends AnyCodec,
   Aggregate extends AnyCodec,
   Event1 extends AnyCodec,
   Event2 extends AnyCodec,
   Event3 extends AnyCodec,
   Event4 extends AnyCodec,
   Event5 extends AnyCodec,
->(config: UseCaseConfig<Action, Aggregate, Event1, Event2, Event3, Event4, Event5> & {
-  preCondition?: (opts: { aggregate: Aggregate['O'], action: Action['O'] }) => boolean
-  execute: (opts: { aggregate: Aggregate['O'], action: Action['O'] }) => Aggregate['O']
+>(config: {
+  command: Command
+  aggregate: Aggregate
+  events: Events<Command, Aggregate, Event1, Event2, Event3, Event4, Event5>,
+  preCondition?: (opts: { aggregate: Aggregate['O'], command: Command['O'] }) => boolean
+  execute: (opts: { aggregate: Aggregate['O'], command: Command['O'] }) => Aggregate['O']
 }) => aggregateFactory({
   ...config,
   aggregateFrom: config.aggregate,
   aggregateTo: config.aggregate
 })
 
-type AggregateFactoryConfig<
-  Action extends AnyCodec,
+export const aggregateFactory = <
+  Command extends AnyCodec,
   AggregateFrom extends AnyCodec,
   AggregateTo extends AnyCodec,
   Event1 extends AnyCodec,
@@ -80,40 +69,28 @@ type AggregateFactoryConfig<
   Event3 extends AnyCodec,
   Event4 extends AnyCodec,
   Event5 extends AnyCodec,
-> = {
-  action: Action
+>(config: {
+  command: Command
   aggregateFrom: AggregateFrom
   aggregateTo: AggregateTo
-  events: Events<Action, AggregateTo, Event1, Event2, Event3, Event4, Event5>
-}
-
-export const aggregateFactory = <
-  Action extends AnyCodec,
-  AggregateFrom extends AnyCodec,
-  AggregateTo extends AnyCodec,
-  Event1 extends AnyCodec,
-  Event2 extends AnyCodec,
-  Event3 extends AnyCodec,
-  Event4 extends AnyCodec,
-  Event5 extends AnyCodec,
->(config: AggregateFactoryConfig<Action, AggregateFrom, AggregateTo, Event1, Event2, Event3, Event4, Event5> & {
-  preCondition?: (opts: { aggregate: AggregateFrom['O'], action: Action['O'] }) => boolean
-  execute: (opts: { aggregate: AggregateFrom['O'], action: Action['O'] }) => AggregateTo['O']
+  events: Events<Command, AggregateTo, Event1, Event2, Event3, Event4, Event5>,
+  preCondition?: (opts: { aggregate: AggregateFrom['O'], command: Command['O'] }) => boolean
+  execute: (opts: { aggregate: AggregateFrom['O'], command: Command['O'] }) => AggregateTo['O']
 }) => ({
   config: {
-    action: config.action,
+    command: config.command,
     aggregateFrom: config.aggregateFrom,
     aggregateTo: config.aggregateTo,
     events: config.events
   },
   run: (
     payload: {
-      action: Action['O']
+      command: Command['O']
       aggregate: AggregateFrom['O']
     }
   ): [AggregateFrom['O'], Array<typeof config.events[number]['event']>] => {
-    if (!config.action.is(payload.action)) {
-      throw new Error('Invalid Action')
+    if (!config.command.is(payload.command)) {
+      throw new Error('Invalid Command')
     }
 
     if (!config.aggregateFrom.is(payload.aggregate)) {
@@ -138,7 +115,7 @@ export const aggregateFactory = <
           const mappedEvent = eventConfig.mapper({
               aggregateBefore: payload.aggregate,
               aggregateAfter: updatedAggregate,
-              action: payload.action
+              command: payload.command
           })
           if (mappedEvent && eventConfig.event.is(mappedEvent)) {
             events.push(mappedEvent)
@@ -157,16 +134,16 @@ export const domainEventToUseCase = <
   AggregateFromEvent extends AggregateFromEventCodec['O'],
   AggregateFromUseCase extends AggregateFromUseCaseCodec['O'],
   DomainEvent extends { aggregate: AggregateFromEventCodec },
-  Mapper extends (aggregateFromEvent: DomainEvent['aggregate']['O']) => Action,
-  Action,
+  Mapper extends (aggregateFromEvent: DomainEvent['aggregate']['O']) => Command,
+  Command,
 >(config: {
   event: DomainEvent
-  useCase: { run: (payload: { aggregate: AggregateFromUseCase, action: Action }) => [AggregateFromUseCase, unknown] }
+  useCase: { run: (payload: { aggregate: AggregateFromUseCase, command: Command }) => [AggregateFromUseCase, unknown] }
   mapper: Mapper
 }) => (payload: {
   event: { aggregate: AggregateFromEvent }
   aggregate: AggregateFromUseCase
 }) => {
-  const action = config.mapper(payload.event.aggregate)
-  return config.useCase.run({ aggregate: payload.aggregate, action })
+  const command = config.mapper(payload.event.aggregate)
+  return config.useCase.run({ aggregate: payload.aggregate, command })
 }

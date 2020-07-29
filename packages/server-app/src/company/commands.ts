@@ -49,18 +49,18 @@ const nameLens = Lens.fromProp<Company>()('name')
 
 export const rename = useCase({
   aggregate: companyAggregate,
-  action: actions.rename,
+  command: actions.rename,
   events: [],
-  preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
-  execute: ({ action, aggregate }) => nameLens.set(action.name)(aggregate)
+  preCondition: ({ aggregate, command: action }) => action.companyId === aggregate.id,
+  execute: ({ command: action, aggregate }) => nameLens.set(action.name)(aggregate)
 })
 
 export const addEmployee = useCase({
   aggregate: companyAggregate,
-  action: actions.addEmployee,
+  command: actions.addEmployee,
   events: [],
-  preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
-  execute: ({ aggregate, action }) => ({
+  preCondition: ({ aggregate, command: action }) => action.companyId === aggregate.id,
+  execute: ({ aggregate, command: action }) => ({
     ...aggregate,
     employees: uniqueBy('id', [{
       id: action.personId,
@@ -71,10 +71,10 @@ export const addEmployee = useCase({
 
 export const removeEmployee = useCase({
   aggregate: companyAggregate,
-  action: actions.removeEmployee,
+  command: actions.removeEmployee,
   events: [],
-  preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
-  execute: ({ aggregate, action }) => ({
+  preCondition: ({ aggregate, command: action }) => action.companyId === aggregate.id,
+  execute: ({ aggregate, command: action }) => ({
     ...aggregate,
     employees: aggregate
       .employees
@@ -84,10 +84,10 @@ export const removeEmployee = useCase({
 
 export const setEmployeeRole = useCase({
   aggregate: companyAggregate,
-  action: actions.setEmployeeRole,
+  command: actions.setEmployeeRole,
   events: [],
-  preCondition: ({ aggregate, action }) => action.companyId === aggregate.id,
-  execute: ({ aggregate, action }) => employees
+  preCondition: ({ aggregate, command: action }) => action.companyId === aggregate.id,
+  execute: ({ aggregate, command: action }) => employees
     .composeTraversal(employeeTraversal)
     .composePrism(employeePrism(action.personId))
     .composeLens(employeeRole)
