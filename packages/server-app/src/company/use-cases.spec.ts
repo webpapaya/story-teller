@@ -6,7 +6,7 @@ import {
   setEmployeeRole,
   rename,
   reactToInvitationAccepted
-} from './commands'
+} from './use-cases'
 import uuid from 'uuid'
 import { LocalDateTime } from 'js-joda'
 import { hasAggregate } from '../utils/custom-matcher'

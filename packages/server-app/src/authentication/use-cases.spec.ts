@@ -13,7 +13,7 @@ import {
   requestPasswordReset,
   resetPasswordByToken,
   confirm
-} from './commands'
+} from './use-cases'
 import {
   create as createUserAuthenticationFactory,
   userAuthenticationFactory,

@@ -1,5 +1,5 @@
 import { assertThat, throws, hasProperties, hasProperty, instanceOf, string } from 'hamjest'
-import { inviteToCompany, acceptInvitation, rejectInvitation } from './commands'
+import { inviteToCompany, acceptInvitation, rejectInvitation } from './use-cases'
 import uuid from 'uuid'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 import { hasAggregate, hasEvents } from '../utils/custom-matcher'
