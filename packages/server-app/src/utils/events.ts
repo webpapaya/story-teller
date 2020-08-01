@@ -1,4 +1,4 @@
-import { AnyCodec, v } from "@story-teller/shared"
+import { AnyCodec, v } from '@story-teller/shared'
 
 export const domainEvent = <Name extends string, Codec extends AnyCodec>(name: Name, codec: Codec) => {
   return {

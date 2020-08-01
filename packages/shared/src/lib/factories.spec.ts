@@ -6,7 +6,6 @@
 // //   modify(() => {}),
 // // )
 
-
 // interface Functor<T> {
 //   map<U>(f: (x: T) => U): Functor<U>
 // }
@@ -28,7 +27,6 @@
 
 // const multipliedBy = (multiplier: number) => (value: number) => value * multiplier
 
-
 // import { assertThat, equalTo } from "hamjest"
 
 // describe('factory', () => {
@@ -49,7 +47,6 @@
 //       traitA: (value, multiplier: number) => value * multiplier
 //     })
 //       .useTraitWithArg('traitA', 3)
-
 
 //     assertThat(myFactory.build(), equalTo(6))
 //   })

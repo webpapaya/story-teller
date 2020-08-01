@@ -51,7 +51,7 @@ type UseCaseConfig<
 > = {
   command: Command
   aggregate: Aggregate
-  events: Events<Command, Aggregate, Event1, Event2, Event3, Event4, Event5>,
+  events: Events<Command, Aggregate, Event1, Event2, Event3, Event4, Event5>
   preCondition?: (opts: { aggregate: Aggregate['O'], command: Command['O'] }) => boolean
   execute: (opts: { aggregate: Aggregate['O'], command: Command['O'] }) => Aggregate['O']
 }
@@ -83,7 +83,7 @@ export const aggregateFactory = <
   command: Command
   aggregateFrom: AggregateFrom
   aggregateTo: AggregateTo
-  events: Events<Command, AggregateTo, Event1, Event2, Event3, Event4, Event5>,
+  events: Events<Command, AggregateTo, Event1, Event2, Event3, Event4, Event5>
   preCondition?: (opts: { aggregate: AggregateFrom['O'], command: Command['O'] }) => boolean
   execute: (opts: { aggregate: AggregateFrom['O'], command: Command['O'] }) => AggregateTo['O']
 }) => ({
@@ -123,9 +123,9 @@ export const aggregateFactory = <
       // @ts-ignore
         .forEach((eventConfig) => {
           const mappedEvent = eventConfig.mapper({
-              aggregateBefore: payload.aggregate,
-              aggregateAfter: updatedAggregate,
-              command: payload.command
+            aggregateBefore: payload.aggregate,
+            aggregateAfter: updatedAggregate,
+            command: payload.command
           })
           if (mappedEvent && eventConfig.event.is(mappedEvent)) {
             events.push(mappedEvent)
