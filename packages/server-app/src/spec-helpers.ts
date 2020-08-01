@@ -3,6 +3,8 @@ import mockdate from 'mockdate'
 import { assertThat, equalTo } from 'hamjest'
 import { WithinConnection, DBClient, withinConnection } from './lib/db'
 import { PoolClient } from 'pg'
+import { queue } from './lib/queue'
+import PgBoss from 'pg-boss'
 
 export const withMockedDate = async <T>(date: string, fn: (remock: typeof mockdate.set) => T) => {
   try {
@@ -15,18 +17,22 @@ export const withMockedDate = async <T>(date: string, fn: (remock: typeof mockda
 
 type WithinConnectionForTesting = (fn: (params: {
   withinConnection: WithinConnection
-  client: DBClient
+  client: DBClient,
+  queue: PgBoss,
 }) => any) => () => any;
 
 export const t: WithinConnectionForTesting = (fn) => async () => {
   return withinConnection(async (params) => {
     try {
       await params.begin()
+      await queue.start()
       return await fn({
         client: params.client,
+        queue,
         withinConnection: async (fn2) => fn2(params)
       })
     } finally {
+      await queue.clearStorage()
       await params.rollback()
     }
   })
