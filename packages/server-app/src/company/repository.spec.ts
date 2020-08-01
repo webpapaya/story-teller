@@ -1,7 +1,7 @@
 import uuid from 'uuid'
 import { t, assertDifference } from '../spec-helpers'
 import { ensure, destroy } from './repository'
-import { Company, companyAggregate, addEmployee } from './commands'
+import { Company, companyAggregate, addEmployee } from './use-cases'
 import { assertThat, truthy, hasProperty } from 'hamjest'
 
 describe('invitation repository', () => {

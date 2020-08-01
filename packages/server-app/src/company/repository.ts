@@ -1,5 +1,5 @@
 import { ensureCompany, deleteCompanyById } from './repository.types'
-import { Company } from './commands'
+import { Company } from './use-cases'
 import { buildRepository } from '../utils/build-repository'
 
 export const ensure = buildRepository({

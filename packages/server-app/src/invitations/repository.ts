@@ -1,5 +1,5 @@
 import { ensureInvitation, deleteInvitationById, findInvitationById, IFindInvitationByIdResult } from './repository.types'
-import { Invitation, invitationAggregate } from './commands'
+import { Invitation, invitationAggregate } from './use-cases'
 import { buildRepository } from '../utils/build-repository'
 
 const toDomain = (response: IFindInvitationByIdResult) => {

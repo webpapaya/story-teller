@@ -9,7 +9,7 @@ import { LocalDateTime, nativeJs } from 'js-joda'
 import sinon from 'ts-sinon'
 import {
   register
-} from './commands'
+} from './use-cases'
 import {
   create as createUserAuthenticationFactory,
   userAuthenticationFactory

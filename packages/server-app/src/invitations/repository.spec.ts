@@ -3,7 +3,7 @@ import { assertThat, hasProperty } from 'hamjest'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 import { t, assertDifference } from '../spec-helpers'
 import { ensure, destroy, whereById } from './repository'
-import { Invitation } from './commands'
+import { Invitation } from './use-cases'
 
 describe('invitation repository', () => {
   const invitation: Invitation = {

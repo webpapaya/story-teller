@@ -40,6 +40,22 @@ type Events<
   EventConfig<Event5, Aggregate, Command>,
 ]
 
+type UseCaseConfig<
+  Command extends AnyCodec,
+  Aggregate extends AnyCodec,
+  Event1 extends AnyCodec,
+  Event2 extends AnyCodec,
+  Event3 extends AnyCodec,
+  Event4 extends AnyCodec,
+  Event5 extends AnyCodec,
+> = {
+  command: Command
+  aggregate: Aggregate
+  events: Events<Command, Aggregate, Event1, Event2, Event3, Event4, Event5>,
+  preCondition?: (opts: { aggregate: Aggregate['O'], command: Command['O'] }) => boolean
+  execute: (opts: { aggregate: Aggregate['O'], command: Command['O'] }) => Aggregate['O']
+}
+
 export const useCase = <
   Command extends AnyCodec,
   Aggregate extends AnyCodec,
@@ -48,13 +64,7 @@ export const useCase = <
   Event3 extends AnyCodec,
   Event4 extends AnyCodec,
   Event5 extends AnyCodec,
->(config: {
-  command: Command
-  aggregate: Aggregate
-  events: Events<Command, Aggregate, Event1, Event2, Event3, Event4, Event5>,
-  preCondition?: (opts: { aggregate: Aggregate['O'], command: Command['O'] }) => boolean
-  execute: (opts: { aggregate: Aggregate['O'], command: Command['O'] }) => Aggregate['O']
-}) => aggregateFactory({
+>(config: UseCaseConfig<Command, Aggregate, Event1, Event2, Event3, Event4, Event5>) => aggregateFactory({
   ...config,
   aggregateFrom: config.aggregate,
   aggregateTo: config.aggregate

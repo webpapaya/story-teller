@@ -3,7 +3,7 @@ import { useCase, domainEventToUseCase } from '../utils/use-case'
 import { uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
 import { array } from 'fp-ts/lib/Array'
-import { invitationAggregate } from '../invitations/commands'
+import { invitationAggregate } from '../invitations/use-cases'
 
 const employeeRoles = v.union([v.literal('manager'), v.literal('employee')])
 
