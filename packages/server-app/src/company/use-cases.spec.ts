@@ -4,11 +4,9 @@ import {
   addEmployee,
   removeEmployee,
   setEmployeeRole,
-  rename,
-  reactToInvitationAccepted
+  rename
 } from './use-cases'
 import uuid from 'uuid'
-import { LocalDateTime } from 'js-joda'
 import { hasAggregate } from '../utils/custom-matcher'
 
 const company: Company = {
@@ -93,24 +91,5 @@ describe('company', () => {
         command: { companyId: company.id, personId, role: 'employee' }
       }), hasAggregate(hasProperty('employees', [])))
     })
-  })
-})
-
-describe('reactions', () => {
-  it('reactToInvitationAccepted', () => {
-    const invitation = {
-      id: uuid(),
-      inviteeId: uuid(),
-      inviterId: uuid(),
-      companyId: company.id,
-      companyName: 'A company',
-      invitedAt: LocalDateTime.now(),
-      response: undefined
-    }
-
-    assertThat(reactToInvitationAccepted({
-      event: { aggregate: invitation },
-      aggregate: company
-    }), hasAggregate(hasProperty('employees.length', 1)))
   })
 })

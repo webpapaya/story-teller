@@ -1,18 +1,17 @@
-import { ConsumeMessage, Channel } from 'amqplib'
-import { connect } from 'amqplib'
+import { ConsumeMessage, Channel, connect } from 'amqplib'
 
 export const connectionPromise = connect({
   protocol: 'amqp',
   hostname: 'localhost',
   port: parseInt(process.env.RABBITMQ_PORT as string),
   username: process.env.RABBITMQ_USERNAME,
-  password: process.env.RABBITMQ_PASSWORD,
+  password: process.env.RABBITMQ_PASSWORD
 })
 
 export const publish = async (queue: string, payload: object, channel: Channel) => {
   await channel.assertQueue(queue, {
     durable: false
-  });
+  })
   await channel.sendToQueue(queue, Buffer.from(JSON.stringify(payload)))
 }
 
@@ -29,7 +28,7 @@ export const subscribe = async (
   handler: (payload: unknown) => Promise<unknown> | unknown,
   channel: Channel
 ) => {
-  await channel.assertQueue(queue, { durable: false });
+  await channel.assertQueue(queue, { durable: false })
   await channel.consume(queue, async (message) => {
     if (!message) { return }
     const unpackedMessage = unpackMessage(message)

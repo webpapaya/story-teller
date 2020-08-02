@@ -1,5 +1,5 @@
 import { v } from '@story-teller/shared'
-import { useCase, domainEventToUseCase } from '../utils/use-case'
+import { useCase, domainEventToUseCase } from '../lib/use-case'
 import { uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
 import { array } from 'fp-ts/lib/Array'
@@ -97,7 +97,7 @@ export const setEmployeeRole = useCase({
 // ------------
 
 export const reactToInvitationAccepted = domainEventToUseCase({
-  event: { aggregate: invitationAggregate },
+  event: invitationAggregate,
   useCase: addEmployee,
   mapper: (invitationAccepted) => ({
     companyId: invitationAccepted.companyId,

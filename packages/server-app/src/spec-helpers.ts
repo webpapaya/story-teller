@@ -17,8 +17,8 @@ export const withMockedDate = async <T>(date: string, fn: (remock: typeof mockda
 
 type WithinConnectionForTesting = (fn: (params: {
   withinConnection: WithinConnection
-  client: DBClient,
-  channel: Channel,
+  client: DBClient
+  channel: Channel
 }) => any) => () => any;
 
 export const t: WithinConnectionForTesting = (fn) => async () => {

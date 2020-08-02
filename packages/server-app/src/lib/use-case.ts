@@ -1,5 +1,7 @@
 import { AnyCodec } from '@story-teller/shared'
 import deepFreeze from 'deep-freeze'
+import { publish, connectionPromise } from './queue'
+import { withinConnection, DBClient } from './db'
 
 type EventConfig<
   Event extends AnyCodec,
@@ -140,20 +142,56 @@ export const aggregateFactory = <
 
 export const domainEventToUseCase = <
   AggregateFromEventCodec extends AnyCodec,
+  DomainEvent extends AggregateFromEventCodec,
+
   AggregateFromUseCaseCodec extends AnyCodec,
   AggregateFromEvent extends AggregateFromEventCodec['O'],
   AggregateFromUseCase extends AggregateFromUseCaseCodec['O'],
-  DomainEvent extends { aggregate: AggregateFromEventCodec },
-  Mapper extends (aggregateFromEvent: DomainEvent['aggregate']['O']) => Command,
+  Mapper extends (aggregateFromEvent: DomainEvent['O']) => Command,
   Command,
 >(config: {
   event: DomainEvent
   useCase: { run: (payload: { aggregate: AggregateFromUseCase, command: Command }) => [AggregateFromUseCase, unknown] }
   mapper: Mapper
-}) => (payload: {
-  event: { aggregate: AggregateFromEvent }
-  aggregate: AggregateFromUseCase
-}) => {
-  const command = config.mapper(payload.event.aggregate)
-  return config.useCase.run({ aggregate: payload.aggregate, command })
+}) => ({
+  config,
+  run: (payload: {
+    event: AggregateFromEvent
+    aggregate: AggregateFromUseCase
+  }) => {
+    const command = config.mapper(payload.event)
+    return config.useCase.run({ aggregate: payload.aggregate, command })
+  }
+})
+
+export const connectUseCase = <
+  UseCaseConfig extends { command: AnyCodec, aggregateFrom: AnyCodec, aggregateTo: AnyCodec },
+  Command extends UseCaseConfig['command'],
+  AggregateFrom extends UseCaseConfig['aggregateFrom'],
+  AggregateTo extends UseCaseConfig['aggregateTo'],
+  FetchAggregateArgs,
+>(config: {
+  useCase: {
+    config: UseCaseConfig
+    run: (payload: { command: Command['O'], aggregate: AggregateFrom['O'] }) => [AggregateTo['O'], any]
+  }
+  mapCommand: (cmd: Command['O']) => FetchAggregateArgs
+  fetchAggregate: (args: FetchAggregateArgs, clients: { pgClient: DBClient }) => Promise<AggregateFrom['O']>
+  ensureAggregate: (args: AggregateTo['O'], clients: { pgClient: DBClient }) => Promise<unknown>
+}) => async (command: Command['O']) => {
+  if (!config.useCase.config.command.is(command)) {
+    throw new Error('Invalid Command')
+  }
+
+  const queue = await connectionPromise
+  const channel = await queue.createChannel()
+  return withinConnection(async ({ client }) => {
+    const fromAggregate = await config.fetchAggregate(config.mapCommand(command), { pgClient: client })
+    const [toAggregate, events] = config.useCase.run({ command, aggregate: fromAggregate })
+    await config.ensureAggregate(toAggregate, { pgClient: client })
+    for (let event of events) {
+      await publish('default', event, channel)
+    }
+    return toAggregate
+  })
 }

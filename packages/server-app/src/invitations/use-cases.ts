@@ -1,5 +1,5 @@
 import { v } from '@story-teller/shared'
-import { useCase, aggregateFactory } from '../utils/use-case'
+import { useCase, aggregateFactory } from '../lib/use-case'
 import { nonEmptyString } from '@story-teller/shared/dist/lib'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 
