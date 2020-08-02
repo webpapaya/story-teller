@@ -1,4 +1,5 @@
 import { t } from '../spec-helpers';
+import { publish, subscribe } from './queue';
 
 const buildLazyPromise = () => {
   let resolve: () => void;
@@ -7,16 +8,18 @@ const buildLazyPromise = () => {
 }
 
 describe('queue', () => {
-  const QUEUE_NAME = 'irrelevant' as const
-  it('WHEN published after subscription, subscribes', t(async ({ queue }) => {
+  const QUEUE = 'test'
+  it('WHEN published after subscription, subscribes', t(async ({ channel }) => {
     const { resolve, promise } = buildLazyPromise()
-    queue.subscribe(QUEUE_NAME, () => resolve())
-    await queue.publish({ name: QUEUE_NAME, data: {} })
+    publish(QUEUE, { hallo: 1 }, channel)
+    subscribe(QUEUE, resolve, channel)
+    await promise
   }))
 
-  it('WHEN published before subscription, subscribes', t(async ({ queue }) => {
+  it('WHEN published before subscription, subscribes', t(async ({ channel }) => {
     const { resolve, promise } = buildLazyPromise()
-    await queue.publish({ name: QUEUE_NAME, data: {} })
-    queue.subscribe(QUEUE_NAME, () => resolve())
+    publish(QUEUE, { hallo: 1 }, channel)
+    subscribe(QUEUE, resolve, channel)
+    await promise
   }))
 })

@@ -16,7 +16,7 @@
     "db:migrate:dump": "npm run env -- schemats generate -c postgres://compup:password@localhost:15432/compup_development -s public -o osm.ts -C",
     "start": "npm run infrastructure:up && npm run env -- ts-node-dev --notify=0 --respawn ./src/index.ts",
     "lint": "eslint --ext js,ts --ignore-path .gitignore .",
-    "test": "ENV_FILE=.env.test npm run env -- mocha -r ts-node/register --exit --watch-extensions ts $(find src -name '*.spec.ts')",
+    "test": "ENV_FILE=.env.test npm run env -- mocha --timeout 10000 -r ts-node/register --exit --watch-extensions ts $(find src -name '*.spec.ts')",
     "tsc": "tsc"
   },
   "pre-commit": [
@@ -25,6 +25,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/amqplib": "^0.5.13",
     "@types/bcrypt": "^3.0.0",
     "@types/body-parser": "^1.17.0",
     "@types/cookie-parser": "^1.4.2",
@@ -36,6 +37,7 @@
     "@types/pg": "^7.4.14",
     "@types/pg-query-stream": "^1.0.2",
     "@types/uuid": "^3.4.5",
+    "amqplib": "^0.6.0",
     "bcrypt": "^3.0.6",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",

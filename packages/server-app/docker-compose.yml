@@ -13,6 +13,13 @@ services:
       timeout: 45s
       interval: 1s
       retries: 10
+  rabbitmq:
+    image: 'bitnami/rabbitmq:latest'
+    environment:
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+    ports:
+      - '${RABBITMQ_PORT}:5672'
   mail:
     image: dockage/mailcatcher
     ports:
