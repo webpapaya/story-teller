@@ -22,3 +22,8 @@ export const emitEvent = (
 ) => {
   eventEmitter.emit(eventName, payload)
 }
+
+export const buildEvent = <EventName extends Readonly<string>, Payload extends AnyCodec>(eventName: EventName, payload: Payload) => ({
+  name: eventName,
+  payload
+})

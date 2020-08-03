@@ -2,24 +2,36 @@ import { AnyCodec } from '@story-teller/shared'
 import deepFreeze from 'deep-freeze'
 import { publish, connectionPromise } from './queue'
 import { withinConnection, DBClient } from './db'
+import { PoolClient } from 'pg'
+import { Channel } from 'amqplib'
+
+type DomainEventConfig<Name extends Readonly<string>, Payload extends AnyCodec> = {
+  name: Name
+  payload: Payload
+}
+
+type DomainEvent<Config extends DomainEventConfig<any, any>> = {
+  name: Config['name']
+  payload: Config['payload']['O']
+}
 
 type EventConfig<
-  Event extends AnyCodec,
+  Event extends DomainEventConfig<any, AnyCodec>,
   Aggregate extends AnyCodec,
   Command extends AnyCodec
 > = {
   event: Event
-  mapper: ((payload: { aggregateBefore: Aggregate['O'], aggregateAfter: Aggregate['O'], command: Command['O']}) => Event['O'] | undefined)
+  mapper: ((payload: { aggregateBefore: Aggregate['O'], aggregateAfter: Aggregate['O'], command: Command['O']}) => Event['payload']['O'] | undefined)
 }
 
 type Events<
   Command extends AnyCodec,
   Aggregate extends AnyCodec,
-  Event1 extends AnyCodec,
-  Event2 extends AnyCodec,
-  Event3 extends AnyCodec,
-  Event4 extends AnyCodec,
-  Event5 extends AnyCodec,
+  Event1 extends DomainEventConfig<any, AnyCodec>,
+  Event2 extends DomainEventConfig<any, AnyCodec>,
+  Event3 extends DomainEventConfig<any, AnyCodec>,
+  Event4 extends DomainEventConfig<any, AnyCodec>,
+  Event5 extends DomainEventConfig<any, AnyCodec>,
 > = [] | [
   EventConfig<Event1, Aggregate, Command>,
 ] | [
@@ -45,11 +57,11 @@ type Events<
 type UseCaseConfig<
   Command extends AnyCodec,
   Aggregate extends AnyCodec,
-  Event1 extends AnyCodec,
-  Event2 extends AnyCodec,
-  Event3 extends AnyCodec,
-  Event4 extends AnyCodec,
-  Event5 extends AnyCodec,
+  Event1 extends DomainEventConfig<any, AnyCodec>,
+  Event2 extends DomainEventConfig<any, AnyCodec>,
+  Event3 extends DomainEventConfig<any, AnyCodec>,
+  Event4 extends DomainEventConfig<any, AnyCodec>,
+  Event5 extends DomainEventConfig<any, AnyCodec>,
 > = {
   command: Command
   aggregate: Aggregate
@@ -61,11 +73,11 @@ type UseCaseConfig<
 export const useCase = <
   Command extends AnyCodec,
   Aggregate extends AnyCodec,
-  Event1 extends AnyCodec,
-  Event2 extends AnyCodec,
-  Event3 extends AnyCodec,
-  Event4 extends AnyCodec,
-  Event5 extends AnyCodec,
+  Event1 extends DomainEventConfig<any, AnyCodec>,
+  Event2 extends DomainEventConfig<any, AnyCodec>,
+  Event3 extends DomainEventConfig<any, AnyCodec>,
+  Event4 extends DomainEventConfig<any, AnyCodec>,
+  Event5 extends DomainEventConfig<any, AnyCodec>,
 >(config: UseCaseConfig<Command, Aggregate, Event1, Event2, Event3, Event4, Event5>) => aggregateFactory({
   ...config,
   aggregateFrom: config.aggregate,
@@ -76,11 +88,11 @@ export const aggregateFactory = <
   Command extends AnyCodec,
   AggregateFrom extends AnyCodec,
   AggregateTo extends AnyCodec,
-  Event1 extends AnyCodec,
-  Event2 extends AnyCodec,
-  Event3 extends AnyCodec,
-  Event4 extends AnyCodec,
-  Event5 extends AnyCodec,
+  Event1 extends DomainEventConfig<any, AnyCodec>,
+  Event2 extends DomainEventConfig<any, AnyCodec>,
+  Event3 extends DomainEventConfig<any, AnyCodec>,
+  Event4 extends DomainEventConfig<any, AnyCodec>,
+  Event5 extends DomainEventConfig<any, AnyCodec>,
 >(config: {
   command: Command
   aggregateFrom: AggregateFrom
@@ -100,7 +112,7 @@ export const aggregateFactory = <
       command: Command['O']
       aggregate: AggregateFrom['O']
     }
-  ): [AggregateFrom['O'], Array<typeof config.events[number]['event']>] => {
+  ): [AggregateFrom['O'], Array<DomainEvent<typeof config.events[number]['event']>>] => {
     if (!config.command.is(payload.command)) {
       throw new Error('Invalid Command')
     }
@@ -119,7 +131,7 @@ export const aggregateFactory = <
       throw new Error('Aggregate invalid after use case')
     }
 
-    const events: Array<Event1 | Event2 | Event3 | Event4 | Event5> = []
+    const events: Array<DomainEvent<Event1> | DomainEvent<Event2> | DomainEvent<Event3> | DomainEvent<Event4> | DomainEvent<Event5>> = []
     if (config.events) {
       config.events
       // @ts-ignore
@@ -129,8 +141,8 @@ export const aggregateFactory = <
             aggregateAfter: updatedAggregate,
             command: payload.command
           })
-          if (mappedEvent && eventConfig.event.is(mappedEvent)) {
-            events.push(mappedEvent)
+          if (mappedEvent && eventConfig.event.payload.is(mappedEvent)) {
+            events.push({ name: eventConfig.event.name, payload: mappedEvent })
           }
           return events
         })
@@ -178,20 +190,30 @@ export const connectUseCase = <
   mapCommand: (cmd: Command['O']) => FetchAggregateArgs
   fetchAggregate: (args: FetchAggregateArgs, clients: { pgClient: DBClient }) => Promise<AggregateFrom['O']>
   ensureAggregate: (args: AggregateTo['O'], clients: { pgClient: DBClient }) => Promise<unknown>
-}) => async (command: Command['O']) => {
-  if (!config.useCase.config.command.is(command)) {
-    throw new Error('Invalid Command')
-  }
-
-  const queue = await connectionPromise
-  const channel = await queue.createChannel()
-  return withinConnection(async ({ client }) => {
-    const fromAggregate = await config.fetchAggregate(config.mapCommand(command), { pgClient: client })
+}) => {
+  const raw = async (command: Command['O'], dependencies: { pgClient: PoolClient, channel: Channel }) => {
+    if (!config.useCase.config.command.is(command)) {
+      throw new Error('Invalid Command')
+    }
+    const { pgClient, channel } = dependencies
+    const fromAggregate = await config.fetchAggregate(config.mapCommand(command), { pgClient })
     const [toAggregate, events] = config.useCase.run({ command, aggregate: fromAggregate })
-    await config.ensureAggregate(toAggregate, { pgClient: client })
+    await config.ensureAggregate(toAggregate, { pgClient })
     for (let event of events) {
       await publish('default', event, channel)
     }
     return toAggregate
+  }
+
+  return ({
+    config,
+    raw,
+    execute: async (command: Command['O']) => {
+      return withinConnection(async ({ client }) => {
+        const queue = await connectionPromise
+        const channel = await queue.createChannel()
+        return raw(command, { pgClient: client, channel })
+      })
+    }
   })
 }

@@ -2,6 +2,7 @@ import { v } from '@story-teller/shared'
 import { useCase, aggregateFactory } from '../lib/use-case'
 import { nonEmptyString } from '@story-teller/shared/dist/lib'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
+import { buildEvent } from '../lib/events'
 
 export const invitationAggregate = v.aggregate({
   id: v.uuid,
@@ -53,7 +54,7 @@ export const acceptInvitation = useCase({
   aggregate: invitationAggregate,
   command: actions.acceptInvitation,
   events: [{
-    event: events.invitationAccepted,
+    event: buildEvent('invitationAccepted', events.invitationAccepted),
     mapper: ({ aggregateAfter }) => ({
       companyId: aggregateAfter.companyId,
       inviteeId: aggregateAfter.inviteeId
