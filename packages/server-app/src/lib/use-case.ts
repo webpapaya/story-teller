@@ -5,6 +5,8 @@ import { withinConnection, DBClient } from './db'
 import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
 
+type ExternalDependencies = { pgClient: PoolClient, channel: Channel }
+
 type DomainEventConfig<Name extends Readonly<string>, Payload extends AnyCodec> = {
   name: Name
   payload: Payload
@@ -22,6 +24,13 @@ type EventConfig<
 > = {
   event: Event
   mapper: ((payload: { aggregateBefore: Aggregate['O'], aggregateAfter: Aggregate['O'], command: Command['O']}) => Event['payload']['O'] | undefined)
+}
+
+type SyncEvent<T> = {
+  event: { name: string, payload: T }
+  useCases: Array<{
+    raw: (command: T, deps: ExternalDependencies) => Promise<unknown>
+  }>
 }
 
 type Events<
@@ -155,7 +164,6 @@ export const aggregateFactory = <
 export const domainEventToUseCase = <
   AggregateFromEventCodec extends AnyCodec,
   DomainEvent extends AggregateFromEventCodec,
-
   AggregateFromUseCaseCodec extends AnyCodec,
   AggregateFromEvent extends AggregateFromEventCodec['O'],
   AggregateFromUseCase extends AggregateFromUseCaseCodec['O'],
@@ -187,18 +195,35 @@ export const connectUseCase = <
     config: UseCaseConfig
     run: (payload: { command: Command['O'], aggregate: AggregateFrom['O'] }) => [AggregateTo['O'], any]
   }
+  getSyncedSubscriptions?: () => Record<string, SyncEvent<any>>
   mapCommand: (cmd: Command['O']) => FetchAggregateArgs
   fetchAggregate: (args: FetchAggregateArgs, clients: { pgClient: DBClient }) => Promise<AggregateFrom['O']>
   ensureAggregate: (args: AggregateTo['O'], clients: { pgClient: DBClient }) => Promise<unknown>
 }) => {
-  const raw = async (command: Command['O'], dependencies: { pgClient: PoolClient, channel: Channel }) => {
+  const raw = async (command: Command['O'], dependencies: ExternalDependencies) => {
+    const { pgClient, channel } = dependencies
+
     if (!config.useCase.config.command.is(command)) {
       throw new Error('Invalid Command')
     }
-    const { pgClient, channel } = dependencies
+
     const fromAggregate = await config.fetchAggregate(config.mapCommand(command), { pgClient })
     const [toAggregate, events] = config.useCase.run({ command, aggregate: fromAggregate })
     await config.ensureAggregate(toAggregate, { pgClient })
+
+    const syncedSubscriptions = config.getSyncedSubscriptions?.() || {}
+
+    for (let event of events) {
+      const eventSub = syncedSubscriptions[event.name]
+      if (eventSub) {
+        for (let useCase of eventSub.useCases) {
+          await useCase.raw(eventSub.event.payload, dependencies)
+        }
+      }
+    }
+
+    // TODO: events should be published after all use-cases
+    // are executed successfully
     for (let event of events) {
       await publish('default', event, channel)
     }
