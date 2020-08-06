@@ -29,7 +29,7 @@ type EventConfig<
 type SyncEvent<T> = {
   event: { name: string, payload: T }
   useCases: Array<{
-    raw: (command: T, deps: ExternalDependencies) => Promise<unknown>
+    raw: (command: T, deps: ExternalDependencies) => Promise<[unknown, DomainEvent<any>[]]>
   }>
 }
 
@@ -200,8 +200,8 @@ export const connectUseCase = <
   fetchAggregate: (args: FetchAggregateArgs, clients: { pgClient: DBClient }) => Promise<AggregateFrom['O']>
   ensureAggregate: (args: AggregateTo['O'], clients: { pgClient: DBClient }) => Promise<unknown>
 }) => {
-  const raw = async (command: Command['O'], dependencies: ExternalDependencies) => {
-    const { pgClient, channel } = dependencies
+  const raw = async (command: Command['O'], dependencies: ExternalDependencies): Promise<[AggregateTo['O'], any[]]> => {
+    const { pgClient } = dependencies
 
     if (!config.useCase.config.command.is(command)) {
       throw new Error('Invalid Command')
@@ -212,22 +212,19 @@ export const connectUseCase = <
     await config.ensureAggregate(toAggregate, { pgClient })
 
     const syncedSubscriptions = config.getSyncedSubscriptions?.() || {}
+    const eventToReturn = [...events]
 
     for (let event of events) {
       const eventSub = syncedSubscriptions[event.name]
       if (eventSub) {
         for (let useCase of eventSub.useCases) {
-          await useCase.raw(eventSub.event.payload, dependencies)
+          const [_, newEvents] = await useCase.raw(eventSub.event.payload, dependencies)
+          eventToReturn.push(...newEvents)
         }
       }
     }
 
-    // TODO: events should be published after all use-cases
-    // are executed successfully
-    for (let event of events) {
-      await publish('default', event, channel)
-    }
-    return toAggregate
+    return [toAggregate, [...events, ...eventToReturn]]
   }
 
   return ({
@@ -237,7 +234,11 @@ export const connectUseCase = <
       return withinConnection(async ({ client }) => {
         const queue = await connectionPromise
         const channel = await queue.createChannel()
-        return raw(command, { pgClient: client, channel })
+        const [aggregate, events] = await raw(command, { pgClient: client, channel })
+        for (let event of events) {
+          await publish('default', event, channel)
+        }
+        return aggregate
       })
     }
   })
