@@ -1,24 +1,25 @@
 import { assertThat, equalTo, promiseThat, rejected } from 'hamjest'
-import { useCase, connectUseCase } from './use-case'
+import { useCase, connectUseCase, reactToEventSync } from './use-case'
 import { v } from '@story-teller/shared'
 import { buildEvent } from './events'
 import sinon from 'ts-sinon'
+import { t } from '../spec-helpers'
+
+const someUseCase = useCase({
+  command: v.record({ id: v.number, value: v.number }),
+  aggregate: v.record({ id: v.number, number: v.number, otherProperty: v.string }),
+  events: [
+    {
+      event: buildEvent('someEvent', v.record({ hallo: v.string })),
+      mapper: () => ({ hallo: 'test' })
+    }
+  ],
+  execute: ({ command, aggregate }) => {
+    return { ...aggregate, number: command.value }
+  }
+})
 
 describe('connectUseCase', () => {
-  const someUseCase = useCase({
-    command: v.record({ id: v.number, value: v.number }),
-    aggregate: v.record({ id: v.number, number: v.number, otherProperty: v.string }),
-    events: [
-      {
-        event: buildEvent('someEvent', v.record({ hallo: v.string })),
-        mapper: () => ({ hallo: 'test' })
-      }
-    ],
-    execute: ({ command, aggregate }) => {
-      return { ...aggregate, number: command.value }
-    }
-  })
-
   it('returns correct result for useCase', async () => {
     const connectedUseCase = connectUseCase({
       useCase: someUseCase,
@@ -53,8 +54,8 @@ describe('connectUseCase', () => {
       const connectedUseCase = connectUseCase({
         getSyncedSubscriptions: () => ({
           someEvent: {
-            event: { name: 'someEvent', payload: { hallo: 1 } },
-            useCases: [anotherUseCase]
+            eventPayload: v.record({ hallo: v.string }),
+            listeners: [anotherUseCase as any]
           }
         }),
         useCase: someUseCase,
@@ -72,8 +73,8 @@ describe('connectUseCase', () => {
       const connectedUseCase = connectUseCase({
         getSyncedSubscriptions: () => ({
           someEvent: {
-            event: { name: 'someEvent', payload: { hallo: 'test' } },
-            useCases: [anotherUseCase]
+            eventPayload: v.record({ hallo: v.string }),
+            listeners: [anotherUseCase as any]
           }
         }),
         useCase: someUseCase,
@@ -85,4 +86,33 @@ describe('connectUseCase', () => {
       return promiseThat(connectedUseCase.execute({ id: 1, value: 12 }), rejected())
     })
   })
+})
+
+
+describe('reactToUseCaseSync', () => {
+  const connectedUseCase = connectUseCase({
+    useCase: someUseCase,
+    mapCommand: (cmd) => cmd.id,
+    fetchAggregate: (id: number) => Promise.resolve({
+      id: id,
+      number: Math.random(),
+      otherProperty: 'hallo'
+    }),
+    ensureAggregate: () => Promise.resolve(void 0)
+  })
+
+  it('', t((externalDependencies) => {
+    const event = buildEvent('test', v.record({
+      someId: v.uuid
+    }));
+
+    reactToEventSync({
+      event,
+      useCase: connectedUseCase,
+      mapper: (x) => ({
+        id: parseInt(x.someId),
+        value: 1
+      })
+    })
+  }))
 })
