@@ -55,7 +55,10 @@ describe('connectUseCase', () => {
         getSyncedSubscriptions: () => ({
           someEvent: {
             eventPayload: v.record({ hallo: v.string }),
-            listeners: [anotherUseCase as any]
+            listeners: [{
+              useCase: anotherUseCase,
+              mapper: (event: any) => ({ hallo: event.hallo.length })
+            } as any]
           }
         }),
         useCase: someUseCase,

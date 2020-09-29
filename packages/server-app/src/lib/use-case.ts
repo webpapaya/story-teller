@@ -220,8 +220,8 @@ export const connectUseCase = <
       const eventSub = syncedSubscriptions[event.name]
 
       if (eventSub) {
-        for (let useCase of eventSub.listeners) {
-          const [_, newEvents] = await useCase(eventSub.eventPayload, dependencies)
+        for (let listener of (eventSub.listeners as any[])) {
+          const [_, newEvents] = await listener.useCase.raw(listener.mapper(event.payload), dependencies)
           eventToReturn.push(...newEvents)
         }
       }
