@@ -4,6 +4,7 @@ import { uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
 import { array } from 'fp-ts/lib/Array'
 import { invitationAggregate } from '../invitations/use-cases'
+import { buildEvent } from '../lib/events'
 
 const employeeRoles = v.union([v.literal('manager'), v.literal('employee')])
 
@@ -78,6 +79,7 @@ export const removeEmployee = useCase({
     ...aggregate,
     employees: aggregate
       .employees
+      // @ts-ignore
       .filter((personId) => personId.id !== action.personId)
   })
 })
@@ -96,11 +98,11 @@ export const setEmployeeRole = useCase({
 
 // ------------
 
-export const reactToInvitationAccepted = domainEventToUseCase({
-  event: invitationAggregate,
-  useCase: addEmployee,
-  mapper: (invitationAccepted) => ({
-    companyId: invitationAccepted.companyId,
-    personId: invitationAccepted.inviterId
-  })
-})
+// export const reactToInvitationAccepted = domainEventToUseCase({
+//   event: invitationAggregate,
+//   useCase: addEmployee,
+//   mapper: (invitationAccepted) => ({
+//     companyId: invitationAccepted.companyId,
+//     personId: invitationAccepted.inviterId
+//   })
+// })
