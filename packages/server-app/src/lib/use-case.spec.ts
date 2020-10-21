@@ -19,7 +19,7 @@ const someUseCase = useCase({
   }
 })
 
-describe('connectUseCase', () => {
+describe.skip('connectUseCase', () => {
   it('returns correct result for useCase', async () => {
     const connectedUseCase = connectUseCase({
       useCase: someUseCase,
@@ -120,7 +120,7 @@ describe('reactToUseCaseSync', () => {
   }))
 })
 
-it('verifies types', () => {
+it.skip('verifies types', () => {
   aggregateFactory({
     command: v.string,
     aggregateFrom: v.string,

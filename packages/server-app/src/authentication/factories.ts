@@ -3,7 +3,7 @@ import { LocalDateTime, nativeJs } from 'js-joda'
 import snakeCase from 'snake-case'
 import { UserAuthentication } from '../domain'
 import { PoolClient } from 'pg'
-import uuid = require('uuid');
+import uuid from 'uuid';
 
 export const DUMMY_TOKEN = '0fb339b556d1a822f68785bff7e67362e235563d'
 const DUMMY_TOKEN_HASHED = '$2b$04$he9DIvynmp4Xj4LZ.tvbsu5Xm/qq.RY5wNpGVsiKhfSlaa.yQn6Ka'

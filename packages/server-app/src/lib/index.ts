@@ -1,7 +1,7 @@
 import QueryStream from 'pg-query-stream'
 import { DBClient, withinNamespace } from './db'
 import { EventId, GenericEvent, GenericQueries, Config, ExecutableQueries } from './types'
-import uuid = require('uuid');
+import uuid from 'uuid';
 
 export function createApp<DomainEvent extends GenericEvent, DomainQueries extends GenericQueries> (config: Config<DomainEvent, DomainQueries>) {
   type InternalEvent = DomainEvent & { id: string }
