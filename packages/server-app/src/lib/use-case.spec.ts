@@ -1,5 +1,5 @@
 import { assertThat, equalTo, promiseThat, rejected } from 'hamjest'
-import { useCase, connectUseCase, reactToEventSync } from './use-case'
+import { useCase, connectUseCase, reactToEventSync, aggregateFactory } from './use-case'
 import { v } from '@story-teller/shared'
 import { buildEvent } from './events'
 import sinon from 'ts-sinon'
@@ -118,4 +118,23 @@ describe('reactToUseCaseSync', () => {
       })
     })
   }))
+})
+
+it('verifies types', () => {
+  aggregateFactory({
+    command: v.string,
+    aggregateFrom: v.string,
+    aggregateTo: v.string,
+    events: [],
+    // @ts-expect-error
+    execute: ({ aggregate }) => {}
+  })
+
+  useCase({
+    command: v.string,
+    aggregate: v.string,
+    events: [],
+    // @ts-expect-error
+    execute: ({ aggregate }) => {}
+  })
 })

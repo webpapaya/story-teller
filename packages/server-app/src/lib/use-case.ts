@@ -1,4 +1,4 @@
-import { AnyCodec } from '@story-teller/shared'
+import { AnyCodec, v } from '@story-teller/shared'
 import deepFreeze from 'deep-freeze'
 import { publish, connectionPromise } from './queue'
 import { withinConnection, DBClient } from './db'
@@ -26,18 +26,19 @@ type EventConfig<
   mapper: ((payload: { aggregateBefore: Aggregate['O'], aggregateAfter: Aggregate['O'], command: Command['O']}) => Event['payload']['O'] | undefined)
 }
 
-type UseCaseConfigType = {
+type UseCaseConfig<
+  Command extends AnyCodec,
+  AggregateFrom extends AnyCodec,
+  AggregateTo extends AnyCodec,
+> = {
   command: AnyCodec,
   aggregateFrom: AnyCodec,
   aggregateTo: AnyCodec,
-  events: [
-    DomainEventConfig<any, AnyCodec>,
-    DomainEventConfig<any, AnyCodec>,
-    DomainEventConfig<any, AnyCodec>,
-    DomainEventConfig<any, AnyCodec>,
-    DomainEventConfig<any, AnyCodec>
-  ]
+  events: DomainEventConfig<any, AnyCodec>[]
 }
+
+type AnyUseCaseConfigType = UseCaseConfig<AnyCodec, AnyCodec, AnyCodec>
+
 
 type SyncEventSubscriptions = Record<string, {
   eventPayload: AnyCodec,
@@ -47,24 +48,24 @@ type SyncEventSubscriptions = Record<string, {
   ) => Promise<[unknown, unknown[]]>>
 }>
 
-type FetchAggregate <UseCaseConfig extends UseCaseConfigType, Args> =
+type FetchAggregate <UseCaseConfig extends AnyUseCaseConfigType, Args> =
   (args: Args, clients: { pgClient: DBClient }) => Promise<UseCaseConfig['aggregateFrom']['O']>
 
-type MapCommandToFetchAggregate <UseCaseConfig extends UseCaseConfigType, Args> =
+type MapCommandToFetchAggregate <UseCaseConfig extends AnyUseCaseConfigType, Args> =
   (cmd: UseCaseConfig['command']['O']) => Args
 
-type EnsureAggregate <UseCaseConfig extends UseCaseConfigType> =
+type EnsureAggregate <UseCaseConfig extends AnyUseCaseConfigType> =
   (args: UseCaseConfig['aggregateTo']['O'], clients: { pgClient: DBClient }) => Promise<unknown>
 
-type EventsFromConfig<Config extends UseCaseConfigType> =
+type EventsFromConfig<Config extends AnyUseCaseConfigType> =
   Config['events'][number][]
 
-type RunUseCase<Config extends UseCaseConfigType> = (payload: {
+type RunUseCase<Config extends AnyUseCaseConfigType> = (payload: {
   command: Config['command']['O'],
   aggregate: Config['aggregateFrom']['O']
 }) => [Config['aggregateTo']['O'], EventsFromConfig<Config>]
 
-type UseCaseType<UseCaseConfig extends UseCaseConfigType> = {
+type UseCaseType<UseCaseConfig extends AnyUseCaseConfigType> = {
   config: {
     command: UseCaseConfig['command']
     aggregateFrom: UseCaseConfig['aggregateFrom']
@@ -76,13 +77,13 @@ type UseCaseType<UseCaseConfig extends UseCaseConfigType> = {
   run: RunUseCase<UseCaseConfig>
 }
 
-type RawConnectedUseCase<UseCaseConfig extends UseCaseConfigType> =
+type RawConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
   (command: UseCaseConfig['command']['O'], dependencies: ExternalDependencies) => Promise<[UseCaseConfig['aggregateTo']['O'], any[]]>
 
-type ConnectedUseCase<UseCaseConfig extends UseCaseConfigType> =
+type ConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
   (command: UseCaseConfig['command']['O']) => Promise<[UseCaseConfig['aggregateTo']['O'], any[]]>
 
-type Events<UseCaseConfig extends UseCaseConfigType> = [] | [
+type Events<UseCaseConfig extends AnyUseCaseConfigType> = [] | [
   EventConfig<UseCaseConfig['events'][0], UseCaseConfig['aggregateTo'], UseCaseConfig['command']>,
 ] | [
   EventConfig<UseCaseConfig['events'][0], UseCaseConfig['aggregateTo'], UseCaseConfig['command']>,
@@ -104,28 +105,13 @@ type Events<UseCaseConfig extends UseCaseConfigType> = [] | [
   EventConfig<UseCaseConfig['events'][4], UseCaseConfig['aggregateTo'], UseCaseConfig['command']>,
 ]
 
-
-type Precondition<UseCaseConfig extends UseCaseConfigType> =
+type Precondition<UseCaseConfig extends AnyUseCaseConfigType> =
   (opts: { aggregate: UseCaseConfig['aggregateFrom']['O'], command: UseCaseConfig['command']['O'] }) => boolean
 
-type ExecuteUseCase<UseCaseConfig extends UseCaseConfigType> =
+type ExecuteUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
   (opts: { aggregate: UseCaseConfig['aggregateTo']['O'], command: UseCaseConfig['command']['O'] }) => UseCaseConfig['aggregateTo']['O']
 
-type AggregateFactory<UseCaseConfig extends UseCaseConfigType> = {
-  command: UseCaseConfig['command']
-  aggregateFrom: UseCaseConfig['aggregateFrom']
-  aggregateTo: UseCaseConfig['aggregateTo']
-  events: Events<UseCaseConfig>
-  preCondition?: Precondition<UseCaseConfig>
-  execute: ExecuteUseCase<UseCaseConfig>
-}
-
-type UseCaseFactory<UseCaseConfig extends UseCaseConfigType> = Omit<AggregateFactory<UseCaseConfig>, 'aggregateFrom' | 'aggregateTo'> & {
-  aggregate: UseCaseConfig['aggregateTo']
-}
-
-
-export const connectUseCase = <UseCaseConfig extends UseCaseConfigType, FetchAggregateArgs>(config: {
+export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, FetchAggregateArgs>(config: {
   useCase: UseCaseType<UseCaseConfig>,
   mapCommand: MapCommandToFetchAggregate<UseCaseConfig, FetchAggregateArgs>
   fetchAggregate: FetchAggregate<UseCaseConfig, FetchAggregateArgs>
@@ -179,18 +165,49 @@ export const connectUseCase = <UseCaseConfig extends UseCaseConfigType, FetchAgg
 
 const SYNC_EVENTS: SyncEventSubscriptions = {}
 
-
-
-export const useCase = <UseCaseConfig extends UseCaseConfigType>(config: UseCaseFactory<UseCaseConfig>) =>
-  aggregateFactory({
+export const useCase = <
+  Command extends AnyCodec,
+  Aggregate extends AnyCodec,
+  Config extends {
+    command: Command,
+    aggregateFrom: Aggregate,
+    aggregateTo: Aggregate,
+    events: DomainEventConfig<any, AnyCodec>[]
+  }
+>(config: {
+  command: Command,
+  aggregate: Aggregate,
+  events: Events<Config>
+  preCondition?: Precondition<Config>
+  execute: ExecuteUseCase<Config>
+}) => {
+  return aggregateFactory({
     ...config,
     aggregateFrom: config.aggregate,
     aggregateTo: config.aggregate
   })
+}
 
-export const aggregateFactory = <UseCaseConfig extends UseCaseConfigType>(config: AggregateFactory<UseCaseConfig>) => {
-  const collectEvents = (payload: Pick<UseCaseConfig, 'aggregateFrom' | 'aggregateTo' | 'command'>) => {
-    const events: UseCaseConfig['events'][number][] = []
+export const aggregateFactory = <
+  Command extends AnyCodec,
+  AggregateFrom extends AnyCodec,
+  AggregateTo extends AnyCodec,
+  Config extends {
+    command: Command,
+    aggregateFrom: AggregateFrom,
+    aggregateTo: AggregateTo,
+    events: DomainEventConfig<any, AnyCodec>[]
+  }
+>(config: {
+  command: Command,
+  aggregateFrom: AggregateFrom,
+  aggregateTo: AggregateTo,
+  events: Events<Config>
+  preCondition?: Precondition<Config>
+  execute: ExecuteUseCase<Config>
+}) => {
+  const collectEvents = (payload: Pick<Config, 'aggregateFrom' | 'aggregateTo' | 'command'>) => {
+    const events: Config['events'][number][] = []
     config.events.forEach((eventConfig) => {
       const mappedEvent = eventConfig.mapper({
         aggregateBefore: payload.aggregateFrom,
@@ -205,41 +222,42 @@ export const aggregateFactory = <UseCaseConfig extends UseCaseConfigType>(config
     return events
   }
 
+  type Run = (payload: { command: Command['O'], aggregate: AggregateFrom['O'] }) =>
+    [AggregateTo['O'], DomainEvent<typeof config.events[number]['event']>[]]
 
-  return ({
-    config,
-    run: (
-      payload: {
-        command: UseCaseConfig['command']['O']
-        aggregate: UseCaseConfig['aggregateFrom']['O']
-      }
-    ): [UseCaseConfig['aggregateFrom']['O'], Array<DomainEvent<typeof config.events[number]['event']>>] => {
-      if (!config.command.is(payload.command)) {
-        throw new Error('Invalid Command')
-      }
-
-      if (!config.aggregateFrom.is(payload.aggregate)) {
-        throw new Error('Invalid Aggregate')
-      }
-
-      if (config.preCondition && !config.preCondition(payload)) {
-        throw new Error('Invalid Precondition')
-      }
-
-      const updatedAggregate = config.execute(deepFreeze(payload))
-
-      if (!config.aggregateTo.is(updatedAggregate)) {
-        throw new Error('Aggregate invalid after use case')
-      }
-
-      return [updatedAggregate, collectEvents({
-        aggregateFrom: payload.aggregate,
-        aggregateTo: updatedAggregate,
-        command: payload.command
-      })]
+  const run: Run = (payload) => {
+    if (!config.command.is(payload.command)) {
+      throw new Error('Invalid Command')
     }
-  })
+
+    if (!config.aggregateFrom.is(payload.aggregate)) {
+      throw new Error('Invalid Aggregate')
+    }
+
+    if (config.preCondition && !config.preCondition(payload)) {
+      throw new Error('Invalid Precondition')
+    }
+
+    const updatedAggregate = config.execute(deepFreeze(payload))
+
+    if (!config.aggregateTo.is(updatedAggregate)) {
+      throw new Error('Aggregate invalid after use case')
+    }
+
+    return [updatedAggregate, collectEvents({
+      aggregateFrom: payload.aggregate,
+      aggregateTo: updatedAggregate,
+      command: payload.command
+    })]
+  }
+
+  return ({ config, run })
 }
+
+
+
+
+
 
 
 
