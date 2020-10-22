@@ -103,21 +103,6 @@ describe('reactToUseCaseSync', () => {
     }),
     ensureAggregate: () => Promise.resolve(void 0)
   })
-
-  it('', t((externalDependencies) => {
-    const event = buildEvent('test', v.record({
-      someId: v.uuid
-    }));
-
-    reactToEventSync({
-      event,
-      useCase: connectedUseCase,
-      mapper: (x) => ({
-        id: parseInt(x.someId),
-        value: 1
-      })
-    })
-  }))
 })
 
 it.skip('verifies types', () => {
@@ -136,5 +121,51 @@ it.skip('verifies types', () => {
     events: [],
     // @ts-expect-error
     execute: ({ aggregate }) => {}
+  })
+
+  const useCaseA = useCase({
+    command: v.string,
+    aggregate: v.string,
+    events: [],
+    execute: ({ aggregate }) => aggregate
+  })
+  const connectedUseCaseA = connectUseCase({
+    useCase: useCaseA,
+    fetchAggregate: async () => 'test',
+    ensureAggregate: async () => 'string',
+    mapCommand: () => 'string',
+  })
+
+  connectUseCase({
+    useCase: useCaseA,
+    // @ts-expect-error
+    fetchAggregate: async () => 1,
+    ensureAggregate: async () => 'string',
+    mapCommand: () => 'string',
+  })
+
+  connectUseCase({
+    useCase: useCaseA,
+    fetchAggregate: async (test: string) => 'string',
+    ensureAggregate: async () => 'string',
+    // @ts-expect-error
+    mapCommand: () => 1,
+  })
+
+  const event = buildEvent('test', v.record({
+    someId: v.uuid
+  }));
+
+  reactToEventSync({
+    event,
+    useCase: connectedUseCaseA,
+    mapper: () => ''
+  })
+
+  reactToEventSync({
+    event,
+    useCase: connectedUseCaseA,
+    // @ts-expect-error
+    mapper: () => 1
   })
 })
