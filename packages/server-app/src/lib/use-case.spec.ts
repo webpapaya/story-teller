@@ -1,10 +1,15 @@
 import { assertThat, equalTo, promiseThat, rejected, hasProperty } from 'hamjest'
-import { useCase, connectUseCase, reactToEventSync, aggregateFactory } from './use-case'
+import { useCase, connectUseCase, reactToEventSync, aggregateFactory, reactToEventAsync } from './use-case'
 import { v } from '@story-teller/shared'
 import { buildEvent } from './events'
 import sinon from 'ts-sinon'
 import { t } from '../spec-helpers'
 import uuid from 'uuid'
+import { buildLazyPromise } from '../utils/build-lazy-promise'
+
+before(() => {
+
+})
 
 const someUseCase = useCase({
   command: v.record({ id: v.number, value: v.number }),
@@ -144,6 +149,60 @@ describe('reactToUseCaseSync', () => {
     await connectedUseCaseB.execute('test')
     assertThat(useCaseSpy, hasProperty('callCount', 1))
   })
+
+  it.skip('calls async event', t(async ({ channel }) => {
+    const { resolve, promise} = buildLazyPromise()
+    const event = buildEvent('test', v.record({
+      someId: v.uuid
+    }))
+
+    const useCaseA = useCase({
+      command: v.string,
+      aggregate: v.string,
+      events: [],
+      execute: ({ aggregate }) => {
+        resolve()
+        return aggregate
+      }
+    })
+
+    const connectedUseCaseA = connectUseCase({
+      useCase: useCaseA,
+      fetchAggregate: async () => 'test1231',
+      ensureAggregate: async () => 'string',
+      mapCommand: () => 'string',
+    })
+
+    const useCaseB = useCase({
+      command: v.string,
+      aggregate: v.string,
+      events: [{
+        event,
+        mapper: () => ({ someId: uuid() })
+      }],
+      execute: ({ aggregate }) => aggregate
+    })
+
+    const connectedUseCaseB = connectUseCase({
+      useCase: useCaseB,
+      fetchAggregate: async () => 'test1',
+      ensureAggregate: async () => 'string',
+      mapCommand: () => 'string',
+    })
+
+    await reactToEventAsync({
+      event: buildEvent('test', v.record({
+        someId: v.uuid
+      })),
+      useCase: connectedUseCaseA,
+      mapper: () => '',
+      channel
+    })
+
+    connectedUseCaseB.execute('test')
+
+    await promise
+  }))
 })
 
 it.skip('verifies types', () => {

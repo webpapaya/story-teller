@@ -1,18 +1,39 @@
 import { ConsumeMessage, Channel, connect } from 'amqplib'
 
-export const connectionPromise = connect({
-  protocol: 'amqp',
-  hostname: 'localhost',
-  port: parseInt(process.env.RABBITMQ_PORT as string),
-  username: process.env.RABBITMQ_USERNAME,
-  password: process.env.RABBITMQ_PASSWORD
-})
+const connectToMQ = async () => {
+  return connect({
+    protocol: 'amqp',
+    hostname: 'localhost',
+    port: parseInt(process.env.RABBITMQ_PORT as string),
+    username: process.env.RABBITMQ_USERNAME,
+    password: process.env.RABBITMQ_PASSWORD
+  })
+}
+
+export let connectionPromise = connectToMQ()
+
+export const createChannel = async () => {
+  const queue = await connectionPromise
+  const channel = queue.createChannel()
+
+  return channel
+}
 
 export const publish = async (queue: string, payload: object, channel: Channel) => {
   await channel.assertQueue(queue, {
     durable: false
   })
   await channel.sendToQueue(queue, Buffer.from(JSON.stringify(payload)))
+}
+
+export type WithChannel = <T>(fn: (deps: { channel: Channel }) => T) => Promise<T>;
+export const withChannel: WithChannel = async (fn) => {
+  const channel = await createChannel()
+  try {
+    return await fn({ channel })
+  } finally {
+    await channel.close()
+  }
 }
 
 const unpackMessage = (message: ConsumeMessage) => {

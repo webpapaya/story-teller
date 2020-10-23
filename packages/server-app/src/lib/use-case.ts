@@ -1,6 +1,6 @@
 import { AnyCodec, v } from '@story-teller/shared'
 import deepFreeze from 'deep-freeze'
-import { publish, connectionPromise } from './queue'
+import { publish, connectionPromise, subscribe, createChannel, withChannel } from './queue'
 import { withinConnection, DBClient } from './db'
 import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
@@ -136,7 +136,7 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
     const eventsToReturn = [...events]
 
     const eventCallbacks = events.map((event) => {
-      const eventSub = syncedSubscriptions[event.name] || []
+      const eventSub = syncedSubscriptions[event.name] || { listeners: [] }
       return eventSub.listeners
         .map((listener) => async () => {
           const [result, newEvents] = await listener(event.payload, dependencies)
@@ -155,15 +155,15 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
   }
 
   const execute: ExecutableConnectedUseCase<UseCaseConfig> = async (command) => {
+    // TODO: change to withinTransaction
     return withinConnection(async ({ client }) => {
-      const queue = await connectionPromise
-      const channel = await queue.createChannel()
+      return withChannel(async ({ channel }) => {
+        const [aggregate, events] = await raw(command, { pgClient: client, channel })
 
-      const [aggregate, events] = await raw(command, { pgClient: client, channel })
+        await sequentially(events.map((event) => () => publish('default', event, channel)))
 
-      await sequentially(events.map((event) => () => publish('default', event, channel)))
-
-      return aggregate
+        return aggregate
+      })
     })
   }
 
@@ -299,4 +299,24 @@ export const reactToEventSync = <
   syncEvent[config.event.name].listeners.push((event: DomainEvent['payload']['O'], dependencies: ExternalDependencies) =>
     config.useCase.raw(config.mapper(event), dependencies))
   return syncEvent;
+}
+
+export const reactToEventAsync = async <
+  ConnectedUseCaseConfig extends AnyConnectedUseCaseConfig<AnyUseCaseConfigType>,
+  DomainEvent extends DomainEventConfig<any, AnyCodec>,
+>(config: {
+    event: DomainEvent,
+    mapper: (event: DomainEvent['payload']['O']) => ConnectedUseCaseConfig['useCase']['config']['command']['O'],
+    useCase: ConnectedUseCaseConfig,
+    getSyncEvents?: () => SyncEventSubscriptions,
+    channel: Channel
+}) => {
+  subscribe('default', async (event: any) => {
+    if(event.name !== config.event.name) { return; }
+    if(!config.event.payload.is(event.payload)) {
+      // TODO: introduce error classes
+      throw new Error('Could not deserialize event')
+    }
+    await config.useCase.execute(config.mapper(event))
+  }, await createChannel())
 }

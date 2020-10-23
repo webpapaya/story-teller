@@ -1,12 +1,7 @@
 import { t } from '../spec-helpers'
 import { publish, subscribe } from './queue'
 import { assertThat, equalTo } from 'hamjest'
-
-const buildLazyPromise = () => {
-  let resolve: () => void
-  const promise = new Promise((_resolve) => { resolve = _resolve }) // eslint-disable-line promise/param-names
-  return { resolve: resolve!, promise }
-}
+import { buildLazyPromise } from '../utils/build-lazy-promise'
 
 describe('queue', () => {
   const QUEUE = 'test'
@@ -35,35 +30,3 @@ describe('queue', () => {
     await promise
   }))
 })
-
-// const subscribeUseCase = async <
-//   AggregateFromEventCodec extends AnyCodec,
-//   DomainEvent extends AggregateFromEventCodec,
-// >(useCaseMapper: { config: { event: DomainEvent } }, channel: Channel) => {
-//   subscribe('default', (value) => {
-//     if (useCaseMapper.config.event.is(value)) {
-
-//     }
-//   }, channel)
-// }
-
-// describe.only('subscribeUseCase', t(({ channel }) => {
-//   it('', () => {
-//     const event = v.record({ value: v.number })
-
-//     subscribeUseCase(domainEventToUseCase({
-//       event: v.record({ test: v.number }),
-//       useCase: someUseCase,
-//       mapper: (event) => ({ value: event.test })
-//     }), channel)
-
-//     domainEventToUseCase({
-//       event: v.record({ test: v.number }),
-//       useCase: someUseCase,
-//       mapper: (event) => ({ value: event.test })
-//     })
-
-//     // subscribeToUseCase({})
-
-//   }))
-// })
