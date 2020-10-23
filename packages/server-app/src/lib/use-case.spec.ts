@@ -1,9 +1,10 @@
-import { assertThat, equalTo, promiseThat, rejected } from 'hamjest'
+import { assertThat, equalTo, promiseThat, rejected, hasProperty } from 'hamjest'
 import { useCase, connectUseCase, reactToEventSync, aggregateFactory } from './use-case'
 import { v } from '@story-teller/shared'
 import { buildEvent } from './events'
 import sinon from 'ts-sinon'
 import { t } from '../spec-helpers'
+import uuid from 'uuid'
 
 const someUseCase = useCase({
   command: v.record({ id: v.number, value: v.number }),
@@ -91,17 +92,57 @@ describe.skip('connectUseCase', () => {
   })
 })
 
-
 describe('reactToUseCaseSync', () => {
-  const connectedUseCase = connectUseCase({
-    useCase: someUseCase,
-    mapCommand: (cmd) => cmd.id,
-    fetchAggregate: (id: number) => Promise.resolve({
-      id: id,
-      number: Math.random(),
-      otherProperty: 'hallo'
-    }),
-    ensureAggregate: () => Promise.resolve(void 0)
+  it('calls synced event', async () => {
+    const useCaseSpy = sinon.spy()
+    const event = buildEvent('test', v.record({
+      someId: v.uuid
+    }))
+
+    const useCaseA = useCase({
+      command: v.string,
+      aggregate: v.string,
+      events: [],
+      execute: ({ aggregate }) => {
+        useCaseSpy()
+        return aggregate
+      }
+    })
+
+    const connectedUseCaseA = connectUseCase({
+      useCase: useCaseA,
+      fetchAggregate: async () => 'test1231',
+      ensureAggregate: async () => 'string',
+      mapCommand: () => 'string',
+    })
+
+    const useCaseB = useCase({
+      command: v.string,
+      aggregate: v.string,
+      events: [{
+        event,
+        mapper: () => ({ someId: uuid() })
+      }],
+      execute: ({ aggregate }) => aggregate
+    })
+
+    const connectedUseCaseB = connectUseCase({
+      useCase: useCaseB,
+      fetchAggregate: async () => 'test1',
+      ensureAggregate: async () => 'string',
+      mapCommand: () => 'string',
+    })
+
+    reactToEventSync({
+      event: buildEvent('test', v.record({
+        someId: v.uuid
+      })),
+      useCase: connectedUseCaseA,
+      mapper: () => ''
+    })
+
+    await connectedUseCaseB.execute('test')
+    assertThat(useCaseSpy, hasProperty('callCount', 1))
   })
 })
 
