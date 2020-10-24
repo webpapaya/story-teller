@@ -1,10 +1,8 @@
 import { v } from '@story-teller/shared'
-import { useCase, domainEventToUseCase } from '../lib/use-case'
+import { useCase } from '../lib/use-case'
 import { uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
 import { array } from 'fp-ts/lib/Array'
-import { invitationAggregate } from '../invitations/use-cases'
-import { buildEvent } from '../lib/events'
 
 const employeeRoles = v.union([v.literal('manager'), v.literal('employee')])
 
