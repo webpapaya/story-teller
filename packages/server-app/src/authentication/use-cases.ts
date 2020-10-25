@@ -8,6 +8,7 @@ import { UserAuthentication } from '../domain'
 import { findUserByIdentifier } from './queries'
 import { RepositoryError } from '../errors'
 import { PoolClient } from 'pg'
+import { ExternalDependencies } from '../lib/use-case'
 
 type TokenErrors =
 | 'TOKEN_NOT_FOUND'
@@ -27,17 +28,17 @@ type RegisterErrors =
 | 'User Identifier already taken'
 
 type Register = (
-  deps: { client: PoolClient, sendMail: SendMail },
+  deps: ExternalDependencies & { sendMail: SendMail },
   params: { userIdentifier: string, password: string}
 ) => Promise<SResult<RegisterErrors, undefined>>
 
-export const register: Register = async (dependencies, params) => {
+export const register: Register = async (clients, params) => {
   const passwordHash = await hashPassword(params.password)
   const confirmationToken = await crypto.randomBytes(50).toString('hex')
   const hashedConfirmationToken = await hashPassword(confirmationToken)
 
   try {
-    await dependencies.client.query(sql`
+    await clients.pgClient.query(sql`
         INSERT into user_authentication (
           user_identifier,
           password,
@@ -52,7 +53,7 @@ export const register: Register = async (dependencies, params) => {
         )
       `)
 
-    await dependencies.sendMail({
+    await clients.sendMail({
       type: 'RegisterEmail',
       to: params.userIdentifier,
       language: 'en',
@@ -69,7 +70,7 @@ export const register: Register = async (dependencies, params) => {
 }
 
 type Confirm = (
-  deps: { client: PoolClient },
+  deps: ExternalDependencies,
   params: { userIdentifier: string, token: string }
 ) => Promise<SResult<RepositoryError, UserAuthentication>>
 
@@ -82,7 +83,7 @@ export const confirm: Confirm = async (dependencies, params) => {
     return Err('NOT_FOUND' as const)
   }
 
-  await dependencies.client.query(sql`
+  await dependencies.pgClient.query(sql`
       UPDATE user_authentication
       SET confirmation_token=null,
           confirmed_at=${new Date()}
@@ -93,7 +94,7 @@ export const confirm: Confirm = async (dependencies, params) => {
 }
 
 type RequestPasswordReset = (
-  deps: { client: PoolClient, sendMail: SendMail },
+  deps: ExternalDependencies & { sendMail: SendMail },
   params: { userIdentifier: string}
 ) => Promise<SResult<never, { userIdentifier: string, token: string }>>
 
@@ -101,7 +102,7 @@ export const requestPasswordReset: RequestPasswordReset = async (dependencies, p
   const token = await crypto.randomBytes(20).toString('hex')
   const hashedToken = await hashPassword(token)
 
-  const result = await dependencies.client.query(sql`
+  const result = await dependencies.pgClient.query(sql`
       UPDATE user_authentication
       SET password_reset_token=(${hashedToken}),
           password_reset_created_at=${new Date()}
@@ -122,7 +123,7 @@ export const requestPasswordReset: RequestPasswordReset = async (dependencies, p
 }
 
 type ResetPasswordByToken = (
-  deps: { client: PoolClient },
+  deps: ExternalDependencies,
   params: { userIdentifier: string, token: string, password: string }
 ) => Promise<SResult<TokenErrors, undefined>>
 
@@ -141,7 +142,7 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
     .isAfter(record.passwordResetCreatedAt)
 
   if (isTokenToOld) {
-    await dependencies.client.query(sql`
+    await dependencies.pgClient.query(sql`
         UPDATE user_authentication
         SET password_reset_token=null,
             password_reset_created_at=null
@@ -151,7 +152,7 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
   }
 
   const hashedPassword = await hashPassword(params.password)
-  await dependencies.client.query(sql`
+  await dependencies.pgClient.query(sql`
       UPDATE user_authentication
       SET password=${hashedPassword},
           password_reset_token=null,

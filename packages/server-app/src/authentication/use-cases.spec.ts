@@ -28,21 +28,21 @@ import { Err } from 'space-lift'
 const sendMail = sinon.spy()
 
 describe('user/register', () => {
-  it('when identifier is used twice, returns error', t(async ({ client }) => {
-    await register({ client, sendMail }, {
+  it('when identifier is used twice, returns error', t(async (clients) => {
+    await register({ ...clients, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
-    const result = await register({ client, sendMail }, {
+    const result = await register({ ...clients, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
     assertThat(result, equalTo(Err('User Identifier already taken')))
   }))
 
-  it('sends a registration email', t(async ({ client }) => {
+  it('sends a registration email', t(async (clients) => {
     const sendMail = sinon.spy()
-    await register({ client, sendMail }, {
+    await register({ ...clients, sendMail }, {
       userIdentifier: 'sepp',
       password: 'huber'
     })
@@ -55,27 +55,27 @@ describe('user/register', () => {
 })
 
 describe('user/confirm', () => {
-  it('when token was found, sets confirmationToken to null', t(async ({ client }) => {
-    const auth = await createUserAuthenticationFactory({ client },
+  it('when token was found, sets confirmationToken to null', t(async (clients) => {
+    const auth = await createUserAuthenticationFactory(clients,
       userAuthenticationFactory.build(unconfirmed))
 
-    await confirm({ client }, {
+    await confirm(clients, {
       userIdentifier: auth.userIdentifier,
       token: DUMMY_TOKEN
     })
 
-    const result = await client.query('select * from user_authentication')
+    const result = await clients.pgClient.query('select * from user_authentication')
     assertThat(result.rows, everyItem(hasProperties({
       confirmationToken: null,
       confirmedAt: present()
     })))
   }))
 
-  it('when token was NOT found, returns token not found error', t(async ({ client }) => {
-    const auth = await createUserAuthenticationFactory({ client },
+  it('when token was NOT found, returns token not found error', t(async (clients) => {
+    const auth = await createUserAuthenticationFactory(clients,
       userAuthenticationFactory.build(unconfirmed))
 
-    const result = await confirm({ client }, {
+    const result = await confirm(clients, {
       userIdentifier: auth.userIdentifier,
       token: 'unknown token'
     })
@@ -83,8 +83,8 @@ describe('user/confirm', () => {
     assertThat(result, equalTo(Err('NOT_FOUND')))
   }))
 
-  it('when user was not found', t(async ({ client }) => {
-    const result = await confirm({ client }, {
+  it('when user was not found', t(async (clients) => {
+    const result = await confirm(clients, {
       userIdentifier: 'unknown user',
       token: 'invalid token'
     })
@@ -94,10 +94,10 @@ describe('user/confirm', () => {
 })
 
 describe('user/requestPasswordReset', () => {
-  it('sends a pw reset email', t(async ({ client }) => {
+  it('sends a pw reset email', t(async (clients) => {
     const sendMail = sinon.spy()
-    await createUserAuthenticationFactory({ client }, userAuthenticationFactory.build())
-    await requestPasswordReset({ client, sendMail }, {
+    await createUserAuthenticationFactory(clients, userAuthenticationFactory.build())
+    await requestPasswordReset({ ...clients, sendMail }, {
       userIdentifier: 'sepp'
     })
     assertThat(sendMail.lastCall.args[0], hasProperties({
@@ -106,22 +106,22 @@ describe('user/requestPasswordReset', () => {
     }))
   }))
 
-  it('does not send an email on unknown user', t(async ({ client }) => {
+  it('does not send an email on unknown user', t(async (clients) => {
     const sendMail = sinon.spy()
-    await requestPasswordReset({ client, sendMail }, {
+    await requestPasswordReset({ ...clients, sendMail }, {
       userIdentifier: 'unknown user'
     })
     assertThat(sendMail.callCount, equalTo(0))
   }))
 
-  it('sets passwordResetCreatedAt', t(async ({ client }) => {
+  it('sets passwordResetCreatedAt', t(async (clients) => {
     return withMockedDate('2000-01-01', async () => {
-      await createUserAuthenticationFactory({ client }, userAuthenticationFactory.build())
-      await requestPasswordReset({ client, sendMail }, {
+      await createUserAuthenticationFactory(clients, userAuthenticationFactory.build())
+      await requestPasswordReset({ ...clients, sendMail }, {
         userIdentifier: 'sepp'
       })
 
-      const result = await client.query('select * from user_authentication')
+      const result = await clients.pgClient.query('select * from user_authentication')
       assertThat(result.rows[0], hasProperties({
         passwordResetCreatedAt: LocalDateTime.from(nativeJs(new Date()))
       }))
@@ -130,33 +130,33 @@ describe('user/requestPasswordReset', () => {
 })
 
 describe('user/resetPasswordByToken', () => {
-  it('after success, user can sign in with new password', t(async ({ client }) => {
-    const auth = await createUserAuthenticationFactory({ client },
+  it('after success, user can sign in with new password', t(async (clients) => {
+    const auth = await createUserAuthenticationFactory(clients,
       userAuthenticationFactory.build(requestedPasswordReset))
 
-    await resetPasswordByToken({ client }, {
+    await resetPasswordByToken(clients, {
       userIdentifier: auth.userIdentifier,
       token: DUMMY_TOKEN,
       password: 'new password'
     })
 
-    assertThat(await findUserByAuthentication({ client }, {
+    assertThat(await findUserByAuthentication(clients, {
       userIdentifier: auth.userIdentifier,
       password: 'new password'
     }), present())
   }))
 
-  it('after success, relevant attributes are set to null', t(async ({ client }) => {
-    const auth = await createUserAuthenticationFactory({ client },
+  it('after success, relevant attributes are set to null', t(async (clients) => {
+    const auth = await createUserAuthenticationFactory(clients,
       userAuthenticationFactory.build(requestedPasswordReset))
 
-    await resetPasswordByToken({ client }, {
+    await resetPasswordByToken(clients, {
       userIdentifier: auth.userIdentifier,
       token: DUMMY_TOKEN,
       password: 'new password'
     })
 
-    const result = await client.query('select * from user_authentication')
+    const result = await clients.pgClient.query('select * from user_authentication')
     assertThat(result.rows[0], hasProperties({
       passwordResetCreatedAt: null,
       passwordResetToken: null,
@@ -164,9 +164,9 @@ describe('user/resetPasswordByToken', () => {
     }))
   }))
 
-  it('after token expired, pw is not resetted', t(async ({ client }) => {
+  it('after token expired, pw is not resetted', t(async (clients) => {
     await withMockedDate('2000-01-01', async (remockDate) => {
-      const auth = await createUserAuthenticationFactory({ client },
+      const auth = await createUserAuthenticationFactory(clients,
         userAuthenticationFactory.build({
           ...requestedPasswordReset,
           passwordResetCreatedAt: LocalDateTime.from(nativeJs(new Date()))
@@ -174,13 +174,13 @@ describe('user/resetPasswordByToken', () => {
 
       remockDate('2000-01-02')
 
-      await resetPasswordByToken({ client }, {
+      await resetPasswordByToken(clients, {
         userIdentifier: auth.userIdentifier,
         token: DUMMY_TOKEN,
         password: 'new password'
       })
 
-      assertThat(await findUserByAuthentication({ client }, {
+      assertThat(await findUserByAuthentication(clients, {
         userIdentifier: auth.userIdentifier,
         password: 'new password'
       }), equalTo(Err('NOT_FOUND')))

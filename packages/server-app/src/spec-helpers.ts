@@ -17,7 +17,7 @@ export const withMockedDate = async <T>(date: string, fn: (remock: typeof mockda
 
 type WithinConnectionForTesting = (fn: (params: {
   withinConnection: WithinConnection
-  client: DBClient
+  pgClient: DBClient
   channel: Channel
 }) => any) => () => any;
 
@@ -28,7 +28,7 @@ export const t: WithinConnectionForTesting = (fn) => async () => {
     try {
       await params.begin()
       return await fn({
-        client: params.client,
+        pgClient: params.client,
         channel,
         withinConnection: async (fn2) => fn2(params)
       })
@@ -39,10 +39,10 @@ export const t: WithinConnectionForTesting = (fn) => async () => {
   })
 }
 
-export const assertDifference = async (deps: { client: PoolClient }, table: string, difference: number, fn: Function) => {
-  const before = await deps.client.query(`select count(*) as count from ${table};`)
+export const assertDifference = async (deps: { pgClient: PoolClient }, table: string, difference: number, fn: Function) => {
+  const before = await deps.pgClient.query(`select count(*) as count from ${table};`)
   await fn()
-  const after = await deps.client.query(`select count(*) as count from ${table};`)
+  const after = await deps.pgClient.query(`select count(*) as count from ${table};`)
   assertThat(parseInt(after.rows[0].count),
     equalTo(parseInt(before.rows[0].count) + difference))
 }

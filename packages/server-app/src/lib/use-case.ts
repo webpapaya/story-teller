@@ -4,10 +4,11 @@ import { publish, connectionPromise, subscribe, createChannel, withChannel } fro
 import { withinConnection, DBClient } from './db'
 import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
+import { sequentially } from '../utils/sequentially'
 
 const SYNC_EVENTS: SyncEventSubscriptions = {}
 
-type ExternalDependencies = { pgClient: PoolClient, channel: Channel }
+export type ExternalDependencies = { pgClient: PoolClient, channel: Channel }
 
 type DomainEventConfig<Name extends Readonly<string>, Payload extends AnyCodec> = {
   name: Name
@@ -116,13 +117,6 @@ type AnyConnectedUseCaseConfig<UseCaseConfig extends AnyUseCaseConfigType> = {
   execute: ExecutableConnectedUseCase<UseCaseConfig>,
   raw: RawConnectedUseCase<UseCaseConfig>
 }
-
-const sequentially = (promiseFns: Array<() => Promise<unknown>>) => {
-  return promiseFns.reduce((promises, currentPromise) => {
-    return promises.then(() => currentPromise())
-  }, Promise.resolve() as Promise<unknown>);
-}
-
 
 export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, FetchAggregateArgs>(config: {
   useCase: UseCaseType<UseCaseConfig>,

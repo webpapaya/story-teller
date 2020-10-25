@@ -9,21 +9,21 @@ import { sequentially } from '../utils/sequentially';
 import { ensure } from './repository';
 import { vacation } from './use-cases';
 
-it('ensure', t(async ({ client }) => {
+it('ensure', t(async (clients) => {
   const allAggregates = vacation.build().map((buildAggregate) =>
     async () => {
-      await assertDifference({ client }, 'vacation', 1, () => ensure(buildAggregate(), client))
+      await assertDifference(clients, 'vacation', 1, () => ensure(buildAggregate(),  clients))
     })
 
   await sequentially(allAggregates)
 }))
 
-it('whereId', t(async ({ client }) => {
+it('whereId', t(async (clients) => {
   const allAggregates = vacation.build().map((buildAggregate) =>
     async () => {
       const aggregate = buildAggregate()
-      await ensure(aggregate, client)
-      assertThat(await whereId({ id: aggregate.id }, client), hasProperty('length', 1))
+      await ensure(aggregate, clients)
+      assertThat(await whereId({ id: aggregate.id }, clients), hasProperty('length', 1))
     })
 
   await sequentially(allAggregates)

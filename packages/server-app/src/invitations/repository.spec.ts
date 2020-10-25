@@ -20,44 +20,44 @@ describe('invitation repository', () => {
   }
 
   describe('find', () => {
-    it('WHEN record exists, returns record', t(async ({ client }) => {
-      await ensure(invitation, client)
-      assertThat(await whereById(invitation.id, client), hasProperty('0.id', invitation.id))
+    it('WHEN record exists, returns record', t(async (clients) => {
+      await ensure(invitation, clients)
+      assertThat(await whereById(invitation.id, clients), hasProperty('0.id', invitation.id))
     }))
 
-    it('WHEN record does not exist, returns empty array', t(async ({ client }) => {
-      assertThat(await whereById(invitation.id, client), hasProperty('length', 0))
+    it('WHEN record does not exist, returns empty array', t(async (clients) => {
+      assertThat(await whereById(invitation.id, clients), hasProperty('length', 0))
     }))
   })
 
   describe('ensure', () => {
-    it('WHEN record does not exist, creates a new record', t(async ({ client }) => {
-      await assertDifference({ client }, 'invitation', 1, async () => {
-        const result = await ensure(invitation, client)
+    it('WHEN record does not exist, creates a new record', t(async (clients) => {
+      await assertDifference(clients, 'invitation', 1, async () => {
+        const result = await ensure(invitation, clients)
         assertThat(result, hasProperty('0.id', invitation.id))
       })
     }))
 
-    it('WHEN record already exists, upserts record', t(async ({ client }) => {
-      await ensure(invitation, client)
-      await assertDifference({ client }, 'invitation', 0, async () => {
+    it('WHEN record already exists, upserts record', t(async (clients) => {
+      await ensure(invitation, clients)
+      await assertDifference(clients, 'invitation', 0, async () => {
         const updatedCompanyName = 'updated'
-        const result = await ensure({ ...invitation, companyName: updatedCompanyName }, client)
+        const result = await ensure({ ...invitation, companyName: updatedCompanyName }, clients)
         assertThat(result, hasProperty('0.companyName', updatedCompanyName))
       })
     }))
   })
 
   describe('destroy', () => {
-    it('WHEN record does not exist, returns empty array', t(async ({ client }) => {
-      const result = await destroy(invitation, client)
+    it('WHEN record does not exist, returns empty array', t(async (clients) => {
+      const result = await destroy(invitation, clients)
       assertThat(result, hasProperty('length', 0))
     }))
 
-    it('WHEN record exists, removes record', t(async ({ client }) => {
-      await ensure(invitation, client)
-      await assertDifference({ client }, 'invitation', -1, async () => {
-        await destroy(invitation, client)
+    it('WHEN record exists, removes record', t(async (clients) => {
+      await ensure(invitation, clients)
+      await assertDifference(clients, 'invitation', -1, async () => {
+        await destroy(invitation, clients)
       })
     }))
   })
