@@ -201,7 +201,7 @@ export const useCase = <
     command: Command,
     aggregateFrom: Aggregate,
     aggregateTo: Aggregate,
-    events: DomainEventConfig<any, any>[]
+    events: DomainEventConfig<any, AnyCodec>[]
   }
 >(config: {
   command: Command,
