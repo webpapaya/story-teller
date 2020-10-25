@@ -1,8 +1,6 @@
 import { v } from '@story-teller/shared'
-
-import { whereById } from '../invitations/repository'
 import { buildEvent } from '../lib/events'
-import { aggregateFactory, connectUseCase, useCase } from '../lib/use-case'
+import { aggregateFactory, useCase } from '../lib/use-case'
 
 const personId = v.uuid
 export const requestingUser = v.record({

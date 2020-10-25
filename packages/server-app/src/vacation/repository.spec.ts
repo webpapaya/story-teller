@@ -1,9 +1,6 @@
-/** Types generated for queries found in "./src/vacation/repository.sql" */
-import { PreparedQuery } from '@pgtyped/query'
-import { assertThat, fulfilled, hasProperty, promiseThat, truthy } from 'hamjest'
+import { assertThat, hasProperty } from 'hamjest'
 
-import { LocalDate } from 'js-joda'
-import { count, whereId, ensure } from './repository'
+import { whereId, ensure } from './repository'
 import { assertDifference, t } from '../spec-helpers'
 import { sequentially } from '../utils/sequentially'
 

@@ -2,7 +2,6 @@ import * as Factory from 'factory.ts'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import snakeCase from 'snake-case'
 import { UserAuthentication } from '../domain'
-import { PoolClient } from 'pg'
 import uuid from 'uuid'
 import { ExternalDependencies } from '../lib/use-case'
 

@@ -5,7 +5,6 @@ import { withinConnection, DBClient } from './db'
 import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
 import { sequentially } from '../utils/sequentially'
-import { boolean } from 'hamjest'
 
 const SYNC_EVENTS: SyncEventSubscriptions = {}
 

@@ -73,9 +73,9 @@ export const exposeUseCaseViaHTTP = <
           method
         }))
 
-      return {
+      return res.send({
         links,
         payload: aggregateAfter
-      }
+      })
     })
 }

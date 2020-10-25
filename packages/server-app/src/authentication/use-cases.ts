@@ -7,7 +7,6 @@ import { SendMail } from './emails'
 import { UserAuthentication } from '../domain'
 import { findUserByIdentifier } from './queries'
 import { RepositoryError } from '../errors'
-import { PoolClient } from 'pg'
 import { ExternalDependencies } from '../lib/use-case'
 
 type TokenErrors =

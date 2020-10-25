@@ -7,10 +7,6 @@ import { t } from '../spec-helpers'
 import uuid from 'uuid'
 import { buildLazyPromise } from '../utils/build-lazy-promise'
 
-before(() => {
-
-})
-
 const someUseCase = useCase({
   command: v.record({ id: v.number, value: v.number }),
   aggregate: v.record({ id: v.number, number: v.number, otherProperty: v.string }),
@@ -212,7 +208,7 @@ it.skip('verifies types', () => {
     aggregateTo: v.string,
     events: [],
     // @ts-expect-error
-    execute: ({ aggregate }) => {}
+    execute: ({ aggregate }) => {} // eslint-disable-line @typescript-eslint/no-unused-vars
   })
 
   useCase({
@@ -220,14 +216,14 @@ it.skip('verifies types', () => {
     aggregate: v.string,
     events: [],
     // @ts-expect-error
-    execute: ({ aggregate }) => {}
+    execute: ({ aggregate }) => {} // eslint-disable-line @typescript-eslint/no-unused-vars
   })
 
   const useCaseA = useCase({
     command: v.string,
     aggregate: v.string,
     events: [],
-    execute: ({ aggregate }) => aggregate
+    execute: ({ aggregate }) => aggregate // eslint-disable-line @typescript-eslint/no-unused-vars
   })
   const connectedUseCaseA = connectUseCase({
     useCase: useCaseA,
@@ -246,6 +242,7 @@ it.skip('verifies types', () => {
 
   connectUseCase({
     useCase: useCaseA,
+    // eslint-ignore-next-line @typescript-eslint/no-unused-vars
     fetchAggregate: async (test: string) => 'string',
     ensureAggregate: async () => 'string',
     // @ts-expect-error

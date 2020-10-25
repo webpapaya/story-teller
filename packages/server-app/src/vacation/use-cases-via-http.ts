@@ -11,7 +11,6 @@ const mapToRequestingUser = (request: Request) => {
   throw new Error('unauthorized')
 }
 
-
 export const initialize = (app: IRouter) => {
   exposeUseCaseViaHTTP({
     app,
@@ -27,7 +26,7 @@ export const initialize = (app: IRouter) => {
         ...JSON.parse(request.body),
         requestingUser
       }
-    },
+    }
   })
 
   exposeUseCaseViaHTTP({
@@ -44,7 +43,7 @@ export const initialize = (app: IRouter) => {
         ...JSON.parse(request.body),
         requestingUser
       }
-    },
+    }
   })
 
   exposeUseCaseViaHTTP({
@@ -61,7 +60,7 @@ export const initialize = (app: IRouter) => {
         ...JSON.parse(request.body),
         requestingUser
       }
-    },
+    }
   })
 
   exposeUseCaseViaHTTP({
@@ -78,12 +77,6 @@ export const initialize = (app: IRouter) => {
         ...JSON.parse(request.body),
         requestingUser
       }
-    },
+    }
   })
-
-
-
 }
-
-
-

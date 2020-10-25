@@ -37,7 +37,7 @@ describe('vacation', () => {
 
     describe('WHEN vacation is pending', () => {
       it('changes state to confirmed', () => {
-        const { command, result } = executeUseCase({ role: 'manager' })
+        const { result } = executeUseCase({ role: 'manager' })
         assertThat(result,
           hasAggregate(hasProperty('request.state', 'confirmed')))
       })
