@@ -30,7 +30,6 @@ describe('vacation', () => {
         }
       }
 
-
       const result = confirmRequest.run({ command, aggregate })
 
       return { command, result }
@@ -49,8 +48,6 @@ describe('vacation', () => {
           hasAggregate(hasProperty('request.answeredBy', command.requestingUser.id)))
       })
     })
-
-
   })
 
   describe('rejectVacation', () => {
@@ -132,7 +129,7 @@ describe('vacation', () => {
           }
 
           assertThat(() => deleteRequest.run({ command, aggregate }),
-            throws());
+            throws())
         })
       })
     })

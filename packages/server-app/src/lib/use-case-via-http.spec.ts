@@ -1,12 +1,12 @@
-import { v } from "@story-teller/shared"
-import { aggregateFactory, connectUseCase, useCase } from "./use-case"
-import { exposeUseCaseViaHTTP } from "./use-case-via-http"
+import { v } from '@story-teller/shared'
+import { aggregateFactory, connectUseCase, useCase } from './use-case'
+import { exposeUseCaseViaHTTP } from './use-case-via-http'
 
 describe('exposeUseCaseViaHTTP', () => {
   it('verify types for record', () => {
     const useCaseA = useCase({
       command: v.record({
-        someProp: v.string,
+        someProp: v.string
       }),
       aggregate: v.string,
       events: [],
@@ -16,7 +16,7 @@ describe('exposeUseCaseViaHTTP', () => {
       useCase: useCaseA,
       mapCommand: () => '',
       ensureAggregate: async (aggregate) => aggregate,
-      fetchAggregate: async (aggregate) => 'hallo',
+      fetchAggregate: async () => 'hallo'
     })
 
     exposeUseCaseViaHTTP({
@@ -28,8 +28,7 @@ describe('exposeUseCaseViaHTTP', () => {
       actionName: 'useCaseA',
       method: 'post',
       useCase: connectedUseCaseA,
-      authenticate: () => true,
+      authenticate: () => true
     })
   })
-
 })

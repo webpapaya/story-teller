@@ -12,7 +12,6 @@ export const buildRepository = <DomainObject, DBParam, DomainResult, DBResult>(c
   return result.map((item) => config.toDomain(item))
 }
 
-
 export const buildRecordRepository = <DomainObject, DBParam, DomainResult, DBResult>(config: {
   dbFunction: PreparedQuery<DBParam, DBResult>
   toRepository: (domainObject: DomainObject) => DBParam

@@ -118,7 +118,7 @@ describe('reactToUseCaseSync', () => {
       useCase: useCaseA,
       fetchAggregate: async () => 'test1231',
       ensureAggregate: async () => 'string',
-      mapCommand: () => 'string',
+      mapCommand: () => 'string'
     })
 
     const useCaseB = useCase({
@@ -135,7 +135,7 @@ describe('reactToUseCaseSync', () => {
       useCase: useCaseB,
       fetchAggregate: async () => 'test1',
       ensureAggregate: async () => 'string',
-      mapCommand: () => 'string',
+      mapCommand: () => 'string'
     })
 
     reactToEventSync({
@@ -151,7 +151,7 @@ describe('reactToUseCaseSync', () => {
   })
 
   it.skip('calls async event', t(async ({ channel }) => {
-    const { resolve, promise} = buildLazyPromise()
+    const { resolve, promise } = buildLazyPromise()
     const event = buildEvent('test', v.record({
       someId: v.uuid
     }))
@@ -170,7 +170,7 @@ describe('reactToUseCaseSync', () => {
       useCase: useCaseA,
       fetchAggregate: async () => 'test1231',
       ensureAggregate: async () => 'string',
-      mapCommand: () => 'string',
+      mapCommand: () => 'string'
     })
 
     const useCaseB = useCase({
@@ -187,7 +187,7 @@ describe('reactToUseCaseSync', () => {
       useCase: useCaseB,
       fetchAggregate: async () => 'test1',
       ensureAggregate: async () => 'string',
-      mapCommand: () => 'string',
+      mapCommand: () => 'string'
     })
 
     await reactToEventAsync({
@@ -233,7 +233,7 @@ it.skip('verifies types', () => {
     useCase: useCaseA,
     fetchAggregate: async () => 'test',
     ensureAggregate: async () => 'string',
-    mapCommand: () => 'string',
+    mapCommand: () => 'string'
   })
 
   connectUseCase({
@@ -241,7 +241,7 @@ it.skip('verifies types', () => {
     // @ts-expect-error
     fetchAggregate: async () => 1,
     ensureAggregate: async () => 'string',
-    mapCommand: () => 'string',
+    mapCommand: () => 'string'
   })
 
   connectUseCase({
@@ -249,12 +249,12 @@ it.skip('verifies types', () => {
     fetchAggregate: async (test: string) => 'string',
     ensureAggregate: async () => 'string',
     // @ts-expect-error
-    mapCommand: () => 1,
+    mapCommand: () => 1
   })
 
   const event = buildEvent('test', v.record({
     someId: v.uuid
-  }));
+  }))
 
   reactToEventSync({
     event,

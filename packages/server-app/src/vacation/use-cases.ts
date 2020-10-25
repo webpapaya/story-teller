@@ -1,5 +1,5 @@
 import { v } from '@story-teller/shared'
-import {  } from '@story-teller/shared/dist'
+
 import { whereById } from '../invitations/repository'
 import { aggregateFactory, connectUseCase, useCase } from '../lib/use-case'
 
@@ -19,16 +19,16 @@ export const vacation = v.aggregate({
     }),
     v.record({
       state: v.literal('confirmed'),
-      answeredBy: personId,
+      answeredBy: personId
     }),
     v.record({
       state: v.literal('rejected'),
       answeredBy: personId,
-      reason: v.nonEmptyString,
+      reason: v.nonEmptyString
     }),
     v.record({
       state: v.literal('deleted'),
-      reason: v.nullable(v.nonEmptyString),
+      reason: v.nullable(v.nonEmptyString)
     })
   ])
 })
@@ -44,17 +44,17 @@ export const commands = {
   }),
   confirm: v.record({
     id: v.uuid,
-    requestingUser: requestingUser,
+    requestingUser: requestingUser
   }),
   reject: v.record({
     id: v.uuid,
     reason: v.nonEmptyString,
-    requestingUser: requestingUser,
+    requestingUser: requestingUser
   }),
   delete: v.record({
     id: v.uuid,
     reason: v.nonEmptyString,
-    requestingUser: requestingUser,
+    requestingUser: requestingUser
   })
 } as const
 
@@ -104,7 +104,7 @@ export const rejectRequest = useCase({
       request: {
         state: 'rejected' as const,
         reason: command.reason,
-        answeredBy: command.requestingUser.id,
+        answeredBy: command.requestingUser.id
       }
     }
   }
@@ -122,7 +122,7 @@ export const deleteRequest = useCase({
       ...aggregate,
       request: {
         state: 'deleted' as const,
-        reason: command.reason,
+        reason: command.reason
       }
     }
   }
