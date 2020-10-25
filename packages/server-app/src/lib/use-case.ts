@@ -5,6 +5,7 @@ import { withinConnection, DBClient } from './db'
 import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
 import { sequentially } from '../utils/sequentially'
+import { boolean } from 'hamjest'
 
 const SYNC_EVENTS: SyncEventSubscriptions = {}
 
@@ -60,7 +61,7 @@ type UseCaseConfig<
   events: DomainEventConfig<any, AnyCodec>[]
 }
 
-type AnyUseCaseConfigType = UseCaseConfig<AnyCodec, AnyCodec, AnyCodec>
+export type AnyUseCaseConfigType = UseCaseConfig<AnyCodec, AnyCodec, AnyCodec>
 
 type SyncEventSubscriptions = Record<string, {
   eventPayload: AnyCodec,
@@ -99,11 +100,20 @@ type UseCaseType<UseCaseConfig extends AnyUseCaseConfigType> = {
   run: RunUseCase<UseCaseConfig>
 }
 
-type RawConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
-  (command: UseCaseConfig['command']['O'], dependencies: ExternalDependencies) => Promise<[UseCaseConfig['aggregateTo']['O'], any[]]>
+export type BeforeUseCase<UseCaseConfig extends AnyUseCaseConfigType> = (payload: {
+    aggregate: UseCaseConfig['command']['O']
+}) => boolean
 
-type ExecutableConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
-  (command: UseCaseConfig['command']['O']) => Promise<[UseCaseConfig['aggregateTo']['O'], any[]]>
+type RawConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> = (
+  command: UseCaseConfig['command']['O'],
+  dependencies: ExternalDependencies,
+  beforeUseCase?: BeforeUseCase<UseCaseConfig>
+) => Promise<[UseCaseConfig['aggregateTo']['O'], any[]]>
+
+type ExecutableConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> = (
+  command: UseCaseConfig['command']['O'],
+  beforeUseCase?: BeforeUseCase<UseCaseConfig>
+) => Promise<[UseCaseConfig['aggregateTo']['O'], any[]]>
 
 
 type Precondition<UseCaseConfig extends AnyUseCaseConfigType> =
@@ -112,7 +122,7 @@ type Precondition<UseCaseConfig extends AnyUseCaseConfigType> =
 type ExecuteUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
   (opts: { aggregate: UseCaseConfig['aggregateTo']['O'], command: UseCaseConfig['command']['O'] }) => UseCaseConfig['aggregateTo']['O']
 
-type AnyConnectedUseCaseConfig<UseCaseConfig extends AnyUseCaseConfigType> = {
+export type AnyConnectedUseCaseConfig<UseCaseConfig extends AnyUseCaseConfigType> = {
   useCase: UseCaseType<UseCaseConfig>,
   execute: ExecutableConnectedUseCase<UseCaseConfig>,
   raw: RawConnectedUseCase<UseCaseConfig>
@@ -148,11 +158,11 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
     return eventsToReturn
   }
 
-  const execute: ExecutableConnectedUseCase<UseCaseConfig> = async (command) => {
+  const execute: ExecutableConnectedUseCase<UseCaseConfig> = async (command, beforeUseCase) => {
     // TODO: change to withinTransaction
     return withinConnection(async ({ client }) => {
       return withChannel(async ({ channel }) => {
-        const [aggregate, events] = await raw(command, { pgClient: client, channel })
+        const [aggregate, events] = await raw(command, { pgClient: client, channel }, beforeUseCase)
 
         await sequentially(events.map((event) => () => publish('default', event, channel)))
 
@@ -161,20 +171,22 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
     })
   }
 
-  const raw: RawConnectedUseCase<UseCaseConfig> = async (command, dependencies) => {
+  const raw: RawConnectedUseCase<UseCaseConfig> = async (command, dependencies, beforeUseCase) => {
     if (!config.useCase.config.command.is(command)) {
       throw new Error('Invalid Command')
     }
 
-
     const fromAggregate = await config.fetchAggregate(config.mapCommand(command), dependencies)
+
+    if (beforeUseCase && !beforeUseCase({ aggregate: fromAggregate })) {
+      throw new Error('Before usecase throwed error')
+    }
+
     const [toAggregate, events] = config.useCase.run({ command, aggregate: fromAggregate })
 
     await config.ensureAggregate(toAggregate, dependencies)
 
-
     const eventsToReturn = await callsRelatedUseCasesSync(events, dependencies)
-
 
     return [toAggregate, eventsToReturn]
   }
@@ -189,7 +201,7 @@ export const useCase = <
     command: Command,
     aggregateFrom: Aggregate,
     aggregateTo: Aggregate,
-    events: DomainEventConfig<any, AnyCodec>[]
+    events: DomainEventConfig<any, any>[]
   }
 >(config: {
   command: Command,
@@ -268,6 +280,7 @@ export const aggregateFactory = <
 
   return ({ config, run })
 }
+
 
 
 export const reactToEventSync = <
