@@ -1,5 +1,5 @@
 import { ensureVacation, IEnsureVacationResult, countVacation, whereIdVacation } from './repository.types'
-import { buildRecordRepository } from '../utils/build-repository'
+import { buildRecordRepository } from '../lib/build-repository'
 import { vacation, Vacation } from './use-cases'
 
 const toDomain = (dbResult: IEnsureVacationResult) => {

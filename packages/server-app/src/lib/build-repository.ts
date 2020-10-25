@@ -1,5 +1,5 @@
 import { PreparedQuery } from '@pgtyped/query'
-import { ExternalDependencies } from '../lib/use-case'
+import { ExternalDependencies } from './use-case'
 
 export const buildRepository = <DomainObject, DBParam, DomainResult, DBResult>(config: {
   dbFunction: PreparedQuery<DBParam, DBResult>
