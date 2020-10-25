@@ -60,7 +60,6 @@ export const acceptInvitation = useCase({
       inviteeId: aggregateAfter.inviteeId
     })
   }],
-  preCondition: ({ aggregate, command: action }) => aggregate.id === action.id,
   execute: ({ aggregate }) => ({
     ...aggregate,
     response: { kind: 'accepted' as const, answeredAt: LocalDateTime.now() }
@@ -71,7 +70,6 @@ export const rejectInvitation = useCase({
   aggregate: invitationAggregate,
   command: actions.acceptInvitation,
   events: [],
-  preCondition: ({ aggregate, command: action }) => aggregate.id === action.id,
   execute: ({ aggregate }) => ({
     ...aggregate,
     response: { kind: 'rejected' as const, answeredAt: LocalDateTime.now() }

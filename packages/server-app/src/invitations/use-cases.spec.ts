@@ -45,10 +45,6 @@ describe('invitation', () => {
       }))))
     })
 
-    it('WHEN `id` does not match invitation, throws', () => {
-      assertThat(() => acceptInvitation.run({ aggregate: invitation, command: { id: uuid() } }), throws())
-    })
-
     it('emits an invitation accepted event', () => {
       assertThat(acceptInvitation.run({ aggregate: invitation, command: { id: invitation.id } }), hasEvents(hasProperty('length', 1)))
     })
@@ -60,10 +56,6 @@ describe('invitation', () => {
         kind: 'rejected',
         answeredAt: instanceOf(LocalDateTime)
       }))))
-    })
-
-    it('WHEN `id` does not match invitation, throws', () => {
-      assertThat(() => rejectInvitation.run({ aggregate: invitation, command: { id: uuid() } }), throws())
     })
   })
 })

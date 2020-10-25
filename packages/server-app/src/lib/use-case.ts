@@ -1,6 +1,6 @@
-import { AnyCodec, v } from '@story-teller/shared'
+import { AnyCodec } from '@story-teller/shared'
 import deepFreeze from 'deep-freeze'
-import { publish, connectionPromise, subscribe, createChannel, withChannel } from './queue'
+import { publish, subscribe, createChannel, withChannel } from './queue'
 import { withinConnection, DBClient } from './db'
 import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
@@ -249,7 +249,7 @@ export const aggregateFactory = <
       throw new Error('Invalid Aggregate')
     }
 
-    if (config.preCondition && !config.preCondition(payload)) {
+    if (config.preCondition && !config.preCondition({ aggregate: payload.aggregate })) {
       throw new Error('Invalid Precondition')
     }
 
