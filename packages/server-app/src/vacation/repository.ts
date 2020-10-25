@@ -1,7 +1,6 @@
 import { ensureVacation, IEnsureVacationResult, countVacation, whereIdVacation } from './repository.types'
 import { buildRecordRepository, buildRepository } from '../utils/build-repository'
 import { vacation, Vacation } from './use-cases'
-import { IEnsureInvitationResult } from '../invitations/repository.types'
 
 const toDomain = (dbResult: IEnsureVacationResult) => {
   const decoded = vacation.decode(dbResult.jsonBuildObject?.valueOf())
@@ -11,7 +10,7 @@ const toDomain = (dbResult: IEnsureVacationResult) => {
   return decoded.get()
 }
 
-export const ensure = buildRepository({
+export const ensure = buildRecordRepository({
   dbFunction: ensureVacation,
   toRepository: (vacation: Vacation) => {
     const confirmedBy = vacation.request.state !== 'pending'

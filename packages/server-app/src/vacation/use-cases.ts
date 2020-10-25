@@ -38,6 +38,11 @@ export const commands = {
   confirm: v.record({
     id: v.uuid,
     requestingUser: requestingUser,
+  }),
+  reject: v.record({
+    id: v.uuid,
+    reason: v.nonEmptyString,
+    requestingUser: requestingUser,
   })
 } as const
 
@@ -69,6 +74,25 @@ export const confirmRequest = useCase({
       request: {
         state: 'confirmed' as const,
         confirmedBy: command.requestingUser.id
+      }
+    }
+  }
+})
+
+export const rejectRequest = useCase({
+  aggregate: vacation,
+  command: commands.reject,
+  events: [],
+  preCondition: ({ command }) => {
+    return command.requestingUser.role === 'manager'
+  },
+  execute: ({ command, aggregate }) => {
+    return {
+      ...aggregate,
+      request: {
+        state: 'rejected' as const,
+        reason: command.reason,
+        confirmedBy: command.requestingUser.id,
       }
     }
   }
