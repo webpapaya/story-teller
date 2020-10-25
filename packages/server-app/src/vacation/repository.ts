@@ -35,7 +35,7 @@ export const ensure = buildRecordRepository({
   toDomain
 })
 
-export const whereId = buildRepository({
+export const whereId = buildRecordRepository({
   dbFunction: whereIdVacation,
   toRepository: (params: {id: Vacation['id']}) => {
     return params
