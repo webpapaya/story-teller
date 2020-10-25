@@ -1,6 +1,7 @@
 import { v } from '@story-teller/shared'
 
 import { whereById } from '../invitations/repository'
+import { buildEvent } from '../lib/events'
 import { aggregateFactory, connectUseCase, useCase } from '../lib/use-case'
 
 const personId = v.uuid
@@ -76,7 +77,12 @@ export const requestVacation = aggregateFactory({
 export const confirmRequest = useCase({
   aggregate: vacation,
   command: commands.confirm,
-  events: [],
+  events: [{
+    mapper: () => ({ someId: 'hallo' }),
+    event: buildEvent('test', v.record({
+      someId: v.string
+    }))
+  }],
   preCondition: ({ aggregate }) => {
     return aggregate.request.state === 'pending'
   },

@@ -1,4 +1,5 @@
 import { v } from '@story-teller/shared'
+import { IRouter } from 'express'
 import { aggregateFactory, connectUseCase, useCase } from './use-case'
 import { exposeUseCaseViaHTTP } from './use-case-via-http'
 
@@ -20,7 +21,7 @@ describe('exposeUseCaseViaHTTP', () => {
     })
 
     exposeUseCaseViaHTTP({
-      app: { post: () => {} },
+      app: { post: () => {} } as unknown as IRouter,
       requestingUser: v.string,
       mapToCommand: () => 'command',
       mapToRequestingUser: () => 'requesting user',

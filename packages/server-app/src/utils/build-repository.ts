@@ -1,5 +1,4 @@
 import { PreparedQuery } from '@pgtyped/query'
-import { PoolClient } from 'pg'
 import { ExternalDependencies } from '../lib/use-case'
 
 export const buildRepository = <DomainObject, DBParam, DomainResult, DBResult>(config: {

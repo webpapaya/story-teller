@@ -1,5 +1,5 @@
 import { AnyCodec } from '@story-teller/shared'
-import { Request, Response } from 'express'
+import { IRouter, Request, Response } from 'express'
 import { AnyUseCaseConfigType, AnyConnectedUseCaseConfig, BeforeUseCase } from './use-case'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
@@ -19,7 +19,7 @@ export const exposeUseCaseViaHTTP = <
   UseCaseConfig extends AnyUseCaseConfigType,
   ConnectedUseCaseConfig extends AnyConnectedUseCaseConfig<UseCaseConfig>
 >(config: {
-  app: any
+  app: IRouter
   method: HTTPVerb
   aggregateName: string
   actionName: string
