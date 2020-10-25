@@ -11,6 +11,7 @@ export class Codec<A, O, I> {
   readonly O: O = null as any as O
   readonly I: I = null as any as I
 
+  readonly schema = null as any
   readonly name: string;
   readonly _is: ((input: unknown) => boolean);
   readonly _decode: (input: I, context: Context) => Result<Error[], O>;
