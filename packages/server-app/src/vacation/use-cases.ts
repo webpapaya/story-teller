@@ -18,9 +18,15 @@ export const vacation = v.aggregate({
     v.record({
       state: v.literal('confirmed'),
       confirmedBy: personId,
+    }),
+    v.record({
+      state: v.literal('rejected'),
+      confirmedBy: personId,
+      reason: v.nonEmptyString,
     })
   ])
 })
+export type Vacation = typeof vacation['O']
 
 export const commands = {
   request: v.record({

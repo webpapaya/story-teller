@@ -1,0 +1,59 @@
+/** Types generated for queries found in "./src/vacation/repository.sql" */
+import { PreparedQuery } from '@pgtyped/query';
+
+import { LocalDate } from 'js-joda';
+
+export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
+
+/** 'ensureVacation' parameters type */
+export interface IEnsureVacationParams {
+  id: string | null | void;
+  start_date: LocalDate | null | void;
+  end_date: LocalDate | null | void;
+  person_id: string | null | void;
+  state: string | null | void;
+  confirmed_by: string | null | void;
+  reason: string | null | void;
+}
+
+/** 'ensureVacation' return type */
+export interface IEnsureVacationResult {
+  jsonBuildObject: Json;
+}
+
+/** 'ensureVacation' query type */
+export interface IEnsureVacationQuery {
+  params: IEnsureVacationParams;
+  result: IEnsureVacationResult;
+}
+
+const ensureVacationIR: any = {"name":"ensureVacation","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":128,"b":129,"line":5,"col":11}]}},{"name":"start_date","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":133,"b":142,"line":5,"col":16}]}},{"name":"end_date","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":146,"b":153,"line":5,"col":29}]}},{"name":"person_id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":157,"b":165,"line":5,"col":40}]}},{"name":"state","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":169,"b":173,"line":5,"col":52}]}},{"name":"confirmed_by","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":177,"b":188,"line":5,"col":60}]}},{"name":"reason","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":192,"b":197,"line":5,"col":75}]}}],"usedParamSet":{"id":true,"start_date":true,"end_date":true,"person_id":true,"state":true,"confirmed_by":true,"reason":true},"statement":{"body":"insert into vacation (id, start_date, end_date, person_id, state, confirmed_by, reason)\n  VALUES (:id, :start_date, :end_date, :person_id, :state, :confirmed_by, :reason)\n  ON CONFLICT (id)\n  DO UPDATE SET\n    start_date = EXCLUDED.start_date,\n    end_date = EXCLUDED.end_date,\n    person_id = EXCLUDED.person_id,\n    state = EXCLUDED.state,\n    confirmed_by = EXCLUDED.confirmed_by,\n    reason = EXCLUDED.reason\n  RETURNING json_build_object(\n    'id', id,\n    'startDate', start_date,\n    'endDate', end_date,\n    'personId', person_id,\n    'request', json_build_object(\n      'state', state,\n      'confirmedBy', confirmed_by,\n      'reason', reason\n    ))","loc":{"a":29,"b":687,"line":4,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * insert into vacation (id, start_date, end_date, person_id, state, confirmed_by, reason)
+ *   VALUES (:id, :start_date, :end_date, :person_id, :state, :confirmed_by, :reason)
+ *   ON CONFLICT (id)
+ *   DO UPDATE SET
+ *     start_date = EXCLUDED.start_date,
+ *     end_date = EXCLUDED.end_date,
+ *     person_id = EXCLUDED.person_id,
+ *     state = EXCLUDED.state,
+ *     confirmed_by = EXCLUDED.confirmed_by,
+ *     reason = EXCLUDED.reason
+ *   RETURNING json_build_object(
+ *     'id', id,
+ *     'startDate', start_date,
+ *     'endDate', end_date,
+ *     'personId', person_id,
+ *     'request', json_build_object(
+ *       'state', state,
+ *       'confirmedBy', confirmed_by,
+ *       'reason', reason
+ *     ))
+ * ```
+ */
+export const ensureVacation = new PreparedQuery<IEnsureVacationParams,IEnsureVacationResult>(ensureVacationIR);
+
+

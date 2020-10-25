@@ -10,7 +10,7 @@
     "infrastructure:implode": "npm run infrastructure:down -- -v",
     "db:build:queries": "PGPORT=25432 PGDATABASE=compup_test PGUSER=compup PGPASSWORD=password  ./node_modules/.bin/pgtyped -c pgtyped.config.json",
     "db:migrate:create": "npm run env -- db-migrate create",
-    "db:migrate:up": "npm run env -- db-migrate up",
+    "db:migrate:up": "npm run env -- db-migrate up && npm run db:build:queries",
     "db:migrate:down": "npm run env -- db-migrate down",
     "db:migrate:redo": "npm run db:migrate:down && npm run db:migrate:up",
     "db:migrate:dump": "npm run env -- schemats generate -c postgres://compup:password@localhost:15432/compup_development -s public -o osm.ts -C",
