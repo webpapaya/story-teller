@@ -12,7 +12,6 @@ describe('invitation repository', () => {
     companyId: uuid(),
     inviteeId: uuid(),
     inviterId: uuid(),
-
     invitedAt: LocalDateTime.now().withNano(0),
     response: {
       kind: 'accepted',

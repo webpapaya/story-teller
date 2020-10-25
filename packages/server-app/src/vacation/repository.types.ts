@@ -57,3 +57,67 @@ const ensureVacationIR: any = {"name":"ensureVacation","params":[{"name":"id","t
 export const ensureVacation = new PreparedQuery<IEnsureVacationParams,IEnsureVacationResult>(ensureVacationIR);
 
 
+/** 'whereIdVacation' parameters type */
+export interface IWhereIdVacationParams {
+  id: string | null | void;
+}
+
+/** 'whereIdVacation' return type */
+export interface IWhereIdVacationResult {
+  jsonBuildObject: Json;
+}
+
+/** 'whereIdVacation' query type */
+export interface IWhereIdVacationQuery {
+  params: IWhereIdVacationParams;
+  result: IWhereIdVacationResult;
+}
+
+const whereIdVacationIR: any = {"name":"whereIdVacation","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":988,"b":989,"line":40,"col":12}]}}],"usedParamSet":{"id":true},"statement":{"body":"select json_build_object(\n    'id', id,\n    'startDate', start_date,\n    'endDate', end_date,\n    'personId', person_id,\n    'request', json_build_object(\n      'state', state,\n      'confirmedBy', confirmed_by,\n      'reason', reason\n  ))\nfrom vacation\nwhere id = :id","loc":{"a":722,"b":989,"line":29,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * select json_build_object(
+ *     'id', id,
+ *     'startDate', start_date,
+ *     'endDate', end_date,
+ *     'personId', person_id,
+ *     'request', json_build_object(
+ *       'state', state,
+ *       'confirmedBy', confirmed_by,
+ *       'reason', reason
+ *   ))
+ * from vacation
+ * where id = :id
+ * ```
+ */
+export const whereIdVacation = new PreparedQuery<IWhereIdVacationParams,IWhereIdVacationResult>(whereIdVacationIR);
+
+
+/** 'countVacation' parameters type */
+export type ICountVacationParams = void;
+
+/** 'countVacation' return type */
+export interface ICountVacationResult {
+  count: number;
+}
+
+/** 'countVacation' query type */
+export interface ICountVacationQuery {
+  params: ICountVacationParams;
+  result: ICountVacationResult;
+}
+
+const countVacationIR: any = {"name":"countVacation","params":[],"usedParamSet":{},"statement":{"body":"select count(*)\nfrom vacation","loc":{"a":1022,"b":1050,"line":46,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * select count(*)
+ * from vacation
+ * ```
+ */
+export const countVacation = new PreparedQuery<ICountVacationParams,ICountVacationResult>(countVacationIR);
+
+

@@ -5,7 +5,7 @@ import uuid from 'uuid'
 import { hasAggregate } from '../utils/custom-matcher'
 import { commands, requestVacation, vacation, confirmRequest, requestingUser } from './use-cases'
 
-describe.only('vacation', () => {
+describe('vacation', () => {
   describe('requestVacation', () => {
     it('returns VACATION in pending state', () => {
       const resultingAggregate = requestVacation.run({

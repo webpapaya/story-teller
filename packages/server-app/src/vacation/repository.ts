@@ -1,6 +1,15 @@
-import { ensureVacation } from './repository.types'
-import { buildRepository } from '../utils/build-repository'
+import { ensureVacation, IEnsureVacationResult, countVacation, whereIdVacation } from './repository.types'
+import { buildRecordRepository, buildRepository } from '../utils/build-repository'
 import { vacation, Vacation } from './use-cases'
+import { IEnsureInvitationResult } from '../invitations/repository.types'
+
+const toDomain = (dbResult: IEnsureVacationResult) => {
+  const decoded = vacation.decode(dbResult.jsonBuildObject?.valueOf())
+  if (!decoded.isOk()) {
+    throw new Error(JSON.stringify(decoded.get()))
+  }
+  return decoded.get()
+}
 
 export const ensure = buildRepository({
   dbFunction: ensureVacation,
@@ -23,11 +32,23 @@ export const ensure = buildRepository({
       reason
     }
   },
-  toDomain: (dbResult) => {
-    const decoded = vacation.decode(dbResult.jsonBuildObject?.valueOf())
-    if (!decoded.isOk()) {
-      throw new Error(JSON.stringify(decoded.get()))
-    }
-    return decoded.get()
+  toDomain
+})
+
+export const whereId = buildRepository({
+  dbFunction: whereIdVacation,
+  toRepository: (params: {id: Vacation['id']}) => {
+    return params
+  },
+  toDomain
+})
+
+export const count = buildRecordRepository({
+  dbFunction: countVacation,
+  toRepository: () => {
+    return void 0
+  },
+  toDomain: (result) => {
+    return result.count
   }
 })
