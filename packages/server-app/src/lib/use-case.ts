@@ -106,7 +106,7 @@ type ExecutableConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
 
 
 type Precondition<UseCaseConfig extends AnyUseCaseConfigType> =
-  (opts: { aggregate: UseCaseConfig['aggregateFrom']['O'], command: UseCaseConfig['command']['O'] }) => boolean
+  (opts: { aggregate: UseCaseConfig['aggregateFrom']['O'] }) => boolean
 
 type ExecuteUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
   (opts: { aggregate: UseCaseConfig['aggregateTo']['O'], command: UseCaseConfig['command']['O'] }) => UseCaseConfig['aggregateTo']['O']

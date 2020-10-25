@@ -1,4 +1,4 @@
-import { assertThat, throws, hasProperties, hasProperty } from 'hamjest'
+import { assertThat, hasProperties, hasProperty } from 'hamjest'
 import {
   Company,
   addEmployee,
@@ -33,13 +33,6 @@ describe('company', () => {
         aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
         command: { companyId: company.id, personId }
       }), hasAggregate(hasProperty('employees.0', { id: personId, role: 'manager' })))
-    })
-
-    it('WHEN companyID in cmd is different, throws error', () => {
-      assertThat(() => addEmployee.run({
-        aggregate: company,
-        command: { companyId: 'whatever', personId: uuid() }
-      }), throws())
     })
   })
 

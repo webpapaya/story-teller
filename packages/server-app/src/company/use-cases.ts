@@ -50,7 +50,6 @@ export const rename = useCase({
   aggregate: companyAggregate,
   command: actions.rename,
   events: [],
-  preCondition: ({ aggregate, command: action }) => action.companyId === aggregate.id,
   execute: ({ command: action, aggregate }) => nameLens.set(action.name)(aggregate)
 })
 
@@ -58,7 +57,6 @@ export const addEmployee = useCase({
   aggregate: companyAggregate,
   command: actions.addEmployee,
   events: [],
-  preCondition: ({ aggregate, command: action }) => action.companyId === aggregate.id,
   execute: ({ aggregate, command: action }) => ({
     ...aggregate,
     employees: uniqueBy('id', [{
@@ -72,7 +70,6 @@ export const removeEmployee = useCase({
   aggregate: companyAggregate,
   command: actions.removeEmployee,
   events: [],
-  preCondition: ({ aggregate, command: action }) => action.companyId === aggregate.id,
   execute: ({ aggregate, command: action }) => ({
     ...aggregate,
     employees: aggregate
@@ -86,7 +83,6 @@ export const setEmployeeRole = useCase({
   aggregate: companyAggregate,
   command: actions.setEmployeeRole,
   events: [],
-  preCondition: ({ aggregate, command: action }) => action.companyId === aggregate.id,
   execute: ({ aggregate, command: action }) => employees
     .composeTraversal(employeeTraversal)
     .composePrism(employeePrism(action.personId))
