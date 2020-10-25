@@ -11,22 +11,28 @@ export const vacation = v.aggregate({
   id: v.uuid,
   startDate: v.date,
   endDate: v.date,
+  employeeId: personId,
   request: v.union([
     v.record({
       state: v.literal('pending')
     }),
     v.record({
       state: v.literal('confirmed'),
-      confirmedBy: personId,
+      answeredBy: personId,
     }),
     v.record({
       state: v.literal('rejected'),
-      confirmedBy: personId,
+      answeredBy: personId,
       reason: v.nonEmptyString,
+    }),
+    v.record({
+      state: v.literal('deleted'),
+      reason: v.nullable(v.nonEmptyString),
     })
   ])
 })
 export type Vacation = typeof vacation['O']
+export type RequestState = typeof vacation.schema.request.O['state']
 
 export const commands = {
   request: v.record({
@@ -40,6 +46,11 @@ export const commands = {
     requestingUser: requestingUser,
   }),
   reject: v.record({
+    id: v.uuid,
+    reason: v.nonEmptyString,
+    requestingUser: requestingUser,
+  }),
+  delete: v.record({
     id: v.uuid,
     reason: v.nonEmptyString,
     requestingUser: requestingUser,
@@ -65,15 +76,15 @@ export const confirmRequest = useCase({
   aggregate: vacation,
   command: commands.confirm,
   events: [],
-  preCondition: ({ command }) => {
-    return command.requestingUser.role === 'manager'
+  preCondition: ({ aggregate }) => {
+    return aggregate.request.state === 'pending'
   },
   execute: ({ command, aggregate }) => {
     return {
       ...aggregate,
       request: {
         state: 'confirmed' as const,
-        confirmedBy: command.requestingUser.id
+        answeredBy: command.requestingUser.id
       }
     }
   }
@@ -83,8 +94,8 @@ export const rejectRequest = useCase({
   aggregate: vacation,
   command: commands.reject,
   events: [],
-  preCondition: ({ command }) => {
-    return command.requestingUser.role === 'manager'
+  preCondition: ({ aggregate }) => {
+    return aggregate.request.state === 'pending'
   },
   execute: ({ command, aggregate }) => {
     return {
@@ -92,7 +103,25 @@ export const rejectRequest = useCase({
       request: {
         state: 'rejected' as const,
         reason: command.reason,
-        confirmedBy: command.requestingUser.id,
+        answeredBy: command.requestingUser.id,
+      }
+    }
+  }
+})
+
+export const deleteRequest = useCase({
+  aggregate: vacation,
+  command: commands.delete,
+  events: [],
+  preCondition: ({ aggregate }) => {
+    return aggregate.request.state === 'pending'
+  },
+  execute: ({ command, aggregate }) => {
+    return {
+      ...aggregate,
+      request: {
+        state: 'deleted' as const,
+        reason: command.reason,
       }
     }
   }

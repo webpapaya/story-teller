@@ -1,6 +1,7 @@
 import { assertThat, hasProperty, throws } from 'hamjest'
+import uuid from 'uuid'
 import { hasAggregate } from '../utils/custom-matcher'
-import { commands, requestVacation, vacation, confirmRequest, requestingUser, rejectRequest } from './use-cases'
+import { commands, requestVacation, vacation, confirmRequest, requestingUser, rejectRequest, deleteRequest } from './use-cases'
 
 describe('vacation', () => {
   describe('requestVacation', () => {
@@ -35,7 +36,7 @@ describe('vacation', () => {
       return { command, result }
     }
 
-    describe('WHEN confirmer is manager', () => {
+    describe('WHEN vacation is pending', () => {
       it('changes state to confirmed', () => {
         const { command, result } = executeUseCase({ role: 'manager' })
         assertThat(result,
@@ -45,18 +46,14 @@ describe('vacation', () => {
       it('AND sets confirmed by', () => {
         const { command, result } = executeUseCase({ role: 'manager' })
         assertThat(result,
-          hasAggregate(hasProperty('request.confirmedBy', command.requestingUser.id)))
+          hasAggregate(hasProperty('request.answeredBy', command.requestingUser.id)))
       })
     })
 
-    describe('WHEN confirmer is user', () => {
-      it('throws invalid precondition error', () => {
-        assertThat(() => executeUseCase({ role: 'user' }), throws())
-      })
-    })
+
   })
 
-  describe.only('rejectVacation', () => {
+  describe('rejectVacation', () => {
     const executeUseCase = (params: {role: 'manager' | 'user' }) => {
       const aggregate = {
         ...vacation.build()[0](),
@@ -75,7 +72,7 @@ describe('vacation', () => {
       return { command, result }
     }
 
-    describe('WHEN confirmer is manager', () => {
+    describe('WHEN vacation is pending', () => {
       it('changes state to confirmed', () => {
         const { result } = executeUseCase({ role: 'manager' })
         assertThat(result,
@@ -85,7 +82,7 @@ describe('vacation', () => {
       it('AND sets confirmed by', () => {
         const { command, result } = executeUseCase({ role: 'manager' })
         assertThat(result,
-          hasAggregate(hasProperty('request.confirmedBy', command.requestingUser.id)))
+          hasAggregate(hasProperty('request.answeredBy', command.requestingUser.id)))
       })
 
       it('AND sets reason', () => {
@@ -94,10 +91,49 @@ describe('vacation', () => {
           hasAggregate(hasProperty('request.reason', command.reason)))
       })
     })
+  })
 
-    describe('WHEN confirmer is user', () => {
-      it('throws invalid precondition error', () => {
-        assertThat(() => executeUseCase({ role: 'user' }), throws())
+  describe('deleteVacation', () => {
+    context('WHEN user is employee of vacation', () => {
+      it('sets vacation to deleted', () => {
+        const aggregate = {
+          ...vacation.build()[0](),
+          request: { state: 'pending' as const }
+        }
+
+        const command = {
+          ...commands.delete.build()[0](),
+          requestingUser: {
+            ...requestingUser.build()[0](),
+            id: aggregate.employeeId
+          }
+        }
+
+        assertThat(deleteRequest.run({ command, aggregate }),
+          hasAggregate(hasProperty('request.state', 'deleted')))
+      })
+
+      context('WHEN vacation was already approved', () => {
+        it('throws error', () => {
+          const aggregate = {
+            ...vacation.build()[0](),
+            request: {
+              state: 'confirmed' as const,
+              answeredBy: uuid()
+            }
+          }
+
+          const command = {
+            ...commands.delete.build()[0](),
+            requestingUser: {
+              ...requestingUser.build()[0](),
+              id: aggregate.employeeId
+            }
+          }
+
+          assertThat(() => deleteRequest.run({ command, aggregate }),
+            throws());
+        })
       })
     })
   })

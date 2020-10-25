@@ -7,9 +7,9 @@ exports.up = function (db) {
       id              uuid PRIMARY KEY,
       start_date      date NOT NULL,
       end_date        date NOT NULL,
-      person_id       uuid NOT NULL,
+      employee_id     uuid NOT NULL,
       state           text NOT NULL,
-      confirmed_by    uuid,
+      answered_by     uuid,
       reason          text
     );
   `)

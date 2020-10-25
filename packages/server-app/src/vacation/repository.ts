@@ -4,6 +4,7 @@ import { vacation, Vacation } from './use-cases'
 
 const toDomain = (dbResult: IEnsureVacationResult) => {
   const decoded = vacation.decode(dbResult.jsonBuildObject?.valueOf())
+
   if (!decoded.isOk()) {
     throw new Error(JSON.stringify(decoded.get()))
   }
@@ -13,8 +14,8 @@ const toDomain = (dbResult: IEnsureVacationResult) => {
 export const ensure = buildRecordRepository({
   dbFunction: ensureVacation,
   toRepository: (vacation: Vacation) => {
-    const confirmedBy = vacation.request.state !== 'pending'
-      ? vacation.request.confirmedBy
+    const answeredBy = vacation.request.state === 'confirmed' || vacation.request.state === 'rejected'
+      ? vacation.request.answeredBy
       : null
 
     const reason = vacation.request.state === 'rejected'
@@ -25,9 +26,9 @@ export const ensure = buildRecordRepository({
       id: vacation.id,
       start_date: vacation.startDate,
       end_date: vacation.endDate,
-      person_id: vacation.id,
+      employee_id: vacation.employeeId,
       state: vacation.request.state,
-      confirmed_by: confirmedBy,
+      answered_by: answeredBy,
       reason
     }
   },
