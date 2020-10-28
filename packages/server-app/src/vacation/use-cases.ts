@@ -75,12 +75,7 @@ export const requestVacation = aggregateFactory({
 export const confirmRequest = useCase({
   aggregate: vacation,
   command: commands.confirm,
-  events: [{
-    mapper: () => ({ someId: 'hallo' }),
-    event: buildEvent('test', v.record({
-      someId: v.string
-    }))
-  }],
+  events: [],
   preCondition: ({ aggregate }) => {
     return aggregate.request.state === 'pending'
   },

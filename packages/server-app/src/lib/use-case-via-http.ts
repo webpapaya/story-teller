@@ -31,11 +31,11 @@ export const exposeUseCaseViaHTTP = <
   ) => UseCaseConfig['command']['O']
   authenticate: (payload: {
     requestingUser?: RequestingUser['O']
-    aggregate: Parameters<BeforeUseCase<UseCaseConfig>>[0]['aggregate']
+    aggregate: UseCaseConfig['aggregateFrom']['O']
   }) => boolean
   useCase: ConnectedUseCaseConfig
 }) => {
-  const route = [config.aggregateName, config.actionName].join('/')
+  const route = '/' + [config.aggregateName, config.actionName].join('/')
   httpRegistry.push({
     method: config.method,
     aggregateName: config.aggregateName,
@@ -47,17 +47,18 @@ export const exposeUseCaseViaHTTP = <
   config.app[config.method](
     route,
     async (req: Request, res: Response) => {
-      const requestingUser = config.requestingUser.decode(config.mapToRequestingUser(req))
-      if (!requestingUser.isOk()) {
+      const requestingUserResult = config.requestingUser.decode(config.mapToRequestingUser(req))
+      if (!requestingUserResult.isOk()) {
         throw new Error('Unauthorized')
       }
+      const requestingUser = requestingUserResult.get()
 
-      const [aggregateAfter] = await config.useCase.execute(
+      const aggregateAfter = await config.useCase.execute(
         config.mapToCommand(requestingUser, req), config.authenticate)
 
       const links = httpRegistry
-        .filter(({ aggregateName }) => {
-          return aggregateName === config.aggregateName
+        .filter(({ aggregateName, method }) => {
+          return aggregateName === config.aggregateName && method !== 'post'
         })
         .filter(({ authenticate }) => {
           return authenticate({ requestingUser, aggregate: aggregateAfter })
@@ -66,11 +67,12 @@ export const exposeUseCaseViaHTTP = <
           const precondition = useCase.useCase.config.preCondition
           return !precondition || precondition?.({ aggregate: aggregateAfter })
         })
-        .map(({ actionName, aggregateName, method }) => ({
-          route: [actionName, aggregateName].join('/'),
+        .map(({ actionName, aggregateName, method, useCase }) => ({
+          route: '/' + [aggregateName, actionName].join('/'),
           actionName,
           aggregateName,
-          method
+          method,
+          schema: useCase.useCase.config.command
         }))
 
       return res.send({

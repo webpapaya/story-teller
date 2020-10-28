@@ -171,17 +171,19 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
   }
 
   const raw: RawConnectedUseCase<UseCaseConfig> = async (command, dependencies, beforeUseCase) => {
-    if (!config.useCase.config.command.is(command)) {
+    const decodedCommandResult = config.useCase.config.command.decode(command)
+    if (!decodedCommandResult.isOk()) {
       throw new Error('Invalid Command')
     }
+    const decodedCommand = decodedCommandResult.get()
 
-    const fromAggregate = await config.fetchAggregate(config.mapCommand(command), dependencies)
+    const fromAggregate = await config.fetchAggregate(config.mapCommand(decodedCommand), dependencies)
 
     if (beforeUseCase && !beforeUseCase({ aggregate: fromAggregate })) {
       throw new Error('Before usecase throwed error')
     }
 
-    const [toAggregate, events] = config.useCase.run({ command, aggregate: fromAggregate })
+    const [toAggregate, events] = config.useCase.run({ command: decodedCommand, aggregate: fromAggregate })
 
     await config.ensureAggregate(toAggregate, dependencies)
 

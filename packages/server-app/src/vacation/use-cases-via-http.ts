@@ -23,7 +23,7 @@ export const initialize = (app: IRouter) => {
     mapToRequestingUser,
     mapToCommand: (requestingUser, request) => {
       return {
-        ...JSON.parse(request.body),
+        ...request.body,
         requestingUser
       }
     }
@@ -34,9 +34,11 @@ export const initialize = (app: IRouter) => {
     aggregateName: 'vacation',
     actionName: 'deleteRequest',
     useCase: useCases.deleteRequest,
-    method: 'post',
+    method: 'put',
     requestingUser,
-    authenticate: () => true,
+    authenticate: ({ requestingUser, aggregate }) => {
+      return aggregate.employeeId === requestingUser?.id
+    },
     mapToRequestingUser,
     mapToCommand: (requestingUser, request) => {
       return {
@@ -51,9 +53,11 @@ export const initialize = (app: IRouter) => {
     aggregateName: 'vacation',
     actionName: 'confirmRequest',
     useCase: useCases.confirmRequest,
-    method: 'post',
+    method: 'put',
     requestingUser,
-    authenticate: () => true,
+    authenticate: ({ requestingUser }) => {
+      return requestingUser?.role === 'manager'
+    },
     mapToRequestingUser,
     mapToCommand: (requestingUser, request) => {
       return {
@@ -68,9 +72,11 @@ export const initialize = (app: IRouter) => {
     actionName: 'rejectRequest',
     aggregateName: 'vacation',
     useCase: useCases.rejectRequest,
-    method: 'post',
+    method: 'put',
     requestingUser,
-    authenticate: () => true,
+    authenticate: ({ requestingUser }) => {
+      return requestingUser?.role === 'manager'
+    },
     mapToRequestingUser,
     mapToCommand: (requestingUser, request) => {
       return {
