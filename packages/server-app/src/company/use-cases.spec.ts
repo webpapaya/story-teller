@@ -6,7 +6,7 @@ import {
   setEmployeeRole,
   rename
 } from './use-cases'
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 import { hasAggregate } from '../utils/custom-matcher'
 
 const company: Company = {

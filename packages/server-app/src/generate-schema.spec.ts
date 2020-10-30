@@ -3,7 +3,6 @@ import {
   equalTo,
   hasProperty,
   hasItems
-// @ts-ignore
 } from 'hamjest'
 import { t } from './spec-helpers'
 import {
@@ -36,10 +35,10 @@ describe('generateSchema', () => {
         tablesInSchema,
         columnsForTable,
         writeFile
-      }, { schema: 'public', header: `import { LocalDate } from 'js-joda'` })
+      }, { schema: 'public', header: 'import { LocalDate } from \'js-joda\'' })
 
       assertThat(writeFile, lastCallArgs(equalTo([
-        `import { LocalDate } from 'js-joda'\n\nexport type ATable {\n  aColumn: string | null,\n  bColumn: string,\n}`
+        'import { LocalDate } from \'js-joda\'\n\nexport type ATable {\n  aColumn: string | null,\n  bColumn: string,\n}'
       ])))
     })
 
@@ -48,19 +47,21 @@ describe('generateSchema', () => {
         tablesInSchema,
         columnsForTable,
         writeFile
-      }, { schema: 'public',
+      }, {
+        schema: 'public',
         overwrites: {
           text: 'any'
-        } })
+        }
+      })
 
       assertThat(writeFile, lastCallArgs(equalTo([
-        `export type ATable {\n  aColumn: any | null,\n  bColumn: any,\n}`
+        'export type ATable {\n  aColumn: any | null,\n  bColumn: any,\n}'
       ])))
     })
   })
 
   it('columnsForTable: responds correct columns', t(async ({ withinConnection }) => {
-    return withinConnection(async ({ client }) => {
+    return await withinConnection(async ({ client }) => {
       await client.query(`
         create table if not exists
         public.test (
@@ -78,7 +79,7 @@ describe('generateSchema', () => {
   }))
 
   it('tablesInSchema: responds tables', t(async ({ withinConnection }) => {
-    return withinConnection(async ({ client }) => {
+    return await withinConnection(async ({ client }) => {
       await client.query(`
         create table if not exists
         public.test_table (id uuid PRIMARY KEY);

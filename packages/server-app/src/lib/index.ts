@@ -1,12 +1,12 @@
 import QueryStream from 'pg-query-stream'
 import { DBClient, withinNamespace } from './db'
 import { EventId, GenericEvent, GenericQueries, Config, ExecutableQueries } from './types'
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 
 export function createApp<DomainEvent extends GenericEvent, DomainQueries extends GenericQueries> (config: Config<DomainEvent, DomainQueries>) {
   type InternalEvent = DomainEvent & { id: string }
-  const tableName = config.tableName || 'events'
-  const rebuildSchemaName = config.rebuildSchemaName || 'rebuild_aggregates'
+  const tableName = config.tableName ?? 'events'
+  const rebuildSchemaName = config.rebuildSchemaName ?? 'rebuild_aggregates'
 
   const insertEvent = async (client: DBClient, event: DomainEvent) => {
     const result = await client.query(`
@@ -20,12 +20,12 @@ export function createApp<DomainEvent extends GenericEvent, DomainQueries extend
 
   const reducer = async (event: InternalEvent, client: DBClient): Promise<void> => {
     await Promise.all(Object.keys(config.reducers).map(async (name) => {
-      return config.reducers[name](event, client)
+      return await config.reducers[name](event, client)
     }))
   }
 
   const publish = async (event: DomainEvent): Promise<EventId> => {
-    return config.withinConnection(async ({ client }) => {
+    return await config.withinConnection(async ({ client }) => {
       const internalEvent = await insertEvent(client, event)
       await reducer(internalEvent, client)
       return internalEvent.id
@@ -33,10 +33,10 @@ export function createApp<DomainEvent extends GenericEvent, DomainQueries extend
   }
 
   const replaceEvent = async (eventId: EventId, payload: object) => {
-    return config.withinConnection(async ({ client }) => {
+    return await config.withinConnection(async ({ client }) => {
       const result = await client.query(`
         INSERT INTO ${tableName} (type, payload)
-        SELECT type, (payload::jsonb || '${JSON.stringify(payload)}'::jsonb) as payload
+        SELECT type, (payload::jsonb ?? '${JSON.stringify(payload)}'::jsonb) as payload
         FROM ${tableName} WHERE id = $1
         RETURNING *;
       `, [eventId])
@@ -55,8 +55,8 @@ export function createApp<DomainEvent extends GenericEvent, DomainQueries extend
   }
 
   const rebuildAggregates = async () => {
-    return config.withinConnection(async ({ client }) => {
-      return withinNamespace(rebuildSchemaName, client, async () => {
+    return await config.withinConnection(async ({ client }) => {
+      return await withinNamespace(rebuildSchemaName, client, async () => {
         await Promise.all(Object.keys(config.reducers).map(async (schemaName) => {
           await client.query(`
             CREATE TABLE ${schemaName} AS
@@ -123,7 +123,7 @@ export function createApp<DomainEvent extends GenericEvent, DomainQueries extend
     get: (obj, prop) => () => {
       if (prop in obj && typeof prop === 'string') {
         return config.withinConnection(async ({ client }) => {
-          return obj[prop](client)
+          return await obj[prop](client)
         })
       }
     }

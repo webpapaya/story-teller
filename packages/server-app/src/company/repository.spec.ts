@@ -1,4 +1,4 @@
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 import { t, assertDifference } from '../spec-helpers'
 import { ensure, destroy } from './repository'
 import { Company, companyAggregate, addEmployee } from './use-cases'

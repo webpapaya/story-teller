@@ -1,13 +1,13 @@
 import sql from 'sql-template-strings'
 import { PoolClient } from 'pg'
 
-type ColumnDefinition = {
+interface ColumnDefinition {
   column: string
   dataType: string
   isNullable: 'NO' | 'YES'
 }
 
-type TableDefinition = {
+interface TableDefinition {
   tableName: string
 }
 
@@ -100,7 +100,7 @@ export const generateTypesForTable = (table: string, tableDefinition: ColumnDefi
 export const postgresToTypescript = (postgresType: string, overwritten: Overwrites = {}) => {
   const lookup = { ...DEFAULT_LOOKUP_MAP, ...overwritten }
   const getValue = (key: string) => {
-    // @ts-ignore
+    // @ts-expect-error
     return lookup[key]
   }
 

@@ -1,5 +1,4 @@
 import { v } from '@story-teller/shared'
-import { buildEvent } from '../lib/events'
 import { aggregateFactory, useCase } from '../lib/use-case'
 
 const personId = v.uuid

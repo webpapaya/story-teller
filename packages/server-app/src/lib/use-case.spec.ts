@@ -4,7 +4,7 @@ import { v } from '@story-teller/shared'
 import { buildEvent } from './events'
 import sinon from 'ts-sinon'
 import { t } from '../spec-helpers'
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 import { buildLazyPromise } from '../utils/build-lazy-promise'
 
 const someUseCase = useCase({
@@ -27,7 +27,7 @@ describe.skip('connectUseCase', () => {
       useCase: someUseCase,
       mapCommand: (cmd) => cmd.id,
       fetchAggregate: (id: number) => Promise.resolve({ id: id, number: Math.random(), otherProperty: 'hallo' }),
-      ensureAggregate: () => Promise.resolve(void 0)
+      ensureAggregate: () => Promise.resolve(undefined)
     })
 
     assertThat(await connectedUseCase.execute({ id: 1, value: 12 }),
@@ -49,7 +49,7 @@ describe.skip('connectUseCase', () => {
       }),
       mapCommand: () => undefined,
       fetchAggregate: () => Promise.resolve({ number: 1 }),
-      ensureAggregate: () => Promise.resolve(void 0)
+      ensureAggregate: () => Promise.resolve(undefined)
     })
 
     it('calls synced useCase', async () => {
@@ -66,7 +66,7 @@ describe.skip('connectUseCase', () => {
         useCase: someUseCase,
         mapCommand: (cmd) => cmd.id,
         fetchAggregate: (id: number) => Promise.resolve({ id: id, number: Math.random(), otherProperty: 'hallo' }),
-        ensureAggregate: () => Promise.resolve(void 0)
+        ensureAggregate: () => Promise.resolve(undefined)
       })
 
       useCaseSpy.resetHistory()
@@ -85,7 +85,7 @@ describe.skip('connectUseCase', () => {
         useCase: someUseCase,
         mapCommand: (cmd) => cmd.id,
         fetchAggregate: (id: number) => Promise.resolve({ id: id, number: Math.random(), otherProperty: 'hallo' }),
-        ensureAggregate: () => Promise.resolve(void 0)
+        ensureAggregate: () => Promise.resolve(undefined)
       })
 
       return promiseThat(connectedUseCase.execute({ id: 1, value: 12 }), rejected())
@@ -195,7 +195,7 @@ describe('reactToUseCaseSync', () => {
       channel
     })
 
-    connectedUseCaseB.execute('test')
+    connectedUseCaseB.execute('test') // eslint-disable-line @typescript-eslint/no-floating-promises
 
     await promise
   }))
@@ -242,7 +242,7 @@ it.skip('verifies types', () => {
 
   connectUseCase({
     useCase: useCaseA,
-    // eslint-ignore-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     fetchAggregate: async (test: string) => 'string',
     ensureAggregate: async () => 'string',
     // @ts-expect-error

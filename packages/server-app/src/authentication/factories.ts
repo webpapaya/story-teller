@@ -1,8 +1,8 @@
 import * as Factory from 'factory.ts'
 import { LocalDateTime, nativeJs } from 'js-joda'
-import snakeCase from 'snake-case'
+import { snakeCase } from 'snake-case'
 import { UserAuthentication } from '../domain'
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 import { ExternalDependencies } from '../lib/use-case'
 
 export const DUMMY_TOKEN = '0fb339b556d1a822f68785bff7e67362e235563d'
@@ -31,7 +31,7 @@ export const userAuthenticationFactory = Factory.Sync.makeFactory<UserAuthentica
 
 export const create = async (dependencies: ExternalDependencies, factory: UserAuthentication) => {
   const keys = Object.keys(factory)
-  // @ts-ignore
+  // @ts-expect-error
   const values = keys.map((key) => factory[key])
   const authentication = await dependencies.pgClient.query(`
     INSERT INTO user_authentication (${keys.map((v) => snakeCase(v)).join(', ')})

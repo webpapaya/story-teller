@@ -46,7 +46,7 @@ export const whereId = buildRecordRepository({
 export const count = buildRecordRepository({
   dbFunction: countVacation,
   toRepository: () => {
-    return void 0
+    return undefined
   },
   toDomain: (result) => {
     return result.count

@@ -1,6 +1,6 @@
 export function uniqueBy<Type, Key extends keyof Type> (key: Key, array: Type[]): Type[] {
   return Object.values(array.reduce((result, obj) => {
-    // @ts-ignore
+    // @ts-expect-error
     result[obj[key]] = obj
     return result
   }, {}))

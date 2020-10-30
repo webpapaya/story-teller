@@ -4,7 +4,6 @@ import {
   hasProperties,
   everyItem,
   truthy as present
-// @ts-ignore
 } from 'hamjest'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import sinon from 'ts-sinon'
@@ -115,7 +114,7 @@ describe('user/requestPasswordReset', () => {
   }))
 
   it('sets passwordResetCreatedAt', t(async (clients) => {
-    return withMockedDate('2000-01-01', async () => {
+    return await withMockedDate('2000-01-01', async () => {
       await createUserAuthenticationFactory(clients, userAuthenticationFactory.build())
       await requestPasswordReset({ ...clients, sendMail }, {
         userIdentifier: 'sepp'

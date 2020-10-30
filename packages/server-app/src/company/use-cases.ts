@@ -74,7 +74,6 @@ export const removeEmployee = useCase({
     ...aggregate,
     employees: aggregate
       .employees
-      // @ts-ignore
       .filter((personId) => personId.id !== action.personId)
   })
 })

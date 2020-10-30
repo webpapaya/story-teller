@@ -1,6 +1,6 @@
 import { AnyCodec } from '@story-teller/shared'
 import { IRouter, Request, Response } from 'express'
-import { AnyUseCaseConfigType, AnyConnectedUseCaseConfig, BeforeUseCase } from './use-case'
+import { AnyUseCaseConfigType, AnyConnectedUseCaseConfig } from './use-case'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 const httpRegistry: Array<{
@@ -65,7 +65,7 @@ export const exposeUseCaseViaHTTP = <
         })
         .filter(({ useCase }) => {
           const precondition = useCase.useCase.config.preCondition
-          return !precondition || precondition?.({ aggregate: aggregateAfter })
+          return !precondition ?? precondition?.({ aggregate: aggregateAfter })
         })
         .map(({ actionName, aggregateName, method, useCase }) => ({
           route: '/' + [aggregateName, actionName].join('/'),

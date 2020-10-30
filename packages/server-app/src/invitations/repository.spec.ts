@@ -1,4 +1,4 @@
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 import { assertThat, hasProperty } from 'hamjest'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 import { t, assertDifference } from '../spec-helpers'

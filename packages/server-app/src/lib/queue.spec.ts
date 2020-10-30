@@ -1,3 +1,4 @@
+// eslint-disable @typescript-eslint/no-floating-promises
 import { t } from '../spec-helpers'
 import { publish, subscribe } from './queue'
 import { assertThat, equalTo } from 'hamjest'

@@ -1,5 +1,6 @@
+
 import pg, { Pool, PoolClient } from 'pg'
-// @ts-ignore
+// @ts-expect-error
 import pgCamelCase from 'pg-camelcase'
 import { ZonedDateTime, LocalDate, LocalTime, ZoneOffset, LocalDateTime } from 'js-joda'
 pgCamelCase.inject(pg)
@@ -35,8 +36,8 @@ pg.types.setTypeParser(1114, (dateTimeAsString) => {
   )
 })
 
-export type DBClient = PoolClient;
-export type WithinConnection = <T>(fn: (deps: TransactionParams) => T) => Promise<T>;
+export type DBClient = PoolClient
+export type WithinConnection = <T>(fn: (deps: TransactionParams) => T) => Promise<T>
 
 interface TransactionParams {
   client: DBClient
@@ -51,14 +52,14 @@ export const withinConnection: WithinConnection = async (fn) => {
   const commit = async () => { await client.query('COMMIT') }
   const rollback = async () => { await client.query('ROLLBACK') }
   try {
-    return await fn({ client, begin, commit, rollback })
+    return fn({ client, begin, commit, rollback })
   } finally {
     await client.release()
   }
 }
 
 export const withinTransaction: WithinConnection = async (fn) => {
-  return withinConnection(async ({ client, begin, commit, rollback }) => {
+  return await withinConnection(async ({ client, begin, commit, rollback }) => {
     try {
       await begin()
       const result = await fn({ client, begin, commit, rollback })
@@ -72,10 +73,10 @@ export const withinTransaction: WithinConnection = async (fn) => {
 }
 
 export const withinRollbackTransaction: WithinConnection = async (fn) => {
-  return withinConnection(async ({ client, begin, commit, rollback }) => {
+  return await withinConnection(async ({ client, begin, commit, rollback }) => {
     try {
       await begin()
-      return await fn({
+      return fn({
         client,
         begin,
         commit,
@@ -87,7 +88,7 @@ export const withinRollbackTransaction: WithinConnection = async (fn) => {
   })
 }
 
-type WithinNamespace = <T>(namespace: string, client: DBClient, fn: () => T) => Promise<T>;
+type WithinNamespace = <T>(namespace: string, client: DBClient, fn: () => T) => Promise<T>
 export const withinNamespace: WithinNamespace = async (namespace, client, fn) => {
   const searchPath = (await client.query('show search_path')).rows[0].searchPath
   try {
@@ -95,7 +96,7 @@ export const withinNamespace: WithinNamespace = async (namespace, client, fn) =>
       create schema ${namespace};
       SET search_path = ${namespace},${searchPath};
     `)
-    return await fn()
+    return fn()
   } finally {
     await client.query(`
       SET search_path = ${searchPath};

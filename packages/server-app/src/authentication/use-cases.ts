@@ -18,10 +18,10 @@ type TokenErrors =
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 
 export const hashPassword = async (password: string) =>
-  bcrypt.hash(password, SALT_ROUNDS)
+  await bcrypt.hash(password, SALT_ROUNDS)
 
 export const comparePassword = async (password: string, passwordHash: any) =>
-  passwordHash && bcrypt.compare(password, passwordHash)
+  passwordHash && (await bcrypt.compare(password, passwordHash))
 
 type RegisterErrors =
 | 'User Identifier already taken'
@@ -59,7 +59,7 @@ export const register: Register = async (clients, params) => {
       payload: { token: confirmationToken }
     })
 
-    return Ok(void 0)
+    return Ok(undefined)
   } catch (e) {
     if (e.code === '23505') {
       return Err('User Identifier already taken' as const)
@@ -160,5 +160,5 @@ export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, p
       WHERE id=${record.id}
     `)
 
-  return Ok(void 0)
+  return Ok(undefined)
 }

@@ -78,16 +78,16 @@ export const commandViaHTTP: CommandViaHTTP = (definition, { app, useCase, middl
     definition.action
   ].filter(x => x).join('/')
 
-  app[definition.verb](`/${route}`, ...(middlewares || []), async (req: Request, res: Response) => {
+  app[definition.verb](`/${route}`, ...(middlewares ?? []), async (req: Request, res: Response) => {
     const deps = typeof dependencies === 'function'
-      // @ts-ignore
+      // @ts-expect-error
       ? dependencies()
       : dependencies
 
     const command = await executeCommand(definition, {
       dependencies: { ...deps, res, auth: req.auth },
       auth: req.auth,
-      // @ts-ignore
+      // @ts-expect-error
       useCase
     })
 

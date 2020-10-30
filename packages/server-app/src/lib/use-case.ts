@@ -8,18 +8,18 @@ import { sequentially } from '../utils/sequentially'
 
 const SYNC_EVENTS: SyncEventSubscriptions = {}
 
-export type ExternalDependencies = { pgClient: PoolClient, channel: Channel }
+export interface ExternalDependencies { pgClient: PoolClient, channel: Channel }
 
-type DomainEventConfig<Name extends Readonly<string>, Payload extends AnyCodec> = {
+interface DomainEventConfig<Name extends Readonly<string>, Payload extends AnyCodec> {
   name: Name
   payload: Payload
 }
 
-type EventConfig<
+interface EventConfig<
   Event extends DomainEventConfig<any, AnyCodec>,
   Aggregate extends AnyCodec,
   Command extends AnyCodec
-> = {
+> {
   event: Event
   mapper: ((payload: { aggregateBefore: Aggregate['O'], aggregateAfter: Aggregate['O'], command: Command['O']}) => Event['payload']['O'] | undefined)
 }
@@ -46,24 +46,21 @@ type Events<UseCaseConfig extends AnyUseCaseConfigType> = [] | [
   EventConfig<UseCaseConfig['events'][4], UseCaseConfig['aggregateTo'], UseCaseConfig['command']>,
 ]
 
-
-
-
-type UseCaseConfig<
+interface UseCaseConfig<
   Command extends AnyCodec,
   AggregateFrom extends AnyCodec,
   AggregateTo extends AnyCodec,
-> = {
-  command: AnyCodec,
-  aggregateFrom: AnyCodec,
-  aggregateTo: AnyCodec,
-  events: DomainEventConfig<any, AnyCodec>[]
+> {
+  command: Command
+  aggregateFrom: AggregateFrom
+  aggregateTo: AggregateTo
+  events: Array<DomainEventConfig<any, AnyCodec>>
 }
 
 export type AnyUseCaseConfigType = UseCaseConfig<AnyCodec, AnyCodec, AnyCodec>
 
 type SyncEventSubscriptions = Record<string, {
-  eventPayload: AnyCodec,
+  eventPayload: AnyCodec
   listeners: Array<(
     command: unknown,
     dependencies: ExternalDependencies
@@ -73,21 +70,18 @@ type SyncEventSubscriptions = Record<string, {
 type FetchAggregate <UseCaseConfig extends AnyUseCaseConfigType, Args> =
   (args: Args, clients: { pgClient: DBClient }) => Promise<UseCaseConfig['aggregateFrom']['O']>
 
-type MapCommandToFetchAggregate <UseCaseConfig extends AnyUseCaseConfigType, Args> =
-  (cmd: UseCaseConfig['command']['O']) => Args
-
 type EnsureAggregate <UseCaseConfig extends AnyUseCaseConfigType> =
   (args: UseCaseConfig['aggregateTo']['O'], clients: { pgClient: DBClient }) => Promise<unknown>
 
 type EventsFromConfig<Config extends AnyUseCaseConfigType> =
-  Config['events'][number][]
+  Array<Config['events'][number]>
 
 type RunUseCase<Config extends AnyUseCaseConfigType> = (payload: {
-  command: Config['command']['O'],
+  command: Config['command']['O']
   aggregate: Config['aggregateFrom']['O']
 }) => [Config['aggregateTo']['O'], EventsFromConfig<Config>]
 
-type UseCaseType<UseCaseConfig extends AnyUseCaseConfigType> = {
+interface UseCaseType<UseCaseConfig extends AnyUseCaseConfigType> {
   config: {
     command: UseCaseConfig['command']
     aggregateFrom: UseCaseConfig['aggregateFrom']
@@ -95,12 +89,12 @@ type UseCaseType<UseCaseConfig extends AnyUseCaseConfigType> = {
     events: Events<UseCaseConfig>
     preCondition?: Precondition<UseCaseConfig>
     execute: ExecuteUseCase<UseCaseConfig>
-  },
+  }
   run: RunUseCase<UseCaseConfig>
 }
 
 export type BeforeUseCase<UseCaseConfig extends AnyUseCaseConfigType> = (payload: {
-    aggregate: UseCaseConfig['command']['O']
+  aggregate: UseCaseConfig['command']['O']
 }) => boolean
 
 type RawConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> = (
@@ -114,53 +108,49 @@ type ExecutableConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> = (
   beforeUseCase?: BeforeUseCase<UseCaseConfig>
 ) => Promise<[UseCaseConfig['aggregateTo']['O'], any[]]>
 
-
 type Precondition<UseCaseConfig extends AnyUseCaseConfigType> =
   (opts: { aggregate: UseCaseConfig['aggregateFrom']['O'] }) => boolean
 
 type ExecuteUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
   (opts: { aggregate: UseCaseConfig['aggregateTo']['O'], command: UseCaseConfig['command']['O'] }) => UseCaseConfig['aggregateTo']['O']
 
-export type AnyConnectedUseCaseConfig<UseCaseConfig extends AnyUseCaseConfigType> = {
-  useCase: UseCaseType<UseCaseConfig>,
-  execute: ExecutableConnectedUseCase<UseCaseConfig>,
+export interface AnyConnectedUseCaseConfig<UseCaseConfig extends AnyUseCaseConfigType> {
+  useCase: UseCaseType<UseCaseConfig>
+  execute: ExecutableConnectedUseCase<UseCaseConfig>
   raw: RawConnectedUseCase<UseCaseConfig>
 }
 
 export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, FetchAggregateArgs>(config: {
-  useCase: UseCaseType<UseCaseConfig>,
-  mapCommand: (cmd: UseCaseConfig['command']['O']) => FetchAggregateArgs,
+  useCase: UseCaseType<UseCaseConfig>
+  mapCommand: (cmd: UseCaseConfig['command']['O']) => FetchAggregateArgs
   fetchAggregate: FetchAggregate<UseCaseConfig, FetchAggregateArgs>
   ensureAggregate: EnsureAggregate<UseCaseConfig>
   getSyncedSubscriptions?: () => SyncEventSubscriptions
 }) => {
   const callsRelatedUseCasesSync = async (events: EventsFromConfig<UseCaseConfig>, dependencies: ExternalDependencies) => {
-    const syncedSubscriptions = config.getSyncedSubscriptions?.() || SYNC_EVENTS
+    const syncedSubscriptions = config.getSyncedSubscriptions?.() ?? SYNC_EVENTS
     const eventsToReturn = [...events]
 
     const eventCallbacks = events.map((event) => {
-      const eventSub = syncedSubscriptions[event.name] || { listeners: [] }
+      const eventSub = syncedSubscriptions[event.name] ?? { listeners: [] }
       return eventSub.listeners
         .map((listener) => async () => {
           const [result, newEvents] = await listener(event.payload, dependencies)
           eventsToReturn.push(...newEvents as any[])
           return result
         })
-    // @ts-ignore
+    // @ts-expect-error
     }).flat()
 
-
     await sequentially(eventCallbacks)
-
-
 
     return eventsToReturn
   }
 
   const execute: ExecutableConnectedUseCase<UseCaseConfig> = async (command, beforeUseCase) => {
     // TODO: change to withinTransaction
-    return withinConnection(async ({ client }) => {
-      return withChannel(async ({ channel }) => {
+    return await withinConnection(async ({ client }) => {
+      return await withChannel(async ({ channel }) => {
         const [aggregate, events] = await raw(command, { pgClient: client, channel }, beforeUseCase)
 
         await sequentially(events.map((event) => () => publish('default', event, channel)))
@@ -199,14 +189,14 @@ export const useCase = <
   Command extends AnyCodec,
   Aggregate extends AnyCodec,
   Config extends {
-    command: Command,
-    aggregateFrom: Aggregate,
-    aggregateTo: Aggregate,
-    events: DomainEventConfig<any, AnyCodec>[]
+    command: Command
+    aggregateFrom: Aggregate
+    aggregateTo: Aggregate
+    events: Array<DomainEventConfig<any, AnyCodec>>
   }
 >(config: {
-  command: Command,
-  aggregate: Aggregate,
+  command: Command
+  aggregate: Aggregate
   events: Events<Config>
   preCondition?: Precondition<Config>
   execute: ExecuteUseCase<Config>
@@ -223,21 +213,21 @@ export const aggregateFactory = <
   AggregateFrom extends AnyCodec,
   AggregateTo extends AnyCodec,
   Config extends {
-    command: Command,
-    aggregateFrom: AggregateFrom,
-    aggregateTo: AggregateTo,
-    events: DomainEventConfig<any, AnyCodec>[]
+    command: Command
+    aggregateFrom: AggregateFrom
+    aggregateTo: AggregateTo
+    events: Array<DomainEventConfig<any, AnyCodec>>
   }
 >(config: {
-  command: Command,
-  aggregateFrom: AggregateFrom,
-  aggregateTo: AggregateTo,
+  command: Command
+  aggregateFrom: AggregateFrom
+  aggregateTo: AggregateTo
   events: Events<Config>
   preCondition?: Precondition<Config>
   execute: ExecuteUseCase<Config>
 }) => {
   const collectEvents = (payload: Pick<Config, 'aggregateFrom' | 'aggregateTo' | 'command'>) => {
-    const events: Config['events'][number][] = []
+    const events: Array<Config['events'][number]> = []
     config.events.forEach((eventConfig) => {
       const mappedEvent = eventConfig.mapper({
         aggregateBefore: payload.aggregateFrom,
@@ -282,16 +272,14 @@ export const aggregateFactory = <
   return ({ config, run })
 }
 
-
-
 export const reactToEventSync = <
   ConnectedUseCaseConfig extends AnyConnectedUseCaseConfig<AnyUseCaseConfigType>,
   DomainEvent extends DomainEventConfig<any, AnyCodec>,
 >(config: {
-    event: DomainEvent,
-    mapper: (event: DomainEvent['payload']['O']) => ConnectedUseCaseConfig['useCase']['config']['command']['O'],
-    useCase: ConnectedUseCaseConfig,
-    getSyncEvents?: () => SyncEventSubscriptions
+  event: DomainEvent
+  mapper: (event: DomainEvent['payload']['O']) => ConnectedUseCaseConfig['useCase']['config']['command']['O']
+  useCase: ConnectedUseCaseConfig
+  getSyncEvents?: () => SyncEventSubscriptions
 }) => {
   const syncEvent = config.getSyncEvents
     ? config.getSyncEvents()
@@ -306,22 +294,22 @@ export const reactToEventSync = <
 
   syncEvent[config.event.name].listeners.push((event: DomainEvent['payload']['O'], dependencies: ExternalDependencies) =>
     config.useCase.raw(config.mapper(event), dependencies))
-  return syncEvent;
+  return syncEvent
 }
 
 export const reactToEventAsync = async <
   ConnectedUseCaseConfig extends AnyConnectedUseCaseConfig<AnyUseCaseConfigType>,
   DomainEvent extends DomainEventConfig<any, AnyCodec>,
 >(config: {
-    event: DomainEvent,
-    mapper: (event: DomainEvent['payload']['O']) => ConnectedUseCaseConfig['useCase']['config']['command']['O'],
-    useCase: ConnectedUseCaseConfig,
-    getSyncEvents?: () => SyncEventSubscriptions,
-    channel: Channel
+  event: DomainEvent
+  mapper: (event: DomainEvent['payload']['O']) => ConnectedUseCaseConfig['useCase']['config']['command']['O']
+  useCase: ConnectedUseCaseConfig
+  getSyncEvents?: () => SyncEventSubscriptions
+  channel: Channel
 }) => {
-  subscribe('default', async (event: any) => {
-    if(event.name !== config.event.name) { return; }
-    if(!config.event.payload.is(event.payload)) {
+  await subscribe('default', async (event: any) => {
+    if (event.name !== config.event.name) { return }
+    if (!config.event.payload.is(event.payload)) {
       // TODO: introduce error classes
       throw new Error('Could not deserialize event')
     }

@@ -1,5 +1,5 @@
 import { assertThat, hasProperty, throws } from 'hamjest'
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 import { hasAggregate } from '../utils/custom-matcher'
 import { commands, requestVacation, vacation, confirmRequest, requestingUser, rejectRequest, deleteRequest } from './use-cases'
 

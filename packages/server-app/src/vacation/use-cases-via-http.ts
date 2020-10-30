@@ -4,7 +4,7 @@ import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter, Request } from 'express'
 
 const mapToRequestingUser = (request: Request) => {
-  const decoded = requestingUser.decode(JSON.parse(request.headers.authorization || '{}'))
+  const decoded = requestingUser.decode(JSON.parse(request.headers.authorization ?? '{}'))
   if (decoded.isOk()) {
     return decoded.get()
   }

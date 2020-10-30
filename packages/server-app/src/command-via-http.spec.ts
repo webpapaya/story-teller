@@ -4,7 +4,6 @@ import {
   equalTo,
   falsy as blank,
   truthy as present
-// @ts-ignore
 } from 'hamjest'
 
 import { v } from '@story-teller/shared'

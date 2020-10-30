@@ -3,7 +3,6 @@ import {
   equalTo,
   hasProperties,
   truthy as present
-// @ts-ignore
 } from 'hamjest'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import sinon from 'ts-sinon'
@@ -69,7 +68,7 @@ describe('findUserByAuthentication', () => {
 
 describe('findUserByAuthenticationToken', () => {
   it('when password was not reset yet, returns user', t(async (clients) => {
-    return withMockedDate('2000-01-02', async () => {
+    return await withMockedDate('2000-01-02', async () => {
       const auth = await createUserAuthenticationFactory(clients,
         userAuthenticationFactory.build())
 

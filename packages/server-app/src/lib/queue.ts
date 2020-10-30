@@ -1,7 +1,7 @@
 import { ConsumeMessage, Channel, connect } from 'amqplib'
 
 const connectToMQ = async () => {
-  return connect({
+  return await connect({
     protocol: 'amqp',
     hostname: 'localhost',
     port: parseInt(process.env.RABBITMQ_PORT as string),
@@ -10,13 +10,13 @@ const connectToMQ = async () => {
   })
 }
 
-export let connectionPromise = connectToMQ()
+export const connectionPromise = connectToMQ()
 
 export const createChannel = async () => {
   const queue = await connectionPromise
   const channel = queue.createChannel()
 
-  return channel
+  return await channel
 }
 
 export const publish = async (queue: string, payload: object, channel: Channel) => {
@@ -26,11 +26,11 @@ export const publish = async (queue: string, payload: object, channel: Channel) 
   await channel.sendToQueue(queue, Buffer.from(JSON.stringify(payload)))
 }
 
-export type WithChannel = <T>(fn: (deps: { channel: Channel }) => T) => Promise<T>;
+export type WithChannel = <T>(fn: (deps: { channel: Channel }) => T) => Promise<T>
 export const withChannel: WithChannel = async (fn) => {
   const channel = await createChannel()
   try {
-    return await fn({ channel })
+    return fn({ channel })
   } finally {
     await channel.close()
   }

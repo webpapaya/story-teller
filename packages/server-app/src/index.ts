@@ -11,7 +11,7 @@ const port = process.env.API_PORT
 app.use(cookieParser(process.env.SECRET_KEY_BASE))
 app.use(bodyParser.json())
 app.use(cors({
-  origin: (process.env.CORS_WHITELIST || '').split(','),
+  origin: (process.env.CORS_WHITELIST ?? '').split(','),
   credentials: true
 }))
 
