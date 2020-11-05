@@ -3,23 +3,23 @@ import { PreparedQuery } from '@pgtyped/query'
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json }
 
-/** 'ensureCompany' parameters type */
+/** 'EnsureCompany' parameters type */
 export interface IEnsureCompanyParams {
   employees: Array<{
-    id: string
-    role: string
-    company_id: string
+    id: string | null | void
+    role: string | null | void
+    company_id: string | null | void
   }>
   id: string | null | void
   name: string | null | void
 }
 
-/** 'ensureCompany' return type */
+/** 'EnsureCompany' return type */
 export interface IEnsureCompanyResult {
-  jsonBuildObject: Json
+  jsonBuildObject: Json | null
 }
 
-/** 'ensureCompany' query type */
+/** 'EnsureCompany' query type */
 export interface IEnsureCompanyQuery {
   params: IEnsureCompanyParams
   result: IEnsureCompanyResult
@@ -56,21 +56,60 @@ const ensureCompanyIR: any = { name: 'ensureCompany', params: [{ name: 'employee
  */
 export const ensureCompany = new PreparedQuery<IEnsureCompanyParams, IEnsureCompanyResult>(ensureCompanyIR)
 
-/** 'deleteCompanyById' parameters type */
+/** 'WhereId' parameters type */
+export interface IWhereIdParams {
+  id: string | null | void
+}
+
+/** 'WhereId' return type */
+export interface IWhereIdResult {
+  jsonBuildObject: Json | null
+}
+
+/** 'WhereId' query type */
+export interface IWhereIdQuery {
+  params: IWhereIdParams
+  result: IWhereIdResult
+}
+
+const whereIdIR: any = { name: 'whereId', params: [{ name: 'id', transform: { type: 'scalar' }, codeRefs: { used: [{ a: 1041, b: 1042, line: 42, col: 24 }, { a: 1079, b: 1080, line: 44, col: 20 }] } }], usedParamSet: { id: true }, statement: { body: "select json_build_object(\n  'id', company.id,\n  'name', company.name,\n  'employees', (\n    select json_agg(\n      json_build_object(\n        'id', company_employee.id,\n        'role', company_employee.role\n      )\n    )\n    from company_employee\n    where company_id = :id))\nfrom company\nwhere company.id = :id", loc: { a: 771, b: 1080, line: 31, col: 0 } } }
+
+/**
+ * Query generated from SQL:
+ * ```
+ * select json_build_object(
+ *   'id', company.id,
+ *   'name', company.name,
+ *   'employees', (
+ *     select json_agg(
+ *       json_build_object(
+ *         'id', company_employee.id,
+ *         'role', company_employee.role
+ *       )
+ *     )
+ *     from company_employee
+ *     where company_id = :id))
+ * from company
+ * where company.id = :id
+ * ```
+ */
+export const whereId = new PreparedQuery<IWhereIdParams, IWhereIdResult>(whereIdIR)
+
+/** 'DeleteCompanyById' parameters type */
 export interface IDeleteCompanyByIdParams {
   id: string | null | void
 }
 
-/** 'deleteCompanyById' return type */
+/** 'DeleteCompanyById' return type */
 export type IDeleteCompanyByIdResult = void
 
-/** 'deleteCompanyById' query type */
+/** 'DeleteCompanyById' query type */
 export interface IDeleteCompanyByIdQuery {
   params: IDeleteCompanyByIdParams
   result: IDeleteCompanyByIdResult
 }
 
-const deleteCompanyByIdIR: any = { name: 'deleteCompanyById', params: [{ name: 'id', transform: { type: 'scalar' }, codeRefs: { used: [{ a: 814, b: 815, line: 32, col: 32 }] } }], usedParamSet: { id: true }, statement: { body: 'delete from company where id = :id', loc: { a: 782, b: 815, line: 32, col: 0 } } }
+const deleteCompanyByIdIR: any = { name: 'deleteCompanyById', params: [{ name: 'id', transform: { type: 'scalar' }, codeRefs: { used: [{ a: 1149, b: 1150, line: 50, col: 32 }] } }], usedParamSet: { id: true }, statement: { body: 'delete from company where id = :id', loc: { a: 1117, b: 1150, line: 50, col: 0 } } }
 
 /**
  * Query generated from SQL:

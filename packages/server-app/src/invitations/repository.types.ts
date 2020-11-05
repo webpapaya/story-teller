@@ -1,26 +1,24 @@
 /** Types generated for queries found in "./src/invitations/repository.sql" */
 import { PreparedQuery } from '@pgtyped/query'
 
-import { LocalDateTime } from 'js-joda'
-
-/** 'findInvitationById' parameters type */
+/** 'FindInvitationById' parameters type */
 export interface IFindInvitationByIdParams {
   id: string | null | void
 }
 
-/** 'findInvitationById' return type */
+/** 'FindInvitationById' return type */
 export interface IFindInvitationByIdResult {
   id: string
   companyName: string
   companyId: string
   inviteeId: string
   inviterId: string
-  invitedAt: LocalDateTime
-  kind: string | null | undefined
-  answeredAt: LocalDateTime | null | undefined
+  invitedAt: Date
+  kind: string | null
+  answeredAt: Date | null
 }
 
-/** 'findInvitationById' query type */
+/** 'FindInvitationById' query type */
 export interface IFindInvitationByIdQuery {
   params: IFindInvitationByIdParams
   result: IFindInvitationByIdResult
@@ -36,31 +34,31 @@ const findInvitationByIdIR: any = { name: 'findInvitationById', params: [{ name:
  */
 export const findInvitationById = new PreparedQuery<IFindInvitationByIdParams, IFindInvitationByIdResult>(findInvitationByIdIR)
 
-/** 'ensureInvitation' parameters type */
+/** 'EnsureInvitation' parameters type */
 export interface IEnsureInvitationParams {
   id: string | null | void
   companyName: string | null | void
   companyId: string | null | void
   inviteeId: string | null | void
   inviterId: string | null | void
-  invitedAt: LocalDateTime | null | void
+  invitedAt: Date | null | void
   kind: string | null | void
-  answeredAt: LocalDateTime | null | void
+  answeredAt: Date | null | void
 }
 
-/** 'ensureInvitation' return type */
+/** 'EnsureInvitation' return type */
 export interface IEnsureInvitationResult {
   id: string
   companyName: string
   companyId: string
   inviteeId: string
   inviterId: string
-  invitedAt: LocalDateTime
-  kind: string | null | undefined
-  answeredAt: LocalDateTime | null | undefined
+  invitedAt: Date
+  kind: string | null
+  answeredAt: Date | null
 }
 
-/** 'ensureInvitation' query type */
+/** 'EnsureInvitation' query type */
 export interface IEnsureInvitationQuery {
   params: IEnsureInvitationParams
   result: IEnsureInvitationResult
@@ -95,24 +93,24 @@ const ensureInvitationIR: any = { name: 'ensureInvitation', params: [{ name: 'id
  */
 export const ensureInvitation = new PreparedQuery<IEnsureInvitationParams, IEnsureInvitationResult>(ensureInvitationIR)
 
-/** 'deleteInvitationById' parameters type */
+/** 'DeleteInvitationById' parameters type */
 export interface IDeleteInvitationByIdParams {
   id: string | null | void
 }
 
-/** 'deleteInvitationById' return type */
+/** 'DeleteInvitationById' return type */
 export interface IDeleteInvitationByIdResult {
   id: string
   companyName: string
   companyId: string
   inviteeId: string
   inviterId: string
-  invitedAt: LocalDateTime
-  kind: string | null | undefined
-  answeredAt: LocalDateTime | null | undefined
+  invitedAt: Date
+  kind: string | null
+  answeredAt: Date | null
 }
 
-/** 'deleteInvitationById' query type */
+/** 'DeleteInvitationById' query type */
 export interface IDeleteInvitationByIdQuery {
   params: IDeleteInvitationByIdParams
   result: IDeleteInvitationByIdResult

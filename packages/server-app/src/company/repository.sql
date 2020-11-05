@@ -25,6 +25,24 @@ WITH company_insert as (
 )
 from company_insert;
 
+/*
+  @name whereId
+*/
+select json_build_object(
+  'id', company.id,
+  'name', company.name,
+  'employees', (
+    select json_agg(
+      json_build_object(
+        'id', company_employee.id,
+        'role', company_employee.role
+      )
+    )
+    from company_employee
+    where company_id = :id))
+from company
+where company.id = :id;
+
 
 /*
   @name deleteCompanyById
