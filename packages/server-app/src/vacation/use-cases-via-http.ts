@@ -1,7 +1,7 @@
 import * as useCases from './use-cases-connected'
 import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter, Request } from 'express'
-import { principal } from '../domain'
+import { principal } from '../principal'
 
 const mapToPrincipal = (request: Request) => {
   const decoded = principal.decode(JSON.parse(request.headers.authorization ?? '{}'))

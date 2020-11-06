@@ -1,8 +1,7 @@
 import * as useCases from './use-cases-connected'
 import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
-import { IRouter, Request } from 'express'
-import { mapToPrincipal, principal } from '../domain'
-
+import { IRouter } from 'express'
+import { mapToPrincipal, principal } from '../principal'
 
 export const initialize = (app: IRouter) => {
   exposeUseCaseViaHTTP({
@@ -59,5 +58,4 @@ export const initialize = (app: IRouter) => {
       }
     }
   })
-
 }

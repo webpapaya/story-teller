@@ -1,5 +1,5 @@
 import { v } from '@story-teller/shared'
-import { principal } from '../domain'
+import { principal } from '../principal'
 import { aggregateFactory, useCase } from '../lib/use-case'
 
 const personId = v.uuid

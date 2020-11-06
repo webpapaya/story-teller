@@ -1,6 +1,6 @@
 import { assertThat, hasProperty, throws } from 'hamjest'
 import { v4 as uuid } from 'uuid'
-import { principal } from '../domain'
+import { principal } from '../principal'
 import { hasAggregate } from '../utils/custom-matcher'
 import { commands, requestVacation, vacation, confirmRequest, rejectRequest, deleteRequest } from './use-cases'
 
