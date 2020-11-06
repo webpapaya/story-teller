@@ -1,8 +1,8 @@
 import { v4 as uuid } from 'uuid'
 import { t, assertDifference } from '../spec-helpers'
-import { ensure, destroy } from './repository'
+import { ensure, destroy, whereId } from './repository'
 import { Company, companyAggregate, addEmployee } from './use-cases'
-import { assertThat, truthy, hasProperty } from 'hamjest'
+import { assertThat, truthy, hasProperty, equalTo, promiseThat, rejected } from 'hamjest'
 
 describe('invitation repository', () => {
   const company: Company = {
@@ -10,6 +10,17 @@ describe('invitation repository', () => {
     name: 'Some company',
     employees: [{ id: uuid(), role: 'employee' }]
   }
+
+  describe('whereId', () => {
+    it('WHEN company exists, returns company', t(async (clients) => {
+      await ensure(company, clients)
+      assertThat(await whereId({ id: company.id }, clients), equalTo(company))
+    }))
+
+    it('WHEN company does not exists, throws error', t(async (clients) => {
+      await promiseThat(whereId({ id: company.id }, clients), rejected())
+    }))
+  })
 
   describe('ensure', () => {
     describe('WHEN record does not exist', () => {

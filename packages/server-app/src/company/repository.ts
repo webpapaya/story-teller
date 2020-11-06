@@ -3,8 +3,7 @@ import { Company, companyAggregate } from './use-cases'
 import { buildRecordRepository, buildRepository } from '../lib/build-repository'
 
 const toDomain = (dbResult: queries.IWhereIdResult) => {
-  const decoded = companyAggregate.decode(dbResult.jsonBuildObject?.valueOf())
-
+  const decoded = companyAggregate.decode(dbResult?.jsonBuildObject?.valueOf())
   if (!decoded.isOk()) {
     throw new Error(JSON.stringify(decoded.get()))
   }
