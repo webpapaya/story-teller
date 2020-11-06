@@ -27,7 +27,7 @@ export const initialize = (app: IRouter) => {
     actionName: 'accept',
     aggregateName: 'invitation',
     useCase: useCases.acceptInvitation,
-    method: 'post',
+    method: 'put',
     principal,
     authenticate: ({ principal, aggregate }) => {
       return principal?.id === aggregate.inviteeId
@@ -46,7 +46,7 @@ export const initialize = (app: IRouter) => {
     actionName: 'reject',
     aggregateName: 'invitation',
     useCase: useCases.rejectInvitation,
-    method: 'post',
+    method: 'put',
     principal,
     authenticate: ({ principal, aggregate }) => {
       return principal?.id === aggregate.inviteeId
