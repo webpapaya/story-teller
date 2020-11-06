@@ -94,7 +94,7 @@ describe.skip('connectUseCase', () => {
 })
 
 describe('reactToUseCaseSync', () => {
-  it('calls synced event', async () => {
+  it('calls synced event', t(async (externalDependencies) => {
     const useCaseSpy = sinon.spy()
     const event = buildEvent('test', v.record({
       someId: v.uuid
@@ -142,11 +142,11 @@ describe('reactToUseCaseSync', () => {
       mapper: () => ''
     })
 
-    await connectedUseCaseB.execute('test')
+    await connectedUseCaseB.raw('test', externalDependencies)
     assertThat(useCaseSpy, hasProperty('callCount', 1))
-  })
+  }))
 
-  it.skip('calls async event', t(async ({ channel }) => {
+  it.skip('calls async event', t(async (externalDependencies) => {
     const { resolve, promise } = buildLazyPromise()
     const event = buildEvent('test', v.record({
       someId: v.uuid
@@ -176,7 +176,9 @@ describe('reactToUseCaseSync', () => {
         event,
         mapper: () => ({ someId: uuid() })
       }],
-      execute: ({ aggregate }) => aggregate
+      execute: ({ aggregate }) => {
+        return aggregate
+      }
     })
 
     const connectedUseCaseB = connectUseCase({
@@ -192,10 +194,10 @@ describe('reactToUseCaseSync', () => {
       })),
       useCase: connectedUseCaseA,
       mapper: () => '',
-      channel
+      channel: externalDependencies.channel
     })
 
-    connectedUseCaseB.execute('test') // eslint-disable-line @typescript-eslint/no-floating-promises
+    connectedUseCaseB.raw('test', externalDependencies) // eslint-disable-line @typescript-eslint/no-floating-promises
 
     await promise
   }))
