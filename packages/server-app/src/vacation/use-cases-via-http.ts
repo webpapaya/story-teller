@@ -1,7 +1,7 @@
 import * as useCases from './use-cases-connected'
-import { requestingUser } from './use-cases'
 import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter, Request } from 'express'
+import { requestingUser } from '../domain'
 
 const mapToRequestingUser = (request: Request) => {
   const decoded = requestingUser.decode(JSON.parse(request.headers.authorization ?? '{}'))

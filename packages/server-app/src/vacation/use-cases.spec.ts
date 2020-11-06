@@ -1,7 +1,8 @@
 import { assertThat, hasProperty, throws } from 'hamjest'
 import { v4 as uuid } from 'uuid'
+import { requestingUser } from '../domain'
 import { hasAggregate } from '../utils/custom-matcher'
-import { commands, requestVacation, vacation, confirmRequest, requestingUser, rejectRequest, deleteRequest } from './use-cases'
+import { commands, requestVacation, vacation, confirmRequest, rejectRequest, deleteRequest } from './use-cases'
 
 describe('vacation', () => {
   describe('requestVacation', () => {

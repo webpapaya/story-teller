@@ -1,11 +1,9 @@
 import { v } from '@story-teller/shared'
+import { requestingUser } from '../domain'
 import { aggregateFactory, useCase } from '../lib/use-case'
 
 const personId = v.uuid
-export const requestingUser = v.record({
-  id: personId,
-  role: v.union([v.literal('user'), v.literal('manager')])
-})
+
 export const vacation = v.aggregate({
   id: v.uuid,
   startDate: v.date,

@@ -9,14 +9,14 @@ export const acceptInvitation = connectUseCase({
   ensureAggregate: repository.ensure
 })
 
-export const rename = connectUseCase({
+export const inviteToCompany = connectUseCase({
   useCase: useCases.inviteToCompany,
   mapCommand: () => undefined,
   fetchAggregate: async () => undefined,
   ensureAggregate: repository.ensure
 })
 
-export const removeEmployee = connectUseCase({
+export const rejectInvitation = connectUseCase({
   useCase: useCases.rejectInvitation,
   mapCommand: (command) => ({ id: command.id }),
   fetchAggregate: repository.whereById,

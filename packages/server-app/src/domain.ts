@@ -1,5 +1,6 @@
 import { LocalDateTime } from 'js-joda'
-import { Revision, Project as DomainProject } from '@story-teller/shared'
+import { v, Revision, Project as DomainProject } from '@story-teller/shared'
+import { Request } from 'express'
 
 type UUID = string
 
@@ -39,4 +40,17 @@ export interface Contributor {
   userId: string
   projectId: string
   name: string
+}
+
+export const requestingUser = v.record({
+  id: v.uuid,
+  role: v.union([v.literal('user'), v.literal('manager')])
+})
+
+export const mapToRequestingUser = (request: Request) => {
+  const decoded = requestingUser.decode(JSON.parse(request.headers.authorization ?? '{}'))
+  if (decoded.isOk()) {
+    return decoded.get()
+  }
+  throw new Error('unauthorized')
 }
