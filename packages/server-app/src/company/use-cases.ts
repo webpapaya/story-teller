@@ -88,14 +88,3 @@ export const setEmployeeRole = useCase({
     .composeLens(employeeRole)
     .set(action.role)(aggregate)
 })
-
-// ------------
-
-// export const reactToInvitationAccepted = domainEventToUseCase({
-//   event: invitationAggregate,
-//   useCase: addEmployee,
-//   mapper: (invitationAccepted) => ({
-//     companyId: invitationAccepted.companyId,
-//     personId: invitationAccepted.inviterId
-//   })
-// })
