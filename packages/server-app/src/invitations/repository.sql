@@ -1,4 +1,4 @@
-/* @name findInvitationById */
+/* @name whereInvitationId */
 SELECT * FROM invitation WHERE id = :id;
 
 /* @name ensureInvitation */

@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid'
-import { assertThat, hasProperty } from 'hamjest'
+import { assertThat, hasProperty, promiseThat, rejected } from 'hamjest'
 import { LocalDateTime } from '@story-teller/shared/node_modules/js-joda'
 import { t, assertDifference } from '../spec-helpers'
 import { ensure, destroy, whereById } from './repository'
@@ -22,11 +22,11 @@ describe('invitation repository', () => {
   describe('find', () => {
     it('WHEN record exists, returns record', t(async (clients) => {
       await ensure(invitation, clients)
-      assertThat(await whereById(invitation.id, clients), hasProperty('0.id', invitation.id))
+      assertThat(await whereById({ id: invitation.id }, clients), hasProperty('id', invitation.id))
     }))
 
     it('WHEN record does not exist, returns empty array', t(async (clients) => {
-      assertThat(await whereById(invitation.id, clients), hasProperty('length', 0))
+      promiseThat(whereById({ id: invitation.id }, clients), rejected())
     }))
   })
 
