@@ -42,13 +42,13 @@ export interface Contributor {
   name: string
 }
 
-export const requestingUser = v.record({
+export const principal = v.record({
   id: v.uuid,
   role: v.union([v.literal('user'), v.literal('manager')])
 })
 
-export const mapToRequestingUser = (request: Request) => {
-  const decoded = requestingUser.decode(JSON.parse(request.headers.authorization ?? '{}'))
+export const mapToPrincipal = (request: Request) => {
+  const decoded = principal.decode(JSON.parse(request.headers.authorization ?? '{}'))
   if (decoded.isOk()) {
     return decoded.get()
   }

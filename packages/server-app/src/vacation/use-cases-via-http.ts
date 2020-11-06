@@ -1,10 +1,10 @@
 import * as useCases from './use-cases-connected'
 import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter, Request } from 'express'
-import { requestingUser } from '../domain'
+import { principal } from '../domain'
 
-const mapToRequestingUser = (request: Request) => {
-  const decoded = requestingUser.decode(JSON.parse(request.headers.authorization ?? '{}'))
+const mapToPrincipal = (request: Request) => {
+  const decoded = principal.decode(JSON.parse(request.headers.authorization ?? '{}'))
   if (decoded.isOk()) {
     return decoded.get()
   }
@@ -18,13 +18,13 @@ export const initialize = (app: IRouter) => {
     aggregateName: 'vacation',
     useCase: useCases.requestVacation,
     method: 'post',
-    requestingUser,
+    principal,
     authenticate: () => true,
-    mapToRequestingUser,
-    mapToCommand: (requestingUser, request) => {
+    mapToPrincipal,
+    mapToCommand: (principal, request) => {
       return {
         ...request.body,
-        requestingUser
+        principal
       }
     }
   })
@@ -35,15 +35,15 @@ export const initialize = (app: IRouter) => {
     actionName: 'deleteRequest',
     useCase: useCases.deleteRequest,
     method: 'put',
-    requestingUser,
-    authenticate: ({ requestingUser, aggregate }) => {
-      return aggregate.employeeId === requestingUser?.id
+    principal,
+    authenticate: ({ principal, aggregate }) => {
+      return aggregate.employeeId === principal?.id
     },
-    mapToRequestingUser,
-    mapToCommand: (requestingUser, request) => {
+    mapToPrincipal,
+    mapToCommand: (principal, request) => {
       return {
         ...JSON.parse(request.body),
-        requestingUser
+        principal
       }
     }
   })
@@ -54,15 +54,15 @@ export const initialize = (app: IRouter) => {
     actionName: 'confirmRequest',
     useCase: useCases.confirmRequest,
     method: 'put',
-    requestingUser,
-    authenticate: ({ requestingUser }) => {
-      return requestingUser?.role === 'manager'
+    principal,
+    authenticate: ({ principal }) => {
+      return principal?.role === 'manager'
     },
-    mapToRequestingUser,
-    mapToCommand: (requestingUser, request) => {
+    mapToPrincipal,
+    mapToCommand: (principal, request) => {
       return {
         ...JSON.parse(request.body),
-        requestingUser
+        principal
       }
     }
   })
@@ -73,15 +73,15 @@ export const initialize = (app: IRouter) => {
     aggregateName: 'vacation',
     useCase: useCases.rejectRequest,
     method: 'put',
-    requestingUser,
-    authenticate: ({ requestingUser }) => {
-      return requestingUser?.role === 'manager'
+    principal,
+    authenticate: ({ principal }) => {
+      return principal?.role === 'manager'
     },
-    mapToRequestingUser,
-    mapToCommand: (requestingUser, request) => {
+    mapToPrincipal,
+    mapToCommand: (principal, request) => {
       return {
         ...JSON.parse(request.body),
-        requestingUser
+        principal
       }
     }
   })

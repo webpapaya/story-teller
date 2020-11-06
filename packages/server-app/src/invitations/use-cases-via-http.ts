@@ -1,7 +1,7 @@
 import * as useCases from './use-cases-connected'
 import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter, Request } from 'express'
-import { mapToRequestingUser, requestingUser } from '../domain'
+import { mapToPrincipal, principal } from '../domain'
 
 
 export const initialize = (app: IRouter) => {
@@ -11,13 +11,13 @@ export const initialize = (app: IRouter) => {
     aggregateName: 'invitation',
     useCase: useCases.acceptInvitation,
     method: 'post',
-    requestingUser,
+    principal,
     authenticate: () => true,
-    mapToRequestingUser,
-    mapToCommand: (requestingUser, request) => {
+    mapToPrincipal,
+    mapToCommand: (principal, request) => {
       return {
         ...request.body,
-        requestingUser
+        principal
       }
     }
   })
@@ -28,15 +28,15 @@ export const initialize = (app: IRouter) => {
     aggregateName: 'invitation',
     useCase: useCases.acceptInvitation,
     method: 'post',
-    requestingUser,
-    authenticate: ({ requestingUser, aggregate }) => {
-      return requestingUser?.id === aggregate.inviteeId
+    principal,
+    authenticate: ({ principal, aggregate }) => {
+      return principal?.id === aggregate.inviteeId
     },
-    mapToRequestingUser,
-    mapToCommand: (requestingUser, request) => {
+    mapToPrincipal,
+    mapToCommand: (principal, request) => {
       return {
         ...request.body,
-        requestingUser
+        principal
       }
     }
   })
@@ -47,15 +47,15 @@ export const initialize = (app: IRouter) => {
     aggregateName: 'invitation',
     useCase: useCases.rejectInvitation,
     method: 'post',
-    requestingUser,
-    authenticate: ({ requestingUser, aggregate }) => {
-      return requestingUser?.id === aggregate.inviteeId
+    principal,
+    authenticate: ({ principal, aggregate }) => {
+      return principal?.id === aggregate.inviteeId
     },
-    mapToRequestingUser,
-    mapToCommand: (requestingUser, request) => {
+    mapToPrincipal,
+    mapToCommand: (principal, request) => {
       return {
         ...request.body,
-        requestingUser
+        principal
       }
     }
   })

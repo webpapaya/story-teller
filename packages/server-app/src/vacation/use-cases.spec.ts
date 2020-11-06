@@ -1,6 +1,6 @@
 import { assertThat, hasProperty, throws } from 'hamjest'
 import { v4 as uuid } from 'uuid'
-import { requestingUser } from '../domain'
+import { principal } from '../domain'
 import { hasAggregate } from '../utils/custom-matcher'
 import { commands, requestVacation, vacation, confirmRequest, rejectRequest, deleteRequest } from './use-cases'
 
@@ -25,8 +25,8 @@ describe('vacation', () => {
       }
       const command = {
         ...commands.confirm.build()[0](),
-        requestingUser: {
-          ...requestingUser.build()[0](),
+        principal: {
+          ...principal.build()[0](),
           role: params.role
         }
       }
@@ -46,7 +46,7 @@ describe('vacation', () => {
       it('AND sets confirmed by', () => {
         const { command, result } = executeUseCase({ role: 'manager' })
         assertThat(result,
-          hasAggregate(hasProperty('request.answeredBy', command.requestingUser.id)))
+          hasAggregate(hasProperty('request.answeredBy', command.principal.id)))
       })
     })
   })
@@ -59,8 +59,8 @@ describe('vacation', () => {
       }
       const command = {
         ...commands.reject.build()[0](),
-        requestingUser: {
-          ...requestingUser.build()[0](),
+        principal: {
+          ...principal.build()[0](),
           role: params.role
         }
       }
@@ -80,7 +80,7 @@ describe('vacation', () => {
       it('AND sets confirmed by', () => {
         const { command, result } = executeUseCase({ role: 'manager' })
         assertThat(result,
-          hasAggregate(hasProperty('request.answeredBy', command.requestingUser.id)))
+          hasAggregate(hasProperty('request.answeredBy', command.principal.id)))
       })
 
       it('AND sets reason', () => {
@@ -101,8 +101,8 @@ describe('vacation', () => {
 
         const command = {
           ...commands.delete.build()[0](),
-          requestingUser: {
-            ...requestingUser.build()[0](),
+          principal: {
+            ...principal.build()[0](),
             id: aggregate.employeeId
           }
         }
@@ -123,8 +123,8 @@ describe('vacation', () => {
 
           const command = {
             ...commands.delete.build()[0](),
-            requestingUser: {
-              ...requestingUser.build()[0](),
+            principal: {
+              ...principal.build()[0](),
               id: aggregate.employeeId
             }
           }

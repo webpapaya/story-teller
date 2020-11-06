@@ -1,5 +1,5 @@
 import { v } from '@story-teller/shared'
-import { requestingUser } from '../domain'
+import { principal } from '../domain'
 import { aggregateFactory, useCase } from '../lib/use-case'
 
 const personId = v.uuid
@@ -40,17 +40,17 @@ export const commands = {
   }),
   confirm: v.record({
     id: v.uuid,
-    requestingUser: requestingUser
+    principal: principal
   }),
   reject: v.record({
     id: v.uuid,
     reason: v.nonEmptyString,
-    requestingUser: requestingUser
+    principal: principal
   }),
   delete: v.record({
     id: v.uuid,
     reason: v.nonEmptyString,
-    requestingUser: requestingUser
+    principal: principal
   })
 } as const
 
@@ -81,7 +81,7 @@ export const confirmRequest = useCase({
       ...aggregate,
       request: {
         state: 'confirmed' as const,
-        answeredBy: command.requestingUser.id
+        answeredBy: command.principal.id
       }
     }
   }
@@ -100,7 +100,7 @@ export const rejectRequest = useCase({
       request: {
         state: 'rejected' as const,
         reason: command.reason,
-        answeredBy: command.requestingUser.id
+        answeredBy: command.principal.id
       }
     }
   }

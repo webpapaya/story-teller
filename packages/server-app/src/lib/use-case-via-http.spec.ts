@@ -22,9 +22,9 @@ describe('exposeUseCaseViaHTTP', () => {
 
     exposeUseCaseViaHTTP({
       app: { post: () => {} } as unknown as IRouter,
-      requestingUser: v.string,
+      principal: v.string,
       mapToCommand: () => 'command',
-      mapToRequestingUser: () => 'requesting user',
+      mapToPrincipal: () => 'requesting user',
       aggregateName: 'whatever',
       actionName: 'useCaseA',
       method: 'post',

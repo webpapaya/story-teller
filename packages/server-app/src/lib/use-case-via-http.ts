@@ -8,14 +8,14 @@ const httpRegistry: Array<{
   aggregateName: string
   actionName: string
   authenticate: (payload: {
-    requestingUser?: any
+    principal?: any
     aggregate: any
   }) => boolean
   useCase: AnyConnectedUseCaseConfig<AnyUseCaseConfigType>
 }> = []
 
 export const exposeUseCaseViaHTTP = <
-  RequestingUser extends AnyCodec,
+  Principal extends AnyCodec,
   UseCaseConfig extends AnyUseCaseConfigType,
   ConnectedUseCaseConfig extends AnyConnectedUseCaseConfig<UseCaseConfig>
 >(config: {
@@ -23,14 +23,14 @@ export const exposeUseCaseViaHTTP = <
   method: HTTPVerb
   aggregateName: string
   actionName: string
-  requestingUser: RequestingUser
-  mapToRequestingUser: (request: Request) => RequestingUser['O']
+  principal: Principal
+  mapToPrincipal: (request: Request) => Principal['O']
   mapToCommand: (
-    requestingUser: RequestingUser['O'],
+    principal: Principal['O'],
     request: Request
   ) => UseCaseConfig['command']['O']
   authenticate: (payload: {
-    requestingUser?: RequestingUser['O']
+    principal?: Principal['O']
     aggregate: UseCaseConfig['aggregateFrom']['O']
   }) => boolean
   useCase: ConnectedUseCaseConfig
@@ -47,21 +47,21 @@ export const exposeUseCaseViaHTTP = <
   config.app[config.method](
     route,
     async (req: Request, res: Response) => {
-      const requestingUserResult = config.requestingUser.decode(config.mapToRequestingUser(req))
-      if (!requestingUserResult.isOk()) {
+      const principalResult = config.principal.decode(config.mapToPrincipal(req))
+      if (!principalResult.isOk()) {
         throw new Error('Unauthorized')
       }
-      const requestingUser = requestingUserResult.get()
+      const principal = principalResult.get()
 
       const aggregateAfter = await config.useCase.execute(
-        config.mapToCommand(requestingUser, req), config.authenticate)
+        config.mapToCommand(principal, req), config.authenticate)
 
       const links = httpRegistry
         .filter(({ aggregateName, method }) => {
           return aggregateName === config.aggregateName && method !== 'post'
         })
         .filter(({ authenticate }) => {
-          return authenticate({ requestingUser, aggregate: aggregateAfter })
+          return authenticate({ principal, aggregate: aggregateAfter })
         })
         .filter(({ useCase }) => {
           const precondition = useCase.useCase.config.preCondition
