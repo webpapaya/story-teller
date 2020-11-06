@@ -1,7 +1,8 @@
 import * as useCases from './use-cases-connected'
 import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter, Request } from 'express'
-import { principal } from '../principal'
+import { Principal, principal } from '../principal'
+import { Vacation } from './use-cases'
 
 const mapToPrincipal = (request: Request) => {
   const decoded = principal.decode(JSON.parse(request.headers.authorization ?? '{}'))
@@ -12,6 +13,20 @@ const mapToPrincipal = (request: Request) => {
 }
 
 export const initialize = (app: IRouter) => {
+  const isEmployeeInCompany = (payload: {principal?: Principal, aggregate: Vacation }) => {
+    return Boolean(payload.principal?.employedIn.some((employee) => {
+      return employee.companyId === payload.aggregate.companyId
+    }))
+  }
+
+  const canManageVacation = (payload: {principal: Principal, aggregate: Vacation }) => {
+    return isEmployeeInCompany(payload) &&
+      payload.principal?.employedIn.some((employee) => {
+        return employee.companyId === payload.aggregate.companyId &&
+          employee.role === 'manager'
+      })
+  }
+
   exposeUseCaseViaHTTP({
     app,
     actionName: 'request',
@@ -19,7 +34,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.requestVacation,
     method: 'post',
     principal,
-    authenticate: () => true,
+    authenticateAfter: isEmployeeInCompany,
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
       return {
@@ -36,8 +51,8 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.deleteRequest,
     method: 'put',
     principal,
-    authenticate: ({ principal, aggregate }) => {
-      return aggregate.employeeId === principal?.id
+    authenticateBefore: ({ principal, aggregate }) => {
+      return aggregate.employeeId === principal.id
     },
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
@@ -55,9 +70,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.confirmRequest,
     method: 'put',
     principal,
-    authenticate: ({ principal }) => {
-      return principal?.role === 'manager'
-    },
+    authenticateBefore: canManageVacation,
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
       return {
@@ -74,9 +87,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.rejectRequest,
     method: 'put',
     principal,
-    authenticate: ({ principal }) => {
-      return principal?.role === 'manager'
-    },
+    authenticateBefore: canManageVacation,
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
       return {

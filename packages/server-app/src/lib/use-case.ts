@@ -100,12 +100,18 @@ export type BeforeUseCase<UseCaseConfig extends AnyUseCaseConfigType> = (payload
 type RawConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> = (
   command: UseCaseConfig['command']['O'],
   dependencies: ExternalDependencies,
-  beforeUseCase?: BeforeUseCase<UseCaseConfig>
+  hooks?: {
+    beforeUseCase?: BeforeUseCase<UseCaseConfig>
+    afterUseCase?: BeforeUseCase<UseCaseConfig>
+  }
 ) => Promise<[UseCaseConfig['aggregateTo']['O'], any[]]>
 
 type ExecutableConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> = (
   command: UseCaseConfig['command']['O'],
-  beforeUseCase?: BeforeUseCase<UseCaseConfig>
+  hooks?: {
+    beforeUseCase?: BeforeUseCase<UseCaseConfig>
+    afterUseCase?: BeforeUseCase<UseCaseConfig>
+  }
 ) => Promise<[UseCaseConfig['aggregateTo']['O'], any[]]>
 
 type Precondition<UseCaseConfig extends AnyUseCaseConfigType> =
@@ -147,11 +153,11 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
     return eventsToReturn
   }
 
-  const execute: ExecutableConnectedUseCase<UseCaseConfig> = async (command, beforeUseCase) => {
+  const execute: ExecutableConnectedUseCase<UseCaseConfig> = async (command, hooks) => {
     // TODO: change to withinTransaction
     return await withinConnection(async ({ client }) => {
       return await withChannel(async ({ channel }) => {
-        const [aggregate, events] = await raw(command, { pgClient: client, channel }, beforeUseCase)
+        const [aggregate, events] = await raw(command, { pgClient: client, channel }, hooks)
 
         await sequentially(events.map((event) => () => publish('default', event, channel)))
 
@@ -160,7 +166,7 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
     })
   }
 
-  const raw: RawConnectedUseCase<UseCaseConfig> = async (command, dependencies, beforeUseCase) => {
+  const raw: RawConnectedUseCase<UseCaseConfig> = async (command, dependencies, hooks) => {
     const decodedCommandResult = config.useCase.config.command.decode(command)
     if (!decodedCommandResult.isOk()) {
       throw new Error('Invalid Command')
@@ -169,11 +175,15 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
 
     const fromAggregate = await config.fetchAggregate(config.mapCommand(decodedCommand), dependencies)
 
-    if (beforeUseCase && !beforeUseCase({ aggregate: fromAggregate })) {
+    if (hooks?.beforeUseCase && !hooks.beforeUseCase({ aggregate: fromAggregate })) {
       throw new Error('Before usecase throwed error')
     }
 
     const [toAggregate, events] = config.useCase.run({ command: decodedCommand, aggregate: fromAggregate })
+
+    if (hooks?.afterUseCase && !hooks.afterUseCase({ aggregate: toAggregate })) {
+      throw new Error('After usecase throwed error')
+    }
 
     await config.ensureAggregate(toAggregate, dependencies)
 

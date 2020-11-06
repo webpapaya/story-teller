@@ -9,6 +9,7 @@ export const vacation = v.aggregate({
   startDate: v.date,
   endDate: v.date,
   employeeId: personId,
+  companyId: v.uuid,
   request: v.union([
     v.record({
       state: v.literal('pending')
@@ -35,6 +36,7 @@ export const commands = {
   request: v.record({
     id: v.uuid,
     employeeId: v.uuid,
+    companyId: v.uuid,
     startDate: v.dateInFuture,
     endDate: v.dateInFuture
   }),

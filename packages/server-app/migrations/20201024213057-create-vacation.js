@@ -9,6 +9,7 @@ exports.up = function (db) {
       end_date        date NOT NULL,
       employee_id     uuid NOT NULL,
       state           text NOT NULL,
+      company_id      uuid,
       answered_by     uuid,
       reason          text
     );

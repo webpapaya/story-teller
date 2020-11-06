@@ -7,8 +7,12 @@ const httpRegistry: Array<{
   method: HTTPVerb
   aggregateName: string
   actionName: string
-  authenticate: (payload: {
-    principal?: any
+  authenticateBefore: (payload: {
+    principal: any
+    aggregate: any
+  }) => boolean
+  authenticateAfter: (payload: {
+    principal: any
     aggregate: any
   }) => boolean
   useCase: AnyConnectedUseCaseConfig<AnyUseCaseConfigType>
@@ -29,9 +33,13 @@ export const exposeUseCaseViaHTTP = <
     principal: Principal['O']
     request: Request
   }) => UseCaseConfig['command']['O']
-  authenticate: (payload: {
-    principal?: Principal['O']
+  authenticateBefore?: (payload: {
+    principal: Principal['O']
     aggregate: UseCaseConfig['aggregateFrom']['O']
+  }) => boolean
+  authenticateAfter?: (payload: {
+    principal: Principal['O']
+    aggregate: UseCaseConfig['aggregateTo']['O']
   }) => boolean
   useCase: ConnectedUseCaseConfig
 }) => {
@@ -40,7 +48,8 @@ export const exposeUseCaseViaHTTP = <
     method: config.method,
     aggregateName: config.aggregateName,
     actionName: config.actionName,
-    authenticate: config.authenticate,
+    authenticateBefore: config.authenticateBefore ?? (() => true),
+    authenticateAfter: config.authenticateAfter ?? (() => true),
     useCase: config.useCase as unknown as AnyConnectedUseCaseConfig<AnyUseCaseConfigType>
   })
 
@@ -54,14 +63,23 @@ export const exposeUseCaseViaHTTP = <
       const principal = principalResult.get()
 
       const aggregateAfter = await config.useCase.execute(
-        config.mapToCommand({ principal, request: req }), config.authenticate)
+        config.mapToCommand({ principal, request: req }), {
+          beforeUseCase: ({ aggregate }) => config.authenticateBefore?.({
+            principal,
+            aggregate
+          }) ?? true,
+          afterUseCase: ({ aggregate }) => config.authenticateAfter?.({
+            principal,
+            aggregate
+          }) ?? true
+        })
 
       const links = httpRegistry
         .filter(({ aggregateName, method }) => {
           return aggregateName === config.aggregateName && method !== 'post'
         })
-        .filter(({ authenticate }) => {
-          return authenticate({ principal, aggregate: aggregateAfter })
+        .filter(({ authenticateBefore }) => {
+          return authenticateBefore({ principal, aggregate: aggregateAfter })
         })
         .filter(({ useCase }) => {
           const precondition = useCase.useCase.config.preCondition

@@ -28,6 +28,7 @@ export const ensure = buildRecordRepository({
       end_date: vacation.endDate,
       employee_id: vacation.employeeId,
       state: vacation.request.state,
+      company_id: vacation.companyId,
       answered_by: answeredBy,
       reason
     }
