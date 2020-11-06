@@ -1,25 +1,27 @@
 /** Types generated for queries found in "./src/vacation/repository.sql" */
 import { PreparedQuery } from '@pgtyped/query'
 
+import { LocalDate } from 'js-joda'
+
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json }
 
-/** 'EnsureVacation' parameters type */
+/** 'ensureVacation' parameters type */
 export interface IEnsureVacationParams {
   id: string | null | void
-  start_date: Date | null | void
-  end_date: Date | null | void
+  start_date: LocalDate | null | void
+  end_date: LocalDate | null | void
   employee_id: string | null | void
   state: string | null | void
   answered_by: string | null | void
   reason: string | null | void
 }
 
-/** 'EnsureVacation' return type */
+/** 'ensureVacation' return type */
 export interface IEnsureVacationResult {
-  jsonBuildObject: Json | null
+  jsonBuildObject: Json
 }
 
-/** 'EnsureVacation' query type */
+/** 'ensureVacation' query type */
 export interface IEnsureVacationQuery {
   params: IEnsureVacationParams
   result: IEnsureVacationResult
@@ -54,17 +56,17 @@ const ensureVacationIR: any = { name: 'ensureVacation', params: [{ name: 'id', t
  */
 export const ensureVacation = new PreparedQuery<IEnsureVacationParams, IEnsureVacationResult>(ensureVacationIR)
 
-/** 'WhereIdVacation' parameters type */
+/** 'whereIdVacation' parameters type */
 export interface IWhereIdVacationParams {
   id: string | null | void
 }
 
-/** 'WhereIdVacation' return type */
+/** 'whereIdVacation' return type */
 export interface IWhereIdVacationResult {
-  jsonBuildObject: Json | null
+  jsonBuildObject: Json
 }
 
-/** 'WhereIdVacation' query type */
+/** 'whereIdVacation' query type */
 export interface IWhereIdVacationQuery {
   params: IWhereIdVacationParams
   result: IWhereIdVacationResult
@@ -91,15 +93,15 @@ const whereIdVacationIR: any = { name: 'whereIdVacation', params: [{ name: 'id',
  */
 export const whereIdVacation = new PreparedQuery<IWhereIdVacationParams, IWhereIdVacationResult>(whereIdVacationIR)
 
-/** 'CountVacation' parameters type */
+/** 'countVacation' parameters type */
 export type ICountVacationParams = void
 
-/** 'CountVacation' return type */
+/** 'countVacation' return type */
 export interface ICountVacationResult {
-  count: string | null
+  count: number
 }
 
-/** 'CountVacation' query type */
+/** 'countVacation' query type */
 export interface ICountVacationQuery {
   params: ICountVacationParams
   result: ICountVacationResult
