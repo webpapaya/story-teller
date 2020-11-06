@@ -25,10 +25,10 @@ export const exposeUseCaseViaHTTP = <
   actionName: string
   principal: Principal
   mapToPrincipal: (request: Request) => Principal['O']
-  mapToCommand: (
-    principal: Principal['O'],
+  mapToCommand: (payload: {
+    principal: Principal['O']
     request: Request
-  ) => UseCaseConfig['command']['O']
+  }) => UseCaseConfig['command']['O']
   authenticate: (payload: {
     principal?: Principal['O']
     aggregate: UseCaseConfig['aggregateFrom']['O']
@@ -54,7 +54,7 @@ export const exposeUseCaseViaHTTP = <
       const principal = principalResult.get()
 
       const aggregateAfter = await config.useCase.execute(
-        config.mapToCommand(principal, req), config.authenticate)
+        config.mapToCommand({ principal, request: req }), config.authenticate)
 
       const links = httpRegistry
         .filter(({ aggregateName, method }) => {

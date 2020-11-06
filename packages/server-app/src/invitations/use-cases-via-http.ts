@@ -13,7 +13,7 @@ export const initialize = (app: IRouter) => {
     principal,
     authenticate: () => true,
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
+    mapToCommand: ({ principal, request }) => {
       return {
         ...request.body,
         principal
@@ -32,7 +32,7 @@ export const initialize = (app: IRouter) => {
       return principal?.id === aggregate.inviteeId
     },
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
+    mapToCommand: ({ principal, request }) => {
       return {
         ...request.body,
         principal
@@ -51,7 +51,7 @@ export const initialize = (app: IRouter) => {
       return principal?.id === aggregate.inviteeId
     },
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
+    mapToCommand: ({ principal, request }) => {
       return {
         ...request.body,
         principal

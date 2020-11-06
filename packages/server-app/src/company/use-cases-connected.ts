@@ -2,6 +2,13 @@ import * as useCases from './use-cases'
 import * as repository from './repository'
 import { connectUseCase } from '../lib/use-case'
 
+export const create = connectUseCase({
+  useCase: useCases.create,
+  mapCommand: () => undefined,
+  fetchAggregate: async () => undefined,
+  ensureAggregate: repository.ensure
+})
+
 export const addEmployee = connectUseCase({
   useCase: useCases.addEmployee,
   mapCommand: (command) => ({ id: command.companyId }),

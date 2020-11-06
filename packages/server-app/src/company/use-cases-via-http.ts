@@ -6,6 +6,23 @@ import { mapToPrincipal, principal } from '../principal'
 export const initialize = (app: IRouter) => {
   exposeUseCaseViaHTTP({
     app,
+    actionName: '',
+    aggregateName: 'company',
+    useCase: useCases.addEmployee,
+    method: 'post',
+    principal,
+    authenticate: () => true,
+    mapToPrincipal,
+    mapToCommand: ({ principal, request }) => {
+      return {
+        ...request.body,
+        principalId: principal.id
+      }
+    }
+  })
+
+  exposeUseCaseViaHTTP({
+    app,
     actionName: 'addEmployee',
     aggregateName: 'company',
     useCase: useCases.addEmployee,
@@ -13,11 +30,8 @@ export const initialize = (app: IRouter) => {
     principal,
     authenticate: () => true,
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
-      return {
-        ...request.body,
-        principal
-      }
+    mapToCommand: ({ principal, request }) => {
+      return request.body
     }
   })
 
@@ -30,11 +44,8 @@ export const initialize = (app: IRouter) => {
     principal,
     authenticate: () => true,
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
-      return {
-        ...request.body,
-        principal
-      }
+    mapToCommand: ({ principal, request }) => {
+      return request.body
     }
   })
 
@@ -47,11 +58,8 @@ export const initialize = (app: IRouter) => {
     principal,
     authenticate: () => true,
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
-      return {
-        ...request.body,
-        principal
-      }
+    mapToCommand: ({ principal, request }) => {
+      return request.body
     }
   })
 
@@ -64,11 +72,8 @@ export const initialize = (app: IRouter) => {
     principal,
     authenticate: () => true,
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
-      return {
-        ...request.body,
-        principal
-      }
+    mapToCommand: ({ principal, request }) => {
+      return request.body
     }
   })
 }

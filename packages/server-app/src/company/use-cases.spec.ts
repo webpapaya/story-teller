@@ -1,10 +1,11 @@
-import { assertThat, hasProperties, hasProperty } from 'hamjest'
+import { assertThat, hasProperties, hasProperty, throws } from 'hamjest'
 import {
   Company,
   addEmployee,
   removeEmployee,
   setEmployeeRole,
-  rename
+  rename,
+  create
 } from './use-cases'
 import { v4 as uuid } from 'uuid'
 import { hasAggregate } from '../utils/custom-matcher'
@@ -16,6 +17,41 @@ const company: Company = {
 }
 
 describe('company', () => {
+  describe('create', () => {
+    context('WHEN command is valid', () => {
+      it('sets name of company', () => {
+        const command = {
+          id: uuid(),
+          name: 'company name',
+          principalId: uuid()
+        }
+        assertThat(create.run({ aggregate: undefined, command }),
+          hasAggregate(hasProperty('name', command.name)))
+      })
+
+      it('AND adds principalId as manager', () => {
+        const command = {
+          id: uuid(),
+          name: 'company name',
+          principalId: uuid()
+        }
+        assertThat(create.run({ aggregate: undefined, command }),
+          hasAggregate(hasProperties({
+            employees: [{ id: command.principalId, role: 'manager' }]
+          })))
+      })
+    })
+
+    it('WHEN command is invalid (empty name), throws', () => {
+      const command = {
+        id: uuid(),
+        name: '',
+        principalId: uuid()
+      }
+      assertThat(() => create.run({ aggregate: undefined, command }), throws())
+    })
+  })
+
   describe('addEmployee', () => {
     it('WHEN employee not already added, adds employee to company', () => {
       const personId = uuid()

@@ -21,7 +21,7 @@ export const initialize = (app: IRouter) => {
     principal,
     authenticate: () => true,
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
+    mapToCommand: ({ principal, request }) => {
       return {
         ...request.body,
         principal
@@ -40,7 +40,7 @@ export const initialize = (app: IRouter) => {
       return aggregate.employeeId === principal?.id
     },
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
+    mapToCommand: ({ principal, request }) => {
       return {
         ...JSON.parse(request.body),
         principal
@@ -59,7 +59,7 @@ export const initialize = (app: IRouter) => {
       return principal?.role === 'manager'
     },
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
+    mapToCommand: ({ principal, request }) => {
       return {
         ...JSON.parse(request.body),
         principal
@@ -78,7 +78,7 @@ export const initialize = (app: IRouter) => {
       return principal?.role === 'manager'
     },
     mapToPrincipal,
-    mapToCommand: (principal, request) => {
+    mapToCommand: ({ principal, request }) => {
       return {
         ...JSON.parse(request.body),
         principal
