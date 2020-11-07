@@ -29,7 +29,7 @@ describe('exposeUseCaseViaHTTP', () => {
       actionName: 'useCaseA',
       method: 'post',
       useCase: connectedUseCaseA,
-      authenticate: () => true
+      authenticateBefore: () => true
     })
   })
 })

@@ -11,7 +11,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.addEmployee,
     method: 'post',
     principal,
-    authenticate: () => true,
+    authenticateBefore: () => true,
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
       return {
@@ -28,7 +28,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.addEmployee,
     method: 'put',
     principal,
-    authenticate: () => true,
+    authenticateBefore: () => true,
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
       return request.body
@@ -42,7 +42,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.removeEmployee,
     method: 'put',
     principal,
-    authenticate: () => true,
+    authenticateBefore: () => true,
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
       return request.body
@@ -56,7 +56,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.rename,
     method: 'put',
     principal,
-    authenticate: () => true,
+    authenticateBefore: () => true,
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
       return request.body
@@ -70,7 +70,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.setEmployeeRole,
     method: 'put',
     principal,
-    authenticate: () => true,
+    authenticateBefore: () => true,
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
       return request.body

@@ -11,7 +11,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.acceptInvitation,
     method: 'post',
     principal,
-    authenticate: () => true,
+    authenticateBefore: () => true,
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
       return {
@@ -28,7 +28,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.acceptInvitation,
     method: 'put',
     principal,
-    authenticate: ({ principal, aggregate }) => {
+    authenticateBefore: ({ principal, aggregate }) => {
       return principal?.id === aggregate.inviteeId
     },
     mapToPrincipal,
@@ -47,7 +47,7 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.rejectInvitation,
     method: 'put',
     principal,
-    authenticate: ({ principal, aggregate }) => {
+    authenticateBefore: ({ principal, aggregate }) => {
       return principal?.id === aggregate.inviteeId
     },
     mapToPrincipal,
