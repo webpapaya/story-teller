@@ -12,6 +12,18 @@ export const hashPassword = (password: string) =>
 export const comparePassword = (password: string, passwordHash: any) =>
   passwordHash && bcrypt.compareSync(password, passwordHash)
 
+export const buildToken = (createdAt = LocalDateTime.now()) => {
+  const plainToken = crypto.randomBytes(50).toString('hex')
+  const token = hashPassword(plainToken)
+
+  return {
+    state: 'active' as const,
+    plainToken,
+    token,
+    createdAt,
+  }
+}
+
 const todo = v.nonEmptyString
 const userAggregateRoot = v.uuid
 
@@ -40,8 +52,7 @@ const userAuthentication = v.aggregate({
 const authenticationToken = v.aggregate({
   id: v.uuid,
   userId: userAggregateRoot,
-  expiresAt: v.localDateTime,
-  token: todo,
+  token: token,
 })
 
 export const register = aggregateFactory({
@@ -57,8 +68,6 @@ export const register = aggregateFactory({
   ],
   execute: ({ command }) => {
     const passwordHash = hashPassword(command.password)
-    const plainConfirmationToken = crypto.randomBytes(50).toString('hex')
-    const confirmationToken = hashPassword(plainConfirmationToken)
     const now = LocalDateTime.now()
 
     return {
@@ -66,12 +75,7 @@ export const register = aggregateFactory({
       userIdentifier: command.userIdentifier,
       password: passwordHash,
       createdAt: now,
-      confirmation: {
-        state: 'active' as const,
-        token: confirmationToken,
-        plainToken: plainConfirmationToken,
-        createdAt: now,
-      },
+      confirmation: buildToken(now),
       passwordReset: {
         state: 'inactive' as const,
         usedAt: now,
@@ -110,18 +114,9 @@ export const requestPasswordReset = useCase({
     // TODO: send password reset email
   ],
   execute: ({ aggregate }) => {
-    const plainConfirmationToken = crypto.randomBytes(50).toString('hex')
-    const confirmationToken = hashPassword(plainConfirmationToken)
-    const now = LocalDateTime.now()
-
     return {
       ...aggregate,
-      passwordReset: {
-        state: 'active' as const,
-        token: confirmationToken,
-        plainToken: plainConfirmationToken,
-        createdAt: now,
-      }
+      passwordReset: buildToken()
     }
   }
 })
@@ -157,6 +152,48 @@ export const resetPasswordByToken = useCase({
         state: 'inactive' as const,
         usedAt: LocalDateTime.now(),
       }
+    }
+  }
+})
+
+export const createToken = aggregateFactory({
+  aggregateFrom: userAuthentication,
+  aggregateTo: authenticationToken,
+  command: v.record({ id: v.uuid, userId: v.uuid, password: todo }),
+  events: [
+    // TODO: send password reset email
+  ],
+  execute: ({ aggregate, command }) => {
+    if (!comparePassword(command.password, aggregate.password)) {
+      // TODO: think about proper exceptions
+      throw new Error('Password didn\'t match')
+    }
+
+    return {
+      id: command.id,
+      userId: command.userId,
+      token: buildToken()
+    }
+  }
+})
+
+export const refreshToken = useCase({
+  aggregate: authenticationToken,
+  command: v.record({ id: v.uuid, userId: v.uuid, token: todo }),
+  events: [
+    // TODO: send password reset email
+  ],
+  execute: ({ aggregate, command }) => {
+    if (aggregate.token.state !== 'active' ||
+      !comparePassword(command.token, aggregate.token.token)) {
+      // TODO: think about proper exceptions
+      throw new Error('Token didn\'t match')
+    }
+
+    return {
+      id: command.id,
+      userId: command.userId,
+      token: buildToken()
     }
   }
 })

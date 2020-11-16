@@ -1,24 +1,26 @@
 /** Types generated for queries found in "./src/invitations/repository.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
-/** 'WhereInvitationId' parameters type */
+import { LocalDateTime } from 'js-joda';
+
+/** 'whereInvitationId' parameters type */
 export interface IWhereInvitationIdParams {
   id: string | null | void;
 }
 
-/** 'WhereInvitationId' return type */
+/** 'whereInvitationId' return type */
 export interface IWhereInvitationIdResult {
   id: string;
   companyName: string;
   companyId: string;
   inviteeId: string;
   inviterId: string;
-  invitedAt: Date;
-  kind: string | null;
-  answeredAt: Date | null;
+  invitedAt: LocalDateTime;
+  kind: string | null | undefined;
+  answeredAt: LocalDateTime | null | undefined;
 }
 
-/** 'WhereInvitationId' query type */
+/** 'whereInvitationId' query type */
 export interface IWhereInvitationIdQuery {
   params: IWhereInvitationIdParams;
   result: IWhereInvitationIdResult;
@@ -35,31 +37,31 @@ const whereInvitationIdIR: any = {"name":"whereInvitationId","params":[{"name":"
 export const whereInvitationId = new PreparedQuery<IWhereInvitationIdParams,IWhereInvitationIdResult>(whereInvitationIdIR);
 
 
-/** 'EnsureInvitation' parameters type */
+/** 'ensureInvitation' parameters type */
 export interface IEnsureInvitationParams {
   id: string | null | void;
   companyName: string | null | void;
   companyId: string | null | void;
   inviteeId: string | null | void;
   inviterId: string | null | void;
-  invitedAt: Date | null | void;
+  invitedAt: LocalDateTime | null | void;
   kind: string | null | void;
-  answeredAt: Date | null | void;
+  answeredAt: LocalDateTime | null | void;
 }
 
-/** 'EnsureInvitation' return type */
+/** 'ensureInvitation' return type */
 export interface IEnsureInvitationResult {
   id: string;
   companyName: string;
   companyId: string;
   inviteeId: string;
   inviterId: string;
-  invitedAt: Date;
-  kind: string | null;
-  answeredAt: Date | null;
+  invitedAt: LocalDateTime;
+  kind: string | null | undefined;
+  answeredAt: LocalDateTime | null | undefined;
 }
 
-/** 'EnsureInvitation' query type */
+/** 'ensureInvitation' query type */
 export interface IEnsureInvitationQuery {
   params: IEnsureInvitationParams;
   result: IEnsureInvitationResult;
@@ -95,24 +97,24 @@ const ensureInvitationIR: any = {"name":"ensureInvitation","params":[{"name":"id
 export const ensureInvitation = new PreparedQuery<IEnsureInvitationParams,IEnsureInvitationResult>(ensureInvitationIR);
 
 
-/** 'DeleteInvitationById' parameters type */
+/** 'deleteInvitationById' parameters type */
 export interface IDeleteInvitationByIdParams {
   id: string | null | void;
 }
 
-/** 'DeleteInvitationById' return type */
+/** 'deleteInvitationById' return type */
 export interface IDeleteInvitationByIdResult {
   id: string;
   companyName: string;
   companyId: string;
   inviteeId: string;
   inviterId: string;
-  invitedAt: Date;
-  kind: string | null;
-  answeredAt: Date | null;
+  invitedAt: LocalDateTime;
+  kind: string | null | undefined;
+  answeredAt: LocalDateTime | null | undefined;
 }
 
-/** 'DeleteInvitationById' query type */
+/** 'deleteInvitationById' query type */
 export interface IDeleteInvitationByIdQuery {
   params: IDeleteInvitationByIdParams;
   result: IDeleteInvitationByIdResult;
