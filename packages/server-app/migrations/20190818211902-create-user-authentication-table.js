@@ -4,7 +4,7 @@ exports.up = function (db) {
   return db.runSql(`
     create table if not exists
     public.user_authentication (
-      id                          uuid PRIMARY KEY DEFAULT uuid_generate_v1(),
+      id                          uuid PRIMARY KEY,
       user_identifier             text NOT NULL UNIQUE,
       created_at                  timestamp without time zone NOT NULL,
 

@@ -3,23 +3,23 @@ import { PreparedQuery } from '@pgtyped/query';
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
-/** 'ensureCompany' parameters type */
+/** 'EnsureCompany' parameters type */
 export interface IEnsureCompanyParams {
   employees: Array<{
-    id: string,
-    role: string,
-    company_id: string
+    id: string | null | void,
+    role: string | null | void,
+    company_id: string | null | void
   }>;
   id: string | null | void;
   name: string | null | void;
 }
 
-/** 'ensureCompany' return type */
+/** 'EnsureCompany' return type */
 export interface IEnsureCompanyResult {
-  jsonBuildObject: Json;
+  jsonBuildObject: Json | null;
 }
 
-/** 'ensureCompany' query type */
+/** 'EnsureCompany' query type */
 export interface IEnsureCompanyQuery {
   params: IEnsureCompanyParams;
   result: IEnsureCompanyResult;
@@ -57,17 +57,17 @@ const ensureCompanyIR: any = {"name":"ensureCompany","params":[{"name":"employee
 export const ensureCompany = new PreparedQuery<IEnsureCompanyParams,IEnsureCompanyResult>(ensureCompanyIR);
 
 
-/** 'whereId' parameters type */
+/** 'WhereId' parameters type */
 export interface IWhereIdParams {
   id: string | null | void;
 }
 
-/** 'whereId' return type */
+/** 'WhereId' return type */
 export interface IWhereIdResult {
-  jsonBuildObject: Json;
+  jsonBuildObject: Json | null;
 }
 
-/** 'whereId' query type */
+/** 'WhereId' query type */
 export interface IWhereIdQuery {
   params: IWhereIdParams;
   result: IWhereIdResult;
@@ -97,15 +97,15 @@ const whereIdIR: any = {"name":"whereId","params":[{"name":"id","transform":{"ty
 export const whereId = new PreparedQuery<IWhereIdParams,IWhereIdResult>(whereIdIR);
 
 
-/** 'deleteCompanyById' parameters type */
+/** 'DeleteCompanyById' parameters type */
 export interface IDeleteCompanyByIdParams {
   id: string | null | void;
 }
 
-/** 'deleteCompanyById' return type */
+/** 'DeleteCompanyById' return type */
 export type IDeleteCompanyByIdResult = void;
 
-/** 'deleteCompanyById' query type */
+/** 'DeleteCompanyById' query type */
 export interface IDeleteCompanyByIdQuery {
   params: IDeleteCompanyByIdParams;
   result: IDeleteCompanyByIdResult;

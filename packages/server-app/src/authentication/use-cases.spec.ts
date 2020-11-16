@@ -12,7 +12,6 @@ import {
   register,
   requestPasswordReset,
   resetPasswordByToken,
-  confirm
 } from './use-cases'
 import {
   create as createUserAuthenticationFactory,

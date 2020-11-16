@@ -1,164 +1,162 @@
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
-import sql from 'sql-template-tag'
-import { Result as SResult, Err, Ok } from 'space-lift'
 import { LocalDateTime, nativeJs } from 'js-joda'
-import { SendMail } from './emails'
-import { UserAuthentication } from '../domain'
-import { findUserByIdentifier } from './queries'
-import { RepositoryError } from '../errors'
-import { PoolClient } from 'pg'
-
-type TokenErrors =
-| 'TOKEN_NOT_FOUND'
-| 'TOKEN_IS_TO_OLD'
-| 'TOKEN_EXPIRED'
-| 'TOKEN_INVALID'
+import { v } from '@story-teller/shared'
+import { aggregateFactory, useCase } from '../lib/use-case'
 
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 
-export const hashPassword = async (password: string) =>
-  bcrypt.hash(password, SALT_ROUNDS)
+export const hashPassword = (password: string) =>
+  bcrypt.hashSync(password, SALT_ROUNDS)
 
-export const comparePassword = async (password: string, passwordHash: any) =>
-  passwordHash && bcrypt.compare(password, passwordHash)
+export const comparePassword = (password: string, passwordHash: any) =>
+  passwordHash && bcrypt.compareSync(password, passwordHash)
 
-type RegisterErrors =
-| 'User Identifier already taken'
+const todo = v.nonEmptyString
+const userAggregateRoot = v.uuid
 
-type Register = (
-  deps: { client: PoolClient, sendMail: SendMail },
-  params: { userIdentifier: string, password: string}
-) => Promise<SResult<RegisterErrors, undefined>>
+const token = v.union([
+  v.valueObject({
+    state: v.literal('inactive'),
+    usedAt: v.localDateTime,
+  }),
+  v.valueObject({
+    state: v.literal('active'),
+    token: todo,
+    plainToken: v.option(todo),
+    createdAt: v.localDateTime,
+  }),
+])
 
-export const register: Register = async (dependencies, params) => {
-  const passwordHash = await hashPassword(params.password)
-  const confirmationToken = await crypto.randomBytes(50).toString('hex')
-  const hashedConfirmationToken = await hashPassword(confirmationToken)
+const userAuthentication = v.aggregate({
+  id: userAggregateRoot,
+  userIdentifier: todo,
+  createdAt: v.localDateTime,
+  confirmation: token,
+  passwordReset: token,
+  password: todo,
+})
 
-  try {
-    await dependencies.client.query(sql`
-        INSERT into user_authentication (
-          user_identifier,
-          password,
-          created_at,
-          confirmation_token
-        )
-        VALUES (
-          ${params.userIdentifier},
-          ${passwordHash},
-          ${new Date()},
-          ${hashedConfirmationToken}
-        )
-      `)
+const authenticationToken = v.aggregate({
+  id: v.uuid,
+  userId: userAggregateRoot,
+  expiresAt: v.localDateTime,
+  token: todo,
+})
 
-    await dependencies.sendMail({
-      type: 'RegisterEmail',
-      to: params.userIdentifier,
-      language: 'en',
-      payload: { token: confirmationToken }
-    })
+export const register = aggregateFactory({
+  aggregateFrom: v.undefinedCodec,
+  aggregateTo: userAuthentication,
+  command: v.record({
+    id: v.uuid,
+    userIdentifier: todo,
+    password: todo,
+  }),
+  events: [
+    // TODO: send event for email sending
+  ],
+  execute: ({ command }) => {
+    const passwordHash = hashPassword(command.password)
+    const plainConfirmationToken = crypto.randomBytes(50).toString('hex')
+    const confirmationToken = hashPassword(plainConfirmationToken)
+    const now = LocalDateTime.now()
 
-    return Ok(void 0)
-  } catch (e) {
-    if (e.code === '23505') {
-      return Err('User Identifier already taken' as const)
+    return {
+      id: command.id,
+      userIdentifier: command.userIdentifier,
+      password: passwordHash,
+      createdAt: now,
+      confirmation: {
+        state: 'active' as const,
+        token: confirmationToken,
+        plainToken: plainConfirmationToken,
+        createdAt: now,
+      },
+      passwordReset: {
+        state: 'inactive' as const,
+        usedAt: now,
+      },
     }
-    throw e
   }
-}
+})
 
-type Confirm = (
-  deps: { client: PoolClient },
-  params: { userIdentifier: string, token: string }
-) => Promise<SResult<RepositoryError, UserAuthentication>>
-
-export const confirm: Confirm = async (dependencies, params) => {
-  const result = await findUserByIdentifier(dependencies, params)
-  if (!result.isOk()) { return result }
-  const record = result.get()
-
-  if (!(await comparePassword(params.token, record.confirmationToken))) {
-    return Err('NOT_FOUND' as const)
+export const confirmAccount = useCase({
+  aggregate: userAuthentication,
+  command: v.record({ id: v.uuid, token: todo }),
+  events: [],
+  preCondition: ({ aggregate }) => aggregate.confirmation.state === 'active',
+  execute: ({ command, aggregate }) => {
+    if (
+      aggregate.confirmation.state !== 'active' ||
+      !comparePassword(command.token, aggregate.confirmation.token)) {
+      // TODO: think about proper exceptions
+      throw new Error('Tokens didn\'t match')
+    }
+    const now = LocalDateTime.now()
+    return {
+      ...aggregate,
+      confirmation: {
+        state: 'inactive' as const,
+        usedAt: now
+      }
+    }
   }
+})
 
-  await dependencies.client.query(sql`
-      UPDATE user_authentication
-      SET confirmation_token=null,
-          confirmed_at=${new Date()}
-      WHERE user_identifier=${params.userIdentifier}
-    `)
+export const requestPasswordReset = useCase({
+  aggregate: userAuthentication,
+  command: v.record({ id: v.uuid }),
+  events: [
+    // TODO: send password reset email
+  ],
+  execute: ({ aggregate }) => {
+    const plainConfirmationToken = crypto.randomBytes(50).toString('hex')
+    const confirmationToken = hashPassword(plainConfirmationToken)
+    const now = LocalDateTime.now()
 
-  return result
-}
-
-type RequestPasswordReset = (
-  deps: { client: PoolClient, sendMail: SendMail },
-  params: { userIdentifier: string}
-) => Promise<SResult<never, { userIdentifier: string, token: string }>>
-
-export const requestPasswordReset: RequestPasswordReset = async (dependencies, params) => {
-  const token = await crypto.randomBytes(20).toString('hex')
-  const hashedToken = await hashPassword(token)
-
-  const result = await dependencies.client.query(sql`
-      UPDATE user_authentication
-      SET password_reset_token=(${hashedToken}),
-          password_reset_created_at=${new Date()}
-      WHERE user_identifier=${params.userIdentifier}
-      RETURNING *
-    `)
-  const record = result.rows[0]
-  if (record) {
-    await dependencies.sendMail({
-      type: 'PasswordResetRequestEmail',
-      to: record.userIdentifier,
-      language: 'de',
-      payload: { token }
-    })
+    return {
+      ...aggregate,
+      passwordReset: {
+        state: 'active' as const,
+        token: confirmationToken,
+        plainToken: plainConfirmationToken,
+        createdAt: now,
+      }
+    }
   }
+})
 
-  return Ok({ userIdentifier: params.userIdentifier, token })
-}
+export const resetPasswordByToken = useCase({
+  aggregate: userAuthentication,
+  command: v.record({ id: v.uuid, token: todo, password: todo }),
+  events: [
+    // TODO: send password reset email
+  ],
+  execute: ({ aggregate, command }) => {
+    if (
+      aggregate.passwordReset.state !== 'active' ||
+      !comparePassword(command.token, aggregate.passwordReset.token)) {
+      // TODO: think about proper exceptions
+      throw new Error('Tokens didn\'t match')
+    }
 
-type ResetPasswordByToken = (
-  deps: { client: PoolClient },
-  params: { userIdentifier: string, token: string, password: string }
-) => Promise<SResult<TokenErrors, undefined>>
+    const isTokenToOld = LocalDateTime.from(nativeJs(new Date()))
+      .minusDays(1)
+      .plusSeconds(1)
+      .isAfter(aggregate.passwordReset.createdAt)
 
-export const resetPasswordByToken: ResetPasswordByToken = async (dependencies, params) => {
-  const result = await findUserByIdentifier(dependencies, params)
-  if (!result.isOk()) { return Err('TOKEN_NOT_FOUND' as const) }
-  const record = result.get()
+    if (isTokenToOld) {
+      // TODO: think about proper exceptions
+      throw new Error('Tokens is too old')
+    }
 
-  if (!await comparePassword(params.token, record.passwordResetToken)) {
-    return Err('TOKEN_INVALID' as const)
+    return {
+      ...aggregate,
+      password: hashPassword(command.password),
+      passwordReset: {
+        state: 'inactive' as const,
+        usedAt: LocalDateTime.now(),
+      }
+    }
   }
-
-  const isTokenToOld = record.passwordResetCreatedAt && LocalDateTime.from(nativeJs(new Date()))
-    .minusDays(1)
-    .plusSeconds(1)
-    .isAfter(record.passwordResetCreatedAt)
-
-  if (isTokenToOld) {
-    await dependencies.client.query(sql`
-        UPDATE user_authentication
-        SET password_reset_token=null,
-            password_reset_created_at=null
-        WHERE id=${record.id}
-      `)
-    return Err('TOKEN_EXPIRED' as const)
-  }
-
-  const hashedPassword = await hashPassword(params.password)
-  await dependencies.client.query(sql`
-      UPDATE user_authentication
-      SET password=${hashedPassword},
-          password_reset_token=null,
-          password_reset_created_at=null,
-          password_changed_at=${new Date()}
-      WHERE id=${record.id}
-    `)
-
-  return Ok(void 0)
-}
+})

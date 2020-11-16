@@ -1,15 +1,13 @@
 /** Types generated for queries found in "./src/vacation/repository.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
-import { LocalDate } from 'js-joda';
-
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
-/** 'ensureVacation' parameters type */
+/** 'EnsureVacation' parameters type */
 export interface IEnsureVacationParams {
   id: string | null | void;
-  start_date: LocalDate | null | void;
-  end_date: LocalDate | null | void;
+  start_date: Date | null | void;
+  end_date: Date | null | void;
   employee_id: string | null | void;
   state: string | null | void;
   answered_by: string | null | void;
@@ -17,12 +15,12 @@ export interface IEnsureVacationParams {
   company_id: string | null | void;
 }
 
-/** 'ensureVacation' return type */
+/** 'EnsureVacation' return type */
 export interface IEnsureVacationResult {
-  jsonBuildObject: Json;
+  jsonBuildObject: Json | null;
 }
 
-/** 'ensureVacation' query type */
+/** 'EnsureVacation' query type */
 export interface IEnsureVacationQuery {
   params: IEnsureVacationParams;
   result: IEnsureVacationResult;
@@ -60,17 +58,17 @@ const ensureVacationIR: any = {"name":"ensureVacation","params":[{"name":"id","t
 export const ensureVacation = new PreparedQuery<IEnsureVacationParams,IEnsureVacationResult>(ensureVacationIR);
 
 
-/** 'whereIdVacation' parameters type */
+/** 'WhereIdVacation' parameters type */
 export interface IWhereIdVacationParams {
   id: string | null | void;
 }
 
-/** 'whereIdVacation' return type */
+/** 'WhereIdVacation' return type */
 export interface IWhereIdVacationResult {
-  jsonBuildObject: Json;
+  jsonBuildObject: Json | null;
 }
 
-/** 'whereIdVacation' query type */
+/** 'WhereIdVacation' query type */
 export interface IWhereIdVacationQuery {
   params: IWhereIdVacationParams;
   result: IWhereIdVacationResult;
@@ -98,15 +96,15 @@ const whereIdVacationIR: any = {"name":"whereIdVacation","params":[{"name":"id",
 export const whereIdVacation = new PreparedQuery<IWhereIdVacationParams,IWhereIdVacationResult>(whereIdVacationIR);
 
 
-/** 'countVacation' parameters type */
+/** 'CountVacation' parameters type */
 export type ICountVacationParams = void;
 
-/** 'countVacation' return type */
+/** 'CountVacation' return type */
 export interface ICountVacationResult {
-  count: number;
+  count: string | null;
 }
 
-/** 'countVacation' query type */
+/** 'CountVacation' query type */
 export interface ICountVacationQuery {
   params: ICountVacationParams;
   result: ICountVacationResult;
