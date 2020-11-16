@@ -4,7 +4,7 @@ exports.up = function (db) {
   return db.runSql(`
     create table if not exists
     public.invitation (
-      id             uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
+      id             uuid PRIMARY KEY,
       company_name   text NOT NULL,
       company_id     uuid NOT NULL,
       invitee_id     uuid NOT NULL,
