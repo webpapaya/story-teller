@@ -118,7 +118,7 @@ type Precondition<UseCaseConfig extends AnyUseCaseConfigType> =
   (opts: { aggregate: UseCaseConfig['aggregateFrom']['O'] }) => boolean
 
 type ExecuteUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
-  (opts: { aggregate: UseCaseConfig['aggregateTo']['O'], command: UseCaseConfig['command']['O'] }) => UseCaseConfig['aggregateTo']['O']
+  (opts: { aggregate: UseCaseConfig['aggregateFrom']['O'], command: UseCaseConfig['command']['O'] }) => UseCaseConfig['aggregateTo']['O']
 
 export interface AnyConnectedUseCaseConfig<UseCaseConfig extends AnyUseCaseConfigType> {
   useCase: UseCaseType<UseCaseConfig>
