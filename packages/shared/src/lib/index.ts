@@ -32,7 +32,7 @@ export const clampedString = (minLength: number, maxLength: number) => new Valid
 
 export const nonEmptyString = clampedString(1, Number.POSITIVE_INFINITY)
 export const color = matchesRegex('color', /^#[0-9A-F]{6}$/i)
-export const uuid = matchesRegex('uuid', /([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}/i)
+export const uuid = matchesRegex('uuid', /([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}){1}/)
 
 export const date = new Codec<string, LocalDate, unknown>({
   name: 'date',
@@ -115,7 +115,7 @@ export const localDateTime = new Codec<string, LocalDateTime, unknown>({
   },
   encode: (input) => input.toString(),
   build: () => [
-    () => LocalDateTime.ofEpochSecond(randBetween(0, Number.MAX_SAFE_INTEGER), ZoneOffset.UTC)
+    () => LocalDateTime.ofEpochSecond(randBetween(0, 999999), ZoneOffset.UTC)
   ]
 })
 
