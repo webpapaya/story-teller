@@ -1,6 +1,6 @@
 import * as repository from './repository.types'
 import { UserAuthentication, userAuthentication } from './use-cases'
-import { buildRepository } from '../lib/build-repository'
+import { buildRecordRepository, buildRepository } from '../lib/build-repository'
 
 const toDomain = (response: repository.IEnsureUserAuthenticationResult): UserAuthentication => {
   const mappedResponse = {
@@ -34,7 +34,7 @@ const toDomain = (response: repository.IEnsureUserAuthenticationResult): UserAut
   throw new Error('Decoding error')
 }
 
-export const ensure = buildRepository({
+export const ensure = buildRecordRepository({
   dbFunction: repository.ensureUserAuthentication,
   toRepository: (userAuthentication: UserAuthentication) => {
     return {
