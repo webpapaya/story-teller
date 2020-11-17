@@ -40,7 +40,7 @@ const token = v.union([
   }),
 ])
 
-const userAuthentication = v.aggregate({
+export const userAuthentication = v.aggregate({
   id: userAggregateRoot,
   userIdentifier: todo,
   createdAt: v.localDateTime,
@@ -48,12 +48,14 @@ const userAuthentication = v.aggregate({
   passwordReset: token,
   password: todo,
 })
+export type UserAuthentication = typeof userAuthentication['O']
 
 const authenticationToken = v.aggregate({
   id: v.uuid,
   userId: userAggregateRoot,
   token: token,
 })
+export type AuthenticationToken = typeof authenticationToken['O']
 
 export const register = aggregateFactory({
   aggregateFrom: v.undefinedCodec,

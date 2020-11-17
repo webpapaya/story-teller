@@ -9,13 +9,11 @@ exports.up = function (db) {
       created_at                  timestamp without time zone NOT NULL,
 
       confirmation_token          text,
-      confirmed_at                timestamp without time zone,
+      confirmation_timestamp      timestamp without time zone,
 
       password                    text NOT NULL,
       password_reset_token        text UNIQUE,
-      password_reset_created_at   timestamp without time zone,
-
-      password_changed_at         timestamp without time zone
+      password_reset_timestamp    timestamp without time zone
     );
   `)
 }
