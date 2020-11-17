@@ -1,7 +1,7 @@
-import { t } from '../spec-helpers'
-import { ensure, where } from './repository'
-import { userAuthentication } from './use-cases'
-import { buildTestsForEnsureRepository } from '../utils/verify-ensure-method'
+import { t } from '../../spec-helpers'
+import { ensure, where } from './index'
+import { userAuthentication } from '../domain'
+import { buildTestsForEnsureRepository } from '../../utils/verify-ensure-method'
 import { assertThat, equalTo } from 'hamjest'
 
 describe('user authentication repository', () => {

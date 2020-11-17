@@ -3,6 +3,7 @@ import crypto from 'crypto'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import { v } from '@story-teller/shared'
 import { aggregateFactory, useCase } from '../lib/use-case'
+import { userAuthentication, todo, authenticationToken } from './domain'
 
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 
@@ -23,39 +24,6 @@ export const buildToken = (createdAt = LocalDateTime.now()) => {
     createdAt,
   }
 }
-
-const todo = v.nonEmptyString
-const userAggregateRoot = v.uuid
-
-const token = v.union([
-  v.valueObject({
-    state: v.literal('inactive'),
-    usedAt: v.localDateTime,
-  }),
-  v.valueObject({
-    state: v.literal('active'),
-    token: todo,
-    plainToken: v.option(todo),
-    createdAt: v.localDateTime,
-  }),
-])
-
-export const userAuthentication = v.aggregate({
-  id: userAggregateRoot,
-  userIdentifier: todo,
-  createdAt: v.localDateTime,
-  confirmation: token,
-  passwordReset: token,
-  password: todo,
-})
-export type UserAuthentication = typeof userAuthentication['O']
-
-const authenticationToken = v.aggregate({
-  id: v.uuid,
-  userId: userAggregateRoot,
-  token: token,
-})
-export type AuthenticationToken = typeof authenticationToken['O']
 
 export const register = aggregateFactory({
   aggregateFrom: v.undefinedCodec,

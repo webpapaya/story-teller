@@ -1,6 +1,6 @@
 import * as repository from './repository.types'
-import { UserAuthentication, userAuthentication } from './use-cases'
-import { buildRecordRepository, buildRepository } from '../lib/build-repository'
+import { UserAuthentication, userAuthentication } from '../domain'
+import { buildRecordRepository } from '../../lib/build-repository'
 
 const toDomain = (response: repository.IEnsureUserAuthenticationResult): UserAuthentication => {
   const mappedResponse = {
