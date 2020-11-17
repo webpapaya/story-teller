@@ -24,6 +24,12 @@
 // import { withMockedDate, t } from '../spec-helpers'
 // import { Err } from 'space-lift'
 
+import { v4 as uuid } from "uuid"
+import { signIn, signUp } from "./use-cases"
+import jsonwebtoken from "jsonwebtoken"
+import { assertThat, equalTo, hasProperties, hasProperty, throws } from "hamjest"
+
+
 // const sendMail = sinon.spy()
 
 // describe('user/register', () => {
@@ -186,3 +192,69 @@
 //     })
 //   }))
 // })
+
+describe('signIn', () => {
+  const userId = uuid()
+  const userIdentifier = 'userIdentifier'
+  const password = 'password'
+
+  const principal = {
+    id: userId,
+    employedIn: []
+  }
+
+  const [userAuthentication] = signUp.run({
+    command: { id: userId, userIdentifier, password },
+    aggregate: undefined
+  })
+
+  describe('WHEN passwords match', () => {
+    it('returns signed JWT token', () => {
+      const [{ jwtToken, }] = signIn.run({
+        command: { id: userId, userIdentifier, password },
+        aggregate: {
+          principal: {
+            id: userId,
+            employedIn: []
+          },
+          userAuthentication,
+        }
+      })
+
+      assertThat(jsonwebtoken.decode(jwtToken),
+        hasProperties(principal))
+    })
+
+    it('returns refreshToken', () => {
+      const [{ refreshToken, }] = signIn.run({
+        command: { id: userId, userIdentifier, password },
+        aggregate: {
+          principal: {
+            id: userId,
+            employedIn: []
+          },
+          userAuthentication,
+        }
+      })
+
+      assertThat(refreshToken, hasProperty('token.state', 'active'))
+    })
+  })
+
+  describe('WHEN passwords do NOT match', () => {
+    it('throws error', () => {
+      assertThat(() => {
+        signIn.run({
+          command: { id: userId, userIdentifier, password: 'wrong password' },
+          aggregate: {
+            principal: {
+              id: userId,
+              employedIn: []
+            },
+            userAuthentication,
+          }
+        })
+      }, throws())
+    })
+  })
+})

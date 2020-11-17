@@ -32,3 +32,13 @@ export const authenticationToken = v.aggregate({
   token: token,
 })
 export type AuthenticationToken = typeof authenticationToken['O']
+
+export const principal = v.record({
+  id: v.uuid,
+  employedIn: v.array(v.record({
+    companyId: v.uuid,
+    role: v.union([v.literal('user'), v.literal('manager')])
+  }))
+})
+
+export type Principal = typeof principal['O']

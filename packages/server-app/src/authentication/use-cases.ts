@@ -3,9 +3,20 @@ import crypto from 'crypto'
 import { LocalDateTime, nativeJs } from 'js-joda'
 import { v } from '@story-teller/shared'
 import { aggregateFactory, useCase } from '../lib/use-case'
-import { userAuthentication, todo, authenticationToken } from './domain'
+import {
+  userAuthentication,
+  todo,
+  authenticationToken,
+  principal
+} from './domain'
+import jsonwebtoken from "jsonwebtoken"
+import { v4 as uuid } from 'uuid'
+
 
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
+const SECRET_KEY_BASE = process.env.SECRET_KEY_BASE as string
+const JWT_EXPIRATION = process.env.JWT_EXPIRATION as string
+
 
 export const hashPassword = (password: string) =>
   bcrypt.hashSync(password, SALT_ROUNDS)
@@ -13,9 +24,14 @@ export const hashPassword = (password: string) =>
 export const comparePassword = (password: string, passwordHash: any) =>
   passwordHash && bcrypt.compareSync(password, passwordHash)
 
-export const buildToken = (createdAt = LocalDateTime.now()) => {
+export const buildTokenPair = () => {
   const plainToken = crypto.randomBytes(50).toString('hex')
   const token = hashPassword(plainToken)
+  return { plainToken, token }
+}
+
+export const buildToken = (createdAt = LocalDateTime.now()) => {
+  const { plainToken, token } = buildTokenPair()
 
   return {
     state: 'active' as const,
@@ -25,7 +41,7 @@ export const buildToken = (createdAt = LocalDateTime.now()) => {
   }
 }
 
-export const register = aggregateFactory({
+export const signUp = aggregateFactory({
   aggregateFrom: v.undefinedCodec,
   aggregateTo: userAuthentication,
   command: v.record({
@@ -53,6 +69,41 @@ export const register = aggregateFactory({
     }
   }
 })
+
+export const signIn = aggregateFactory({
+  aggregateFrom: v.record({
+    principal: principal,
+    userAuthentication: userAuthentication,
+  }),
+  aggregateTo: v.record({
+    jwtToken: v.string,
+    refreshToken: authenticationToken
+  }),
+  command: v.record({
+    id: v.uuid,
+    userIdentifier: todo,
+    password: todo,
+  }),
+  events: [],
+  execute: ({ command, aggregate }) => {
+    if (!comparePassword(command.password, aggregate.userAuthentication.password)) {
+      // TODO: think about proper exceptions
+      throw new Error('Password didn\'t match')
+    }
+
+    return {
+      jwtToken: jsonwebtoken.sign(aggregate.principal, SECRET_KEY_BASE, {
+        expiresIn: JWT_EXPIRATION
+      }),
+      refreshToken: {
+        id: uuid(),
+        userId: aggregate.userAuthentication.id,
+        token: buildToken()
+      }
+    }
+  }
+})
+
 
 export const confirmAccount = useCase({
   aggregate: userAuthentication,
