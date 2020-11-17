@@ -33,6 +33,7 @@ select json_build_object(
     'startDate', start_date,
     'endDate', end_date,
     'employeeId', employee_id,
+    'companyId', company_id,
     'request', json_build_object(
       'state', state,
       'answeredBy', answered_by,

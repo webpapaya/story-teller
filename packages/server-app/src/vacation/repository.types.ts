@@ -76,7 +76,7 @@ export interface IWhereIdVacationQuery {
   result: IWhereIdVacationResult;
 }
 
-const whereIdVacationIR: any = {"name":"whereIdVacation","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1090,"b":1091,"line":42,"col":12}]}}],"usedParamSet":{"id":true},"statement":{"body":"select json_build_object(\n    'id', id,\n    'startDate', start_date,\n    'endDate', end_date,\n    'employeeId', employee_id,\n    'request', json_build_object(\n      'state', state,\n      'answeredBy', answered_by,\n      'reason', reason\n    ))\nfrom vacation\nwhere id = :id","loc":{"a":820,"b":1091,"line":31,"col":0}}};
+const whereIdVacationIR: any = {"name":"whereIdVacation","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1119,"b":1120,"line":43,"col":12}]}}],"usedParamSet":{"id":true},"statement":{"body":"select json_build_object(\n    'id', id,\n    'startDate', start_date,\n    'endDate', end_date,\n    'employeeId', employee_id,\n    'companyId', company_id,\n    'request', json_build_object(\n      'state', state,\n      'answeredBy', answered_by,\n      'reason', reason\n    ))\nfrom vacation\nwhere id = :id","loc":{"a":820,"b":1120,"line":31,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -86,6 +86,7 @@ const whereIdVacationIR: any = {"name":"whereIdVacation","params":[{"name":"id",
  *     'startDate', start_date,
  *     'endDate', end_date,
  *     'employeeId', employee_id,
+ *     'companyId', company_id,
  *     'request', json_build_object(
  *       'state', state,
  *       'answeredBy', answered_by,
@@ -112,7 +113,7 @@ export interface ICountVacationQuery {
   result: ICountVacationResult;
 }
 
-const countVacationIR: any = {"name":"countVacation","params":[],"usedParamSet":{},"statement":{"body":"select count(*)\nfrom vacation","loc":{"a":1124,"b":1152,"line":48,"col":0}}};
+const countVacationIR: any = {"name":"countVacation","params":[],"usedParamSet":{},"statement":{"body":"select count(*)\nfrom vacation","loc":{"a":1153,"b":1181,"line":49,"col":0}}};
 
 /**
  * Query generated from SQL:
