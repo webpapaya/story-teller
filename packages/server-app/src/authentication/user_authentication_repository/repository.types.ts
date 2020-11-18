@@ -1,4 +1,4 @@
-/** Types generated for queries found in "./src/authentication/repository.sql" */
+/** Types generated for queries found in "./src/authentication/user_authentication_repository/repository.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 import { LocalDateTime } from 'js-joda';

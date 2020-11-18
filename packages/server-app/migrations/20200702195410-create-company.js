@@ -12,6 +12,7 @@ exports.up = function (db) {
     public.company_employee (
       id             uuid PRIMARY KEY,
       role           text NOT NULL,
+      user_id        uuid NOT NULL,
       company_id     uuid REFERENCES public.company(id) ON DELETE CASCADE
     );
   `)

@@ -98,7 +98,8 @@ export const signIn = aggregateFactory({
       refreshToken: {
         id: uuid(),
         userId: aggregate.userAuthentication.id,
-        token: buildToken()
+        token: buildToken(),
+        expiresOn: LocalDateTime.now().plusDays(30)
       }
     }
   }
@@ -177,26 +178,6 @@ export const resetPasswordByToken = useCase({
   }
 })
 
-export const createToken = aggregateFactory({
-  aggregateFrom: userAuthentication,
-  aggregateTo: authenticationToken,
-  command: v.record({ id: v.uuid, userId: v.uuid, password: todo }),
-  events: [
-    // TODO: send password reset email
-  ],
-  execute: ({ aggregate, command }) => {
-    if (!comparePassword(command.password, aggregate.password)) {
-      // TODO: think about proper exceptions
-      throw new Error('Password didn\'t match')
-    }
-
-    return {
-      id: command.id,
-      userId: command.userId,
-      token: buildToken()
-    }
-  }
-})
 
 export const refreshToken = useCase({
   aggregate: authenticationToken,
@@ -214,7 +195,8 @@ export const refreshToken = useCase({
     return {
       id: command.id,
       userId: command.userId,
-      token: buildToken()
+      token: buildToken(),
+      expiresOn: LocalDateTime.now().plusDays(30)
     }
   }
 })

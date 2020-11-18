@@ -1,4 +1,5 @@
 import { v } from "@story-teller/shared"
+import { LocalDateTime } from "js-joda"
 
 export const todo = v.nonEmptyString
 export const userAggregateRoot = v.uuid
@@ -30,6 +31,7 @@ export const authenticationToken = v.aggregate({
   id: v.uuid,
   userId: userAggregateRoot,
   token: token,
+  expiresOn: v.localDateTime,
 })
 export type AuthenticationToken = typeof authenticationToken['O']
 
