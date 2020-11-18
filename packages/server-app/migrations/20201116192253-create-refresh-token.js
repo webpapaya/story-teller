@@ -8,7 +8,7 @@ function sql ([literals]) {
 exports.up = function (db) {
   return db.runSql(sql`
     CREATE TABLE refresh_token (
-        id uuid NOT NULL,
+        id uuid NOT NULL PRIMARY KEY,
         user_id uuid NOT NULL,
         token text NOT NULL,
         created_at timestamp without time zone NOT NULL,
