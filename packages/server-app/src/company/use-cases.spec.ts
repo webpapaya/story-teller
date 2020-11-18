@@ -37,7 +37,11 @@ describe('company', () => {
         }
         assertThat(create.run({ aggregate: undefined, command }),
           hasAggregate(hasProperties({
-            employees: [{ id: command.principalId, role: 'manager' }]
+            employees: [{
+              id: command.principalId,
+              userId: command.principalId,
+              role: 'manager'
+            }]
           })))
       })
     })
@@ -59,16 +63,16 @@ describe('company', () => {
         aggregate: company,
         command: { companyId: company.id, personId }
       }), hasAggregate(hasProperties({
-        employees: [{ id: personId, role: 'employee' }]
+        employees: [{ id: personId, userId: personId, role: 'employee' }]
       })))
     })
 
     it('WHEN employee is already present in company, does not add employee twice', () => {
       const personId = uuid()
       assertThat(addEmployee.run({
-        aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
+        aggregate: { ...company, employees: [{ id: personId, userId: personId, role: 'manager' }] },
         command: { companyId: company.id, personId }
-      }), hasAggregate(hasProperty('employees.0', { id: personId, role: 'manager' })))
+      }), hasAggregate(hasProperty('employees.0', { id: personId, userId: personId, role: 'manager' })))
     })
   })
 
@@ -86,7 +90,7 @@ describe('company', () => {
       const personId = uuid()
 
       assertThat(removeEmployee.run({
-        aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
+        aggregate: { ...company, employees: [{ id: personId, userId: personId, role: 'manager' }] },
         command: { companyId: company.id, personId }
       }), hasAggregate(hasProperties({
         employees: []
@@ -107,7 +111,7 @@ describe('company', () => {
       const personId = uuid()
 
       assertThat(setEmployeeRole.run({
-        aggregate: { ...company, employees: [{ id: personId, role: 'manager' }] },
+        aggregate: { ...company, employees: [{ id: personId, userId: personId, role: 'manager' }] },
         command: { companyId: company.id, personId, role: 'employee' }
       }), hasAggregate(hasProperty('employees.0.role', 'employee')))
     })

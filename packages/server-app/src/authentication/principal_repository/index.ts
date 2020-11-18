@@ -3,7 +3,13 @@ import { principal, Principal } from '../domain'
 import { buildRecordRepository } from '../../lib/build-repository'
 
 const toDomain = (response: repository.IWherePrincipalResult): Principal => {
-  const mappedResponse = response.jsonBuildObject
+  const mappedResponse = {
+    // @ts-ignore
+    id: response.jsonBuildObject.id,
+    // @ts-ignore
+    employedIn: response.jsonBuildObject.employedIn || []
+  }
+
   if (principal.is(mappedResponse)) { return mappedResponse }
   throw new Error('Decoding error')
 }

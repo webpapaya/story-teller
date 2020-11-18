@@ -8,7 +8,7 @@ describe('invitation repository', () => {
   const company: Company = {
     id: uuid(),
     name: 'Some company',
-    employees: [{ id: uuid(), role: 'employee' }]
+    employees: [{ id: uuid(), userId: uuid(), role: 'employee' }]
   }
 
   describe('whereId', () => {

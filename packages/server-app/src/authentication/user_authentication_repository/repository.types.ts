@@ -18,7 +18,6 @@ export interface IWhereUserAuthenticationResult {
   password: string;
   passwordResetToken: string | null | undefined;
   passwordResetTimestamp: LocalDateTime | null | undefined;
-  passwordChangedAt: LocalDateTime | null | undefined;
 }
 
 /** 'whereUserAuthentication' query type */
@@ -60,7 +59,6 @@ export interface IEnsureUserAuthenticationResult {
   password: string;
   passwordResetToken: string | null | undefined;
   passwordResetTimestamp: LocalDateTime | null | undefined;
-  passwordChangedAt: LocalDateTime | null | undefined;
 }
 
 /** 'ensureUserAuthentication' query type */

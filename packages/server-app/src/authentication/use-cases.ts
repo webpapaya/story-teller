@@ -12,11 +12,9 @@ import {
 import jsonwebtoken from "jsonwebtoken"
 import { v4 as uuid } from 'uuid'
 
-
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 const SECRET_KEY_BASE = process.env.SECRET_KEY_BASE as string
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION as string
-
 
 export const hashPassword = (password: string) =>
   bcrypt.hashSync(password, SALT_ROUNDS)

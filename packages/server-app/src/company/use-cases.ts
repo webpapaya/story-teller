@@ -8,6 +8,7 @@ const employeeRoles = v.union([v.literal('manager'), v.literal('employee')])
 
 const employeeEntity = v.entity({
   id: v.uuid,
+  userId: v.uuid,
   role: employeeRoles
 })
 export type Employee = typeof employeeEntity['O']
@@ -60,7 +61,11 @@ export const create = aggregateFactory({
     return {
       id: command.id,
       name: command.name,
-      employees: [{ id: command.principalId, role: 'manager' as const }]
+      employees: [{
+        id: command.principalId,
+        userId: command.principalId,
+        role: 'manager' as const
+      }]
     }
   }
 })
@@ -78,8 +83,9 @@ export const addEmployee = useCase({
   events: [],
   execute: ({ aggregate, command: action }) => ({
     ...aggregate,
-    employees: uniqueBy('id', [{
+    employees: uniqueBy('userId', [{
       id: action.personId,
+      userId: action.personId,
       role: 'employee' as const
     }, ...aggregate.employees])
   })

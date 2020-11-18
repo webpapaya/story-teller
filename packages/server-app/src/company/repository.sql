@@ -1,6 +1,6 @@
 /*
   @name ensureCompany
-  @param employees -> ((id, role, company_id)...)
+  @param employees -> ((id, role, userId, company_id)...)
 */
 WITH company_insert as (
   INSERT INTO company (id, name)
@@ -9,10 +9,11 @@ WITH company_insert as (
   DO UPDATE SET name = EXCLUDED.name
   RETURNING *
 ), employee_insert as (
-  INSERT INTO company_employee (id, role, company_id)
+  INSERT INTO company_employee (id, role, user_id, company_id)
   VALUES :employees
     ON CONFLICT (id)
     DO UPDATE SET role = EXCLUDED.role,
+                  user_id = EXCLUDED.user_id,
                   company_id = EXCLUDED.company_id
     RETURNING *
 ), remove as (
@@ -21,7 +22,11 @@ WITH company_insert as (
 ) select json_build_object(
   'id', id,
   'name', name,
-  'employees', (select json_agg(json_build_object('id', id, 'role', role)) from employee_insert)
+  'employees', (select json_agg(json_build_object(
+    'id', id,
+    'userId', user_id,
+    'role', role
+  )) from employee_insert)
 )
 from company_insert;
 
@@ -35,6 +40,7 @@ select json_build_object(
     select json_agg(
       json_build_object(
         'id', company_employee.id,
+        'userId', company_employee.user_id,
         'role', company_employee.role
       )
     )
