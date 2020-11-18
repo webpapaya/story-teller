@@ -6,6 +6,7 @@ import cors from 'cors'
 import * as vacation from './vacation/use-cases-via-http'
 import * as invitation from './invitations/use-cases-via-http'
 import * as company from './company/use-cases-via-http'
+import * as authentication from './authentication/use-cases-via-http'
 
 const app = express()
 const port = process.env.API_PORT
@@ -20,5 +21,6 @@ app.use(cors({
 vacation.initialize(app)
 invitation.initialize(app)
 company.initialize(app)
+authentication.initialize(app)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

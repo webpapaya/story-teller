@@ -210,7 +210,7 @@ describe('signIn', () => {
   describe('WHEN passwords match', () => {
     it('returns signed JWT token', () => {
       const [{ jwtToken }] = signIn.run({
-        command: { id: userId, userIdentifier, password },
+        command: { userIdentifier, password },
         aggregate: {
           principal: {
             id: userId,
@@ -226,7 +226,7 @@ describe('signIn', () => {
 
     it('returns refreshToken', () => {
       const [{ refreshToken }] = signIn.run({
-        command: { id: userId, userIdentifier, password },
+        command: { userIdentifier, password },
         aggregate: {
           principal: {
             id: userId,
@@ -244,7 +244,7 @@ describe('signIn', () => {
     it('throws error', () => {
       assertThat(() => {
         signIn.run({
-          command: { id: userId, userIdentifier, password: 'wrong password' },
+          command: { userIdentifier, password: 'wrong password' },
           aggregate: {
             principal: {
               id: userId,

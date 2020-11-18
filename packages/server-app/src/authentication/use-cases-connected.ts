@@ -5,12 +5,14 @@ import * as principalRepo from './principal_repository'
 import { connectUseCase } from '../lib/use-case'
 
 export const signIn = connectUseCase({
-  mapCommand: (cmd) => ({ id: cmd.id }),
-  fetchAggregate: async (command: { id: string }, clients) => {
-    const [userAuthentication, principal] = await Promise.all([
-      userAuthenticationRepo.where(command, clients),
-      principalRepo.where(command, clients)
-    ])
+  mapCommand: (cmd) => ({ userIdentifier: cmd.userIdentifier }),
+  fetchAggregate: async (command: { userIdentifier: string }, clients) => {
+    const userAuthentication = await userAuthenticationRepo
+      .whereByUserIdentifier(command, clients)
+
+    const principal = await principalRepo
+      .where({ id: userAuthentication.id }, clients)
+
     return { userAuthentication, principal }
   },
   ensureAggregate: async (aggregate, clients) => {

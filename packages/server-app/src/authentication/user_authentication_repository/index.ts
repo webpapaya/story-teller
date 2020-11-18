@@ -68,3 +68,9 @@ export const where = buildRecordRepository({
   toRepository: (params: { id: string }) => ({ id: params.id }),
   toDomain
 })
+
+export const whereByUserIdentifier = buildRecordRepository({
+  dbFunction: repository.whereUserAuthenticationByUserIdentifier,
+  toRepository: (params: { userIdentifier: string }) => ({ user_identifier: params.userIdentifier }),
+  toDomain
+})

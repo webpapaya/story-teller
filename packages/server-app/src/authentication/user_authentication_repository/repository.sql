@@ -1,5 +1,11 @@
 /* @name whereUserAuthentication */
-SELECT * FROM user_authentication WHERE id = :id;
+SELECT * FROM user_authentication
+WHERE id = :id;
+
+/* @name whereUserAuthenticationByUserIdentifier */
+SELECT * FROM user_authentication
+WHERE :user_identifier = :user_identifier;
+
 
 /* @name ensureUserAuthentication */
 INSERT INTO user_authentication (

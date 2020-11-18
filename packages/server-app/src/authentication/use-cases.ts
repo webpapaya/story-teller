@@ -78,7 +78,6 @@ export const signIn = aggregateFactory({
     refreshToken: authenticationToken
   }),
   command: v.record({
-    id: v.uuid,
     userIdentifier: todo,
     password: todo
   }),
