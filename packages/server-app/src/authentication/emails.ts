@@ -1,4 +1,4 @@
-type PasswordResetRequestEmail = {
+interface PasswordResetRequestEmail {
   type: 'PasswordResetRequestEmail'
   language: 'de' | 'en'
   to: string
@@ -7,7 +7,7 @@ type PasswordResetRequestEmail = {
   }
 }
 
-type RegisterEmail = {
+interface RegisterEmail {
   type: 'RegisterEmail'
   language: 'de' | 'en'
   to: string

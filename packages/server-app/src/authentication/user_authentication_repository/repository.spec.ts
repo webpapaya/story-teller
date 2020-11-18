@@ -13,7 +13,7 @@ describe('user authentication repository', () => {
     it('finds previously stored record', t(async (clients) => {
       const record = userAuthentication.build()[0]()
       await ensure(record, clients)
-      const result = await where({id: record.id}, clients)
+      const result = await where({ id: record.id }, clients)
       assertThat(JSON.parse(JSON.stringify(result)),
         equalTo(JSON.parse(JSON.stringify(record))))
     }))

@@ -7,7 +7,7 @@ import { ExternalDependencies } from '../lib/use-case'
 export const buildTestsForEnsureRepository = async <Codec extends AnyCodec>(
   codec: Codec,
   dbTable: string,
-  ensure: (domainObject: Codec['O'], deps: ExternalDependencies) => Promise<any>,
+  ensure: (domainObject: Codec['O'], deps: ExternalDependencies) => Promise<any>
 ): Promise<void> => {
   it('WHEN record does not exist, creates a new record', t(async (clients) => {
     const promises = codec.build().map((factory) => async () => {

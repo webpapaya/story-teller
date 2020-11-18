@@ -24,11 +24,10 @@
 // import { withMockedDate, t } from '../spec-helpers'
 // import { Err } from 'space-lift'
 
-import { v4 as uuid } from "uuid"
-import { signIn, signUp } from "./use-cases"
-import jsonwebtoken from "jsonwebtoken"
-import { assertThat, equalTo, hasProperties, hasProperty, throws } from "hamjest"
-
+import { v4 as uuid } from 'uuid'
+import { signIn, signUp } from './use-cases'
+import jsonwebtoken from 'jsonwebtoken'
+import { assertThat, hasProperties, hasProperty, throws } from 'hamjest'
 
 // const sendMail = sinon.spy()
 
@@ -210,14 +209,14 @@ describe('signIn', () => {
 
   describe('WHEN passwords match', () => {
     it('returns signed JWT token', () => {
-      const [{ jwtToken, }] = signIn.run({
+      const [{ jwtToken }] = signIn.run({
         command: { id: userId, userIdentifier, password },
         aggregate: {
           principal: {
             id: userId,
             employedIn: []
           },
-          userAuthentication,
+          userAuthentication
         }
       })
 
@@ -226,14 +225,14 @@ describe('signIn', () => {
     })
 
     it('returns refreshToken', () => {
-      const [{ refreshToken, }] = signIn.run({
+      const [{ refreshToken }] = signIn.run({
         command: { id: userId, userIdentifier, password },
         aggregate: {
           principal: {
             id: userId,
             employedIn: []
           },
-          userAuthentication,
+          userAuthentication
         }
       })
 
@@ -251,7 +250,7 @@ describe('signIn', () => {
               id: userId,
               employedIn: []
             },
-            userAuthentication,
+            userAuthentication
           }
         })
       }, throws())

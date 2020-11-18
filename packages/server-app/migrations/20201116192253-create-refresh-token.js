@@ -1,9 +1,8 @@
 'use strict'
 
-
 // a sample tag function
-function sql([literals]) {
-    return literals;
+function sql ([literals]) {
+  return literals
 }
 
 exports.up = function (db) {

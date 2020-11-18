@@ -13,7 +13,7 @@ const toDomain = (response: repository.IEnsureUserAuthenticationResult): UserAut
         state: 'active' as const,
         token: response.confirmationToken,
         createdAt: response.confirmationTimestamp,
-        plainToken: undefined,
+        plainToken: undefined
       } : {
         state: 'inactive',
         usedAt: response.confirmationTimestamp
@@ -23,11 +23,11 @@ const toDomain = (response: repository.IEnsureUserAuthenticationResult): UserAut
         state: 'active' as const,
         token: response.passwordResetToken,
         createdAt: response.passwordResetTimestamp,
-        plainToken: undefined,
+        plainToken: undefined
       } : {
         state: 'inactive',
         usedAt: response.passwordResetTimestamp
-      },
+      }
   }
 
   if (userAuthentication.is(mappedResponse)) { return mappedResponse }
@@ -68,4 +68,3 @@ export const where = buildRecordRepository({
   toRepository: (params: { id: string }) => ({ id: params.id }),
   toDomain
 })
-

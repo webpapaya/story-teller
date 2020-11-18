@@ -1,5 +1,4 @@
-import { v } from "@story-teller/shared"
-import { LocalDateTime } from "js-joda"
+import { v } from '@story-teller/shared'
 
 export const todo = v.nonEmptyString
 export const userAggregateRoot = v.uuid
@@ -7,14 +6,14 @@ export const userAggregateRoot = v.uuid
 const token = v.union([
   v.valueObject({
     state: v.literal('inactive'),
-    usedAt: v.localDateTime,
+    usedAt: v.localDateTime
   }),
   v.valueObject({
     state: v.literal('active'),
     token: todo,
     plainToken: v.option(todo),
-    createdAt: v.localDateTime,
-  }),
+    createdAt: v.localDateTime
+  })
 ])
 
 export const userAuthentication = v.aggregate({
@@ -23,7 +22,7 @@ export const userAuthentication = v.aggregate({
   createdAt: v.localDateTime,
   confirmation: token,
   passwordReset: token,
-  password: todo,
+  password: todo
 })
 export type UserAuthentication = typeof userAuthentication['O']
 
@@ -31,7 +30,7 @@ export const authenticationToken = v.aggregate({
   id: v.uuid,
   userId: userAggregateRoot,
   token: token,
-  expiresOn: v.localDateTime,
+  expiresOn: v.localDateTime
 })
 export type AuthenticationToken = typeof authenticationToken['O']
 

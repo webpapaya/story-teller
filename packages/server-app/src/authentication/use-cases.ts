@@ -9,7 +9,7 @@ import {
   authenticationToken,
   principal
 } from './domain'
-import jsonwebtoken from "jsonwebtoken"
+import jsonwebtoken from 'jsonwebtoken'
 import { v4 as uuid } from 'uuid'
 
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
@@ -35,7 +35,7 @@ export const buildToken = (createdAt = LocalDateTime.now()) => {
     state: 'active' as const,
     plainToken,
     token,
-    createdAt,
+    createdAt
   }
 }
 
@@ -45,7 +45,7 @@ export const signUp = aggregateFactory({
   command: v.record({
     id: v.uuid,
     userIdentifier: todo,
-    password: todo,
+    password: todo
   }),
   events: [
     // TODO: send event for email sending
@@ -62,8 +62,8 @@ export const signUp = aggregateFactory({
       confirmation: buildToken(now),
       passwordReset: {
         state: 'inactive' as const,
-        usedAt: now,
-      },
+        usedAt: now
+      }
     }
   }
 })
@@ -71,7 +71,7 @@ export const signUp = aggregateFactory({
 export const signIn = aggregateFactory({
   aggregateFrom: v.record({
     principal: principal,
-    userAuthentication: userAuthentication,
+    userAuthentication: userAuthentication
   }),
   aggregateTo: v.record({
     jwtToken: v.string,
@@ -80,7 +80,7 @@ export const signIn = aggregateFactory({
   command: v.record({
     id: v.uuid,
     userIdentifier: todo,
-    password: todo,
+    password: todo
   }),
   events: [],
   execute: ({ command, aggregate }) => {
@@ -102,7 +102,6 @@ export const signIn = aggregateFactory({
     }
   }
 })
-
 
 export const confirmAccount = useCase({
   aggregate: userAuthentication,
@@ -170,12 +169,11 @@ export const resetPasswordByToken = useCase({
       password: hashPassword(command.password),
       passwordReset: {
         state: 'inactive' as const,
-        usedAt: LocalDateTime.now(),
+        usedAt: LocalDateTime.now()
       }
     }
   }
 })
-
 
 export const refreshToken = useCase({
   aggregate: authenticationToken,

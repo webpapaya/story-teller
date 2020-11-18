@@ -4,9 +4,9 @@ import { buildRecordRepository } from '../../lib/build-repository'
 
 const toDomain = (response: repository.IWherePrincipalResult): Principal => {
   const mappedResponse = {
-    // @ts-ignore
+    // @ts-expect-error
     id: response.jsonBuildObject.id,
-    // @ts-ignore
+    // @ts-expect-error
     employedIn: response.jsonBuildObject.employedIn || []
   }
 
@@ -19,4 +19,3 @@ export const where = buildRecordRepository({
   toRepository: (params: { id: string }) => ({ id: params.id }),
   toDomain
 })
-

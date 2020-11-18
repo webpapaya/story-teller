@@ -15,7 +15,7 @@ const toDomain = (response: repository.IEnsureRefreshTokenResult): Authenticatio
       createdAt: response.createdAt,
       plainToken: undefined
     },
-    expiresOn: response.expiresOn,
+    expiresOn: response.expiresOn
   }
 
   if (authenticationToken.is(mappedResponse)) { return mappedResponse }
@@ -32,7 +32,7 @@ const toRepository = (refreshToken: AuthenticationToken) => {
     user_id: refreshToken.userId,
     token: refreshToken.token.token,
     created_at: refreshToken.token.createdAt,
-    expires_on: refreshToken.expiresOn,
+    expires_on: refreshToken.expiresOn
   }
 }
 
@@ -50,4 +50,3 @@ export const where = buildRecordRepository({
   }),
   toDomain
 })
-
