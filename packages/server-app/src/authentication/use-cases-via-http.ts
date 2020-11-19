@@ -4,16 +4,22 @@ import { IRouter } from 'express'
 import { v } from '@story-teller/shared'
 
 export const initialize = (app: IRouter) => {
-  exposeUseCaseViaHTTP({
-    app,
-    actionName: 'sign-in',
-    aggregateName: 'authentication',
-    useCase: useCases.signIn,
-    method: 'post',
-    principal: v.undefinedCodec,
-    authenticateBefore: () => true,
-    mapToPrincipal: () => undefined,
-    mapToCommand: ({ request }) => request.body
+  app.post('/authentication/sign-in', async (req, res) => {
+    const signInResponse = await useCases.signIn.execute(req.body)
+    if (signInResponse.refreshToken.token.state === 'active') {
+      res.cookie('refreshToken', signInResponse.refreshToken.token.plainToken, {
+        // TODO: enable expiration
+        // expires: new Date(signInResponse.refreshToken.expiresOn.toString()),
+        httpOnly: true,
+        signed: true
+      })
+    }
+
+    res.send({
+      payload: {
+        jwtToken: signInResponse.jwtToken
+      }
+    })
   })
 
   exposeUseCaseViaHTTP({

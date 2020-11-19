@@ -1,14 +1,15 @@
 import * as useCases from './use-cases-connected'
 import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter } from 'express'
-import { mapToPrincipal, principal } from '../principal'
+import { mapToPrincipal } from '../authentication/map-to-principal'
+import { principal } from '../authentication/domain'
 
 export const initialize = (app: IRouter) => {
   exposeUseCaseViaHTTP({
     app,
     actionName: '',
     aggregateName: 'company',
-    useCase: useCases.addEmployee,
+    useCase: useCases.create,
     method: 'post',
     principal,
     authenticateBefore: () => true,

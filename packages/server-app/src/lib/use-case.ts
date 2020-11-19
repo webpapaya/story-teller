@@ -112,7 +112,7 @@ type ExecutableConnectedUseCase<UseCaseConfig extends AnyUseCaseConfigType> = (
     beforeUseCase?: BeforeUseCase<UseCaseConfig>
     afterUseCase?: BeforeUseCase<UseCaseConfig>
   }
-) => Promise<[UseCaseConfig['aggregateTo']['O'], any[]]>
+) => Promise<UseCaseConfig['aggregateTo']['O']>
 
 type Precondition<UseCaseConfig extends AnyUseCaseConfigType> =
   (opts: { aggregate: UseCaseConfig['aggregateFrom']['O'] }) => boolean

@@ -1,16 +1,9 @@
 import * as useCases from './use-cases-connected'
 import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
-import { IRouter, Request } from 'express'
-import { Principal, principal } from '../principal'
+import { IRouter } from 'express'
+import { mapToPrincipal } from '../authentication/map-to-principal'
+import { principal, Principal } from '../authentication/domain'
 import { Vacation } from './use-cases'
-
-const mapToPrincipal = (request: Request) => {
-  const decoded = principal.decode(JSON.parse(request.headers.authorization ?? '{}'))
-  if (decoded.isOk()) {
-    return decoded.get()
-  }
-  throw new Error('unauthorized')
-}
 
 export const initialize = (app: IRouter) => {
   const isEmployeeInCompany = (payload: {principal?: Principal, aggregate: Vacation }) => {
