@@ -27,7 +27,7 @@
 import { v4 as uuid } from 'uuid'
 import { signIn, signUp } from './use-cases'
 import jsonwebtoken from 'jsonwebtoken'
-import { assertThat, hasProperties, hasProperty, throws } from 'hamjest'
+import { anyOf, assertThat, contains, hasProperties, hasProperty, throws } from 'hamjest'
 
 // const sendMail = sinon.spy()
 
@@ -191,6 +191,40 @@ import { assertThat, hasProperties, hasProperty, throws } from 'hamjest'
 //     })
 //   }))
 // })
+
+describe('signUp', () => {
+  it('returns a new userAuthentication', () => {
+    const command = {
+      id: uuid(),
+      userIdentifier: 'irrelevant',
+      password: 'password'
+    }
+    const [userAuthentication] = signUp.run({
+      command,
+      aggregate: undefined
+    })
+
+    assertThat(userAuthentication, hasProperties({
+      id: command.id,
+      userIdentifier: command.userIdentifier
+    }))
+  })
+
+  it('emits a userRegistered event', () => {
+    const command = {
+      id: uuid(),
+      userIdentifier: 'irrelevant',
+      password: 'password'
+    }
+    const [, events] = signUp.run({
+      command,
+      aggregate: undefined
+    })
+
+    assertThat(events,
+      contains(hasProperty('name', 'userRegistered')))
+  })
+})
 
 describe('signIn', () => {
   const userId = uuid()

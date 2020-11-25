@@ -7,7 +7,8 @@ import {
   userAuthentication,
   todo,
   authenticationToken,
-  principal
+  principal,
+  events,
 } from './domain'
 import jsonwebtoken from 'jsonwebtoken'
 import { v4 as uuid } from 'uuid'
@@ -48,7 +49,14 @@ export const signUp = aggregateFactory({
     password: todo
   }),
   events: [
-    // TODO: send event for email sending
+    {
+      event: events.userRegistered,
+      mapper: ({ aggregateAfter }) => {
+        return {
+          userAuthentication: aggregateAfter
+        }
+      }
+    }
   ],
   execute: ({ command }) => {
     const passwordHash = hashPassword(command.password)

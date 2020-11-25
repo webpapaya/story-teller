@@ -1,4 +1,5 @@
 import { v } from '@story-teller/shared'
+import { buildEvent } from '../lib/events'
 
 export const todo = v.nonEmptyString
 export const userAggregateRoot = v.uuid
@@ -43,3 +44,10 @@ export const principal = v.record({
 })
 
 export type Principal = typeof principal['O']
+
+
+export const events = {
+  userRegistered: buildEvent('userRegistered', v.record({
+    userAuthentication
+  }))
+} as const
