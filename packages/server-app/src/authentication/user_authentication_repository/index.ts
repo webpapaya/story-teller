@@ -63,6 +63,12 @@ export const ensure = buildRecordRepository({
   toDomain
 })
 
+export const create = buildRecordRepository({
+  dbFunction: repository.createUserAuthentication,
+  toRepository,
+  toDomain
+})
+
 export const where = buildRecordRepository({
   dbFunction: repository.whereUserAuthentication,
   toRepository: (params: { id: string }) => ({ id: params.id }),
@@ -71,6 +77,8 @@ export const where = buildRecordRepository({
 
 export const whereByUserIdentifier = buildRecordRepository({
   dbFunction: repository.whereUserAuthenticationByUserIdentifier,
-  toRepository: (params: { userIdentifier: string }) => ({ user_identifier: params.userIdentifier }),
+  toRepository: (params: { userIdentifier: string }) => ({
+    user_identifier: params.userIdentifier
+  }),
   toDomain
 })

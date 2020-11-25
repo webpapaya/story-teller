@@ -7,6 +7,30 @@ SELECT * FROM user_authentication
 WHERE :user_identifier = :user_identifier;
 
 
+
+/* @name createUserAuthentication */
+INSERT INTO user_authentication (
+  id,
+  created_at,
+  user_identifier,
+  confirmation_token,
+  confirmation_timestamp,
+  password,
+  password_reset_token,
+  password_reset_timestamp
+) VALUES (
+  :id,
+  :created_at,
+  :user_identifier,
+  :confirmation_token,
+  :confirmation_timestamp,
+  :password,
+  :password_reset_token,
+  :password_reset_timestamp
+)
+RETURNING *;
+
+
 /* @name ensureUserAuthentication */
 INSERT INTO user_authentication (
   id,

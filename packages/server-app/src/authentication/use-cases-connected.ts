@@ -24,8 +24,8 @@ export const signIn = connectUseCase({
 
 export const register = connectUseCase({
   fetchAggregate: async () => undefined,
-  ensureAggregate: userAuthenticationRepo.ensure,
-  mapCommand: () => {},
+  ensureAggregate: userAuthenticationRepo.create,
+  mapCommand: () => undefined,
   useCase: useCases.signUp
 })
 
