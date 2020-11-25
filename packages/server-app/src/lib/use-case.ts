@@ -282,13 +282,44 @@ export const aggregateFactory = <
   return ({ config, run })
 }
 
+export const sideEffect = <
+  Aggregate extends AnyCodec,
+>(config: {
+  aggregate: Aggregate
+  preCondition?: (payload: { aggregate: Aggregate }) => boolean
+  sideEffect: (aggregate: Aggregate['O'], clients: ExternalDependencies) => Promise<void>
+}) => {
+  const raw = async (aggregate: Aggregate, clients: ExternalDependencies) => {
+    if (config.aggregate.is(aggregate)) {
+      throw new Error('Invalid aggregate')
+    }
+    await config.sideEffect(aggregate, clients)
+  }
+  const execute = async (aggregate: Aggregate) => {
+    return await withinConnection(async ({ client }) => {
+      return await withChannel(async ({ channel }) => {
+        await raw(aggregate, { channel, pgClient: client })
+      })
+    })
+  }
+
+  return ({
+    raw: config.sideEffect,
+    execute
+  })
+}
+
+
+
 export const reactToEventSync = <
-  ConnectedUseCaseConfig extends AnyConnectedUseCaseConfig<AnyUseCaseConfigType>,
+  Aggregate extends AnyCodec,
   DomainEvent extends DomainEventConfig<any, AnyCodec>,
 >(config: {
   event: DomainEvent
-  mapper: (event: DomainEvent['payload']['O']) => ConnectedUseCaseConfig['useCase']['config']['command']['O']
-  useCase: ConnectedUseCaseConfig
+  mapper: (event: DomainEvent['payload']['O']) => Aggregate['O']
+  useCase: {
+    raw: (payload: Aggregate['O'], clients: ExternalDependencies) => any
+  },
   getSyncEvents?: () => SyncEventSubscriptions
 }) => {
   const syncEvent = config.getSyncEvents
@@ -308,12 +339,14 @@ export const reactToEventSync = <
 }
 
 export const reactToEventAsync = async <
-  ConnectedUseCaseConfig extends AnyConnectedUseCaseConfig<AnyUseCaseConfigType>,
+  Aggregate extends AnyCodec,
   DomainEvent extends DomainEventConfig<any, AnyCodec>,
 >(config: {
   event: DomainEvent
-  mapper: (event: DomainEvent['payload']['O']) => ConnectedUseCaseConfig['useCase']['config']['command']['O']
-  useCase: ConnectedUseCaseConfig
+  mapper: (event: DomainEvent['payload']['O']) => Aggregate
+  useCase: {
+    execute: (payload: Aggregate) => unknown
+  },
   getSyncEvents?: () => SyncEventSubscriptions
   channel: Channel
 }) => {
