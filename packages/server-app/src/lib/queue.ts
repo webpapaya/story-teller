@@ -20,19 +20,19 @@ export const createChannel = async () => {
 }
 
 export const publish = async (queue: string, payload: object, channel: Channel) => {
-  await channel.assertQueue(queue, {
-    durable: false
-  })
-  await channel.sendToQueue(queue, Buffer.from(JSON.stringify(payload)))
+  // await channel.assertQueue(queue, {
+  //   durable: false
+  // })
+  // await channel.sendToQueue(queue, Buffer.from(JSON.stringify(payload)))
 }
 
 export type WithChannel = <T>(fn: (deps: { channel: Channel }) => T) => Promise<T>
 export const withChannel: WithChannel = async (fn) => {
-  const channel = await createChannel()
+  // const channel = await createChannel()
   try {
-    return fn({ channel })
+    return fn({ channel: {} as any })
   } finally {
-    await channel.close()
+    // await channel.close()
   }
 }
 
