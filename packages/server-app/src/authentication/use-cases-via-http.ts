@@ -2,6 +2,7 @@ import * as useCases from './use-cases-connected'
 import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter } from 'express'
 import { v } from '@story-teller/shared'
+import './use-cases-reactions'
 
 export const initialize = (app: IRouter) => {
   app.post('/authentication/sign-in', async (req, res) => {

@@ -1,7 +1,7 @@
 import { AnyCodec } from '@story-teller/shared'
 import deepFreeze from 'deep-freeze'
 import { publish, subscribe, createChannel, withChannel } from './queue'
-import { withinConnection, DBClient } from './db'
+import { withinConnection, DBClient, withinTransaction } from './db'
 import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
 import { sequentially } from '../utils/sequentially'
@@ -146,9 +146,11 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
       const eventSub = syncedSubscriptions[event.name] ?? { listeners: [] }
       return eventSub.listeners
         .map((listener) => async () => {
-          const [result, newEvents] = await listener(event.payload, dependencies)
+          const resultFromListener = await listener(event.payload, dependencies)
+          const newEvents = resultFromListener?.[1]
+            ? resultFromListener[1]
+            : []
           eventsToReturn.push(...newEvents as any[])
-          return result
         })
     // @ts-expect-error
     }).flat()
@@ -159,8 +161,7 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
   }
 
   const execute: ExecutableConnectedUseCase<UseCaseConfig> = async (command, hooks) => {
-    // TODO: change to withinTransaction
-    return await withinConnection(async ({ client }) => {
+    return await withinTransaction(async ({ client }) => {
       return await withChannel(async ({ channel }) => {
         const [aggregate, events] = await raw(command, {
           pgClient: client,
@@ -324,7 +325,7 @@ export const reactToEventSync = <
     raw: (payload: Aggregate['O'], clients: ExternalDependencies) => any
   },
   Mapper extends (event: DomainEvent['payload']['O']) =>
-    Parameters<UseCase['raw']>[0],
+  Parameters<UseCase['raw']>[0],
   DomainEvent extends DomainEventConfig<any, AnyCodec>,
 >(config: {
   event: DomainEvent
@@ -357,12 +358,12 @@ export const reactToEventAsync = async <
     execute: (payload: Aggregate['O']) => any
   },
   Mapper extends (event: DomainEvent['payload']['O']) =>
-    Parameters<UseCase['execute']>[0],
+  Parameters<UseCase['execute']>[0],
   DomainEvent extends DomainEventConfig<any, AnyCodec>,
 >(config: {
   event: DomainEvent
   mapper: Mapper
-  useCase: UseCase,
+  useCase: UseCase
   getSyncEvents?: () => SyncEventSubscriptions
   channel: Channel
 }) => {
