@@ -1,6 +1,12 @@
 import { AnyCodec } from '@story-teller/shared'
 import { IRouter, Request, Response } from 'express'
 import { AnyUseCaseConfigType, AnyConnectedUseCaseConfig } from './use-case'
+import {
+  PrincipalDecodingError,
+  CodecError,
+  PreConditionViolated,
+  PostConditionViolated,
+ } from '../errors'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 const httpRegistry: Array<{
@@ -56,46 +62,87 @@ export const exposeUseCaseViaHTTP = <
   config.app[config.method](
     route,
     async (req: Request, res: Response) => {
-      const principalResult = config.principal.decode(config.mapToPrincipal(req))
-      if (!principalResult.isOk()) {
-        throw new Error('Unauthorized')
+      const principal = config.principal
+        .decode(config.mapToPrincipal(req))
+        .mapError((errors) => { throw new PrincipalDecodingError(errors) })
+        .get()
+
+      try {
+        const aggregateAfter = await config.useCase.execute(
+          config.mapToCommand({ principal, request: req }), {
+            beforeUseCase: ({ aggregate }) => config.authenticateBefore?.({
+              principal,
+              aggregate
+            }) ?? true,
+            afterUseCase: ({ aggregate }) => config.authenticateAfter?.({
+              principal,
+              aggregate
+            }) ?? true
+          })
+
+        const links = httpRegistry
+          .filter(({ aggregateName, method }) => {
+            return aggregateName === config.aggregateName && method !== 'post'
+          })
+          .filter(({ authenticateBefore }) => {
+            return authenticateBefore({ principal, aggregate: aggregateAfter })
+          })
+          .filter(({ useCase }) => {
+            const precondition = useCase.useCase.config.preCondition
+            return !precondition ?? precondition?.({ aggregate: aggregateAfter })
+          })
+          .map(({ actionName, aggregateName, method, useCase }) => ({
+            route: '/' + [aggregateName, actionName].join('/'),
+            actionName,
+            aggregateName,
+            method,
+            schema: useCase.useCase.config.command
+          }))
+
+        return res.send({
+          links,
+          payload: aggregateAfter
+        })
+      } catch (e) {
+        const { status, body } = convertError(e)
+        res.status(status)
+        res.send(body)
       }
-      const principal = principalResult.get()
-
-      const aggregateAfter = await config.useCase.execute(
-        config.mapToCommand({ principal, request: req }), {
-          beforeUseCase: ({ aggregate }) => config.authenticateBefore?.({
-            principal,
-            aggregate
-          }) ?? true,
-          afterUseCase: ({ aggregate }) => config.authenticateAfter?.({
-            principal,
-            aggregate
-          }) ?? true
-        })
-
-      const links = httpRegistry
-        .filter(({ aggregateName, method }) => {
-          return aggregateName === config.aggregateName && method !== 'post'
-        })
-        .filter(({ authenticateBefore }) => {
-          return authenticateBefore({ principal, aggregate: aggregateAfter })
-        })
-        .filter(({ useCase }) => {
-          const precondition = useCase.useCase.config.preCondition
-          return !precondition ?? precondition?.({ aggregate: aggregateAfter })
-        })
-        .map(({ actionName, aggregateName, method, useCase }) => ({
-          route: '/' + [aggregateName, actionName].join('/'),
-          actionName,
-          aggregateName,
-          method,
-          schema: useCase.useCase.config.command
-        }))
-
-      return res.send({
-        links,
-        payload: aggregateAfter
-      })
     })
+}
+
+
+const convertError = (error: Error) => {
+  if (error instanceof CodecError) {
+    return {
+      status: 400,
+      body: {
+        description: error.name,
+        payload: error.codecErrors
+      }
+    }
+  } else if (error instanceof PreConditionViolated) {
+    return {
+      status: 400,
+      body: {
+        description: 'precondition violated',
+        payload: []
+      }
+    }
+  } else if (error instanceof PostConditionViolated) {
+    return {
+      status: 400,
+      body: {
+        description: 'postcondition violated',
+        payload: []
+      }
+    }
+  } else {
+    return {
+      status: 500,
+      body: {
+        description: 'internal server error'
+      }
+    }
+  }
 }

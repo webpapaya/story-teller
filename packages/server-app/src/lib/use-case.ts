@@ -6,6 +6,15 @@ import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
 import { sequentially } from '../utils/sequentially'
 import { sendMail, SendMail } from './mailer'
+import {
+  AggregateInvalid,
+  PreConditionViolated,
+  PostConditionViolated,
+  CommandInvalid,
+  AggregateInvalidAfterUseCase,
+  AggregateInvalidBeforeUseCase,
+  EventInvalid
+} from '../errors'
 
 const SYNC_EVENTS: SyncEventSubscriptions = {}
 
@@ -179,20 +188,20 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
   const raw: RawConnectedUseCase<UseCaseConfig> = async (command, dependencies, hooks) => {
     const decodedCommandResult = config.useCase.config.command.decode(command)
     if (!decodedCommandResult.isOk()) {
-      throw new Error('Invalid Command')
+      throw new AggregateInvalid(decodedCommandResult.get())
     }
     const decodedCommand = decodedCommandResult.get()
 
     const fromAggregate = await config.fetchAggregate(config.mapCommand(decodedCommand), dependencies)
 
     if (hooks?.beforeUseCase && !hooks.beforeUseCase({ aggregate: fromAggregate })) {
-      throw new Error('Before usecase throwed error')
+      throw new PreConditionViolated()
     }
 
     const [toAggregate, events] = config.useCase.run({ command: decodedCommand, aggregate: fromAggregate })
 
     if (hooks?.afterUseCase && !hooks.afterUseCase({ aggregate: toAggregate })) {
-      throw new Error('After usecase throwed error')
+      throw new PostConditionViolated()
     }
 
     await config.ensureAggregate(toAggregate, dependencies)
@@ -264,28 +273,33 @@ export const aggregateFactory = <
   }
 
   const run: RunUseCase<Config> = (payload) => {
-    if (!config.command.is(payload.command)) {
-      throw new Error('Invalid Command')
-    }
+    const command = config.command.decode(payload.command)
+      .mapError((error) => { throw new CommandInvalid(error) })
+      .get()
 
-    if (!config.aggregateFrom.is(payload.aggregate)) {
-      throw new Error('Invalid Aggregate')
-    }
+    const aggregateFrom = config.aggregateFrom.decode(payload.aggregate)
+      .mapError((error) => {
+        throw new AggregateInvalidBeforeUseCase(error)
+      })
+      .get()
 
-    if (config.preCondition && !config.preCondition({ aggregate: payload.aggregate })) {
-      throw new Error('Invalid Precondition')
+    if (config.preCondition && !config.preCondition({
+      aggregate: aggregateFrom
+    })) {
+      throw new PreConditionViolated()
     }
 
     const updatedAggregate = config.execute(deepFreeze(payload))
 
-    if (!config.aggregateTo.is(updatedAggregate)) {
-      throw new Error('Aggregate invalid after use case')
-    }
+    config.aggregateTo.decode(updatedAggregate)
+      .mapError((error) => {
+        throw new AggregateInvalidAfterUseCase(error)
+      })
 
     return [updatedAggregate, collectEvents({
-      aggregateFrom: payload.aggregate,
+      aggregateFrom: aggregateFrom,
       aggregateTo: updatedAggregate,
-      command: payload.command
+      command: command
     })]
   }
 
@@ -300,9 +314,9 @@ export const sideEffect = <
   sideEffect: (aggregate: Aggregate['O'], clients: ExternalDependencies) => Promise<void>
 }) => {
   const raw = async (aggregate: Aggregate, clients: ExternalDependencies) => {
-    if (config.aggregate.is(aggregate)) {
-      throw new Error('Invalid aggregate')
-    }
+    config.aggregate.decode(aggregate)
+      .mapError((error) => { throw new AggregateInvalid(error) })
+
     await config.sideEffect(aggregate, clients)
   }
   const execute = async (aggregate: Aggregate) => {
@@ -369,10 +383,11 @@ export const reactToEventAsync = async <
 }) => {
   await subscribe('default', async (event: any) => {
     if (event.name !== config.event.name) { return }
-    if (!config.event.payload.is(event.payload)) {
-      // TODO: introduce error classes
-      throw new Error('Could not deserialize event')
-    }
-    await config.useCase.execute(config.mapper(event))
+
+    const decodedEvent = config.event.payload.decode(event.payload)
+      .mapError((error) => { throw new EventInvalid(error) })
+      .get()
+
+    await config.useCase.execute(config.mapper(decodedEvent))
   }, await createChannel())
 }
