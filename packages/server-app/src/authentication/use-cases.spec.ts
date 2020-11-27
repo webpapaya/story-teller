@@ -27,7 +27,7 @@
 import { v4 as uuid } from 'uuid'
 import { signIn, signUp } from './use-cases'
 import jsonwebtoken from 'jsonwebtoken'
-import { anyOf, assertThat, contains, hasProperties, hasProperty, throws } from 'hamjest'
+import { assertThat, contains, hasProperties, hasProperty, throws } from 'hamjest'
 
 // const sendMail = sinon.spy()
 

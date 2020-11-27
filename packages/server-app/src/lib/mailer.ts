@@ -11,11 +11,11 @@ const transporter = nodemailer.createTransport({
 })
 
 export type SendMail = (options: {
-  from: string,
-  to: string,
-  subject: string,
-  text: string,
-  html: string,
+  from: string
+  to: string
+  subject: string
+  text: string
+  html: string
 }) => Promise<void>
 
 export const sendMail: SendMail = async ({ to, subject, html }) => {

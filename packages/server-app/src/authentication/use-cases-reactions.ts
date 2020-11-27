@@ -8,7 +8,7 @@ export const reactToUserRegistered = reactToEventSync({
     return {
       from: 'info@story-teller.com',
       to: {
-        email: event.userAuthentication.userIdentifier,
+        email: event.userAuthentication.userIdentifier
       },
       subject: 'Confirm your account',
       html: '<b>html email</b>',

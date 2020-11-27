@@ -8,7 +8,7 @@ import {
   todo,
   authenticationToken,
   principal,
-  events,
+  events
 } from './domain'
 import jsonwebtoken from 'jsonwebtoken'
 import { v4 as uuid } from 'uuid'

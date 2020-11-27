@@ -2,9 +2,7 @@ import * as useCases from './use-cases'
 import * as userAuthenticationRepo from './user_authentication_repository'
 import * as refreshTokenRepo from './refresh_token_repository'
 import * as principalRepo from './principal_repository'
-import { connectUseCase, reactToEventSync, sideEffect } from '../lib/use-case'
-import { events, userAuthentication } from './domain'
-import { sendEmail } from '../side-effects/send-mail'
+import { connectUseCase } from '../lib/use-case'
 
 export const signIn = connectUseCase({
   mapCommand: (cmd) => ({ userIdentifier: cmd.userIdentifier }),

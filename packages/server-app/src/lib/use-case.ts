@@ -10,8 +10,8 @@ import { sendMail, SendMail } from './mailer'
 const SYNC_EVENTS: SyncEventSubscriptions = {}
 
 export interface ExternalDependencies {
-  pgClient: PoolClient,
-  channel: Channel,
+  pgClient: PoolClient
+  channel: Channel
   sendMail: SendMail
 }
 
@@ -318,8 +318,6 @@ export const sideEffect = <
   })
 }
 
-
-
 export const reactToEventSync = <
   Aggregate extends AnyCodec,
   DomainEvent extends DomainEventConfig<any, AnyCodec>,
@@ -328,7 +326,7 @@ export const reactToEventSync = <
   mapper: (event: DomainEvent['payload']['O']) => Aggregate['O']
   useCase: {
     raw: (payload: Aggregate['O'], clients: ExternalDependencies) => any
-  },
+  }
   getSyncEvents?: () => SyncEventSubscriptions
 }) => {
   const syncEvent = config.getSyncEvents
@@ -358,7 +356,7 @@ export const reactToEventAsync = async <
   mapper: (event: DomainEvent['payload']['O']) => Aggregate
   useCase: {
     execute: (payload: Aggregate) => unknown
-  },
+  }
   getSyncEvents?: () => SyncEventSubscriptions
   channel: Channel
 }) => {
