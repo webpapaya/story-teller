@@ -1,5 +1,6 @@
 import { v } from '@story-teller/shared'
 import { buildEvent } from '../lib/events'
+import { email } from '../utils/custom-codecs'
 
 export const todo = v.nonEmptyString
 export const userAggregateRoot = v.uuid
@@ -19,7 +20,7 @@ const token = v.union([
 
 export const userAuthentication = v.aggregate({
   id: userAggregateRoot,
-  userIdentifier: todo,
+  userIdentifier: email,
   createdAt: v.localDateTime,
   confirmation: token,
   passwordReset: token,

@@ -5,10 +5,15 @@ import { withinConnection, DBClient } from './db'
 import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
 import { sequentially } from '../utils/sequentially'
+import { sendMail, SendMail } from './mailer'
 
 const SYNC_EVENTS: SyncEventSubscriptions = {}
 
-export interface ExternalDependencies { pgClient: PoolClient, channel: Channel }
+export interface ExternalDependencies {
+  pgClient: PoolClient,
+  channel: Channel,
+  sendMail: SendMail
+}
 
 interface DomainEventConfig<Name extends Readonly<string>, Payload extends AnyCodec> {
   name: Name
@@ -157,7 +162,11 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
     // TODO: change to withinTransaction
     return await withinConnection(async ({ client }) => {
       return await withChannel(async ({ channel }) => {
-        const [aggregate, events] = await raw(command, { pgClient: client, channel }, hooks)
+        const [aggregate, events] = await raw(command, {
+          pgClient: client,
+          channel,
+          sendMail
+        }, hooks)
 
         await sequentially(events.map((event) => () => publish('default', event, channel)))
 
@@ -298,7 +307,7 @@ export const sideEffect = <
   const execute = async (aggregate: Aggregate) => {
     return await withinConnection(async ({ client }) => {
       return await withChannel(async ({ channel }) => {
-        await raw(aggregate, { channel, pgClient: client })
+        await raw(aggregate, { channel, pgClient: client, sendMail })
       })
     })
   }
@@ -333,9 +342,12 @@ export const reactToEventSync = <
     }
   }
 
-  syncEvent[config.event.name].listeners.push((event: DomainEvent['payload']['O'], dependencies: ExternalDependencies) =>
-    config.useCase.raw(config.mapper(event), dependencies))
-  return syncEvent
+  const execute = (event: DomainEvent['payload']['O'], dependencies: ExternalDependencies) =>
+    config.useCase.raw(config.mapper(event), dependencies)
+
+  syncEvent[config.event.name].listeners.push(execute)
+
+  return { execute }
 }
 
 export const reactToEventAsync = async <

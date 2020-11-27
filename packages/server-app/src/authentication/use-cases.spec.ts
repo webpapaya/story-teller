@@ -196,7 +196,7 @@ describe('signUp', () => {
   it('returns a new userAuthentication', () => {
     const command = {
       id: uuid(),
-      userIdentifier: 'irrelevant',
+      userIdentifier: 'irrelevant@test.com',
       password: 'password'
     }
     const [userAuthentication] = signUp.run({
@@ -213,7 +213,7 @@ describe('signUp', () => {
   it('emits a userRegistered event', () => {
     const command = {
       id: uuid(),
-      userIdentifier: 'irrelevant',
+      userIdentifier: 'irrelevant@test.com',
       password: 'password'
     }
     const [, events] = signUp.run({
@@ -228,7 +228,7 @@ describe('signUp', () => {
 
 describe('signIn', () => {
   const userId = uuid()
-  const userIdentifier = 'userIdentifier'
+  const userIdentifier = 'userIdentifier@test.com'
   const password = 'password'
 
   const principal = {

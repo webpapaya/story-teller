@@ -4,6 +4,7 @@ import * as refreshTokenRepo from './refresh_token_repository'
 import * as principalRepo from './principal_repository'
 import { connectUseCase, reactToEventSync, sideEffect } from '../lib/use-case'
 import { events, userAuthentication } from './domain'
+import { sendEmail } from '../side-effects/send-mail'
 
 export const signIn = connectUseCase({
   mapCommand: (cmd) => ({ userIdentifier: cmd.userIdentifier }),
@@ -49,17 +50,4 @@ export const resetPasswordByToken = connectUseCase({
   ensureAggregate: userAuthenticationRepo.ensure,
   mapCommand: (cmd) => ({ id: cmd.id }),
   useCase: useCases.resetPasswordByToken
-})
-
-const sendEmail = sideEffect({
-  aggregate: userAuthentication,
-  sideEffect: async (aggregate, clients) => {
-    console.log(aggregate)
-  }
-})
-
-reactToEventSync({
-  event: events.userRegistered,
-  mapper: (event) => event.userAuthentication,
-  useCase: sendEmail
 })
