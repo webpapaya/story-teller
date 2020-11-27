@@ -67,9 +67,9 @@ export type AnyUseCaseConfigType = UseCaseConfig<AnyCodec, AnyCodec, AnyCodec>
 type SyncEventSubscriptions = Record<string, {
   eventPayload: AnyCodec
   listeners: Array<(
-    command: unknown,
+    command: any,
     dependencies: ExternalDependencies
-  ) => Promise<[unknown, unknown[]]>>
+  ) => Promise<any>>
 }>
 
 type FetchAggregate <UseCaseConfig extends AnyUseCaseConfigType, Args> =
@@ -320,13 +320,16 @@ export const sideEffect = <
 
 export const reactToEventSync = <
   Aggregate extends AnyCodec,
+  UseCase extends {
+    raw: (payload: Aggregate['O'], clients: ExternalDependencies) => any
+  },
+  Mapper extends (event: DomainEvent['payload']['O']) =>
+    Parameters<UseCase['raw']>[0],
   DomainEvent extends DomainEventConfig<any, AnyCodec>,
 >(config: {
   event: DomainEvent
-  mapper: (event: DomainEvent['payload']['O']) => Aggregate['O']
-  useCase: {
-    raw: (payload: Aggregate['O'], clients: ExternalDependencies) => any
-  }
+  mapper: Mapper
+  useCase: UseCase
   getSyncEvents?: () => SyncEventSubscriptions
 }) => {
   const syncEvent = config.getSyncEvents
@@ -350,13 +353,16 @@ export const reactToEventSync = <
 
 export const reactToEventAsync = async <
   Aggregate extends AnyCodec,
+  UseCase extends {
+    execute: (payload: Aggregate['O']) => any
+  },
+  Mapper extends (event: DomainEvent['payload']['O']) =>
+    Parameters<UseCase['execute']>[0],
   DomainEvent extends DomainEventConfig<any, AnyCodec>,
 >(config: {
   event: DomainEvent
-  mapper: (event: DomainEvent['payload']['O']) => Aggregate
-  useCase: {
-    execute: (payload: Aggregate) => unknown
-  }
+  mapper: Mapper
+  useCase: UseCase,
   getSyncEvents?: () => SyncEventSubscriptions
   channel: Channel
 }) => {
