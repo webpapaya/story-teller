@@ -5,8 +5,8 @@ import {
   PrincipalDecodingError,
   CodecError,
   PreConditionViolated,
-  PostConditionViolated,
- } from '../errors'
+  PostConditionViolated
+} from '../errors'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 const httpRegistry: Array<{
@@ -110,7 +110,6 @@ export const exposeUseCaseViaHTTP = <
       }
     })
 }
-
 
 const convertError = (error: Error) => {
   if (error instanceof CodecError) {

@@ -23,17 +23,18 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - name: npm install, build
-      run: |
-        npm install
-        ./node_modules/.bin/lerna link
-        ./node_modules/.bin/lerna bootstrap
-        ./node_modules/.bin/lerna run --scope @story-teller/shared build
-    - name: linting
-      run: |
-        npm run lint
-    - name: tests
-      run: |
-        ENV_FILE=.env.test ./node_modules/.bin/lerna run --scope @story-teller/server-app infrastructure:up
-        ENV_FILE=.env.test ./node_modules/.bin/lerna run --scope @story-teller/server-app db:migrate:up
-        ENV_FILE=.env.test npm run test
+    - name: and build/shared module
+      working-directory: ./packages/shared
+      run: npm i && npm run build && npm link .
+    - name: install dependencies
+      working-directory: ./packages/server-app
+      run: npm link @story-teller/shared && npm ci
+    - name: test
+      working-directory: ./packages/server-app
+      run: npm run lint
+    - name: setup infrastructure
+      working-directory: ./packages/server-app
+      run: ENV_FILE=.env.test npm run infrastructure:up
+    - name: test
+      working-directory: ./packages/server-app
+      run: ENV_FILE=.env.test npm run test

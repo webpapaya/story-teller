@@ -4,7 +4,7 @@ import { publish, subscribe } from './queue'
 import { assertThat, equalTo } from 'hamjest'
 import { buildLazyPromise } from '../utils/build-lazy-promise'
 
-describe('queue', () => {
+describe.skip('queue', () => {
   const QUEUE = 'test'
   const MESSAGE = { hallo: 1 } as const
   it('WHEN published after subscription, subscribes', t(async ({ channel }) => {

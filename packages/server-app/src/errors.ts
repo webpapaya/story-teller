@@ -7,12 +7,12 @@ class DomainError extends Error {}
 export class Unauthorized extends Error {}
 
 type CodecErrors = Array<{
-  message: string;
-  context: { path: string };
-}>;
+  message: string
+  context: { path: string }
+}>
 export abstract class CodecError extends DomainError {
   abstract name: string
-  constructor(public codecErrors: CodecErrors) {
+  constructor (public codecErrors: CodecErrors) {
     super()
   }
 }
