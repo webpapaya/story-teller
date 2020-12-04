@@ -7,14 +7,14 @@ describe('reactionsToTree', () => {
   })
 
   it('adds a side effect without targets', () => {
-    assertThat(reactionsToTree([{useCaseFrom: 'useCase1', event: '' }]),
+    assertThat(reactionsToTree([{ useCaseFrom: 'useCase1', event: '' }]),
       hasProperty('0', hasProperty('sideEffects', equalTo([]))))
   })
 
   it('adds a two side effects without targets', () => {
     const reactions = [
-      {useCaseFrom: 'useCase1', event: '' },
-      {useCaseFrom: 'useCase2', event: '' }
+      { useCaseFrom: 'useCase1', event: '' },
+      { useCaseFrom: 'useCase2', event: '' }
     ]
     assertThat(reactionsToTree(reactions), hasProperties({
       0: hasProperty('useCaseFrom', reactions[0].useCaseFrom),
@@ -24,10 +24,10 @@ describe('reactionsToTree', () => {
 
   it('converts nested reactions', () => {
     const reactions = [
-      {useCaseFrom: 'useCase1', event: '' },
-      {useCaseFrom: 'useCase2', event: '', useCaseTo: 'useCase1'},
-      {useCaseFrom: 'useCase3', event: '', useCaseTo: 'useCase2'},
-    ];
+      { useCaseFrom: 'useCase1', event: '' },
+      { useCaseFrom: 'useCase2', event: '', useCaseTo: 'useCase1' },
+      { useCaseFrom: 'useCase3', event: '', useCaseTo: 'useCase2' }
+    ]
 
     assertThat(reactionsToTree(reactions),
       hasProperty('0.sideEffects.0.sideEffects.0.useCaseFrom',

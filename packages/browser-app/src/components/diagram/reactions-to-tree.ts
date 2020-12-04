@@ -1,39 +1,34 @@
-import { Reaction, ReactionNode } from "./index";
+import { Reaction, ReactionNode } from './index'
 
 export const reactionsToTree = (
   arr: Reaction[],
   fromProp = 'useCaseFrom',
   toProp = 'useCaseTo'
-): ReactionNode<string>[] => {
-  var tree = [],
-      mappedArr = {},
-      arrElem,
-      mappedElem;
+): Array<ReactionNode<string>> => {
+  var tree = []
+  var mappedArr = {}
+  var arrElem
+  var mappedElem
 
-  // First map the nodes of the array to an object -> create a hash table.
-  for(var i = 0, len = arr.length; i < len; i++) {
-    arrElem = arr[i];
+  for (var i = 0, len = arr.length; i < len; i++) {
+    arrElem = arr[i]
     // @ts-ignore
-    mappedArr[arrElem[fromProp]] = arrElem;
+    mappedArr[arrElem[fromProp]] = arrElem
     // @ts-ignore
-    mappedArr[arrElem[fromProp]].sideEffects = [];
+    mappedArr[arrElem[fromProp]].sideEffects = []
   }
 
-
   for (var id in mappedArr) {
-    if (mappedArr.hasOwnProperty(id)) {
+    if (Object.prototype.hasOwnProperty.call(mappedArr, id)) {
       // @ts-ignore
-      mappedElem = mappedArr[id];
-      // If the element is not at the root level, add it to its parent array of children.
+      mappedElem = mappedArr[id]
       if (mappedElem[toProp]) {
         // @ts-ignore
-        mappedArr[mappedElem[toProp]]['sideEffects'].push(mappedElem);
-      }
-      // If the element is at the root level, add it to first level elements array.
-      else {
-        tree.push(mappedElem);
+        mappedArr[mappedElem[toProp]].sideEffects.push(mappedElem)
+      } else {
+        tree.push(mappedElem)
       }
     }
   }
-  return tree;
+  return tree
 }
