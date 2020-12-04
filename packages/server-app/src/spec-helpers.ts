@@ -3,7 +3,6 @@ import { assertThat, equalTo } from 'hamjest'
 import { WithinConnection, DBClient, withinConnection } from './lib/db'
 import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
-import { connectionPromise } from './lib/queue'
 
 export const withMockedDate = async <T>(date: string, fn: (remock: typeof mockdate.set) => T) => {
   try {
@@ -22,8 +21,8 @@ type WithinConnectionForTesting = (fn: (params: {
 
 export const t: WithinConnectionForTesting = (fn) => async () => {
   return await withinConnection(async (params) => {
-    const queue = await connectionPromise
-    const channel = await queue.createChannel()
+    // const queue = await connectionPromise
+    const channel = {} as any
     try {
       await params.begin()
       return await fn({
@@ -32,7 +31,7 @@ export const t: WithinConnectionForTesting = (fn) => async () => {
         withinConnection: async (fn2) => fn2(params)
       })
     } finally {
-      await channel.close()
+      // await channel.close()
       await params.rollback()
     }
   })
