@@ -29,21 +29,33 @@ jobs:
     - name: shared - build
       working-directory: ./packages/shared
       run: npm run build
+
     - name: pgtyped - install
       working-directory: ./packages/pgtyped
       run: npm i
     - name: pgtyped - build
       working-directory: ./packages/pgtyped
       run: npm run build
-    - name: server-app - Install
+
+    - name: browser-app - install
+      working-directory: ./packages/browser-app
+      run: npm i
+    - name: browser-app - lint
+      working-directory: ./packages/browser-app
+      run: npm run lint
+    - name: browser-app - test
+      working-directory: ./packages/browser-app
+      run: ENV_FILE=.env.test npm run test
+
+    - name: server-app - install
       working-directory: ./packages/server-app
       run: npm i
-    - name: server-app - Linting
+    - name: server-app - lint
       working-directory: ./packages/server-app
       run: npm run lint
     - name: server-app - Setup infrastructure
       working-directory: ./packages/server-app
       run: ENV_FILE=.env.test npm run infrastructure:up
-    - name: server-app - Test
+    - name: server-app - test
       working-directory: ./packages/server-app
       run: ENV_FILE=.env.test npm run test
