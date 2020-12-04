@@ -23,18 +23,27 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - name: and build/shared module
+    - name: shared - install
       working-directory: ./packages/shared
-      run: npm i && npm run build && npm link .
-    - name: install dependencies
+      run: npm i
+    - name: shared - build
+      working-directory: ./packages/shared
+      run: npm run build
+    - name: pgtyped - install
+      working-directory: ./packages/pgtyped
+      run: npm i
+    - name: pgtyped - build
+      working-directory: ./packages/pgtyped
+      run: npm run build
+    - name: server-app - Install
       working-directory: ./packages/server-app
-      run: npm link @story-teller/shared && npm ci
-    - name: test
+      run: npm i
+    - name: server-app - Linting
       working-directory: ./packages/server-app
       run: npm run lint
-    - name: setup infrastructure
+    - name: server-app - Setup infrastructure
       working-directory: ./packages/server-app
       run: ENV_FILE=.env.test npm run infrastructure:up
-    - name: test
+    - name: server-app - Test
       working-directory: ./packages/server-app
       run: ENV_FILE=.env.test npm run test
