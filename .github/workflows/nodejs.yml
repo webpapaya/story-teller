@@ -23,12 +23,17 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
+
     - name: shared - install
       working-directory: ./packages/shared
       run: npm i
+    - name: shared - test
+      working-directory: ./packages/shared
+      run: npm run test
     - name: shared - build
       working-directory: ./packages/shared
       run: npm run build
+
 
     - name: pgtyped - install
       working-directory: ./packages/pgtyped
