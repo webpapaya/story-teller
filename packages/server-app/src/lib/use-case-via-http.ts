@@ -68,6 +68,7 @@ export const exposeUseCaseViaHTTP = <
         .get()
 
       try {
+        console.log(req.params, req.body, req.headers)
         const aggregateAfter = await config.useCase.execute(
           config.mapToCommand({ principal, request: req }), {
             beforeUseCase: ({ aggregate }) => config.authenticateBefore?.({

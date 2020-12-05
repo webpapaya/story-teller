@@ -33,3 +33,11 @@ export class CommandInvalid extends CodecError {
 }
 export class PreConditionViolated extends DomainError {}
 export class PostConditionViolated extends DomainError {}
+
+type UseCaseErrors =
+  | 'Passwords do not match'
+export class UseCaseError extends DomainError {
+  constructor (public cause: UseCaseErrors) {
+    super()
+  }
+}

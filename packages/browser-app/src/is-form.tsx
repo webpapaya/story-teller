@@ -5,7 +5,7 @@ import objectKeys from './utils/object-keys'
 // Props you want the resulting component to take (besides the props of the wrapped component)
 interface ExternalProps<A extends AnyCodec> {
     defaultValues?: Partial<A['O']>,
-    onSubmit?: (params: A) => Promise<void> | void
+    onSubmit?: (params: A['O']) => Promise<void> | void
 }
 
 type ValidationError = { message: string, context: { path: string }}

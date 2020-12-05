@@ -188,7 +188,7 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
   const raw: RawConnectedUseCase<UseCaseConfig> = async (command, dependencies, hooks) => {
     const decodedCommandResult = config.useCase.config.command.decode(command)
     if (!decodedCommandResult.isOk()) {
-      throw new AggregateInvalid(decodedCommandResult.get())
+      throw new CommandInvalid(decodedCommandResult.get())
     }
     const decodedCommand = decodedCommandResult.get()
 

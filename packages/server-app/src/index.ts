@@ -17,6 +17,7 @@ app.use(cors({
   origin: (process.env.CORS_WHITELIST ?? '').split(','),
   credentials: true
 }))
+app.options('*', cors())
 
 vacation.initialize(app)
 invitation.initialize(app)

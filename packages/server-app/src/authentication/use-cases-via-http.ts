@@ -25,13 +25,16 @@ export const initialize = (app: IRouter) => {
 
   exposeUseCaseViaHTTP({
     app,
-    actionName: 'register',
+    actionName: 'sign-up',
     aggregateName: 'authentication',
     useCase: useCases.register,
     method: 'post',
     principal: v.undefinedCodec,
     authenticateBefore: () => true,
     mapToPrincipal: () => undefined,
-    mapToCommand: ({ request }) => request.body
+    mapToCommand: ({ request }) => {
+      return request.body
+    }
   })
+  return app
 }
