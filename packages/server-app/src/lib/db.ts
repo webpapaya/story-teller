@@ -36,6 +36,16 @@ pg.types.setTypeParser(1114, (dateTimeAsString) => {
   )
 })
 
+const Query = pg.Query
+var actualSubmit = Query.prototype.submit
+
+Query.prototype.submit = function () {
+  // @ts-expect-error
+  console.log(this.text)
+  // @ts-expect-error
+  actualSubmit.apply(this, arguments)
+}
+
 export type DBClient = PoolClient
 export type WithinConnection = <T>(fn: (deps: TransactionParams) => T) => Promise<T>
 

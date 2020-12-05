@@ -1,7 +1,7 @@
 import { AnyCodec } from '@story-teller/shared'
 import deepFreeze from 'deep-freeze'
 import { publish, subscribe, createChannel, withChannel } from './queue'
-import { withinConnection, DBClient, withinTransaction } from './db'
+import { withinConnection, DBClient, withinTransaction, withinRollbackTransaction } from './db'
 import { PoolClient } from 'pg'
 import { Channel } from 'amqplib'
 import { sequentially } from '../utils/sequentially'
@@ -137,6 +137,7 @@ type ExecuteUseCase<UseCaseConfig extends AnyUseCaseConfigType> =
 export interface AnyConnectedUseCaseConfig<UseCaseConfig extends AnyUseCaseConfigType> {
   useCase: UseCaseType<UseCaseConfig>
   execute: ExecutableConnectedUseCase<UseCaseConfig>
+  simulate: ExecutableConnectedUseCase<UseCaseConfig>
   raw: RawConnectedUseCase<UseCaseConfig>
 }
 
@@ -185,6 +186,20 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
     })
   }
 
+  const simulate: ExecutableConnectedUseCase<UseCaseConfig> = async (command, hooks) => {
+    return await withinRollbackTransaction(async ({ client }) => {
+      return await withChannel(async ({ channel }) => {
+        const [aggregate] = await raw(command, {
+          pgClient: client,
+          channel,
+          sendMail
+        }, hooks)
+
+        return aggregate
+      })
+    })
+  }
+
   const raw: RawConnectedUseCase<UseCaseConfig> = async (command, dependencies, hooks) => {
     const decodedCommandResult = config.useCase.config.command.decode(command)
     if (!decodedCommandResult.isOk()) {
@@ -211,7 +226,7 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
     return [toAggregate, eventsToReturn]
   }
 
-  return { useCase: config.useCase, raw, execute }
+  return { useCase: config.useCase, raw, execute, simulate }
 }
 
 export const useCase = <

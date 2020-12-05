@@ -64,13 +64,18 @@ export const exposeUseCaseViaHTTP = <
   config.app[config.method](
     route,
     async (req: Request, res: Response) => {
+      const simulate = req.headers['x-story-teller-simulate'] === 'true'
       const principal = config.principal
         .decode(config.mapToPrincipal(req))
         .mapError((errors) => { throw new PrincipalDecodingError(errors) })
         .get()
 
       try {
-        const aggregateAfter = await config.useCase.execute(
+        const execUseCase = simulate
+          ? config.useCase.simulate
+          : config.useCase.execute
+
+        const aggregateAfter = await execUseCase(
           config.mapToCommand({ principal, request: req }), {
             beforeUseCase: ({ aggregate }) => config.authenticateBefore?.({
               principal,
