@@ -2,7 +2,7 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "lint": "lerna run --stream --concurrency=1 lint",
+    "lint": "lerna run --stream --parallel lint",
     "start": "lerna run start --parallel",
     "test": "lerna run --stream --concurrency=1 test",
     "build": "lerna run build --parallel"
@@ -11,5 +11,7 @@
     "lerna": "^3.16.4",
     "pre-commit": "^1.2.2"
   },
-  "pre-commit": []
+  "pre-commit": [
+    "lint"
+  ]
 }
