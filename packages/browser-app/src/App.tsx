@@ -6,13 +6,6 @@ import { store } from './domain';
 import SignIn from './containers/user-sign-in';
 import SignUp from './containers/user-sign-up'
 import RequestPasswordReset from './containers/user-request-password-reset'
-import FeatureCreate from './containers/feature-create'
-import FeatureList from './containers/feature-list'
-import FeatureUpdate from './containers/feature-create-revision'
-import FeatureRevisionList from './containers/feature-revision-list'
-import FeatureSetTags from './containers/feature-set-tags'
-import ProjectCreate from './containers/project-create'
-import ProjectList from './containers/project-list'
 
 import ProtectedRoute from './containers/protected-route';
 import Navigation from './containers/navigation';
@@ -47,23 +40,6 @@ const App = () => (
               </CenteredPanel>
             )}
           />
-          <ProtectedRoute path='/project/create' render={({ history }) => {
-            return <ProjectCreate history={history}/>
-          }} />
-          <ProtectedRoute path='/feature/create' component={FeatureCreate} />
-          <ProtectedRoute path='/feature/:id' component={(props: any) => (
-            <>
-              <FeatureSetTags featureId={props.match.params.id} />
-              <FeatureUpdate id={props.match.params.id} history={props.history} />
-              <FeatureRevisionList id={props.match.params.id} />
-            </>
-          )} />
-          <ProtectedRoute path='/' render={({history}) => (
-            <>
-              <FeatureList />
-              <ProjectList />
-            </>
-          )} />
         </Switch>
     </Provider>
   </BrowserRouter>

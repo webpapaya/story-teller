@@ -5,7 +5,6 @@ import {
 } from '@material-ui/icons';
 import styles from './index.module.css'
 import { css } from '../../../utils/css';
-import ProjectSelection from './project-selection';
 import { useTranslations } from './translations';
 
 const Organism = (props: OrganismPropsType) => {
@@ -29,11 +28,6 @@ const Organism = (props: OrganismPropsType) => {
 
   return (
     <nav className={css(styles.navigationWrp)} ref={ref}>
-      <ProjectSelection
-        onProjectsSelected={props.onProjectsSelected}
-        projects={props.projects}
-        activeProjects={props.activeProjects}
-      />
       <ExitToApp onClick={() => props.onSignOut({})} aria-label={t('signOut')} />
     </nav>
   )

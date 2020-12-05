@@ -6,13 +6,10 @@ import { signOut } from '../../domain/authentication/actions'
 import hasSideEffect from '../../has-side-effect'
 import { whereProjects } from '../../domain/project/actions'
 import { withRouter } from 'react-router'
-import { selectActiveProjects, writeActiveProjects } from '../../domain/project/selectors'
+import { writeActiveProjects } from '../../domain/project/selectors'
 
-const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state, props) => {
-  return ({
-    projects: state.projects,
-    activeProjects: selectActiveProjects(props.history)
-  })
+const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = () => {
+  return ({})
 }
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => {
