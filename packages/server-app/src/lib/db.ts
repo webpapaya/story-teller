@@ -36,14 +36,20 @@ pg.types.setTypeParser(1114, (dateTimeAsString) => {
   )
 })
 
-const Query = pg.Query
-var actualSubmit = Query.prototype.submit
+const installQueryLogger = () => {
+  const Query = pg.Query
+  const actualSubmit = Query.prototype.submit
 
-Query.prototype.submit = function () {
-  // @ts-expect-error
-  console.log(this.text)
-  // @ts-expect-error
-  actualSubmit.apply(this, arguments)
+  Query.prototype.submit = function () {
+    // @ts-expect-error
+    console.log({ query: this.text })
+    // @ts-expect-error
+    actualSubmit.apply(this, arguments)
+  }
+}
+
+if (process.env.PG_LOG_QUERIES) {
+  installQueryLogger()
 }
 
 export type DBClient = PoolClient
@@ -72,7 +78,12 @@ export const withinTransaction: WithinConnection = async (fn) => {
   return await withinConnection(async ({ client, begin, commit, rollback }) => {
     try {
       await begin()
-      const result = await fn({ client, begin, commit, rollback })
+      const result = await fn({
+        client,
+        begin,
+        commit,
+        rollback
+      })
       await commit()
       return result
     } catch (e) {
@@ -96,21 +107,4 @@ export const withinRollbackTransaction: WithinConnection = async (fn) => {
       await rollback()
     }
   })
-}
-
-type WithinNamespace = <T>(namespace: string, client: DBClient, fn: () => T) => Promise<T>
-export const withinNamespace: WithinNamespace = async (namespace, client, fn) => {
-  const searchPath = (await client.query('show search_path')).rows[0].searchPath
-  try {
-    await client.query(`
-      create schema ${namespace};
-      SET search_path = ${namespace},${searchPath};
-    `)
-    return fn()
-  } finally {
-    await client.query(`
-      SET search_path = ${searchPath};
-      drop schema if exists ${namespace};
-    `)
-  }
 }

@@ -28,7 +28,8 @@ Actions
     method: 'POST',
     body: JSON.stringify({ id: v4(), ...args }),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'x-story-teller-simulate': 'true'
     }
   })
   return undefined
