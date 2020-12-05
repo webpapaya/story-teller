@@ -1,26 +1,31 @@
 import * as useCases from './use-cases-connected'
-import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
+import { convertError, exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter } from 'express'
 import { v } from '@story-teller/shared'
 import './use-cases-reactions'
 
 export const initialize = (app: IRouter) => {
   app.post('/authentication/sign-in', async (req, res) => {
-    const signInResponse = await useCases.signIn.execute(req.body)
-    if (signInResponse.refreshToken.token.state === 'active') {
-      res.cookie('refreshToken', signInResponse.refreshToken.token.plainToken, {
-        // TODO: enable expiration
-        // expires: new Date(signInResponse.refreshToken.expiresOn.toString()),
-        httpOnly: true,
-        signed: true
-      })
-    }
-
-    res.send({
-      payload: {
-        jwtToken: signInResponse.jwtToken
+    try {
+      const signInResponse = await useCases.signIn.execute(req.body)
+      if (signInResponse.refreshToken.token.state === 'active') {
+        res.cookie('refreshToken', signInResponse.refreshToken.token.plainToken, {
+          // TODO: enable expiration
+          // expires: new Date(signInResponse.refreshToken.expiresOn.toString()),
+          httpOnly: true,
+          signed: true
+        })
       }
-    })
+      res.send({
+        payload: {
+          jwtToken: signInResponse.jwtToken
+        }
+      })
+    } catch (e) {
+      const { status, body } = convertError(e)
+      res.status(status)
+      res.send(body)
+    }
   })
 
   exposeUseCaseViaHTTP({

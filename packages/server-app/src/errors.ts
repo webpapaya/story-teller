@@ -1,7 +1,4 @@
-export type RepositoryError = 'NOT_FOUND'
-export type HTTPError = 'UNAUTHORIZED'
-
-export type Errors = RepositoryError | HTTPError
+export type Errors = any
 
 class DomainError extends Error {}
 export class Unauthorized extends Error {}
@@ -34,8 +31,22 @@ export class CommandInvalid extends CodecError {
 export class PreConditionViolated extends DomainError {}
 export class PostConditionViolated extends DomainError {}
 
+export type RepositoryErrors =
+  | 'Record does already exist'
+  | 'Record not found'
+  | 'Unknown'
+
+export class RepositoryError extends DomainError {
+  constructor (public cause: RepositoryErrors) {
+    super()
+  }
+}
+
 type UseCaseErrors =
-  | 'Passwords do not match'
+  | 'Password did not match'
+  | 'Token did not match'
+  | 'Token is to old'
+
 export class UseCaseError extends DomainError {
   constructor (public cause: UseCaseErrors) {
     super()

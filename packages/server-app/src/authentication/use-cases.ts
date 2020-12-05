@@ -12,6 +12,7 @@ import {
 } from './domain'
 import jsonwebtoken from 'jsonwebtoken'
 import { v4 as uuid } from 'uuid'
+import { UseCaseError } from '../errors'
 
 const SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : 10
 const SECRET_KEY_BASE = process.env.SECRET_KEY_BASE as string
@@ -92,8 +93,7 @@ export const signIn = aggregateFactory({
   events: [],
   execute: ({ command, aggregate }) => {
     if (!comparePassword(command.password, aggregate.userAuthentication.password)) {
-      // TODO: think about proper exceptions
-      throw new Error('Password didn\'t match')
+      throw new UseCaseError('Password did not match')
     }
 
     return {
@@ -119,8 +119,7 @@ export const confirmAccount = useCase({
     if (
       aggregate.confirmation.state !== 'active' ||
       !comparePassword(command.token, aggregate.confirmation.token)) {
-      // TODO: think about proper exceptions
-      throw new Error('Tokens didn\'t match')
+      throw new UseCaseError('Token did not match')
     }
     const now = LocalDateTime.now()
     return {
@@ -157,8 +156,7 @@ export const resetPasswordByToken = useCase({
     if (
       aggregate.passwordReset.state !== 'active' ||
       !comparePassword(command.token, aggregate.passwordReset.token)) {
-      // TODO: think about proper exceptions
-      throw new Error('Tokens didn\'t match')
+      throw new UseCaseError('Token did not match')
     }
 
     const isTokenToOld = LocalDateTime.from(nativeJs(new Date()))
@@ -167,8 +165,7 @@ export const resetPasswordByToken = useCase({
       .isAfter(aggregate.passwordReset.createdAt)
 
     if (isTokenToOld) {
-      // TODO: think about proper exceptions
-      throw new Error('Tokens is too old')
+      throw new UseCaseError('Token is to old')
     }
 
     return {
@@ -191,8 +188,7 @@ export const refreshToken = useCase({
   execute: ({ aggregate, command }) => {
     if (aggregate.token.state !== 'active' ||
       !comparePassword(command.token, aggregate.token.token)) {
-      // TODO: think about proper exceptions
-      throw new Error('Token didn\'t match')
+      throw new UseCaseError('Token did not match')
     }
 
     return {

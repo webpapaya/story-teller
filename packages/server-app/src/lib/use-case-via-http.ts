@@ -5,7 +5,9 @@ import {
   PrincipalDecodingError,
   CodecError,
   PreConditionViolated,
-  PostConditionViolated
+  PostConditionViolated,
+  UseCaseError,
+  RepositoryError
 } from '../errors'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
@@ -68,7 +70,6 @@ export const exposeUseCaseViaHTTP = <
         .get()
 
       try {
-        console.log(req.params, req.body, req.headers)
         const aggregateAfter = await config.useCase.execute(
           config.mapToCommand({ principal, request: req }), {
             beforeUseCase: ({ aggregate }) => config.authenticateBefore?.({
@@ -112,13 +113,21 @@ export const exposeUseCaseViaHTTP = <
     })
 }
 
-const convertError = (error: Error) => {
+export const convertError = (error: Error) => {
   if (error instanceof CodecError) {
     return {
       status: 400,
       body: {
         description: error.name,
         payload: error.codecErrors
+      }
+    }
+  } else if (error instanceof UseCaseError) {
+    return {
+      status: 400,
+      body: {
+        description: 'Use case error',
+        message: error.cause
       }
     }
   } else if (error instanceof PreConditionViolated) {
@@ -135,6 +144,15 @@ const convertError = (error: Error) => {
       body: {
         description: 'postcondition violated',
         payload: []
+      }
+    }
+  } else if (error instanceof RepositoryError &&
+    error.cause === 'Record does already exist') {
+    return {
+      status: 409,
+      body: {
+        description: 'persistence error',
+        message: error.cause
       }
     }
   } else {
