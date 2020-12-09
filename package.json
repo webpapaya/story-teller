@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "lint": "lerna run --stream --parallel lint",
-    "start": "lerna run start --parallel",
+    "start": "ENV_FILE=.env.dev lerna run start --parallel",
     "test": "lerna run --stream --concurrency=1 test",
     "build": "lerna run build --parallel"
   },
