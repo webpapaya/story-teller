@@ -6,43 +6,31 @@ import { InputPassword } from '../../components/input-password';
 import { Button } from '../../components/button';
 import { Link } from '../../components/link';
 import { useTranslations } from './translations';
+import Message from '../../components/message';
 
 const Organism = isForm({
   initialValues: {
     userIdentifier: '',
     password: '',
-    passwordConfirmation: ''
   },
   schema: v.record({
-    userIdentifier: v.matchesRegex('numerical', /\d+/),
-    password: v.string,
-    passwordConfirmation: v.string,
+    userIdentifier: v.nonEmptyString,
+    password: v.nonEmptyString,
   }),
 }, ({ fields, onSubmit, submissionError }) => {
   const {t} = useTranslations()
   return (
     <form onSubmit={onSubmit}>
-      {submissionError && (
-        <div>
-          { submissionError.message }
-        </div>
-      )}
-
       <InputText
         label={t('userIdentifier')}
-        name="userIdentifier"
         {...fields.userIdentifier}
+        error={fields.userIdentifier.error || (submissionError?.message)}
       />
       <InputPassword
         label={t('password')}
-        name="password"
         {...fields.password}
       />
-      <InputPassword
-        label={t('passwordConfirmation')}
-        name="passwordConfirmation"
-        {...fields.passwordConfirmation}
-      />
+
       <Button block marginBottom>{t('signUp')}</Button>
 
       <Link to="/sign-in" variant="link" block>

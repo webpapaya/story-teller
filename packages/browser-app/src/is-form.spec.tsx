@@ -15,7 +15,6 @@ const DummyForm = isForm({
     <input
       data-testid="test1"
       type="text"
-      name="test1"
       {...props.fields.test1}
     />
 )})

@@ -27,8 +27,8 @@ afterEach(cleanup);
 it('without search filter, renders all options', async () => {
   const { container } = renderInputMultiSelect();
   assertThat([
-    queryByText(container, 'first label'),
-    queryByText(container, 'second label'),
+    queryByText(container as HTMLElement, 'first label'),
+    queryByText(container as HTMLElement, 'second label'),
   ], everyItem(present()))
 })
 

@@ -1,0 +1,19 @@
+.default {
+  padding: var(--space-sm) var(--space-md);
+  font: var(--font-regular-bold);
+  border-radius: 2px;
+  border-left: 4px solid;
+  box-shadow:var(--shadow-1)
+}
+
+.error {
+  color: var(--color-danger-600);
+  border-left-color: var(--color-danger-500);
+  background: var(--color-danger-100);
+}
+
+.success {
+  color: var(--color-success-800);
+  border-left-color: var(--color-success-700);
+  background: var(--color-success-100);
+}

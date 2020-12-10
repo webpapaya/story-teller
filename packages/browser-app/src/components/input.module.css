@@ -22,8 +22,6 @@
   padding: var(--space-sm);
   border-radius: 3px;
   background: transparent;
-
-
   margin-bottom: calc(var(--font-size-smaller) + var(--space-xxs) + var(--space-sm));
 
   /* Reduce padding by border width */
@@ -50,6 +48,7 @@
   padding-top: var(--space-xxs);
   padding-bottom: var(--space-sm);
   display: block;
+  line-height: 1;
 }
 
 .variantTitle {

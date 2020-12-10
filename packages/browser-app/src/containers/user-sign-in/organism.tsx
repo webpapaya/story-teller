@@ -16,18 +16,16 @@ const SignIn = isForm({
     userIdentifier: v.string,
     password: v.string,
   }),
-}, ({ fields, onSubmit }) => {
+}, ({ fields, onSubmit, submissionError }) => {
   const {t} = useTranslations()
   return (
   <form onSubmit={onSubmit}>
     <InputText
       label={t('userIdentifier')}
-      name="userIdentifier"
       {...fields.userIdentifier}
     />
     <InputPassword
       label={t('password')}
-      name="password"
       {...fields.password}
     />
     <Button block marginBottom>Sign in</Button>

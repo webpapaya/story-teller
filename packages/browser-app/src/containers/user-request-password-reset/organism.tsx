@@ -19,7 +19,6 @@ const Organism = isForm({
   <form onSubmit={onSubmit}>
     <InputText
       label={t('email')}
-      name="userIdentifier"
       {...fields.userIdentifier}
     />
     <Button block marginBottom>Submit</Button>

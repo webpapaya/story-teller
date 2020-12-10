@@ -21,7 +21,8 @@ export interface InjectedProps<A extends object> {
         error?: string,
         onBlur: (evt: FormEvent) => {}
         onFocus: (evt: FormEvent) => {}
-        onChange: (evt: FormEvent) => {}
+        onChange: (evt: FormEvent) => {},
+        name: string,
       }
     }
 }
@@ -45,7 +46,7 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
 ) => {
   class HOC extends React.Component<OriginalProps & ExternalProps<A>, {
     touchedFields: (keyof A['O'])[],
-    values: Partial<A>,
+    values: Partial<A['O']>,
     submitCount: number,
     errors: ValidationError[],
     submissionError?: APIError
@@ -54,7 +55,10 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
       super(props)
       this.state = {
         submitCount: 0,
-        values: { ...options.initialValues, ...props.defaultValues },
+        values: {
+          ...options.initialValues,
+          ...props.defaultValues
+        } as Partial<A['O']>,
         errors: [],
         touchedFields: [],
       }
@@ -126,13 +130,14 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
     }
 
     get fields() {
-      return objectKeys(options.schema.toJSON().properties).reduce((result, key: keyof A['O']) => {
-        result[key] = {
-          value: this.state.values[key],
-          error: this.errors[key],
+      return objectKeys(options.schema.toJSON().properties).reduce((result, name: keyof A['O']) => {
+        result[name] = {
+          value: this.state.values[name],
+          error: this.errors[name],
           onBlur: this.onFieldBlur,
           onFocus: this.onFieldFocus,
-          onChange: this.onValueChange
+          onChange: this.onValueChange,
+          name: name,
         }
         return result
       }, {} as { [key in keyof A['O']]: any })

@@ -18,12 +18,10 @@ const Organism = isForm({
   <form onSubmit={onSubmit}>
     <InputPassword
       label="New password"
-      name="password"
       {...fields.password}
     />
     <InputPassword
       label="Password confirmation"
-      name="passwordConfirmation"
       {...fields.passwordConfirmation}
     />
     <Button block marginBottom>Submit</Button>
