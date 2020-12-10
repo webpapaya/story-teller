@@ -10,8 +10,8 @@ export const signIn: ActionCreator<
 { userIdentifier: string, password: string },
 void,
 Actions
-> = (args) => async (dispatch) => {
-  const response = await fetch('/authentication/sign-in', {
+> = (args, options) => async (dispatch) => {
+  const response = await fetch('authentication/sign-in', {
     method: 'POST',
     body: JSON.stringify(args)
   })
@@ -29,15 +29,18 @@ export const signUp: ActionCreator<
 void,
 Actions
 > = (args) => async (dispatch) => {
-  await fetch(`${process.env.REACT_APP_SERVER_URL}/authentication/sign-up`, {
+  const response = await fetch('authentication/sign-up', {
     method: 'POST',
-    body: JSON.stringify({ id: v4(), ...args }),
-    headers: {
-      'Content-Type': 'application/json',
-      'x-story-teller-simulate': 'true'
-    }
+    body: JSON.stringify({ id: v4(), ...args })
   })
-  return undefined
+
+  const parsedBody = await response.json()
+
+  if (response.status !== 200) {
+    throw new APIError(parsedBody)
+  }
+
+  return parsedBody
 }
 
 export const signOut = fetchViaHTTP(Authentication.actions.signOut)

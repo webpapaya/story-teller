@@ -7,7 +7,7 @@ import { Link } from '../../components/link';
 import { useTranslations } from './translations';
 
 const Organism = isForm({
-  defaultValues: {
+  initialValues: {
     userIdentifier: '',
   },
   schema: v.record({

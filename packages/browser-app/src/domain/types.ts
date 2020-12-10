@@ -10,7 +10,8 @@ export type ExternalDependencies = {
 export type AppState = ReturnType<typeof rootReducer>
 
 export type ActionCreator<Args, ReturnValue, Actions extends AnyAction> = (
-  arg: Args
+  arg: Args,
+  options?: { simulate: boolean }
 ) => ThunkAction<Promise<ReturnValue>, AppState, ExternalDependencies, Actions>
 
 export type MapStateToProps<ReturnValue, OwnPropsType> =

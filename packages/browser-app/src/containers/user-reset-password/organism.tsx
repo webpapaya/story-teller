@@ -6,7 +6,7 @@ import { InputPassword } from '../../components/input-password';
 import { Link } from '../../components/link';
 
 const Organism = isForm({
-  defaultValues: {
+  initialValues: {
     password: '',
     passwordConfirmation: '',
   },

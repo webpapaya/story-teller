@@ -8,20 +8,26 @@ import { Link } from '../../components/link';
 import { useTranslations } from './translations';
 
 const Organism = isForm({
-  defaultValues: {
+  initialValues: {
     userIdentifier: '',
     password: '',
     passwordConfirmation: ''
   },
   schema: v.record({
-    userIdentifier: v.string,
+    userIdentifier: v.matchesRegex('numerical', /\d+/),
     password: v.string,
     passwordConfirmation: v.string,
   }),
-}, ({ fields, onSubmit }) => {
+}, ({ fields, onSubmit, submissionError }) => {
   const {t} = useTranslations()
   return (
     <form onSubmit={onSubmit}>
+      {submissionError && (
+        <div>
+          { submissionError.message }
+        </div>
+      )}
+
       <InputText
         label={t('userIdentifier')}
         name="userIdentifier"

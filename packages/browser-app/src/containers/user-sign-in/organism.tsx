@@ -8,7 +8,7 @@ import { Link } from '../../components/link';
 import { useTranslations } from './translations';
 
 const SignIn = isForm({
-  defaultValues: {
+  initialValues: {
     userIdentifier: '',
     password: ''
   },

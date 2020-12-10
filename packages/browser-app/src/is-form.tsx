@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { AnyCodec } from '@story-teller/shared';
 import objectKeys from './utils/object-keys'
+import { APIError } from './domain/errors';
 
 // Props you want the resulting component to take (besides the props of the wrapped component)
 interface ExternalProps<A extends AnyCodec> {
@@ -12,6 +13,7 @@ type ValidationError = { message: string, context: { path: string }}
 
 // Props the HOC adds to the wrapped component
 export interface InjectedProps<A extends object> {
+    submissionError?: APIError
     onSubmit: (evt: React.FormEvent) => void,
     fields: {
       [key in keyof A]: {
@@ -27,7 +29,7 @@ export interface InjectedProps<A extends object> {
 // Options for the HOC factory that are not dependent on props values
 interface Options<A extends AnyCodec> {
   schema: A,
-  defaultValues?: Partial<A['O']>
+  initialValues?: Partial<A['O']>
 }
 
 type FormEvent = {
@@ -45,13 +47,14 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
     touchedFields: (keyof A['O'])[],
     values: Partial<A>,
     submitCount: number,
-    errors: ValidationError[]
+    errors: ValidationError[],
+    submissionError?: APIError
 }> {
     constructor(props: OriginalProps & ExternalProps<A>) {
       super(props)
       this.state = {
         submitCount: 0,
-        values: { ...options.defaultValues, ...props.defaultValues },
+        values: { ...options.initialValues, ...props.defaultValues },
         errors: [],
         touchedFields: [],
       }
@@ -85,24 +88,30 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
       this.setState({ touchedFields })
     }
 
-    onSubmit = (evt: React.FormEvent) => {
+    onSubmit = async (evt: React.FormEvent) => {
       evt.preventDefault()
-      options.schema.decode(this.state.values)
-        .fold(
-          (errors) => this.setState({ errors }),
-          async (values) => {
-            if (this.props.onSubmit) {
-              await this.props.onSubmit(values)
-              this.setState({
-                values: {
-                  ...options.defaultValues,
-                  ...this.props.defaultValues
-                },
-                touchedFields: [],
-                submitCount: this.state.submitCount + 1
-              })
-            }
-          })
+      const decoded = options.schema.decode(this.state.values)
+      if (!decoded.isOk()) {
+        this.setState({ errors: decoded.get() })
+        return
+      }
+
+      if (!this.props.onSubmit) { return }
+      const values = decoded.get()
+
+      try {
+        await this.props.onSubmit(values)
+        this.setState({
+          values: {
+            ...options.initialValues,
+            ...this.props.defaultValues
+          },
+          touchedFields: [],
+          submitCount: this.state.submitCount + 1
+        })
+      } catch (submissionError) {
+        this.setState({ submissionError: submissionError })
+      }
     }
 
     get errors() {
@@ -133,6 +142,7 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
       return (
         <Component
           {...this.props}
+          submissionError={this.state.submissionError}
           key={this.state.submitCount}
           fields={this.fields}
           onSubmit={this.onSubmit}
