@@ -6,7 +6,7 @@ import { InputPassword } from '../../components/input-password';
 import { Button } from '../../components/button';
 import { Link } from '../../components/link';
 import { useTranslations } from './translations';
-import Message from '../../components/message';
+import Heading from '../../components/heading';
 
 const Organism = isForm({
   initialValues: {
@@ -21,6 +21,8 @@ const Organism = isForm({
   const {t} = useTranslations()
   return (
     <form onSubmit={onSubmit}>
+      <Heading alignment='center' variant='h2'>{t('signUp')}</Heading>
+
       <InputText
         label={t('userIdentifier')}
         {...fields.userIdentifier}
