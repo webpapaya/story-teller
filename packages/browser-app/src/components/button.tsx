@@ -13,7 +13,8 @@ type ButtonProps = {
   block?: boolean
   disabled?: boolean
   marginBottom?: boolean
-
+  usesGridArea?: boolean,
+  state?: "enabled" | "disabled" | "pending"
 }
 
 export const Button = ({
@@ -25,19 +26,31 @@ export const Button = ({
   disabled = false,
   variant = 'solid',
   marginBottom = false,
-  onClick
-}: ButtonProps) => (
-  <button type={type} onClick={onClick} className={
-    css(
-      theme[color],
-      styles[`${size}Size`],
-      styles[`${variant}Variant`],
-      styles.button,
-      block && styles.block,
-      disabled && styles.disabled,
-      marginBottom && styles.marginBottom
-    )
-  }>
-    { children }
-  </button>
-)
+  onClick,
+  usesGridArea,
+  state = "enabled"
+}: ButtonProps) => {
+  const isDisabled = disabled || state !== 'enabled'
+
+  return (
+    <button
+      type={type}
+      style={usesGridArea ? { gridArea: type } : {}}
+      onClick={onClick}
+      disabled={isDisabled}
+      className={
+        css(
+          theme[color],
+          styles[`${size}Size`],
+          styles[`${variant}Variant`],
+          styles.button,
+          block && styles.block,
+          isDisabled && styles[state],
+          marginBottom && styles.marginBottom
+        )
+      }
+    >
+      { children }
+    </button>
+  )
+}

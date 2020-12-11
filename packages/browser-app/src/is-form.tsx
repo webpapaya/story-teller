@@ -10,11 +10,16 @@ interface ExternalProps<A extends AnyCodec> {
 }
 
 type ValidationError = { message: string, context: { path: string }}
+type ButtonState = "pending" | "disabled"  | "enabled"
 
 // Props the HOC adds to the wrapped component
 export interface InjectedProps<A extends object> {
     submissionError?: APIError
     onSubmit: (evt: React.FormEvent) => void,
+    submitButton: {
+      type: "submit",
+      state: ButtonState
+    },
     fields: {
       [key in keyof A]: {
         value: any,
@@ -49,18 +54,23 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
     values: Partial<A['O']>,
     submitCount: number,
     errors: ValidationError[],
-    submissionError?: APIError
+    submissionError?: APIError,
+    submitButtonState: ButtonState
 }> {
     constructor(props: OriginalProps & ExternalProps<A>) {
       super(props)
+      const values = {
+        ...options.initialValues,
+        ...props.defaultValues
+      } as Partial<A['O']>
+
+
       this.state = {
         submitCount: 0,
-        values: {
-          ...options.initialValues,
-          ...props.defaultValues
-        } as Partial<A['O']>,
+        values: values,
         errors: [],
         touchedFields: [],
+        submitButtonState: options.schema.is(values) ? "enabled" : "disabled"
       }
     }
 
@@ -71,12 +81,14 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
 
       this.setState((state) => {
         const values = { ...state.values, [name]: value }
-        const validationResult = options.schema.decode(values)
-        const errors = validationResult.isOk()
-          ? []
-          : validationResult.get()
+        const errors = this.getValidationErrors(values)
 
-        return ({ ...state, errors, values })
+        return ({
+          ...state,
+          errors,
+          values,
+          submitButtonState: this.getSubmitButtonState(errors)
+        })
       })
     }
 
@@ -84,6 +96,21 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
       const name = evt.target.name;
       const touchedFields = Array.from(new Set([...this.state.touchedFields, name as keyof A]))
       this.setState({ touchedFields })
+    }
+
+    getValidationErrors = (
+      vals: Partial<A['O']>,
+      nextVals: Partial<A['O']> = {}
+    ) => {
+      const values = { ...vals, ...nextVals }
+      const validationResult = options.schema.decode(values)
+      return validationResult.isOk()
+        ? []
+        : validationResult.get()
+    }
+
+    getSubmitButtonState = (errors: ValidationError[]) => {
+      return errors.length ? 'disabled' : 'enabled'
     }
 
     onFieldFocus = (evt: FormEvent) => {
@@ -95,26 +122,36 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
     onSubmit = async (evt: React.FormEvent) => {
       evt.preventDefault()
       const decoded = options.schema.decode(this.state.values)
+      this.setState({ submitButtonState: 'pending' })
       if (!decoded.isOk()) {
         this.setState({ errors: decoded.get() })
         return
       }
 
       if (!this.props.onSubmit) { return }
+
       const values = decoded.get()
 
       try {
         await this.props.onSubmit(values)
+        const nextValues = {
+          ...options.initialValues,
+          ...this.props.defaultValues
+        }
+
         this.setState({
-          values: {
-            ...options.initialValues,
-            ...this.props.defaultValues
-          },
+          values: nextValues,
           touchedFields: [],
-          submitCount: this.state.submitCount + 1
+          submitCount: this.state.submitCount + 1,
+          submitButtonState: this.getSubmitButtonState(
+            this.getValidationErrors(nextValues))
         })
       } catch (submissionError) {
-        this.setState({ submissionError: submissionError })
+        this.setState({
+          submissionError: submissionError,
+          submitButtonState: this.getSubmitButtonState(
+            this.getValidationErrors(this.state.errors))
+        })
       }
     }
 
@@ -147,6 +184,10 @@ const isForm = <A extends AnyCodec, OriginalProps extends {}>(options: Options<A
       return (
         <Component
           {...this.props}
+          submitButton={{
+            type: 'submit',
+            state: this.state.submitButtonState
+          }}
           submissionError={this.state.submissionError}
           key={this.state.submitCount}
           fields={this.fields}

@@ -13,12 +13,21 @@ type InputProps = {
   usesGridArea?: boolean
 }
 
-export const InputPassword = ({ name, error, value, onChange, label, onBlur, onFocus, usesGridArea }: InputProps) => (
+export const InputDate = ({
+  name,
+  error,
+  value,
+  onChange,
+  label,
+  onBlur,
+  onFocus,
+  usesGridArea
+}: InputProps) => (
   <>
     <label style={usesGridArea ? { gridArea: name } : {}}>
       <span className={styles.label}>{ label }</span>
       <input
-        type="password"
+        type="date"
         className={css(
           styles.input,
           error && styles.inputError

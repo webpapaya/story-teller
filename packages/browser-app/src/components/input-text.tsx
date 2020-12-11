@@ -13,6 +13,7 @@ type InputProps = {
   focus?: boolean,
   error?: string,
   variant?: 'form' | 'title',
+  usesGridArea?: boolean
 }
 
 export const InputText = React.forwardRef<HTMLInputElement, InputProps>(({
@@ -24,7 +25,8 @@ export const InputText = React.forwardRef<HTMLInputElement, InputProps>(({
   error,
   variant='form',
   onFocus,
-  onBlur
+  onBlur,
+  usesGridArea
 }, ref) => {
   switch(variant) {
     case 'title': return (
@@ -46,25 +48,24 @@ export const InputText = React.forwardRef<HTMLInputElement, InputProps>(({
     )
     case 'form': return (
       <>
-        <label className={styles.label} htmlFor={name}>
-          { label }
+        <label style={usesGridArea ? { gridArea: name } : {}}>
+          <span className={styles.label}></span>
+          <input
+            ref={ref}
+            className={css(
+              styles.input,
+              error && styles.inputError
+            )}
+            type="text"
+            name={name}
+            value={value}
+            onChange={onChange}
+            onKeyDown={onKeyDown}
+            onFocus={onFocus}
+            onBlur={onBlur}
+          />
+          {error && (<span className={styles.error}>{error}</span>)}
         </label>
-
-        <input
-          ref={ref}
-          className={css(
-            styles.input,
-            error && styles.inputError
-          )}
-          type="text"
-          name={name}
-          value={value}
-          onChange={onChange}
-          onKeyDown={onKeyDown}
-          onFocus={onFocus}
-          onBlur={onBlur}
-        />
-        {error && (<span className={styles.error}>{error}</span>)}
       </>
     )
   }

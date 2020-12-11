@@ -1,0 +1,9 @@
+.form {
+  display: grid;
+  grid-template-areas:
+    "startDate endDate"
+    "submit submit"
+    "reset reset";
+  gap: var(--space-sm);
+}
+
