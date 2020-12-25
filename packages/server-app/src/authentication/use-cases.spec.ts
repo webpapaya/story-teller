@@ -1,7 +1,9 @@
 import { v4 as uuid } from 'uuid'
-import { signIn, signUp } from './use-cases'
+import { signIn, signUp, requestPasswordReset } from './use-cases'
 import jsonwebtoken from 'jsonwebtoken'
 import { assertThat, contains, hasProperties, hasProperty, throws } from 'hamjest'
+import { userAuthentication } from './domain'
+import { hasEvents } from '../utils/custom-matcher'
 
 describe('signUp', () => {
   it('returns a new userAuthentication', () => {
@@ -100,5 +102,19 @@ describe('signIn', () => {
         })
       }, throws())
     })
+  })
+})
+
+describe('requestPasswordReset', () => {
+  it('sends a passwordResetRequested event', () => {
+    const result = requestPasswordReset.run({
+      command: {
+        userIdentifier: 'irrelevant'
+      },
+      aggregate: userAuthentication.build()[0]()
+    })
+
+    assertThat(result, hasEvents(
+      hasProperty('0.name', 'passwordResetRequested')))
   })
 })

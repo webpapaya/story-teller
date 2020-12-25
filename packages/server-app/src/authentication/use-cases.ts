@@ -142,7 +142,12 @@ export const requestPasswordReset = useCase({
   aggregate: userAuthentication,
   command: v.record({ userIdentifier: todo }),
   events: [
-    // TODO: send password reset email
+    {
+      event: events.passwordResetRequested,
+      mapper: ({ aggregateAfter }) => {
+        return { userAuthentication: aggregateAfter }
+      }
+    }
   ],
   execute: ({ aggregate }) => {
     return {

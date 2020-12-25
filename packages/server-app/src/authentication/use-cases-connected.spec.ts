@@ -9,7 +9,7 @@ import {
   resetPasswordByToken
 } from './use-cases-connected'
 
-describe.only('authentication flow', () => {
+describe('authentication flow', () => {
   describe('after successful sign up', () => {
     const credentials = {
       id: v4(),

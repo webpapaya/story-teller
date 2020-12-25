@@ -3,9 +3,12 @@ import sinon from 'sinon'
 import { userAuthentication } from './domain'
 import { reactToUserRegistered } from './use-cases-reactions'
 
-describe('sends email', () => {
+describe('reactToUserRegistered', () => {
   it('calls sendMail correctly', async () => {
-    const auth = userAuthentication.build()[0]()
+    const auth = userAuthentication.build()
+      .map((fn) => fn())
+      .find((userAuthentication) => userAuthentication.confirmation.state === 'active')!
+
     const sendMail = sinon.spy()
     const userIdentifier = 'test@test.com'
 
