@@ -91,10 +91,6 @@ context('Authentication', () => {
   it.only('reset password', () => {
     const credentials = buildCredentials()
     signUp(credentials)
-    signIn(credentials)
     requestPasswordReset(credentials)
-
-
-
   })
 })

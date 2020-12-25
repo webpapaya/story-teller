@@ -46,7 +46,7 @@ describe('signIn', () => {
     const returnValue = 'irrelevant'
     const fetch = stub().returns(Promise.resolve({
       status: 400,
-      json: () => Promise.resolve(returnValue)
+      json: () => Promise.resolve({ message: returnValue })
     }))
 
     const { signIn } = proxyquire('./actions', {
@@ -99,7 +99,7 @@ describe('signUp', () => {
     const returnValue = 'irrelevant'
     const fetch = stub().returns(Promise.resolve({
       status: 400,
-      json: () => Promise.resolve(returnValue)
+      json: () => Promise.resolve({ message: returnValue })
     }))
 
     const { signUp } = proxyquire('./actions', {
@@ -111,5 +111,28 @@ describe('signUp', () => {
       instanceOf(APIError),
       hasProperty('message', returnValue)
     )))
+  })
+})
+
+describe('requestPasswordReset', () => {
+  it('calls sign-in with given parameters', () => {
+    const returnValue = 'irrelevant'
+    const fetch = stub().returns(Promise.resolve({
+      status: 200,
+      json: () => Promise.resolve(returnValue)
+    }))
+
+    const { requestPasswordReset } = proxyquire('./actions', {
+      '../fetch': { fetch }
+    })
+    const payload = { userIdentifier: 'irrelevant' }
+
+    requestPasswordReset(payload)(dispatch)
+    assertThat(fetch, hasProperty('lastCall.args', hasProperties({
+      0: 'authentication/request-password-reset',
+      1: hasProperties({
+        body: JSON.stringify(payload)
+      })
+    })))
   })
 })

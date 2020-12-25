@@ -34,3 +34,32 @@ export const reactToUserRegistered = reactToEventSync({
     }
   }
 })
+
+export const reactToPasswordResetRequested = reactToEventSync({
+  event: events.passwordResetRequested,
+  useCase: sendEmail,
+  mapper: (event) => {
+    const confirmation = event.userAuthentication.passwordReset
+    if (confirmation.state !== 'active') {
+      throw new ReactionError('Token needs to be active')
+    }
+
+    return {
+      from: 'info@story-teller.com',
+      to: {
+        email: event.userAuthentication.userIdentifier,
+        name: undefined
+      },
+      subject: 'Reset your password',
+      html: `
+        <p>click the following link to reset your password
+          <a href="${process.env.CLIENT_URL}/reset-password?token=${confirmation.plainToken}">reset now</a>
+        </p>
+      `,
+      text: `
+        click the following link to reset your password:
+          ${process.env.CLIENT_URL}/reset-password?token=${confirmation.plainToken}
+      `
+    }
+  }
+})

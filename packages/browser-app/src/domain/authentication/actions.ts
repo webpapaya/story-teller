@@ -43,6 +43,16 @@ Actions
   return parsedBody
 }
 
+export const requestPasswordReset: ActionCreator<
+{ userIdentifier: string },
+void,
+Actions
+> = (args) => async (dispatch) => {
+  await fetch('authentication/request-password-reset', {
+    method: 'POST',
+    body: JSON.stringify(args)
+  })
+}
+
 export const signOut = fetchViaHTTP(Authentication.actions.signOut)
-export const requestPasswordReset = fetchViaHTTP(Authentication.actions.requestPasswordReset)
 export const getAuthenticatedUser = fetchMemoizedViaHTTP(Authentication.queries.session)
