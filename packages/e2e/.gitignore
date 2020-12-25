@@ -11,4 +11,6 @@ compiled
 .rpt2_cache
 docs
 dist
+cypress/videos
+cypress/screenshots
 
