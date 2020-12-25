@@ -26,7 +26,7 @@ describe.only('authentication flow', () => {
       it('sign in works with new password', t(async (clients) => {
         await register.raw(credentials, clients)
         const [aggregateFromRequest] = await requestPasswordReset
-          .raw({ id: credentials.id }, clients)
+          .raw({ userIdentifier: credentials.userIdentifier }, clients)
 
         if (aggregateFromRequest.passwordReset.state !== 'active') {
           throw new Error('Token State needs to be active')

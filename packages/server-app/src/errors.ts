@@ -47,8 +47,15 @@ type UseCaseErrors =
   | 'Password did not match'
   | 'Token did not match'
   | 'Token is to old'
+  | 'Token needs to be active'
 
 export class UseCaseError extends DomainError {
+  constructor (public cause: UseCaseErrors) {
+    super()
+  }
+}
+
+export class ReactionError extends DomainError {
   constructor (public cause: UseCaseErrors) {
     super()
   }

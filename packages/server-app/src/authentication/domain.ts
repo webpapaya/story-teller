@@ -49,5 +49,8 @@ export type Principal = typeof principal['O']
 export const events = {
   userRegistered: buildEvent('userRegistered', v.record({
     userAuthentication
+  })),
+  passwordResetRequested: buildEvent('passwordResetRequested', v.record({
+    userAuthentication
   }))
 } as const

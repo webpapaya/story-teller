@@ -7,7 +7,7 @@ import { signIn } from '../../domain/authentication/actions';
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => ({
   onSubmit: async (values) => {
     await dispatch(signIn(values))
-    props.history.push('/')
+    props.history.push('/app')
   }
 })
 

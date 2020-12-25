@@ -37,9 +37,9 @@ export const confirmAccount = connectUseCase({
 })
 
 export const requestPasswordReset = connectUseCase({
-  fetchAggregate: userAuthenticationRepo.where,
+  fetchAggregate: userAuthenticationRepo.whereByUserIdentifier,
   ensureAggregate: userAuthenticationRepo.ensure,
-  mapCommand: (cmd) => ({ id: cmd.id }),
+  mapCommand: (cmd) => ({ userIdentifier: cmd.userIdentifier }),
   useCase: useCases.requestPasswordReset
 })
 

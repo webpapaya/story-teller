@@ -14,7 +14,6 @@ import CenteredPanel from './components/centered-panel';
 const App = () => (
   <BrowserRouter>
     <Provider store={store}>
-        <ProtectedRoute path='*' component={Navigation} />
         <Switch>
           <Route
             path="/sign-up"
@@ -37,6 +36,14 @@ const App = () => (
             render={({ history }) => (
               <CenteredPanel>
                 <RequestPasswordReset history={history} />
+              </CenteredPanel>
+            )}
+          />
+          <Route
+            path="/app"
+            render={({ history }) => (
+              <CenteredPanel>
+                Authenticated
               </CenteredPanel>
             )}
           />

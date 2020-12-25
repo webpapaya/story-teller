@@ -20,7 +20,7 @@ const Organism = isForm({
 }, ({ fields, onSubmit, submissionError }) => {
   const {t} = useTranslations()
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit} data-test-id="signUpForm">
       <Heading alignment='center' variant='h2'>{t('signUp')}</Heading>
 
       <InputText

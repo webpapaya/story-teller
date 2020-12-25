@@ -16,7 +16,7 @@ const Organism = isForm({
 }, ({ fields, onSubmit }) => {
   const {t} = useTranslations()
   return (
-  <form onSubmit={onSubmit}>
+  <form onSubmit={onSubmit} data-test-id="requestPasswordReset">
     <InputText
       label={t('email')}
       {...fields.userIdentifier}

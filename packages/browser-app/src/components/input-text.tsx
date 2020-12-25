@@ -49,7 +49,7 @@ export const InputText = React.forwardRef<HTMLInputElement, InputProps>(({
     case 'form': return (
       <>
         <label style={usesGridArea ? { gridArea: name } : {}}>
-          <span className={styles.label}></span>
+          <span className={styles.label}>{label}</span>
           <input
             ref={ref}
             className={css(

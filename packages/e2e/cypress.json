@@ -1,1 +1,6 @@
-{}
+{
+  "env": {
+    "CYPRESS_CLIENT_URL": "http://localhost:3000",
+    "CYPRESS_MAIL_URL": "http://localhost:11080/"
+  }
+}

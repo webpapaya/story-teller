@@ -41,5 +41,19 @@ export const initialize = (app: IRouter) => {
       return request.body
     }
   })
+
+  exposeUseCaseViaHTTP({
+    app,
+    actionName: 'request-password-reset',
+    aggregateName: 'authentication',
+    useCase: useCases.requestPasswordReset,
+    method: 'post',
+    principal: v.undefinedCodec,
+    authenticateBefore: () => true,
+    mapToPrincipal: () => undefined,
+    mapToCommand: ({ request }) => {
+      return request.body
+    }
+  })
   return app
 }

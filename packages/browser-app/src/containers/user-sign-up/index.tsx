@@ -7,7 +7,7 @@ import Organism from './organism'
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => ({
   onSubmit: async (values) => {
     await dispatch(signUp(values))
-    props.history.push('/')
+    props.history.push('/sign-in')
   }
 })
 

@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "env": "env $(cat $ENV_FILE | sed '/^#/ d')",
+    "test": "ENV_FILE=.env.test npm run env -- cypress run"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
     "cypress": "^6.2.0",
+    "hamjest": "^3.7.1",
     "typescript": "^4.1.3"
   }
 }

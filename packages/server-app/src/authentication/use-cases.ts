@@ -140,7 +140,7 @@ export const confirmAccount = useCase({
 
 export const requestPasswordReset = useCase({
   aggregate: userAuthentication,
-  command: v.record({ id: v.uuid }),
+  command: v.record({ userIdentifier: todo }),
   events: [
     // TODO: send password reset email
   ],
