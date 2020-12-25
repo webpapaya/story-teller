@@ -9,6 +9,7 @@ export const buildRepository = <DomainObject, DBParam, DomainResult, DBResult>(c
 }) => async (params: DomainObject, clients: Pick<ExternalDependencies, 'pgClient'>) => {
   try {
     const repository = config.toRepository(params)
+
     const result = await config.dbFunction.run(repository, clients.pgClient)
     return result.map((item) => config.toDomain(item))
   } catch (e) {
@@ -25,6 +26,7 @@ export const buildRecordRepository = <DomainObject, DBParam, DomainResult, DBRes
   toDomain: (dbResult: DBResult) => DomainResult
 }) => async (params: DomainObject, clients: Pick<ExternalDependencies, 'pgClient'>) => {
   const result = await buildRepository(config)(params, clients)
+
   if (result.length === 0) {
     throw new RepositoryError('Record not found')
   }

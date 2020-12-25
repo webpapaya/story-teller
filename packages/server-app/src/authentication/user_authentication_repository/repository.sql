@@ -4,9 +4,7 @@ WHERE id = :id;
 
 /* @name whereUserAuthenticationByUserIdentifier */
 SELECT * FROM user_authentication
-WHERE :user_identifier = :user_identifier;
-
-
+WHERE user_identifier = :user_identifier;
 
 /* @name createUserAuthentication */
 INSERT INTO user_authentication (

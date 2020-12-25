@@ -43,6 +43,7 @@ export class RepositoryError extends DomainError {
 }
 
 type UseCaseErrors =
+  | 'Token is invalid'
   | 'Password did not match'
   | 'Token did not match'
   | 'Token is to old'

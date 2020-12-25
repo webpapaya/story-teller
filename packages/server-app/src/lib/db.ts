@@ -48,7 +48,7 @@ const installQueryLogger = () => {
   }
 }
 
-if (process.env.PG_LOG_QUERIES) {
+if (process.env.PG_LOG_QUERIES === 'true') {
   installQueryLogger()
 }
 

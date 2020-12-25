@@ -21,8 +21,13 @@ const JWT_EXPIRATION = process.env.JWT_EXPIRATION as string
 export const hashPassword = (password: string) =>
   bcrypt.hashSync(password, SALT_ROUNDS)
 
-export const comparePassword = (password: string, passwordHash: any) =>
-  passwordHash && bcrypt.compareSync(password, passwordHash)
+export const comparePassword = (password: string, passwordHash: any) => {
+  try {
+    return passwordHash && bcrypt.compareSync(password, passwordHash)
+  } catch (e) {
+    throw new UseCaseError('Token is invalid')
+  }
+}
 
 export const buildTokenPair = () => {
   const plainToken = crypto.randomBytes(50).toString('hex')
@@ -121,6 +126,7 @@ export const confirmAccount = useCase({
       !comparePassword(command.token, aggregate.confirmation.token)) {
       throw new UseCaseError('Token did not match')
     }
+
     const now = LocalDateTime.now()
     return {
       ...aggregate,

@@ -14,6 +14,7 @@ export const withMockedDate = async <T>(date: string, fn: (remock: typeof mockda
 }
 
 type WithinConnectionForTesting = (fn: (params: {
+  sendMail: () => Promise<void>
   withinConnection: WithinConnection
   pgClient: DBClient
   channel: Channel
@@ -26,6 +27,7 @@ export const t: WithinConnectionForTesting = (fn) => async () => {
     try {
       await params.begin()
       return await fn({
+        sendMail: async () => {},
         pgClient: params.client,
         channel,
         withinConnection: async (fn2) => fn2(params)
