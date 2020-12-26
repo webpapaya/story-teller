@@ -1,6 +1,6 @@
-import { sideEffect } from '../lib/use-case'
+import { sideEffect } from '../../lib/use-case'
 import { v } from '@story-teller/shared'
-import { email } from '../utils/custom-codecs'
+import { email } from '../../utils/custom-codecs'
 
 const mail = v.record({
   from: email,

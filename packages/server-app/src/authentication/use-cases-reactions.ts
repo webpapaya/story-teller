@@ -1,6 +1,7 @@
 import { reactToEventSync } from '../lib/use-case'
 import { events } from './domain'
 import { sendEmail } from '../side-effects/send-mail'
+import { template } from '../side-effects/send-mail/template'
 import { ReactionError } from '../errors'
 
 export const reactToUserRegistered = reactToEventSync({
@@ -19,18 +20,14 @@ export const reactToUserRegistered = reactToEventSync({
         name: undefined
       },
       subject: 'Confirm your account',
-      html: `
-        <h1>Welcome to Story-Teller</h1>
-        <p>Please confirm your account with the following link
-          <a href="${process.env.CLIENT_URL}/confirm-account?token=${confirmation.plainToken}">confirm now</a>
-        </p>
-      `,
-      text: `
-        Welcome to Story-Teller
-
-        Please confirm your account with the following link:
-          ${process.env.CLIENT_URL}/confirm-account?token=${confirmation.token}
-      `
+      ...template({
+        header: 'Welcome to Story-Teller',
+        body: 'Please confirm your account',
+        callToAction: {
+          link: `${process.env.CLIENT_URL}/confirm-account?token=${confirmation.plainToken}`,
+          text: 'confirm now'
+        }
+      })
     }
   }
 })
@@ -43,7 +40,6 @@ export const reactToPasswordResetRequested = reactToEventSync({
     if (confirmation.state !== 'active') {
       throw new ReactionError('Token needs to be active')
     }
-    const resetPasswordLink = `${process.env.CLIENT_URL}/reset-password?id=${event.userAuthentication.id}&token=${confirmation.plainToken}`
 
     return {
       from: 'info@story-teller.com',
@@ -52,15 +48,14 @@ export const reactToPasswordResetRequested = reactToEventSync({
         name: undefined
       },
       subject: 'Reset your password',
-      html: `
-        <p>click the following link to reset your password
-          <a href="${resetPasswordLink}">reset now</a>
-        </p>
-      `,
-      text: `
-        click the following link to reset your password:
-          ${resetPasswordLink}
-      `
+      ...template({
+        header: 'Reset your password',
+        body: 'To reset your password click the following link',
+        callToAction: {
+          link: `${process.env.CLIENT_URL}/reset-password?id=${event.userAuthentication.id}&token=${confirmation.plainToken}`,
+          text: 'reset now'
+        }
+      })
     }
   }
 })

@@ -19,7 +19,7 @@ const SignIn = isForm({
   }),
 }, ({ fields, onSubmit, submissionError }) => {
   const {t} = useTranslations()
-  console.log(t('userIdentifier'))
+
   return (
     <form onSubmit={onSubmit} data-test-id="signInForm">
       <Heading alignment='center' variant='h2'>{t('signIn')}</Heading>
