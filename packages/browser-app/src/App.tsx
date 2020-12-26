@@ -6,6 +6,7 @@ import { store } from './domain';
 import SignIn from './containers/user-sign-in';
 import SignUp from './containers/user-sign-up'
 import RequestPasswordReset from './containers/user-request-password-reset'
+import ResetPassword from './containers/user-reset-password'
 
 import ProtectedRoute from './containers/protected-route';
 import Navigation from './containers/navigation';
@@ -36,6 +37,14 @@ const App = () => (
             render={({ history }) => (
               <CenteredPanel>
                 <RequestPasswordReset history={history} />
+              </CenteredPanel>
+            )}
+          />
+           <Route
+            path="/reset-password"
+            render={({ history }) => (
+              <CenteredPanel>
+                <ResetPassword history={history} />
               </CenteredPanel>
             )}
           />

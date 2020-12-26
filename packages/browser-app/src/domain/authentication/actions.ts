@@ -54,5 +54,16 @@ Actions
   })
 }
 
+export const resetPassword: ActionCreator<
+{ id: string, token: string, password: string },
+void,
+Actions
+> = (args) => async (dispatch) => {
+  // await fetch('authentication/request-password-reset', {
+  //   method: 'POST',
+  //   body: JSON.stringify(args)
+  // })
+}
+
 export const signOut = fetchViaHTTP(Authentication.actions.signOut)
 export const getAuthenticatedUser = fetchMemoizedViaHTTP(Authentication.queries.session)
