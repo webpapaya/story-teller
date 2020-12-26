@@ -49,10 +49,13 @@ const requestPasswordReset = (credentials = signUp()) => {
 }
 
 const extractTokenFromMail = () => {
+  cy.wait(200)
+
   return  cy.request(`${Cypress.env('CYPRESS_MAIL_URL')}/messages`, {
     headers: { 'content-type': 'application/json' }
   }).then((allMessages) => {
     const messageId = allMessages.body[allMessages.body.length - 1].id
+
 
     return cy
       .request(`${Cypress.env('CYPRESS_MAIL_URL')}/messages/${messageId}.html`)
@@ -65,18 +68,16 @@ const extractTokenFromMail = () => {
 }
 
 const resetPassword = (credentials = signUp()) => {
-  cy.get('#messages tr:first-child').click()
-
   extractTokenFromMail()
     .then(url => {
       console.log(url)
       cy.visit(url)
 
       cy.get('[name="password"]')
-        .type(credentials.userIdentifier)
+        .type(credentials.password)
 
-      // cy.get('[data-test-id="resetPasswordForm"]')
-      //   .submit()
+      cy.get('[data-test-id="resetPasswordForm"]')
+        .submit()
     })
 
   return credentials
@@ -88,9 +89,12 @@ context('Authentication', () => {
     cy.location('pathname').should('equal', '/app')
   })
 
-  it.only('reset password', () => {
+  it('reset password', () => {
     const credentials = buildCredentials()
     signUp(credentials)
     requestPasswordReset(credentials)
+    resetPassword({...credentials, password: 'updated' })
+    signIn({...credentials, password: 'updated' })
+    cy.location('pathname').should('equal', '/app')
   })
 })

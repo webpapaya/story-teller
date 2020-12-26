@@ -43,6 +43,7 @@ export const reactToPasswordResetRequested = reactToEventSync({
     if (confirmation.state !== 'active') {
       throw new ReactionError('Token needs to be active')
     }
+    const resetPasswordLink = `${process.env.CLIENT_URL}/reset-password?id=${event.userAuthentication.id}&token=${confirmation.plainToken}`
 
     return {
       from: 'info@story-teller.com',
@@ -53,12 +54,12 @@ export const reactToPasswordResetRequested = reactToEventSync({
       subject: 'Reset your password',
       html: `
         <p>click the following link to reset your password
-          <a href="${process.env.CLIENT_URL}/reset-password?token=${confirmation.plainToken}">reset now</a>
+          <a href="${resetPasswordLink}">reset now</a>
         </p>
       `,
       text: `
         click the following link to reset your password:
-          ${process.env.CLIENT_URL}/reset-password?token=${confirmation.plainToken}
+          ${resetPasswordLink}
       `
     }
   }

@@ -17,7 +17,7 @@ export const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = ()
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => ({
   onSubmit: async (values) => {
     await dispatch(resetPassword(values))
-    props.history.push('/app')
+    props.history.push('/sign-in')
   }
 })
 

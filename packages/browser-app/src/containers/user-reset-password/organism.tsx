@@ -24,14 +24,14 @@ const Organism = isForm<typeof schema, OrganismPropsType>({
 }, ({ fields, onSubmit }) => {
   const { t } = useTranslations()
   return (
-  <form onSubmit={onSubmit}>
+  <form onSubmit={onSubmit} data-test-id="resetPasswordForm">
     <InputHidden
-      defaultValue=""
+      defaultValue={fields.id.value}
       {...fields.id}
     />
 
     <InputHidden
-      defaultValue=""
+      defaultValue={fields.token.value}
       {...fields.token}
     />
 

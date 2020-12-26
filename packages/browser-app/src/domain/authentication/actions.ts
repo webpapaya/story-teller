@@ -59,10 +59,10 @@ export const resetPassword: ActionCreator<
 void,
 Actions
 > = (args) => async (dispatch) => {
-  // await fetch('authentication/request-password-reset', {
-  //   method: 'POST',
-  //   body: JSON.stringify(args)
-  // })
+  await fetch('authentication/reset-password', {
+    method: 'POST',
+    body: JSON.stringify(args)
+  })
 }
 
 export const signOut = fetchViaHTTP(Authentication.actions.signOut)

@@ -115,7 +115,7 @@ describe('signUp', () => {
 })
 
 describe('requestPasswordReset', () => {
-  it('calls sign-in with given parameters', () => {
+  it('calls request-password-reset with given parameters', () => {
     const returnValue = 'irrelevant'
     const fetch = stub().returns(Promise.resolve({
       status: 200,
@@ -130,6 +130,29 @@ describe('requestPasswordReset', () => {
     requestPasswordReset(payload)(dispatch)
     assertThat(fetch, hasProperty('lastCall.args', hasProperties({
       0: 'authentication/request-password-reset',
+      1: hasProperties({
+        body: JSON.stringify(payload)
+      })
+    })))
+  })
+})
+
+describe('resetPassword', () => {
+  it('calls reset-password with given parameters', () => {
+    const returnValue = 'irrelevant'
+    const fetch = stub().returns(Promise.resolve({
+      status: 200,
+      json: () => Promise.resolve(returnValue)
+    }))
+
+    const { resetPassword } = proxyquire('./actions', {
+      '../fetch': { fetch }
+    })
+    const payload = { userIdentifier: 'irrelevant' }
+
+    resetPassword(payload)(dispatch)
+    assertThat(fetch, hasProperty('lastCall.args', hasProperties({
+      0: 'authentication/reset-password',
       1: hasProperties({
         body: JSON.stringify(payload)
       })

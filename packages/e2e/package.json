@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "env": "env $(cat $ENV_FILE | sed '/^#/ d')",
-    "test": "ENV_FILE=.env.test npm run env -- cypress run"
+    "test": "cypress run"
   },
   "author": "",
   "license": "ISC",

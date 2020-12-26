@@ -7,7 +7,7 @@ export const buildI18n = (translations: {
   en: FluentResource
 }) => {
   const [locale] = negotiateLanguages(
-    navigator.languages,
+    global?.navigator?.languages,
     Object.keys(translations),
     { defaultLocale: 'en' }
   )
