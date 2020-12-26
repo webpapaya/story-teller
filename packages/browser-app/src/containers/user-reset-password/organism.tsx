@@ -6,6 +6,7 @@ import { InputPassword } from '../../components/input-password';
 import { Link } from '../../components/link';
 import { OrganismPropsType } from './types';
 import { InputHidden } from '../../components/input-hidden';
+import { useTranslations } from './translations'
 
 const schema = v.record({
   id: v.string,
@@ -20,7 +21,9 @@ const Organism = isForm<typeof schema, OrganismPropsType>({
     password: '',
   },
   schema,
-}, ({ fields, onSubmit }) => (
+}, ({ fields, onSubmit }) => {
+  const { t } = useTranslations()
+  return (
   <form onSubmit={onSubmit}>
     <InputHidden
       defaultValue=""
@@ -33,15 +36,16 @@ const Organism = isForm<typeof schema, OrganismPropsType>({
     />
 
     <InputPassword
-      label="New password"
+      label={t('password')}
       {...fields.password}
     />
 
-    <Button block marginBottom>Submit</Button>
+    <Button block marginBottom>{t('submit')}</Button>
     <Link to="/" variant="link" block>
-      Cancel
+      {t('cancel')}
     </Link>
   </form>
-))
+)
+})
 
 export default Organism
