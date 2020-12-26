@@ -49,6 +49,7 @@
     "analyze": "npm run build && source-map-explorer 'build/static/js/*.js'",
     "test": "npm run env -- mocha -r ./src/utils/style-mock.js -r regenerator-runtime/runtime.js -r @swc-node/register --exit --extension ts $(find src -name '*.spec.ts')",
     "build": "npm run env -- react-scripts build",
+    "test:types": "tsc --noEmit",
     "lint": "eslint --ext js,ts --ignore-path .gitignore .",
     "storybook": "start-storybook -p 9009 -s public",
     "build-storybook": "build-storybook -s public"
