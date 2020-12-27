@@ -84,17 +84,28 @@ const resetPassword = (credentials = signUp()) => {
 }
 
 context('Authentication', () => {
-  it('sign-up', () => {
-    signIn()
+  it('can sign in after sign up', () => {
+    const credentials = buildCredentials()
+    signUp(credentials)
+    signIn(credentials)
     cy.location('pathname').should('equal', '/app')
   })
 
-  it('reset password', () => {
+  it('can sign in after password reset', () => {
     const credentials = buildCredentials()
     signUp(credentials)
     requestPasswordReset(credentials)
     resetPassword({...credentials, password: 'updated' })
     signIn({...credentials, password: 'updated' })
+    cy.location('pathname').should('equal', '/app')
+  })
+
+  it('refreshes token after reload', () => {
+    const credentials = buildCredentials()
+    signUp(credentials)
+    signIn(credentials)
+    cy.location('pathname').should('equal', '/app')
+    cy.reload()
     cy.location('pathname').should('equal', '/app')
   })
 })

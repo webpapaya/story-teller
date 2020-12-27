@@ -49,3 +49,21 @@ export const resetPasswordByToken = connectUseCase({
   mapCommand: (cmd) => ({ id: cmd.id }),
   useCase: useCases.resetPasswordByToken
 })
+
+export const refreshToken = connectUseCase({
+  fetchAggregate: async (command: { id: string, userId: string }, clients) => {
+    const refreshToken = await refreshTokenRepo
+      .where({ id: command.id, userId: command.userId }, clients)
+
+    const principal = await principalRepo
+      .where({ id: command.userId }, clients)
+
+    return { refreshToken, principal }
+  },
+  ensureAggregate: async (aggregate, clients) => {
+    await refreshTokenRepo.ensure(aggregate.refreshToken, clients)
+    return aggregate
+  },
+  mapCommand: (cmd) => ({ id: cmd.id, userId: cmd.userId }),
+  useCase: useCases.refreshToken
+})

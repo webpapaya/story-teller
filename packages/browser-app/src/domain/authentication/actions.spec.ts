@@ -31,6 +31,7 @@ describe('signIn', () => {
 
   describe('when status was 200', () => {
     const signInFactory = (args?: { token?: string }) => {
+      const dispatch = stub()
       const returnValue = { payload: { jwtToken: args?.token ?? DUMMY_TOKEN } }
       const fetch = stub().returns(Promise.resolve({
         status: 200,
@@ -43,7 +44,7 @@ describe('signIn', () => {
       const signInArgs = { userIdentifier: 'test', password: 'myPassword' }
       const signIn = () => actions.signIn(signInArgs)(dispatch)
 
-      return { returnValue, fetch, signIn, signInArgs }
+      return { returnValue, fetch, signIn, signInArgs, dispatch }
     }
 
     it('returns value from API', async () => {
@@ -52,7 +53,7 @@ describe('signIn', () => {
     })
 
     it('dispatches USER/SESSION/SUCCESS', async () => {
-      const { signIn } = signInFactory()
+      const { signIn, dispatch } = signInFactory()
 
       await signIn()
 
@@ -166,6 +167,52 @@ describe('requestPasswordReset', () => {
         body: JSON.stringify(payload)
       })
     })))
+  })
+})
+
+describe('refreshToken', () => {
+  describe('WHEN status 200', () => {
+    const refreshTokenFactory = (args?: { token?: string }) => {
+      const dispatch = stub()
+      const returnValue = { payload: { jwtToken: args?.token ?? DUMMY_TOKEN } }
+      const fetch = stub().returns(Promise.resolve({
+        status: 200,
+        json: () => Promise.resolve(returnValue)
+      }))
+
+      const actions = proxyquire('./actions', {
+        '../fetch': { fetch }
+      })
+
+      const refreshToken = () => actions.refreshToken.unmemoized()(dispatch)
+      return { returnValue, fetch, refreshToken, dispatch }
+    }
+
+    it('calls refresh-token correctly', async () => {
+      const { refreshToken, fetch } = refreshTokenFactory()
+
+      await refreshToken()
+      assertThat(fetch, hasProperty('lastCall.args', hasProperties({
+        0: 'authentication/refresh-token',
+        1: hasProperties({
+          credentials: 'include'
+        })
+      })))
+    })
+
+    it('dispatches USER/SESSION/SUCCESS', async () => {
+      const { refreshToken, dispatch } = refreshTokenFactory()
+
+      await refreshToken()
+
+      assertThat(dispatch, hasProperty('lastCall.args.0', equalTo({
+        type: 'USER/SESSION/SUCCESS',
+        payload: {
+          id: DUMMY_PRINCIPAL_ID,
+          jwtToken: DUMMY_TOKEN
+        }
+      })))
+    })
   })
 })
 

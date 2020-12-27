@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { MapDispatchToProps, MapStateToProps } from '../../domain/types';
-import { getAuthenticatedUser } from '../../domain/authentication/actions';
+import { refreshToken } from '../../domain/authentication/actions';
 import { DispatchPropsType, StatePropsType, OwnPropsType } from './types'
 import hasSideEffect from '../../has-side-effect';
 import Organism from './organism';
@@ -11,7 +11,7 @@ const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state) =
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch) => ({
-  sideEffect: () => dispatch(getAuthenticatedUser({}))
+  sideEffect: () => dispatch(refreshToken())
 })
 
 export default connect(

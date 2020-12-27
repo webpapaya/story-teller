@@ -190,23 +190,35 @@ export const resetPasswordByToken = useCase({
   }
 })
 
-export const refreshToken = useCase({
-  aggregate: authenticationToken,
+export const refreshToken = aggregateFactory({
+  aggregateFrom: v.record({
+    refreshToken: authenticationToken,
+    principal: principal
+  }),
+  aggregateTo: v.record({
+    jwtToken: v.string,
+    refreshToken: authenticationToken
+  }),
   command: v.record({ id: v.uuid, userId: v.uuid, token: todo }),
   events: [
     // TODO: send password reset email
   ],
   execute: ({ aggregate, command }) => {
-    if (aggregate.token.state !== 'active' ||
-      !comparePassword(command.token, aggregate.token.token)) {
+    if (aggregate.refreshToken.token.state !== 'active' ||
+      !comparePassword(command.token, aggregate.refreshToken.token.token)) {
       throw new UseCaseError('Token did not match')
     }
 
     return {
-      id: command.id,
-      userId: command.userId,
-      token: buildToken(),
-      expiresOn: LocalDateTime.now().plusDays(30)
+      jwtToken: jsonwebtoken.sign(aggregate.principal, SECRET_KEY_BASE, {
+        expiresIn: JWT_EXPIRATION
+      }),
+      refreshToken: {
+        id: uuid(),
+        userId: aggregate.principal.id,
+        token: buildToken(),
+        expiresOn: LocalDateTime.now().plusDays(30)
+      }
     }
   }
 })
