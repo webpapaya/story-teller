@@ -3,14 +3,14 @@ import { v4 } from 'uuid'
 import fetchViaHTTP, { fetchMemoizedViaHTTP } from '../fetch-via-http'
 import { ActionCreator } from '../types'
 import { Actions } from './types'
-import { fetch } from '../fetch'
+import { fetch, setAuthenticationToken } from '../fetch'
 import { APIError } from '../errors'
 
 export const signIn: ActionCreator<
 { userIdentifier: string, password: string },
 void,
 Actions
-> = (args, options) => async (dispatch) => {
+> = (args) => async (dispatch) => {
   const response = await fetch('authentication/sign-in', {
     method: 'POST',
     body: JSON.stringify(args)
@@ -21,6 +21,7 @@ Actions
     throw new APIError(parsedBody)
   }
 
+  setAuthenticationToken(parsedBody.payload.jwtToken)
   return parsedBody
 }
 

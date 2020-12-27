@@ -7,9 +7,10 @@ const dispatch = () => {} // eslint-disable-line @typescript-eslint/no-empty-fun
 
 describe('signIn', () => {
   it('calls sign in route with arguments', async () => {
+    const returnValue = { payload: { jwtToken: 'token' } }
     const fetch = stub().returns(Promise.resolve({
       status: 200,
-      json: () => Promise.resolve()
+      json: () => Promise.resolve(returnValue)
     }))
     const { signIn } = proxyquire('./actions', {
       '../fetch': { fetch }
@@ -26,24 +27,44 @@ describe('signIn', () => {
     })))
   })
 
-  it('WHEN status was 200, returns value from API', async () => {
-    const returnValue = 'irrelevant'
-    const fetch = stub().returns(Promise.resolve({
-      status: 200,
-      json: () => Promise.resolve(returnValue)
-    }))
+  describe('when status was 200', () => {
+    it('returns value from API', async () => {
+      const returnValue = { payload: { jwtToken: 'token' } }
+      const fetch = stub().returns(Promise.resolve({
+        status: 200,
+        json: () => Promise.resolve(returnValue)
+      }))
+      const setAuthenticationToken = stub()
 
-    const { signIn } = proxyquire('./actions', {
-      '../fetch': { fetch }
+      const { signIn } = proxyquire('./actions', {
+        '../fetch': { fetch, setAuthenticationToken }
+      })
+      const signInArgs = { userIdentifier: 'test', password: 'myPassword' }
+      const actionResult = await signIn(signInArgs)(dispatch)
+
+      assertThat(actionResult, equalTo(returnValue))
     })
-    const signInArgs = { userIdentifier: 'test', password: 'myPassword' }
-    const actionResult = await signIn(signInArgs)(dispatch)
 
-    assertThat(actionResult, equalTo(returnValue))
+    it('sets jwtToken', async () => {
+      const returnValue = { payload: { jwtToken: 'token' } }
+      const fetch = stub().returns(Promise.resolve({
+        status: 200,
+        json: () => Promise.resolve(returnValue)
+      }))
+      const setAuthenticationToken = stub()
+
+      const { signIn } = proxyquire('./actions', {
+        '../fetch': { fetch, setAuthenticationToken }
+      })
+      const signInArgs = { userIdentifier: 'test', password: 'myPassword' }
+      await signIn(signInArgs)(dispatch)
+
+      assertThat(setAuthenticationToken, hasProperty('lastCall.args.0', returnValue.payload.jwtToken))
+    })
   })
 
   it('WHEN status was not 200, throws API error', async () => {
-    const returnValue = 'irrelevant'
+    const returnValue = { payload: { jwtToken: 'token' } }
     const fetch = stub().returns(Promise.resolve({
       status: 400,
       json: () => Promise.resolve({ message: returnValue })
