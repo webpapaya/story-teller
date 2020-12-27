@@ -15,37 +15,33 @@ const schema = v.record({
 })
 
 const Organism = isForm<typeof schema, OrganismPropsType>({
-  initialValues: {
-    id: '',
-    token: '',
-    password: '',
-  },
   schema,
 }, ({ fields, onSubmit }) => {
   const { t } = useTranslations()
   return (
-  <form onSubmit={onSubmit} data-test-id="resetPasswordForm">
-    <InputHidden
-      defaultValue={fields.id.value}
-      {...fields.id}
-    />
+    <form onSubmit={onSubmit} data-test-id="resetPasswordForm">
+      <InputHidden
+        defaultValue={fields.id.value}
+        {...fields.id}
+      />
 
-    <InputHidden
-      defaultValue={fields.token.value}
-      {...fields.token}
-    />
+      <InputHidden
+        defaultValue={fields.token.value}
+        {...fields.token}
+      />
 
-    <InputPassword
-      label={t('password')}
-      {...fields.password}
-    />
+      <InputPassword
+        label={t('password')}
+        {...fields.password}
+      />
 
-    <Button block marginBottom>{t('submit')}</Button>
-    <Link to="/" variant="link" block>
-      {t('cancel')}
-    </Link>
-  </form>
+      <Button block marginBottom>{t('submit')}</Button>
+      <Link to="/" variant="link" block>
+        {t('cancel')}
+      </Link>
+    </form>
 )
 })
 
 export default Organism
+

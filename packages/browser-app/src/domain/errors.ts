@@ -1,6 +1,6 @@
 class ClientError extends Error {}
 export class APIError extends ClientError {
-  constructor (public details: any) {
+  constructor (public details?: any) {
     super()
   }
 

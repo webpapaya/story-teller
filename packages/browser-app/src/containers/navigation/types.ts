@@ -11,7 +11,6 @@ export type StatePropsType = {
 
 export type DispatchPropsType = {
   sideEffect: () => Promise<any>
-  onProjectsSelected: (id: string[]) => void
   onSignOut: UnpackThunk<typeof signOut>
 }
 

@@ -50,3 +50,12 @@ export const where = buildRecordRepository({
   }),
   toDomain
 })
+
+export const destroy = buildRecordRepository({
+  dbFunction: repository.deleteRefreshToken,
+  toRepository: (params: { id: string, userId: string }) => ({
+    id: params.id,
+    userId: params.userId
+  }),
+  toDomain
+})

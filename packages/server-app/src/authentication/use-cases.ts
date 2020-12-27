@@ -200,9 +200,7 @@ export const refreshToken = aggregateFactory({
     refreshToken: authenticationToken
   }),
   command: v.record({ id: v.uuid, userId: v.uuid, token: todo }),
-  events: [
-    // TODO: send password reset email
-  ],
+  events: [],
   execute: ({ aggregate, command }) => {
     if (aggregate.refreshToken.token.state !== 'active' ||
       !comparePassword(command.token, aggregate.refreshToken.token.token)) {
@@ -220,5 +218,20 @@ export const refreshToken = aggregateFactory({
         expiresOn: LocalDateTime.now().plusDays(30)
       }
     }
+  }
+})
+
+export const signOut = aggregateFactory({
+  aggregateFrom: authenticationToken,
+  aggregateTo: authenticationToken,
+  command: v.record({ id: v.uuid, userId: v.uuid, token: todo }),
+  events: [],
+  execute: ({ aggregate, command }) => {
+    if (aggregate.token.state !== 'active' ||
+      !comparePassword(command.token, aggregate.token.token)) {
+      throw new UseCaseError('Token did not match')
+    }
+
+    return aggregate
   }
 })

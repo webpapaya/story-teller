@@ -56,6 +56,23 @@ export const initialize = (app: IRouter) => {
     }
   })
 
+  app.post('/authentication/sign-out', async (req, res) => {
+    try {
+      const refreshToken = JSON.parse(req.signedCookies.refreshToken)
+      res.cookie('refreshToken', { expires: Date.now() })
+      await useCases.signOut.execute(refreshToken)
+
+      res.send({
+        payload: {}
+      })
+    } catch (e) {
+      console.log(e)
+      const { status, body } = convertError(e)
+      res.status(status)
+      res.send(body)
+    }
+  })
+
   exposeUseCaseViaHTTP({
     app,
     actionName: 'sign-up',

@@ -7,6 +7,7 @@ import SignIn from './containers/user-sign-in';
 import SignUp from './containers/user-sign-up'
 import RequestPasswordReset from './containers/user-request-password-reset'
 import ResetPassword from './containers/user-reset-password'
+import Navigation from './containers/navigation'
 
 import ProtectedRoute from './containers/protected-route';
 import CenteredPanel from './components/centered-panel';
@@ -50,9 +51,12 @@ const App = () => (
           <ProtectedRoute
             path="/app"
             render={() => (
-              <CenteredPanel>
-                Authenticated
-              </CenteredPanel>
+              <>
+                <Navigation />
+                <CenteredPanel>
+                  Authenticated
+                </CenteredPanel>
+              </>
             )}
           />
         </Switch>

@@ -7,7 +7,7 @@ import { requestPasswordReset } from '../../domain/authentication/actions';
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => ({
   onSubmit: async (values) => {
     await dispatch(requestPasswordReset(values))
-    props.history.push('/')
+    props.history.push('/sign-in')
   }
 })
 

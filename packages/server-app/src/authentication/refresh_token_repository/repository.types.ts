@@ -36,6 +36,40 @@ const whereRefreshTokenIR: any = {"name":"whereRefreshToken","params":[{"name":"
 export const whereRefreshToken = new PreparedQuery<IWhereRefreshTokenParams,IWhereRefreshTokenResult>(whereRefreshTokenIR);
 
 
+/** 'deleteRefreshToken' parameters type */
+export interface IDeleteRefreshTokenParams {
+  id: string | null | void;
+  userId: string | null | void;
+}
+
+/** 'deleteRefreshToken' return type */
+export interface IDeleteRefreshTokenResult {
+  id: string;
+  userId: string;
+  token: string;
+  createdAt: LocalDateTime;
+  expiresOn: LocalDateTime;
+}
+
+/** 'deleteRefreshToken' query type */
+export interface IDeleteRefreshTokenQuery {
+  params: IDeleteRefreshTokenParams;
+  result: IDeleteRefreshTokenResult;
+}
+
+const deleteRefreshTokenIR: any = {"name":"deleteRefreshToken","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":166,"b":167,"line":7,"col":12}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":184,"b":189,"line":7,"col":30}]}}],"usedParamSet":{"id":true,"userId":true},"statement":{"body":"delete from refresh_token\nWHERE id = :id AND user_id = :userId\nRETURNING *","loc":{"a":128,"b":201,"line":6,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * delete from refresh_token
+ * WHERE id = :id AND user_id = :userId
+ * RETURNING *
+ * ```
+ */
+export const deleteRefreshToken = new PreparedQuery<IDeleteRefreshTokenParams,IDeleteRefreshTokenResult>(deleteRefreshTokenIR);
+
+
 /** 'ensureRefreshToken' parameters type */
 export interface IEnsureRefreshTokenParams {
   id: string | null | void;
@@ -60,7 +94,7 @@ export interface IEnsureRefreshTokenQuery {
   result: IEnsureRefreshTokenResult;
 }
 
-const ensureRefreshTokenIR: any = {"name":"ensureRefreshToken","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":208,"b":209,"line":7,"col":9}]}},{"name":"user_id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":213,"b":219,"line":7,"col":14}]}},{"name":"token","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":223,"b":227,"line":7,"col":24}]}},{"name":"expires_on","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":231,"b":240,"line":7,"col":32}]}},{"name":"created_at","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":244,"b":253,"line":7,"col":45}]}}],"usedParamSet":{"id":true,"user_id":true,"token":true,"expires_on":true,"created_at":true},"statement":{"body":"INSERT INTO refresh_token (id, user_id, token, expires_on, created_at)\nVALUES (:id, :user_id, :token, :expires_on, :created_at)\nON CONFLICT (id)\nDO UPDATE\n  SET user_id = EXCLUDED.user_id,\n      token = EXCLUDED.token,\n      expires_on = EXCLUDED.expires_on,\n      created_at = EXCLUDED.created_at\nRETURNING *","loc":{"a":128,"b":436,"line":6,"col":0}}};
+const ensureRefreshTokenIR: any = {"name":"ensureRefreshToken","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":316,"b":317,"line":12,"col":9}]}},{"name":"user_id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":321,"b":327,"line":12,"col":14}]}},{"name":"token","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":331,"b":335,"line":12,"col":24}]}},{"name":"expires_on","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":339,"b":348,"line":12,"col":32}]}},{"name":"created_at","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":352,"b":361,"line":12,"col":45}]}}],"usedParamSet":{"id":true,"user_id":true,"token":true,"expires_on":true,"created_at":true},"statement":{"body":"INSERT INTO refresh_token (id, user_id, token, expires_on, created_at)\nVALUES (:id, :user_id, :token, :expires_on, :created_at)\nON CONFLICT (id)\nDO UPDATE\n  SET user_id = EXCLUDED.user_id,\n      token = EXCLUDED.token,\n      expires_on = EXCLUDED.expires_on,\n      created_at = EXCLUDED.created_at\nRETURNING *","loc":{"a":236,"b":544,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:

@@ -1,7 +1,7 @@
 import { Authentication } from '@story-teller/shared'
 import { v4 } from 'uuid'
 import { decode as decodeJWT } from 'jsonwebtoken'
-import fetchViaHTTP, { fetchMemoizedViaHTTP } from '../fetch-via-http'
+import { fetchMemoizedViaHTTP } from '../fetch-via-http'
 import { ActionCreator } from '../types'
 import { Actions } from './types'
 import { fetch } from '../fetch'
@@ -44,6 +44,26 @@ Actions
     }
   })
   return parsedBody
+}
+
+export const signOut: ActionCreator<
+void,
+void,
+Actions
+> = () => async (dispatch) => {
+  const response = await fetch('authentication/sign-out', {
+    method: 'POST',
+    credentials: 'include'
+  })
+
+  if (response.status !== 200) {
+    throw new APIError()
+  }
+
+  dispatch({
+    type: 'USER/SIGN_OUT/SUCCESS',
+    payload: undefined
+  })
 }
 
 export const signUp: ActionCreator<
@@ -112,5 +132,4 @@ Actions
   })
 }
 
-export const signOut = fetchViaHTTP(Authentication.actions.signOut)
 export const getAuthenticatedUser = fetchMemoizedViaHTTP(Authentication.queries.session)

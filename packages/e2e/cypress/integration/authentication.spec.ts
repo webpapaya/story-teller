@@ -35,6 +35,15 @@ const signIn = (credentials = signUp()) => {
   return credentials
 }
 
+const signOut = (credentials = signUp()) => {
+  cy.visit(`${Cypress.env('CYPRESS_CLIENT_URL')}/app`)
+
+  cy.get('[data-test-id="sign-out"]')
+      .click()
+
+  return credentials
+}
+
 
 const requestPasswordReset = (credentials = signUp()) => {
   cy.visit(`${Cypress.env('CYPRESS_CLIENT_URL')}/request-password-reset`)
@@ -100,12 +109,14 @@ context('Authentication', () => {
     cy.location('pathname').should('equal', '/app')
   })
 
-  it('refreshes token after reload', () => {
+  it('can sign-in, reload and sign-out afterwards', () => {
     const credentials = buildCredentials()
     signUp(credentials)
     signIn(credentials)
     cy.location('pathname').should('equal', '/app')
     cy.reload()
     cy.location('pathname').should('equal', '/app')
+    signOut()
+    cy.location('pathname').should('equal', '/sign-in')
   })
 })

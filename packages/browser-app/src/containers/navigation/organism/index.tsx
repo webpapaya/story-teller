@@ -28,7 +28,7 @@ const Organism = (props: OrganismPropsType) => {
 
   return (
     <nav className={css(styles.navigationWrp)} ref={ref}>
-      <ExitToApp onClick={() => props.onSignOut({})} aria-label={t('signOut')} />
+      <ExitToApp onClick={() => props.onSignOut()} aria-label={t('signOut')} data-test-id="sign-out"/>
     </nav>
   )
 }

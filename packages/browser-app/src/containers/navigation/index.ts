@@ -4,9 +4,7 @@ import { MapDispatchToProps, MapStateToProps } from '../../domain/types'
 import Organism from './organism'
 import { signOut } from '../../domain/authentication/actions'
 import hasSideEffect from '../../has-side-effect'
-import { whereProjects } from '../../domain/project/actions'
 import { withRouter } from 'react-router'
-import { writeActiveProjects } from '../../domain/project/selectors'
 
 const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = () => {
   return ({})
@@ -14,9 +12,8 @@ const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = () => {
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => {
   return {
-    onProjectsSelected: (t) => writeActiveProjects(props.history, t),
-    sideEffect: () => dispatch(whereProjects({})),
-    onSignOut: () => dispatch(signOut({}))
+    sideEffect: () => Promise.resolve(),
+    onSignOut: () => dispatch(signOut())
   }
 }
 

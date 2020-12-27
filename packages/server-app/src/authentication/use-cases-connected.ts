@@ -22,6 +22,13 @@ export const signIn = connectUseCase({
   useCase: useCases.signIn
 })
 
+export const signOut = connectUseCase({
+  fetchAggregate: refreshTokenRepo.where,
+  ensureAggregate: refreshTokenRepo.destroy,
+  mapCommand: (cmd) => ({ id: cmd.id, userId: cmd.userId }),
+  useCase: useCases.signOut
+})
+
 export const register = connectUseCase({
   fetchAggregate: async () => undefined,
   ensureAggregate: userAuthenticationRepo.create,
