@@ -9,7 +9,6 @@ import RequestPasswordReset from './containers/user-request-password-reset'
 import ResetPassword from './containers/user-reset-password'
 
 import ProtectedRoute from './containers/protected-route';
-import Navigation from './containers/navigation';
 import CenteredPanel from './components/centered-panel';
 
 const App = () => (
@@ -48,9 +47,9 @@ const App = () => (
               </CenteredPanel>
             )}
           />
-          <Route
+          <ProtectedRoute
             path="/app"
-            render={({ history }) => (
+            render={() => (
               <CenteredPanel>
                 Authenticated
               </CenteredPanel>

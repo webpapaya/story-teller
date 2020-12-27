@@ -1,6 +1,6 @@
 export type AuthenticatedUser = {
   id: string
-  userIdentifier: string
+  jwtToken: string
 }
 
 export type Action<Type extends string, Payload> = {

@@ -1,13 +1,15 @@
 import { allOf, assertThat, equalTo, hasProperties, hasProperty, instanceOf, promiseThat, rejected } from 'hamjest'
 import proxyquire from 'proxyquire'
 import { stub } from 'sinon'
-import { APIError } from '../errors'
+import { APIError, DecodingError } from '../errors'
 
-const dispatch = () => {} // eslint-disable-line @typescript-eslint/no-empty-function
+const dispatch = stub()
+const DUMMY_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNkMDUzNzMzLWFlZDQtNDdiNy1hNDc0LTNhZmM5NjMxYTU2MiIsImVtcGxveWVkSW4iOltdLCJpYXQiOjE2MDkwOTUzNzUsImV4cCI6MTYwOTA5NTY3NX0.a3_18sHK9PZCiJrhtd3LjotPMl4YFOfN-O2IG7ZCeIU'
+const DUMMY_PRINCIPAL_ID = '3d053733-aed4-47b7-a474-3afc9631a562'
 
 describe('signIn', () => {
   it('calls sign in route with arguments', async () => {
-    const returnValue = { payload: { jwtToken: 'token' } }
+    const returnValue = { payload: { jwtToken: DUMMY_TOKEN } }
     const fetch = stub().returns(Promise.resolve({
       status: 200,
       json: () => Promise.resolve(returnValue)
@@ -28,38 +30,47 @@ describe('signIn', () => {
   })
 
   describe('when status was 200', () => {
-    it('returns value from API', async () => {
-      const returnValue = { payload: { jwtToken: 'token' } }
+    const signInFactory = (args?: { token?: string }) => {
+      const returnValue = { payload: { jwtToken: args?.token ?? DUMMY_TOKEN } }
       const fetch = stub().returns(Promise.resolve({
         status: 200,
         json: () => Promise.resolve(returnValue)
       }))
-      const setAuthenticationToken = stub()
 
-      const { signIn } = proxyquire('./actions', {
-        '../fetch': { fetch, setAuthenticationToken }
+      const actions = proxyquire('./actions', {
+        '../fetch': { fetch }
       })
       const signInArgs = { userIdentifier: 'test', password: 'myPassword' }
-      const actionResult = await signIn(signInArgs)(dispatch)
+      const signIn = () => actions.signIn(signInArgs)(dispatch)
 
-      assertThat(actionResult, equalTo(returnValue))
+      return { returnValue, fetch, signIn, signInArgs }
+    }
+
+    it('returns value from API', async () => {
+      const { signIn, returnValue } = signInFactory()
+      assertThat(await signIn(), equalTo(returnValue))
     })
 
-    it('sets jwtToken', async () => {
-      const returnValue = { payload: { jwtToken: 'token' } }
-      const fetch = stub().returns(Promise.resolve({
-        status: 200,
-        json: () => Promise.resolve(returnValue)
-      }))
-      const setAuthenticationToken = stub()
+    it('dispatches USER/SESSION/SUCCESS', async () => {
+      const { signIn } = signInFactory()
 
-      const { signIn } = proxyquire('./actions', {
-        '../fetch': { fetch, setAuthenticationToken }
-      })
-      const signInArgs = { userIdentifier: 'test', password: 'myPassword' }
-      await signIn(signInArgs)(dispatch)
+      await signIn()
 
-      assertThat(setAuthenticationToken, hasProperty('lastCall.args.0', returnValue.payload.jwtToken))
+      assertThat(dispatch, hasProperty('lastCall.args.0', equalTo({
+        type: 'USER/SESSION/SUCCESS',
+        payload: {
+          id: DUMMY_PRINCIPAL_ID,
+          jwtToken: DUMMY_TOKEN
+        }
+      })))
+    })
+
+    it('AND an invalid JWT was returned, throws DecodingError', async () => {
+      const { signIn } = signInFactory({ token: 'invalid token' })
+
+      await promiseThat(signIn(), rejected(
+        instanceOf(DecodingError)
+      ))
     })
   })
 

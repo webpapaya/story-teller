@@ -1,10 +1,11 @@
 import { Authentication } from '@story-teller/shared'
 import { v4 } from 'uuid'
+import { decode as decodeJWT } from 'jsonwebtoken'
 import fetchViaHTTP, { fetchMemoizedViaHTTP } from '../fetch-via-http'
 import { ActionCreator } from '../types'
 import { Actions } from './types'
-import { fetch, setAuthenticationToken } from '../fetch'
-import { APIError } from '../errors'
+import { fetch } from '../fetch'
+import { APIError, DecodingError } from '../errors'
 
 export const signIn: ActionCreator<
 { userIdentifier: string, password: string },
@@ -20,8 +21,20 @@ Actions
   if (response.status !== 200) {
     throw new APIError(parsedBody)
   }
+  const jwtToken = parsedBody.payload.jwtToken
+  const decodedToken = decodeJWT(jwtToken)
 
-  setAuthenticationToken(parsedBody.payload.jwtToken)
+  if (!(typeof decodedToken === 'object' && decodedToken?.id)) {
+    throw new DecodingError()
+  }
+
+  dispatch({
+    type: 'USER/SESSION/SUCCESS',
+    payload: {
+      id: decodedToken.id,
+      jwtToken: jwtToken
+    }
+  })
   return parsedBody
 }
 

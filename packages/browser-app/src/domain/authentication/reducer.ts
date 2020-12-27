@@ -1,19 +1,31 @@
-import { AuthenticatedUser, Actions } from './types'
+import { Actions } from './types'
 import { cache } from '../cache'
 
-const initialState: AuthenticatedUser[] = []
+type State = {
+  state: 'authenticated' | 'not authenticated'
+  id?: string
+  jwtToken?: string
+}
 
-const reducer = (state = initialState, action: Actions): AuthenticatedUser[] => {
+const defaultState: State = {
+  state: 'not authenticated' as const,
+  id: '',
+  jwtToken: ''
+}
+
+const reducer = (state = defaultState, action: Actions): State => {
   switch (action.type) {
     case 'USER/SESSION/SUCCESS':
       cache.clear()
-      return [{
+      return {
+        state: 'authenticated' as const,
         id: action.payload.id,
-        userIdentifier: action.payload.userIdentifier
-      }]
+        jwtToken: action.payload.jwtToken
+      }
     case 'USER/SIGN_OUT/SUCCESS':
       cache.clear()
-      return []
+      return defaultState
+
     default: return state
   }
 }

@@ -6,7 +6,7 @@ import hasSideEffect from '../../has-side-effect';
 import Organism from './organism';
 
 const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state) => ({
-  isAuthenticated: !!state.authentication[0],
+  isAuthenticated: state.authentication.state === 'authenticated',
   isLoading: false,
 })
 

@@ -8,3 +8,5 @@ export class APIError extends ClientError {
     return this.details.message
   }
 }
+
+export class DecodingError extends ClientError {}
