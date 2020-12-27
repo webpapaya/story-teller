@@ -1,6 +1,9 @@
 {
   "extends": "standard-with-typescript",
   "parser": "@typescript-eslint/parser",
+  "ignorePatterns": [
+    "*.types.ts"
+  ],
   "parserOptions": {
       "project": "./tsconfig.json"
   },

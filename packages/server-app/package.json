@@ -9,7 +9,7 @@
     "infrastructure:down": "npm run env -- docker-compose -p $ENV_FILE down",
     "infrastructure:implode": "npm run infrastructure:down -- -v",
     "infrastructure:reset": "npm run infrastructure:implode && npm run infrastructure:up",
-    "db:build:queries": "PGPORT=25432 PGDATABASE=compup_test PGUSER=compup PGPASSWORD=password  ./node_modules/.bin/pgtyped -c pgtyped.config.json && npm run lint $(find src -name '*.types.ts') -- --fix",
+    "db:build:queries": "PGPORT=25432 PGDATABASE=compup_test PGUSER=compup PGPASSWORD=password  ./node_modules/.bin/pgtyped -c pgtyped.config.json",
     "db:migrate:create": "npm run env -- db-migrate create",
     "db:migrate:up": "npm run env -- db-migrate up && npm run db:build:queries",
     "db:migrate:down": "npm run env -- db-migrate down",
