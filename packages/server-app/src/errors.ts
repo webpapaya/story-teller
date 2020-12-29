@@ -25,6 +25,10 @@ export class AggregateInvalidBeforeUseCase extends AggregateInvalid {}
 export class EventInvalid extends CodecError {
   name = 'event validation failed'
 }
+export class InputInvalid extends CodecError {
+  name = 'input validation failed'
+}
+
 export class CommandInvalid extends CodecError {
   name = 'command validation failed'
 }

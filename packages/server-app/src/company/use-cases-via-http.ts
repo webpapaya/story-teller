@@ -26,8 +26,9 @@ export const initialize = (app: IRouter) => {
     app,
     actionName: 'addEmployee',
     aggregateName: 'company',
-    useCase: useCases.addEmployee,
     method: 'put',
+
+    useCase: useCases.addEmployee,
     principal,
     authenticateBefore: () => true,
     mapToPrincipal,
