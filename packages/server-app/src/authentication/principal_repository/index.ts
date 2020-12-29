@@ -1,6 +1,7 @@
 import * as repository from './repository.types'
 import { principal, Principal } from '../domain'
 import { buildRecordRepository } from '../../lib/build-repository'
+import { AggregateInvalid } from '../../errors'
 
 const toDomain = (response: repository.IWherePrincipalResult): Principal => {
   const mappedResponse = {
@@ -10,8 +11,10 @@ const toDomain = (response: repository.IWherePrincipalResult): Principal => {
     employedIn: response.jsonBuildObject.employedIn || []
   }
 
-  if (principal.is(mappedResponse)) { return mappedResponse }
-  throw new Error('Decoding error')
+  return principal
+    .decode(mappedResponse)
+    .mapError((e) => { throw new AggregateInvalid(e) })
+    .get()
 }
 
 export const where = buildRecordRepository({

@@ -6,7 +6,6 @@ import { ActionCreator } from '../types'
 import { Actions } from './types'
 import { fetch } from '../fetch'
 import { APIError, DecodingError } from '../errors'
-import { memoize } from 'redux-memoize'
 
 const decodeJWTToken = (jwtToken: string) => {
   const decodedToken = decodeJWT(jwtToken)
@@ -100,7 +99,7 @@ export const refreshToken: ActionCreator<
 void,
 void,
 Actions
-> = memoize((args) => async (dispatch) => {
+> = (args) => async (dispatch) => {
   const response = await fetch('authentication/refresh-token', {
     method: 'POST',
     credentials: 'include',
@@ -109,6 +108,12 @@ Actions
 
   const parsedBody = await response.json()
   const { jwtToken, decodedToken } = decodeJWTToken(parsedBody.payload.jwtToken)
+
+  // TODO: find better solution
+  setTimeout(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    dispatch(refreshToken())
+  }, +new Date(decodedToken.exp * 1000 - 10000) - (+new Date()))
 
   dispatch({
     type: 'USER/SESSION/SUCCESS',
@@ -119,7 +124,7 @@ Actions
   })
 
   return parsedBody
-})
+}
 
 export const resetPassword: ActionCreator<
 { id: string, token: string, password: string },

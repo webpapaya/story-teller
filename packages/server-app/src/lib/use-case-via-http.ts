@@ -9,6 +9,7 @@ import {
   UseCaseError,
   RepositoryError
 } from '../errors'
+import { TokenExpiredError } from 'jsonwebtoken'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 const httpRegistry: Array<{
@@ -64,13 +65,13 @@ export const exposeUseCaseViaHTTP = <
   config.app[config.method](
     route,
     async (req: Request, res: Response) => {
-      const simulate = req.headers['x-story-teller-simulate'] === 'true'
-      const principal = config.principal
-        .decode(config.mapToPrincipal(req))
-        .mapError((errors) => { throw new PrincipalDecodingError(errors) })
-        .get()
-
       try {
+        const simulate = req.headers['x-story-teller-simulate'] === 'true'
+        const principal = config.principal
+          .decode(config.mapToPrincipal(req))
+          .mapError((errors) => { throw new PrincipalDecodingError(errors) })
+          .get()
+
         const execUseCase = simulate
           ? config.useCase.simulate
           : config.useCase.execute
@@ -119,6 +120,7 @@ export const exposeUseCaseViaHTTP = <
 }
 
 export const convertError = (error: Error) => {
+  console.error(error)
   if (error instanceof CodecError) {
     return {
       status: 400,
@@ -158,6 +160,13 @@ export const convertError = (error: Error) => {
       body: {
         description: 'persistence error',
         message: error.cause
+      }
+    }
+  } else if (error instanceof TokenExpiredError) {
+    return {
+      status: 401,
+      body: {
+        description: 'Token expired'
       }
     }
   } else {

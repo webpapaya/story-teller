@@ -19,7 +19,7 @@ export interface IWherePrincipalQuery {
   result: IWherePrincipalResult;
 }
 
-const wherePrincipalIR: any = {"name":"wherePrincipal","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":292,"b":293,"line":13,"col":21},{"a":334,"b":335,"line":15,"col":12}]}}],"usedParamSet":{"id":true},"statement":{"body":"SELECT json_build_object(\n  'id', user_authentication.id,\n  'employedIn', (\n    select json_agg(\n      json_build_object(\n        'company_id', company_employee.id,\n        'role', company_employee.role\n      )\n    )\n    from company_employee\n    where user_id = :id))\nFROM user_authentication\nWHERE id = :id","loc":{"a":28,"b":335,"line":3,"col":0}}};
+const wherePrincipalIR: any = {"name":"wherePrincipal","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":291,"b":292,"line":13,"col":21},{"a":333,"b":334,"line":15,"col":12}]}}],"usedParamSet":{"id":true},"statement":{"body":"SELECT json_build_object(\n  'id', user_authentication.id,\n  'employedIn', (\n    select json_agg(\n      json_build_object(\n        'companyId', company_employee.id,\n        'role', company_employee.role\n      )\n    )\n    from company_employee\n    where user_id = :id))\nFROM user_authentication\nWHERE id = :id","loc":{"a":28,"b":334,"line":3,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -29,7 +29,7 @@ const wherePrincipalIR: any = {"name":"wherePrincipal","params":[{"name":"id","t
  *   'employedIn', (
  *     select json_agg(
  *       json_build_object(
- *         'company_id', company_employee.id,
+ *         'companyId', company_employee.id,
  *         'role', company_employee.role
  *       )
  *     )

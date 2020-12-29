@@ -17,11 +17,14 @@ describe('createCompany', () => {
     await createCompany(params)(dispatch)
 
     assertThat(fetch, hasProperty('lastCall.args', hasProperties({
-      0: 'company/create',
-      1: hasProperty('rawBody', hasProperties({
-        id: string(),
-        name: params.name
-      }))
+      0: 'company',
+      1: hasProperties({
+        method: 'POST',
+        rawBody: hasProperties({
+          id: string(),
+          name: params.name
+        })
+      })
     })))
   })
 })

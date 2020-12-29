@@ -7,6 +7,7 @@ import SignIn from './containers/user-sign-in';
 import SignUp from './containers/user-sign-up'
 import RequestPasswordReset from './containers/user-request-password-reset'
 import ResetPassword from './containers/user-reset-password'
+import CompanyCreate from './containers/company-create'
 import Navigation from './containers/navigation'
 
 import ProtectedRoute from './containers/protected-route';
@@ -53,9 +54,7 @@ const App = () => (
             render={() => (
               <>
                 <Navigation />
-                <CenteredPanel>
-                  Authenticated
-                </CenteredPanel>
+                <CompanyCreate />
               </>
             )}
           />

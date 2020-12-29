@@ -8,9 +8,9 @@ export const fetch = (
 
   return window.fetch(`${process.env.REACT_APP_SERVER_URL}/${url}`, {
     ...request,
-    ...(request.rawBody ? { body: JSON.stringify(request.body) } : {}),
+    ...(request.rawBody ? { body: JSON.stringify(request.rawBody) } : {}),
     headers: {
-      ...(jwtToken ? { Authentication: jwtToken } : {}),
+      ...(jwtToken ? { authorization: jwtToken } : {}),
       'Content-Type': 'application/json',
       ...request.headers,
       ...(options.simulate ? { 'x-story-teller-simulate': 'true' } : {})
