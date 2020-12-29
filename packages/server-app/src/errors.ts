@@ -25,13 +25,19 @@ export class AggregateInvalidBeforeUseCase extends AggregateInvalid {}
 export class EventInvalid extends CodecError {
   name = 'event validation failed'
 }
-export class InputInvalid extends CodecError {
-  name = 'input validation failed'
-}
 
 export class CommandInvalid extends CodecError {
   name = 'command validation failed'
 }
+
+abstract class HTTPCodecError extends CodecError {}
+export class InputInvalid extends HTTPCodecError {
+  name = 'input validation failed'
+}
+export class ResponseInvalid extends HTTPCodecError {
+  name = 'response validation failed'
+}
+
 export class PreConditionViolated extends DomainError {}
 export class PostConditionViolated extends DomainError {}
 
