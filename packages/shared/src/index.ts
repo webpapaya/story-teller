@@ -8,7 +8,7 @@ import {
   nonEmptyString,
   localDateTime,
   literal,
-  union, undefinedCodec
+  union
 } from './lib'
 import * as _v from './lib/index'
 import { positiveInteger } from './lib/primitives'
@@ -71,16 +71,16 @@ export namespace Authentication {
   export const actions = {
     signOut: buildCommandDefinition({
       verb: 'post',
-      model: 'user',
+      model: 'authentication',
       action: 'sign-out',
-      validator: undefinedCodec,
+      validator: record({}),
       response: record({})
     }),
 
     signIn: buildCommandDefinition({
       verb: 'post',
       action: 'sign-in',
-      model: 'user',
+      model: 'authentication',
       validator: record({
         userIdentifier: nonEmptyString,
         password: nonEmptyString
@@ -93,11 +93,8 @@ export namespace Authentication {
     refreshToken: buildCommandDefinition({
       verb: 'post',
       action: 'refresh-token',
-      model: 'user',
-      validator: record({
-        userIdentifier: nonEmptyString,
-        password: nonEmptyString
-      }),
+      model: 'authentication',
+      validator: record({}),
       response: record({
         jwtToken: nonEmptyString
       })
@@ -106,7 +103,7 @@ export namespace Authentication {
     signUp: buildCommandDefinition({
       verb: 'post',
       action: 'sign-up',
-      model: 'user',
+      model: 'authentication',
       validator: record({
         userIdentifier: nonEmptyString,
         password: nonEmptyString
@@ -117,7 +114,7 @@ export namespace Authentication {
     resetPasswordByToken: buildCommandDefinition({
       verb: 'post',
       action: 'reset-password-by-token',
-      model: 'user',
+      model: 'authentication',
       validator: record({
         id: uuid,
         password: nonEmptyString,
@@ -129,7 +126,7 @@ export namespace Authentication {
     requestPasswordReset: buildCommandDefinition({
       verb: 'post',
       action: 'request-password-reset',
-      model: 'user',
+      model: 'authentication',
       validator: record({
         userIdentifier: nonEmptyString
       }),

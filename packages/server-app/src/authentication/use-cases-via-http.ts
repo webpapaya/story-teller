@@ -5,6 +5,7 @@ import { AuthenticationToken } from './domain'
 import { useCaseViaHTTP } from '../lib/http-adapter/use-case-via-http'
 import { v4 } from 'uuid'
 import { FastifyReply } from 'fastify'
+import { Unauthorized } from '../errors'
 
 const identity = <T>(value: T) => value
 
@@ -38,8 +39,11 @@ export const signIn = useCaseViaHTTP({
 
 export const refreshToken = useCaseViaHTTP({
   apiDefinition: Authentication.actions.refreshToken,
-  mapToCommand: (_input, _principal, req) =>
-    JSON.parse(req.cookies.refreshToken),
+  mapToCommand: (_input, _principal, req) => {
+    const { value, valid } = req.unsignCookie(req.cookies.refreshToken)
+    if (!valid || !value) { throw new Unauthorized() }
+    return JSON.parse(value)
+  },
   mapToResponse: (aggregate) => ({ jwtToken: aggregate.jwtToken }),
   httpReplyOptions: ({ aggregate, reply }) => {
     setToken(reply, aggregate.refreshToken)
@@ -49,8 +53,11 @@ export const refreshToken = useCaseViaHTTP({
 
 export const signOut = useCaseViaHTTP({
   apiDefinition: Authentication.actions.signOut,
-  mapToCommand: (_input, _principal, req) =>
-    JSON.parse(req.cookies.refreshToken),
+  mapToCommand: (_input, _principal, req) => {
+    const { value, valid } = req.unsignCookie(req.cookies.refreshToken)
+    if (!valid || !value) { throw new Unauthorized() }
+    return JSON.parse(value)
+  },
   mapToResponse: () => ({}),
   httpReplyOptions: ({ reply }) => {
     reply.clearCookie('refreshToken')

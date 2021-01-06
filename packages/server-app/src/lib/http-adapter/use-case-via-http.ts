@@ -32,7 +32,7 @@ export const useCaseViaHTTP = <Principal extends AnyCodec,
   mapToCommand: (
     input: CommandDefinition['validator']['O'],
     principal: Principal['O'],
-    req: Pick<FastifyRequest, 'cookies' | 'headers'>
+    req: Pick<FastifyRequest, 'cookies' | 'headers' | 'unsignCookie'>
   ) => Command
 
   // TODO: add default implementation
@@ -40,13 +40,14 @@ export const useCaseViaHTTP = <Principal extends AnyCodec,
   httpReplyOptions?: (payload: { aggregate: Aggregate, reply: FastifyReply }) => void
 }) => {
   const mapRequestToPrincipal = (req: Pick<Request, 'headers'>) => {
+    if (!config.authorization) { return }
     if (req.headers.authorization) {
       return config.authorization?.mapToPrincipal(req.headers.authorization)
     }
     throw new Unauthorized()
   }
 
-  const mapRequestToCommand = (req: Pick<FastifyRequest, 'body' | 'cookies' | 'headers'>, principal: Principal['A']) => {
+  const mapRequestToCommand = (req: Pick<FastifyRequest, 'body' | 'cookies' | 'headers' | 'unsignCookie'>, principal: Principal['A']) => {
     const decoded = config.apiDefinition.validator.decode(req.body)
       .mapError((error) => {
         throw new InputInvalid(error)
@@ -114,6 +115,7 @@ export const useCaseViaHTTP = <Principal extends AnyCodec,
             links: httpRegistry.linksFor(config.apiDefinition.model, principal, aggregate)
           })
         } catch (e) {
+          app.log.error(e)
           const { status, body } = convertError(e)
           reply.status(status)
           reply.send(body)

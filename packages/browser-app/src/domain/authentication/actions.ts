@@ -52,7 +52,8 @@ Actions
 > = () => async (dispatch) => {
   const response = await fetch('authentication/sign-out', {
     method: 'POST',
-    credentials: 'include'
+    credentials: 'include',
+    body: JSON.stringify({})
   })
 
   if (response.status !== 200) {
@@ -99,11 +100,11 @@ export const refreshToken: ActionCreator<
 void,
 void,
 Actions
-> = (args) => async (dispatch) => {
+> = () => async (dispatch) => {
   const response = await fetch('authentication/refresh-token', {
     method: 'POST',
     credentials: 'include',
-    body: JSON.stringify(args)
+    body: JSON.stringify({})
   })
 
   const parsedBody = await response.json()
@@ -131,7 +132,7 @@ export const resetPassword: ActionCreator<
 void,
 Actions
 > = (args) => async (dispatch) => {
-  await fetch('authentication/reset-password', {
+  await fetch('authentication/reset-password-by-token', {
     method: 'POST',
     body: JSON.stringify(args)
   })
