@@ -1,10 +1,10 @@
 import { AnyCodec, AnyCommandDefinition } from '@story-teller/shared'
-import { AnyConnectedUseCaseConfig, AnyUseCaseConfigType } from '../lib/use-case'
-import { httpRegistry } from '../lib/http-registry'
+import { AnyConnectedUseCaseConfig, AnyUseCaseConfigType } from '../use-case'
+import { httpRegistry } from './http-registry'
 import { Request } from 'express'
-import { InputInvalid, ResponseInvalid, Unauthorized } from '../errors'
+import { InputInvalid, ResponseInvalid, Unauthorized } from '../../errors'
 import { FastifyInstance } from 'fastify'
-import { convertError } from '../lib/convertToHTTPError'
+import { convertError } from './convert-to-http-errors'
 
 export const useCaseViaHTTP = <Principal extends AnyCodec,
   CommandDefinition extends AnyCommandDefinition,

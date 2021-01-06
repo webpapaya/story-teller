@@ -1,4 +1,4 @@
-import { AnyConnectedUseCaseConfig, AnyUseCaseConfigType } from './use-case'
+import { AnyConnectedUseCaseConfig, AnyUseCaseConfigType } from '../use-case'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 

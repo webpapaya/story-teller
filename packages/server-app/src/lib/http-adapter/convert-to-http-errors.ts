@@ -5,7 +5,7 @@ import {
   RepositoryError,
   Unauthorized,
   UseCaseError
-} from '../errors'
+} from '../../errors'
 import { TokenExpiredError } from 'jsonwebtoken'
 
 export const convertError = (error: Error) => {

@@ -4,7 +4,7 @@ import { IRouter, Response } from 'express'
 import { v } from '@story-teller/shared'
 import './use-cases-reactions'
 import { AuthenticationToken } from './domain'
-import { convertError } from '../lib/convertToHTTPError'
+import { convertError } from '../lib/http-adapter/convert-to-http-errors'
 
 export const initialize = (app: IRouter) => {
   const setRefreshTokenCookie = (res: Response, refreshToken: AuthenticationToken) => {

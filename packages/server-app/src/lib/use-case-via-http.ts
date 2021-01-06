@@ -2,7 +2,7 @@ import { AnyCodec } from '@story-teller/shared'
 import { IRouter, Request, Response } from 'express'
 import { AnyConnectedUseCaseConfig, AnyUseCaseConfigType } from './use-case'
 import { PrincipalDecodingError } from '../errors'
-import { convertError } from './convertToHTTPError'
+import { convertError } from './http-adapter/convert-to-http-errors'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 const httpRegistry: Array<{
