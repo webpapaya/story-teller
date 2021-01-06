@@ -50,6 +50,7 @@
     "deep-freeze": "0.0.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "fastify": "^3.9.2",
     "fp-ts": "^2.8.5",
     "hamjest": "^3.7.1",
     "js-joda": "^1.10.1",

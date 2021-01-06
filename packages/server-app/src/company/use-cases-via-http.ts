@@ -58,7 +58,8 @@ export const initialize = (app: IRouter) => {
     useCase: useCases.rename,
     method: 'put',
     principal,
-    authenticateBefore: () => true,
+    authenticateBefore: ({ principal, aggregate: company }) =>
+      principal.employedIn.some((employment) => employment.companyId === company.id),
     mapToPrincipal,
     mapToCommand: ({ principal, request }) => {
       return request.body

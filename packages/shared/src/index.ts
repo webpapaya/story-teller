@@ -6,7 +6,9 @@ import {
   uuid,
   color,
   nonEmptyString,
-  localDateTime
+  localDateTime,
+  literal,
+  union
 } from './lib'
 import * as _v from './lib/index'
 import { positiveInteger } from './lib/primitives'
@@ -20,13 +22,48 @@ export type CommandDefinition<
   action?: string
   model: string
   validator: A
-  response: B | undefined
+  response: B
+}
+export type AnyCommandDefinition = CommandDefinition<AnyCodec, AnyCodec>
+
+export type Response<
+  A extends AnyCodec,
+> = {
+  payload: A
 }
 
 export const buildCommandDefinition = <
   A extends AnyCodec,
   B extends AnyCodec
 >(definition: CommandDefinition<A, B>) => definition
+
+export namespace Company {
+  const employeeRoles = union([literal('manager'), literal('employee')])
+
+  const employeeEntity = record({
+    id: uuid,
+    userId: uuid,
+    role: employeeRoles
+  })
+
+  export const aggregate = record({
+    id: uuid,
+    name: nonEmptyString,
+    employees: array(employeeEntity)
+  })
+
+  export const actions = {
+    createCompany: buildCommandDefinition({
+      verb: 'post',
+      model: 'company',
+      action: '',
+      validator: record({
+        name: nonEmptyString
+      }),
+      response: aggregate
+    })
+  }
+}
 
 export namespace Authentication {
   export const aggregate = record({})
