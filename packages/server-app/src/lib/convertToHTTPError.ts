@@ -9,7 +9,6 @@ import {
 import { TokenExpiredError } from 'jsonwebtoken'
 
 export const convertError = (error: Error) => {
-  console.error(error)
   if (error instanceof CodecError) {
     return {
       status: 400,
