@@ -25,7 +25,7 @@ describe.skip('connectUseCase', () => {
   it('returns correct result for useCase', async () => {
     const connectedUseCase = connectUseCase({
       useCase: someUseCase,
-      mapCommand: (cmd) => cmd.id,
+      mapToFetchArgs: (cmd) => cmd.id,
       fetchAggregate: (id: number) => Promise.resolve({ id: id, number: Math.random(), otherProperty: 'hallo' }),
       ensureAggregate: () => Promise.resolve(undefined)
     })
@@ -47,7 +47,7 @@ describe.skip('connectUseCase', () => {
         }
 
       }),
-      mapCommand: () => undefined,
+      mapToFetchArgs: () => undefined,
       fetchAggregate: () => Promise.resolve({ number: 1 }),
       ensureAggregate: () => Promise.resolve(undefined)
     })
@@ -64,7 +64,7 @@ describe.skip('connectUseCase', () => {
           }
         }),
         useCase: someUseCase,
-        mapCommand: (cmd) => cmd.id,
+        mapToFetchArgs: (cmd) => cmd.id,
         fetchAggregate: (id: number) => Promise.resolve({ id: id, number: Math.random(), otherProperty: 'hallo' }),
         ensureAggregate: () => Promise.resolve(undefined)
       })
@@ -83,7 +83,7 @@ describe.skip('connectUseCase', () => {
           }
         }),
         useCase: someUseCase,
-        mapCommand: (cmd) => cmd.id,
+        mapToFetchArgs: (cmd) => cmd.id,
         fetchAggregate: (id: number) => Promise.resolve({ id: id, number: Math.random(), otherProperty: 'hallo' }),
         ensureAggregate: () => Promise.resolve(undefined)
       })
@@ -114,7 +114,7 @@ describe('reactToUseCaseSync', () => {
       useCase: useCaseA,
       fetchAggregate: async () => 'test1231',
       ensureAggregate: async () => 'string',
-      mapCommand: () => 'string'
+      mapToFetchArgs: () => 'string'
     })
 
     const useCaseB = useCase({
@@ -131,7 +131,7 @@ describe('reactToUseCaseSync', () => {
       useCase: useCaseB,
       fetchAggregate: async () => 'test1',
       ensureAggregate: async () => 'string',
-      mapCommand: () => 'string'
+      mapToFetchArgs: () => 'string'
     })
 
     reactToEventSync({
@@ -166,7 +166,7 @@ describe('reactToUseCaseSync', () => {
       useCase: useCaseA,
       fetchAggregate: async () => 'test1231',
       ensureAggregate: async () => 'string',
-      mapCommand: () => 'string'
+      mapToFetchArgs: () => 'string'
     })
 
     const useCaseB = useCase({
@@ -185,7 +185,7 @@ describe('reactToUseCaseSync', () => {
       useCase: useCaseB,
       fetchAggregate: async () => 'test1',
       ensureAggregate: async () => 'string',
-      mapCommand: () => 'string'
+      mapToFetchArgs: () => 'string'
     })
 
     await reactToEventAsync({
@@ -231,7 +231,7 @@ it.skip('verifies types', () => {
     useCase: useCaseA,
     fetchAggregate: async () => 'test',
     ensureAggregate: async () => 'string',
-    mapCommand: () => 'string'
+    mapToFetchArgs: () => 'string'
   })
 
   connectUseCase({
@@ -239,7 +239,7 @@ it.skip('verifies types', () => {
     // @ts-expect-error
     fetchAggregate: async () => 1,
     ensureAggregate: async () => 'string',
-    mapCommand: () => 'string'
+    mapToFetchArgs: () => 'string'
   })
 
   connectUseCase({
@@ -248,7 +248,7 @@ it.skip('verifies types', () => {
     fetchAggregate: async (test: string) => 'string',
     ensureAggregate: async () => 'string',
     // @ts-expect-error
-    mapCommand: () => 1
+    mapToFetchArgs: () => 1
   })
 
   const event = buildEvent('test', v.record({

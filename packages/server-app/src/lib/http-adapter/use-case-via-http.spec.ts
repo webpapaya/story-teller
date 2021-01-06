@@ -28,7 +28,7 @@ describe('use-case-via-http', () => {
 
   const connectedUseCaseDefinition = connectUseCase({
     useCase: useCaseDefinition,
-    mapCommand: () => undefined,
+    mapToFetchArgs: () => undefined,
     fetchAggregate: async () => {
       return useCaseDefinition.config.aggregateFrom.build()[0]()
     },

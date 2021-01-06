@@ -4,35 +4,35 @@ import { connectUseCase } from '../lib/use-case'
 
 export const create = connectUseCase({
   useCase: useCases.create,
-  mapCommand: () => undefined,
+  mapToFetchArgs: () => undefined,
   fetchAggregate: async () => undefined,
   ensureAggregate: repository.ensure
 })
 
 export const addEmployee = connectUseCase({
   useCase: useCases.addEmployee,
-  mapCommand: (command) => ({ id: command.companyId }),
+  mapToFetchArgs: (command) => ({ id: command.companyId }),
   fetchAggregate: repository.whereId,
   ensureAggregate: repository.ensure
 })
 
 export const rename = connectUseCase({
   useCase: useCases.rename,
-  mapCommand: (command) => ({ id: command.companyId }),
+  mapToFetchArgs: (command) => ({ id: command.companyId }),
   fetchAggregate: repository.whereId,
   ensureAggregate: repository.ensure
 })
 
 export const removeEmployee = connectUseCase({
   useCase: useCases.removeEmployee,
-  mapCommand: (command) => ({ id: command.companyId }),
+  mapToFetchArgs: (command) => ({ id: command.companyId }),
   fetchAggregate: repository.whereId,
   ensureAggregate: repository.ensure
 })
 
 export const setEmployeeRole = connectUseCase({
   useCase: useCases.setEmployeeRole,
-  mapCommand: (command) => ({ id: command.companyId }),
+  mapToFetchArgs: (command) => ({ id: command.companyId }),
   fetchAggregate: repository.whereId,
   ensureAggregate: repository.ensure
 })

@@ -1,25 +1,24 @@
-import express from 'express'
-import cookieParser from 'cookie-parser'
-import bodyParser from 'body-parser'
-import cors from 'cors'
+import fastify from 'fastify'
+import fastifyCookie from 'fastify-cookie'
+import fastifyCors from 'fastify-cors'
+import * as authentication from './authentication/use-cases-via-http'
 
-import * as vacation from './vacation/use-cases-via-http'
-import * as invitation from './invitations/use-cases-via-http'
-import * as company from './company/use-cases-via-http'
+const app = fastify({
+  logger: true
+})
 
-const app = express()
-const port = process.env.API_PORT
-
-app.use(cookieParser(process.env.SECRET_KEY_BASE))
-app.use(bodyParser.json())
-app.use(cors({
+app.register(fastifyCookie, {
+  secret: process.env.SECRET_KEY_BASE
+})
+app.register(fastifyCors, {
   origin: (process.env.CORS_WHITELIST ?? '').split(','),
   credentials: true
-}))
-app.options('*', cors())
+})
 
-vacation.initialize(app)
-invitation.initialize(app)
-company.initialize(app)
+const port = parseInt(process.env.API_PORT ?? '3000')
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+Object.entries(authentication).forEach(([_, endpoint]) => {
+  endpoint.register(app)
+})
+
+app.listen(port)

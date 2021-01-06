@@ -143,7 +143,7 @@ export interface AnyConnectedUseCaseConfig<UseCaseConfig extends AnyUseCaseConfi
 
 export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, FetchAggregateArgs>(config: {
   useCase: UseCaseType<UseCaseConfig>
-  mapCommand: (cmd: UseCaseConfig['command']['O']) => FetchAggregateArgs
+  mapToFetchArgs: (cmd: UseCaseConfig['command']['O']) => FetchAggregateArgs
   fetchAggregate: FetchAggregate<UseCaseConfig, FetchAggregateArgs>
   ensureAggregate: EnsureAggregate<UseCaseConfig>
   getSyncedSubscriptions?: () => SyncEventSubscriptions
@@ -207,7 +207,7 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
     }
     const decodedCommand = decodedCommandResult.get()
 
-    const fromAggregate = await config.fetchAggregate(config.mapCommand(decodedCommand), dependencies)
+    const fromAggregate = await config.fetchAggregate(config.mapToFetchArgs(decodedCommand), dependencies)
 
     if (hooks?.beforeUseCase && !hooks.beforeUseCase({ aggregate: fromAggregate })) {
       throw new PreConditionViolated()

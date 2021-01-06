@@ -5,7 +5,7 @@ import * as principalRepo from './principal_repository'
 import { connectUseCase } from '../lib/use-case'
 
 export const signIn = connectUseCase({
-  mapCommand: (cmd) => ({ userIdentifier: cmd.userIdentifier }),
+  mapToFetchArgs: (cmd) => ({ userIdentifier: cmd.userIdentifier }),
   fetchAggregate: async (command: { userIdentifier: string }, clients) => {
     const userAuthentication = await userAuthenticationRepo
       .whereByUserIdentifier(command, clients)
@@ -25,35 +25,35 @@ export const signIn = connectUseCase({
 export const signOut = connectUseCase({
   fetchAggregate: refreshTokenRepo.where,
   ensureAggregate: refreshTokenRepo.destroy,
-  mapCommand: (cmd) => ({ id: cmd.id, userId: cmd.userId }),
+  mapToFetchArgs: (cmd) => ({ id: cmd.id, userId: cmd.userId }),
   useCase: useCases.signOut
 })
 
 export const register = connectUseCase({
   fetchAggregate: async () => undefined,
   ensureAggregate: userAuthenticationRepo.create,
-  mapCommand: () => undefined,
+  mapToFetchArgs: () => undefined,
   useCase: useCases.signUp
 })
 
 export const confirmAccount = connectUseCase({
   fetchAggregate: userAuthenticationRepo.where,
   ensureAggregate: userAuthenticationRepo.ensure,
-  mapCommand: (cmd) => ({ id: cmd.id }),
+  mapToFetchArgs: (cmd) => ({ id: cmd.id }),
   useCase: useCases.confirmAccount
 })
 
 export const requestPasswordReset = connectUseCase({
   fetchAggregate: userAuthenticationRepo.whereByUserIdentifier,
   ensureAggregate: userAuthenticationRepo.ensure,
-  mapCommand: (cmd) => ({ userIdentifier: cmd.userIdentifier }),
+  mapToFetchArgs: (cmd) => ({ userIdentifier: cmd.userIdentifier }),
   useCase: useCases.requestPasswordReset
 })
 
 export const resetPasswordByToken = connectUseCase({
   fetchAggregate: userAuthenticationRepo.where,
   ensureAggregate: userAuthenticationRepo.ensure,
-  mapCommand: (cmd) => ({ id: cmd.id }),
+  mapToFetchArgs: (cmd) => ({ id: cmd.id }),
   useCase: useCases.resetPasswordByToken
 })
 
@@ -71,6 +71,6 @@ export const refreshToken = connectUseCase({
     await refreshTokenRepo.ensure(aggregate.refreshToken, clients)
     return aggregate
   },
-  mapCommand: (cmd) => ({ id: cmd.id, userId: cmd.userId }),
+  mapToFetchArgs: (cmd) => ({ id: cmd.id, userId: cmd.userId }),
   useCase: useCases.refreshToken
 })

@@ -52,6 +52,7 @@
     "express": "^4.17.1",
     "fastify": "^3.9.2",
     "fastify-cookie": "^5.1.0",
+    "fastify-cors": "^5.1.0",
     "fp-ts": "^2.8.5",
     "hamjest": "^3.7.1",
     "js-joda": "^1.10.1",

@@ -15,7 +15,7 @@ describe('exposeUseCaseViaHTTP', () => {
     })
     const connectedUseCaseA = connectUseCase({
       useCase: useCaseA,
-      mapCommand: () => '',
+      mapToFetchArgs: () => '',
       ensureAggregate: async (aggregate) => aggregate,
       fetchAggregate: async () => 'hallo'
     })
