@@ -3,7 +3,7 @@ import { AnyConnectedUseCaseConfig, AnyUseCaseConfigType } from '../use-case'
 import { httpRegistry } from './http-registry'
 import { Request } from 'express'
 import { InputInvalid, ResponseInvalid, Unauthorized } from '../../errors'
-import { FastifyInstance } from 'fastify'
+import { FastifyInstance, FastifyRequest } from 'fastify'
 import { convertError } from './convert-to-http-errors'
 
 export const useCaseViaHTTP = <Principal extends AnyCodec,
@@ -49,7 +49,7 @@ export const useCaseViaHTTP = <Principal extends AnyCodec,
     throw new Unauthorized()
   }
 
-  const mapRequestToCommand = (req: Pick<Request, 'body'>, principal: Principal['A']) => {
+  const mapRequestToCommand = (req: Pick<FastifyRequest, 'body'>, principal: Principal['A']) => {
     const decoded = config.apiDefinition.validator.decode(req.body)
       .mapError((error) => {
         throw new InputInvalid(error)

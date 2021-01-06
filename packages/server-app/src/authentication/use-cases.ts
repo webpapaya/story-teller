@@ -5,10 +5,12 @@ import { v } from '@story-teller/shared'
 import { aggregateFactory, useCase } from '../lib/use-case'
 import {
   userAuthentication,
-  todo,
   authenticationToken,
   principal,
-  events
+  events,
+  userIdentifier,
+  password,
+  plainToken
 } from './domain'
 import jsonwebtoken from 'jsonwebtoken'
 import { v4 as uuid } from 'uuid'
@@ -51,8 +53,8 @@ export const signUp = aggregateFactory({
   aggregateTo: userAuthentication,
   command: v.record({
     id: v.uuid,
-    userIdentifier: todo,
-    password: todo
+    userIdentifier: userIdentifier,
+    password: password
   }),
   events: [
     {
@@ -92,8 +94,8 @@ export const signIn = aggregateFactory({
     refreshToken: authenticationToken
   }),
   command: v.record({
-    userIdentifier: todo,
-    password: todo
+    userIdentifier: v.nonEmptyString,
+    password: v.clampedString(4, 255)
   }),
   events: [],
   execute: ({ command, aggregate }) => {
@@ -117,7 +119,7 @@ export const signIn = aggregateFactory({
 
 export const confirmAccount = useCase({
   aggregate: userAuthentication,
-  command: v.record({ id: v.uuid, token: todo }),
+  command: v.record({ id: v.uuid, token: v.nonEmptyString }),
   events: [],
   preCondition: ({ aggregate }) => aggregate.confirmation.state === 'active',
   execute: ({ command, aggregate }) => {
@@ -140,7 +142,7 @@ export const confirmAccount = useCase({
 
 export const requestPasswordReset = useCase({
   aggregate: userAuthentication,
-  command: v.record({ userIdentifier: todo }),
+  command: v.record({ userIdentifier: userIdentifier }),
   events: [
     {
       event: events.passwordResetRequested,
@@ -159,7 +161,7 @@ export const requestPasswordReset = useCase({
 
 export const resetPasswordByToken = useCase({
   aggregate: userAuthentication,
-  command: v.record({ id: v.uuid, token: todo, password: todo }),
+  command: v.record({ id: v.uuid, token: plainToken, password: password }),
   events: [
     // TODO: send password reset email
   ],
@@ -199,7 +201,7 @@ export const refreshToken = aggregateFactory({
     jwtToken: v.string,
     refreshToken: authenticationToken
   }),
-  command: v.record({ id: v.uuid, userId: v.uuid, token: todo }),
+  command: v.record({ id: v.uuid, userId: v.uuid, token: plainToken }),
   events: [],
   execute: ({ aggregate, command }) => {
     if (aggregate.refreshToken.token.state !== 'active' ||
@@ -224,7 +226,7 @@ export const refreshToken = aggregateFactory({
 export const signOut = aggregateFactory({
   aggregateFrom: authenticationToken,
   aggregateTo: authenticationToken,
-  command: v.record({ id: v.uuid, userId: v.uuid, token: todo }),
+  command: v.record({ id: v.uuid, userId: v.uuid, token: plainToken }),
   events: [],
   execute: ({ aggregate, command }) => {
     if (aggregate.token.state !== 'active' ||

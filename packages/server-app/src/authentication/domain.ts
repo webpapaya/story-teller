@@ -4,6 +4,9 @@ import { email } from '../utils/custom-codecs'
 
 export const todo = v.nonEmptyString
 export const userAggregateRoot = v.uuid
+export const userIdentifier = v.nonEmptyString
+export const password = v.clampedString(4, 255)
+export const plainToken = v.nonEmptyString
 
 const token = v.union([
   v.valueObject({

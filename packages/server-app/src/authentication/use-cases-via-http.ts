@@ -1,10 +1,13 @@
 import * as useCases from './use-cases-connected'
-import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter, Response } from 'express'
-import { v } from '@story-teller/shared'
+import { Authentication } from '@story-teller/shared'
 import './use-cases-reactions'
 import { AuthenticationToken } from './domain'
 import { convertError } from '../lib/http-adapter/convert-to-http-errors'
+import { useCaseViaHTTP } from '../lib/http-adapter/use-case-via-http'
+import { v4 } from 'uuid'
+
+const identity = <T>(value: T) => value
 
 export const initialize = (app: IRouter) => {
   const setRefreshTokenCookie = (res: Response, refreshToken: AuthenticationToken) => {
@@ -74,46 +77,25 @@ export const initialize = (app: IRouter) => {
     }
   })
 
-  exposeUseCaseViaHTTP({
-    app,
-    actionName: 'sign-up',
-    aggregateName: 'authentication',
-    useCase: useCases.register,
-    method: 'post',
-    principal: v.undefinedCodec,
-    authenticateBefore: () => true,
-    mapToPrincipal: () => undefined,
-    mapToCommand: ({ request }) => {
-      return request.body
-    }
+  useCaseViaHTTP({
+    apiDefinition: Authentication.actions.signUp,
+    mapToCommand: ({ userIdentifier, password }) => ({ id: v4(), userIdentifier, password }),
+    mapToResponse: identity,
+    useCase: useCases.register
   })
 
-  exposeUseCaseViaHTTP({
-    app,
-    actionName: 'request-password-reset',
-    aggregateName: 'authentication',
-    useCase: useCases.requestPasswordReset,
-    method: 'post',
-    principal: v.undefinedCodec,
-    authenticateBefore: () => true,
-    mapToPrincipal: () => undefined,
-    mapToCommand: ({ request }) => {
-      return request.body
-    }
+  useCaseViaHTTP({
+    apiDefinition: Authentication.actions.requestPasswordReset,
+    mapToCommand: identity,
+    mapToResponse: identity,
+    useCase: useCases.requestPasswordReset
   })
 
-  exposeUseCaseViaHTTP({
-    app,
-    actionName: 'reset-password',
-    aggregateName: 'authentication',
-    useCase: useCases.resetPasswordByToken,
-    method: 'post',
-    principal: v.undefinedCodec,
-    authenticateBefore: () => true,
-    mapToPrincipal: () => undefined,
-    mapToCommand: ({ request }) => {
-      return request.body
-    }
+  useCaseViaHTTP({
+    apiDefinition: Authentication.actions.resetPasswordByToken,
+    mapToCommand: identity,
+    mapToResponse: identity,
+    useCase: useCases.resetPasswordByToken
   })
 
   return app

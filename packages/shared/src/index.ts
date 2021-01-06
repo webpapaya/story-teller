@@ -107,7 +107,7 @@ export namespace Authentication {
       action: 'reset-password-by-token',
       model: 'user',
       validator: record({
-        userIdentifier: nonEmptyString,
+        id: uuid,
         password: nonEmptyString,
         token: nonEmptyString
       }),
