@@ -4,9 +4,15 @@ import { allOf, assertThat, equalTo, hasProperty, instanceOf, string, throws, tr
 import { stub } from 'sinon'
 import { v4 } from 'uuid'
 import { InputInvalid, ResponseInvalid, Unauthorized } from '../errors'
-import { AnyConnectedUseCaseConfig, AnyUseCaseConfigType, connectUseCase, useCase } from '../lib/use-case'
+import {
+  AnyConnectedUseCaseConfig,
+  AnyUseCaseConfigType,
+  connectUseCase,
+  useCase
+} from '../lib/use-case'
 
 import fastify, { FastifyInstance } from 'fastify'
+import { convertError } from '../lib/convertToHTTPError'
 
 const useCaseViaHTTP = <
   Principal extends AnyCodec,
@@ -22,6 +28,14 @@ const useCaseViaHTTP = <
     principal: Principal
     mapToPrincipal: (authorizationHeader: string) => Principal['O']
   }
+  authenticateBefore?: (payload: {
+    principal: Principal['O']
+    aggregate: UseCaseConfig['aggregateFrom']['O']
+  }) => boolean
+  authenticateAfter?: (payload: {
+    principal: Principal['O']
+    aggregate: UseCaseConfig['aggregateTo']['O']
+  }) => boolean
 
   // TODO: add default implementation
   mapToCommand: (input: CommandDefinition['validator']['O'], principal: Principal['O']) => Command
@@ -71,15 +85,25 @@ const useCaseViaHTTP = <
         try {
           const principal = mapRequestToPrincipal(req)
           const command = mapRequestToCommand(req, principal)
-          const aggregate = await config.useCase.execute(command, {})
+          const aggregate = await config.useCase.execute(command, {
+            beforeUseCase: ({ aggregate }) => config.authenticateBefore?.({
+              principal,
+              aggregate
+            }) ?? true,
+            afterUseCase: ({ aggregate }) => config.authenticateAfter?.({
+              principal,
+              aggregate
+            }) ?? true
+          })
           const responsePayload = mapAggregateToResponse(aggregate)
 
           res.send({
             payload: responsePayload
           })
         } catch (e) {
-          res.status(401)
-          res.send({ test: 1 })
+          const { status, body } = convertError(e)
+          res.status(status)
+          res.send(body)
         }
       })
     }
@@ -259,6 +283,60 @@ describe('use-case-via-http', () => {
           assertThat(response.json(), allOf(
             hasProperty('payload.aggregateOutput', string()))
           )
+        })
+
+        async function callEndpoint ({ authenticateBefore, authenticateAfter }: {authenticateBefore: boolean, authenticateAfter: boolean}) {
+          const httpUseCase = useCaseViaHTTP({
+            apiDefinition,
+            useCase: connectedUseCaseDefinition,
+            mapToCommand: (requestInput, principal) => {
+              return { commandUseCase: principal.id }
+            },
+            authorization: {
+              principal: v.record({
+                id: v.string
+              }),
+              mapToPrincipal: (header) => ({
+                id: header
+              })
+            },
+            authenticateBefore: () => authenticateBefore,
+            authenticateAfter: () => authenticateAfter,
+            mapToResponse: (aggregate) => {
+              return { aggregateOutput: aggregate.aggregate }
+            }
+          })
+          const app = fastify()
+          httpUseCase.register(app)
+
+          return app.inject({
+            method: httpUseCase.verb,
+            url: httpUseCase.path,
+            headers: {
+              authorization: principal.id
+            },
+            payload: { commandInput: 'hallo' }
+          })
+        }
+
+        it('AND authenticateBefore returns false, returns 401', async () => {
+          const response = await callEndpoint({
+            authenticateBefore: false,
+            authenticateAfter: true
+          })
+
+          assertThat(response,
+            hasProperty('statusCode', 401))
+        })
+
+        it('AND authenticateAfter returns false, returns 401', async () => {
+          const response = await callEndpoint({
+            authenticateBefore: true,
+            authenticateAfter: false
+          })
+
+          assertThat(response,
+            hasProperty('statusCode', 401))
         })
       })
     })

@@ -1,9 +1,10 @@
 import * as useCases from './use-cases-connected'
-import { convertError, exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
+import { exposeUseCaseViaHTTP } from '../lib/use-case-via-http'
 import { IRouter, Response } from 'express'
 import { v } from '@story-teller/shared'
 import './use-cases-reactions'
 import { AuthenticationToken } from './domain'
+import { convertError } from '../lib/convertToHTTPError'
 
 export const initialize = (app: IRouter) => {
   const setRefreshTokenCookie = (res: Response, refreshToken: AuthenticationToken) => {

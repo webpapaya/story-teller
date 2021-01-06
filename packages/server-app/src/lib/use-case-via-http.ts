@@ -1,15 +1,8 @@
 import { AnyCodec } from '@story-teller/shared'
 import { IRouter, Request, Response } from 'express'
-import { AnyUseCaseConfigType, AnyConnectedUseCaseConfig } from './use-case'
-import {
-  PrincipalDecodingError,
-  CodecError,
-  PreConditionViolated,
-  PostConditionViolated,
-  UseCaseError,
-  RepositoryError
-} from '../errors'
-import { TokenExpiredError } from 'jsonwebtoken'
+import { AnyConnectedUseCaseConfig, AnyUseCaseConfigType } from './use-case'
+import { PrincipalDecodingError } from '../errors'
+import { convertError } from './convertToHTTPError'
 
 type HTTPVerb = 'get' | 'post' | 'patch' | 'delete' | 'put'
 const httpRegistry: Array<{
@@ -117,64 +110,4 @@ export const exposeUseCaseViaHTTP = <
         res.send(body)
       }
     })
-}
-
-export const convertError = (error: Error) => {
-  console.error(error)
-  if (error instanceof CodecError) {
-    return {
-      status: 400,
-      body: {
-        description: error.name,
-        payload: error.codecErrors
-      }
-    }
-  } else if (error instanceof UseCaseError) {
-    return {
-      status: 400,
-      body: {
-        description: 'Use case error',
-        message: error.cause
-      }
-    }
-  } else if (error instanceof PreConditionViolated) {
-    return {
-      status: 400,
-      body: {
-        description: 'precondition violated',
-        payload: []
-      }
-    }
-  } else if (error instanceof PostConditionViolated) {
-    return {
-      status: 400,
-      body: {
-        description: 'postcondition violated',
-        payload: []
-      }
-    }
-  } else if (error instanceof RepositoryError &&
-    error.cause === 'Record does already exist') {
-    return {
-      status: 409,
-      body: {
-        description: 'persistence error',
-        message: error.cause
-      }
-    }
-  } else if (error instanceof TokenExpiredError) {
-    return {
-      status: 401,
-      body: {
-        description: 'Token expired'
-      }
-    }
-  } else {
-    return {
-      status: 500,
-      body: {
-        description: 'internal server error'
-      }
-    }
-  }
 }
