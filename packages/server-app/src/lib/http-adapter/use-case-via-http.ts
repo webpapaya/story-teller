@@ -3,7 +3,8 @@ import { AnyConnectedUseCaseConfig, AnyUseCaseConfigType } from '../use-case'
 import { httpRegistry } from './http-registry'
 import { Request } from 'express'
 import { InputInvalid, ResponseInvalid, Unauthorized } from '../../errors'
-import { FastifyInstance, FastifyRequest } from 'fastify'
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import 'fastify-cookie'
 import { convertError } from './convert-to-http-errors'
 
 export const useCaseViaHTTP = <Principal extends AnyCodec,
@@ -28,20 +29,16 @@ export const useCaseViaHTTP = <Principal extends AnyCodec,
     aggregate: UseCaseConfig['aggregateTo']['O']
   }) => boolean
 
-  mapToCommand: (input: CommandDefinition['validator']['O'], principal: Principal['O']) => Command
+  mapToCommand: (
+    input: CommandDefinition['validator']['O'],
+    principal: Principal['O'],
+    req: Pick<FastifyRequest, 'cookies' | 'headers'>
+  ) => Command
 
   // TODO: add default implementation
   mapToResponse: (aggregate: Aggregate) => CommandDefinition['response']['O']
+  httpReplyOptions?: (payload: { aggregate: Aggregate, reply: FastifyReply }) => void
 }) => {
-  httpRegistry.add({
-    method: config.apiDefinition.verb,
-    aggregateName: config.apiDefinition.model,
-    actionName: config.apiDefinition.verb,
-    authenticateAfter: config.authenticateAfter ?? (() => true),
-    authenticateBefore: config.authenticateBefore ?? (() => true),
-    useCase: config.useCase as unknown as AnyConnectedUseCaseConfig<AnyUseCaseConfigType>
-  })
-
   const mapRequestToPrincipal = (req: Pick<Request, 'headers'>) => {
     if (req.headers.authorization) {
       return config.authorization?.mapToPrincipal(req.headers.authorization)
@@ -49,14 +46,14 @@ export const useCaseViaHTTP = <Principal extends AnyCodec,
     throw new Unauthorized()
   }
 
-  const mapRequestToCommand = (req: Pick<FastifyRequest, 'body'>, principal: Principal['A']) => {
+  const mapRequestToCommand = (req: Pick<FastifyRequest, 'body' | 'cookies' | 'headers'>, principal: Principal['A']) => {
     const decoded = config.apiDefinition.validator.decode(req.body)
       .mapError((error) => {
         throw new InputInvalid(error)
       })
       .get()
 
-    return config.mapToCommand(decoded, principal)
+    return config.mapToCommand(decoded, principal, req)
   }
 
   const mapAggregateToResponse = (aggregate: Aggregate) => {
@@ -85,7 +82,16 @@ export const useCaseViaHTTP = <Principal extends AnyCodec,
     mapRequestToCommand,
     mapAggregateToResponse,
     register: (app: FastifyInstance) => {
-      app[verb](path, async (req, res) => {
+      httpRegistry.add({
+        method: config.apiDefinition.verb,
+        aggregateName: config.apiDefinition.model,
+        actionName: config.apiDefinition.verb,
+        authenticateAfter: config.authenticateAfter ?? (() => true),
+        authenticateBefore: config.authenticateBefore ?? (() => true),
+        useCase: config.useCase as unknown as AnyConnectedUseCaseConfig<AnyUseCaseConfigType>
+      })
+
+      app[verb](path, async (req, reply) => {
         try {
           const principal = mapRequestToPrincipal(req)
           const command = mapRequestToCommand(req, principal)
@@ -101,14 +107,16 @@ export const useCaseViaHTTP = <Principal extends AnyCodec,
           })
           const responsePayload = mapAggregateToResponse(aggregate)
 
-          res.send({
+          config.httpReplyOptions?.({ reply, aggregate })
+
+          reply.send({
             payload: responsePayload,
             links: httpRegistry.linksFor(config.apiDefinition.model, principal, aggregate)
           })
         } catch (e) {
           const { status, body } = convertError(e)
-          res.status(status)
-          res.send(body)
+          reply.status(status)
+          reply.send(body)
         }
       })
     }

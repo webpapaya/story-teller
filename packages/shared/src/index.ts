@@ -8,7 +8,7 @@ import {
   nonEmptyString,
   localDateTime,
   literal,
-  union
+  union, undefinedCodec
 } from './lib'
 import * as _v from './lib/index'
 import { positiveInteger } from './lib/primitives'
@@ -73,7 +73,7 @@ export namespace Authentication {
       verb: 'post',
       model: 'user',
       action: 'sign-out',
-      validator: record({}),
+      validator: undefinedCodec,
       response: record({})
     }),
 
@@ -86,8 +86,20 @@ export namespace Authentication {
         password: nonEmptyString
       }),
       response: record({
-        id: uuid,
-        userIdentifier: nonEmptyString
+        jwtToken: nonEmptyString
+      })
+    }),
+
+    refreshToken: buildCommandDefinition({
+      verb: 'post',
+      action: 'refresh-token',
+      model: 'user',
+      validator: record({
+        userIdentifier: nonEmptyString,
+        password: nonEmptyString
+      }),
+      response: record({
+        jwtToken: nonEmptyString
       })
     }),
 

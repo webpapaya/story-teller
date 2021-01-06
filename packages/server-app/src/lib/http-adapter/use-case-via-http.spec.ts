@@ -58,12 +58,14 @@ describe('use-case-via-http', () => {
     it('WHEN correct input given, maps it correctly', () => {
       httpUseCase.apiDefinitionValidator.build().forEach((factory) => {
         assertThat(httpUseCase.useCaseConfig.command.decode(
+          // @ts-expect-error
           httpUseCase.mapRequestToCommand({ body: factory() }, principal)).isOk(), truthy())
       })
     })
 
     it('WHEN invalid input given, throws InputInvalid error', () => {
       assertThat(() => httpUseCase.useCaseConfig.command.decode(
+        // @ts-expect-error
         httpUseCase.mapRequestToCommand({ body: 'test' }, principal)).isOk(), throws(instanceOf(InputInvalid)))
     })
   })
@@ -109,10 +111,12 @@ describe('use-case-via-http', () => {
       }
     })
     const body = httpUseCase.apiDefinitionValidator.build()[0]()
+
+    // @ts-expect-error
     httpUseCase.mapRequestToCommand({ body }, principal)
 
     assertThat(mapToCommand, hasProperty('lastCall.args.length',
-      equalTo(2)))
+      equalTo(3)))
   })
 
   describe('HTTP Server', () => {
