@@ -61,6 +61,47 @@ export namespace Company {
         name: nonEmptyString
       }),
       response: aggregate
+    }),
+    rename: buildCommandDefinition({
+      verb: 'put',
+      model: 'company',
+      action: 'rename',
+      validator: record({
+        companyId: uuid,
+        name: nonEmptyString
+      }),
+      response: aggregate
+    }),
+    addEmployee: buildCommandDefinition({
+      verb: 'put',
+      model: 'company',
+      action: 'addEmployee',
+      validator: record({
+        companyId: uuid,
+        personId: uuid
+      }),
+      response: aggregate
+    }),
+    removeEmployee: buildCommandDefinition({
+      verb: 'put',
+      model: 'company',
+      action: 'removeEmployee',
+      validator: record({
+        companyId: uuid,
+        personId: uuid
+      }),
+      response: aggregate
+    }),
+    setEmployeeRole: buildCommandDefinition({
+      verb: 'put',
+      model: 'company',
+      action: 'setEmployeeRole',
+      validator: record({
+        companyId: uuid,
+        personId: uuid,
+        role: string
+      }),
+      response: aggregate
     })
   }
 }

@@ -86,7 +86,7 @@ export const useCaseViaHTTP = <Principal extends AnyCodec,
       httpRegistry.add({
         method: config.apiDefinition.verb,
         aggregateName: config.apiDefinition.model,
-        actionName: config.apiDefinition.verb,
+        actionName: config.apiDefinition.action ?? '',
         authenticateAfter: config.authenticateAfter ?? (() => true),
         authenticateBefore: config.authenticateBefore ?? (() => true),
         useCase: config.useCase as unknown as AnyConnectedUseCaseConfig<AnyUseCaseConfigType>
@@ -112,7 +112,7 @@ export const useCaseViaHTTP = <Principal extends AnyCodec,
 
           reply.send({
             payload: responsePayload,
-            links: httpRegistry.linksFor(config.apiDefinition.model, principal, aggregate)
+            links: httpRegistry.linksFor(config.apiDefinition.model, principal, aggregate, verb)
           })
         } catch (e) {
           app.log.error(e)

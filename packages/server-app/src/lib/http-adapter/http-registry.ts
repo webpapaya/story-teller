@@ -20,13 +20,13 @@ interface HTTPRegistryItem {
 const buildRegistry = () => {
   const httpRegistry: HTTPRegistryItem[] = []
 
-  function linksFor<Principal, Aggregate> (aggregateName: string, principal: Principal, aggregate: Aggregate) {
+  function linksFor<Principal, Aggregate> (aggregateName: string, principal: Principal, aggregate: Aggregate, method: HTTPVerb) {
     return httpRegistry
       .filter(({ aggregateName: currentAggregateName, method }) => {
         return currentAggregateName === aggregateName && method !== 'post'
       })
       .filter(({ authenticateBefore }) => {
-        return authenticateBefore({ principal, aggregate })
+        return method === 'post' || authenticateBefore({ principal, aggregate })
       })
       .filter(({ useCase }) => {
         const precondition = useCase.useCase.config.preCondition

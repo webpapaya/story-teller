@@ -1,6 +1,6 @@
 import { assertThat, hasProperties, hasProperty, throws } from 'hamjest'
 import {
-  Company,
+  CompanyAggregate,
   addEmployee,
   removeEmployee,
   setEmployeeRole,
@@ -10,7 +10,7 @@ import {
 import { v4 as uuid } from 'uuid'
 import { hasAggregate } from '../utils/custom-matcher'
 
-const company: Company = {
+const company: CompanyAggregate = {
   id: uuid(),
   name: 'Some company',
   employees: []

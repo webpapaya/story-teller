@@ -1,5 +1,5 @@
 import * as queries from './repository.types'
-import { Company, companyAggregate } from './use-cases'
+import { CompanyAggregate, companyAggregate } from './use-cases'
 import { buildRecordRepository, buildRepository } from '../lib/build-repository'
 
 const toDomain = (dbResult: queries.IWhereIdResult) => {
@@ -12,7 +12,7 @@ const toDomain = (dbResult: queries.IWhereIdResult) => {
 
 export const ensure = buildRepository({
   dbFunction: queries.ensureCompany,
-  toRepository: (company: Company) => {
+  toRepository: (company: CompanyAggregate) => {
     return {
       id: company.id,
       name: company.name,
@@ -24,7 +24,7 @@ export const ensure = buildRepository({
 
 export const whereId = buildRecordRepository({
   dbFunction: queries.whereId,
-  toRepository: (params: {id: Company['id']}) => {
+  toRepository: (params: {id: CompanyAggregate['id']}) => {
     return params
   },
   toDomain
@@ -32,7 +32,7 @@ export const whereId = buildRecordRepository({
 
 export const destroy = buildRepository({
   dbFunction: queries.deleteCompanyById,
-  toRepository: (id: Company['id']) => {
+  toRepository: (id: CompanyAggregate['id']) => {
     return { id: id }
   },
   toDomain: () => {}

@@ -1,11 +1,11 @@
 import { v4 as uuid } from 'uuid'
 import { t, assertDifference } from '../spec-helpers'
 import { ensure, destroy, whereId } from './repository'
-import { Company, companyAggregate, addEmployee } from './use-cases'
+import { CompanyAggregate, companyAggregate, addEmployee } from './use-cases'
 import { assertThat, truthy, hasProperty, equalTo, promiseThat, rejected } from 'hamjest'
 
 describe('invitation repository', () => {
-  const company: Company = {
+  const company: CompanyAggregate = {
     id: uuid(),
     name: 'Some company',
     employees: [{ id: uuid(), userId: uuid(), role: 'employee' }]

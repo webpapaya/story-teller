@@ -3,6 +3,7 @@ import { aggregateFactory, useCase } from '../lib/use-case'
 import { uniqueBy } from '../utils/unique-by'
 import { fromTraversable, Lens, Prism } from 'monocle-ts'
 import { array } from 'fp-ts/lib/Array'
+import { v4 } from 'uuid'
 
 const employeeRoles = v.union([v.literal('manager'), v.literal('employee')])
 
@@ -19,7 +20,7 @@ export const companyAggregate = v.aggregate({
   employees: v.array(employeeEntity)
 })
 
-export type Company = typeof companyAggregate['O']
+export type CompanyAggregate = typeof companyAggregate['O']
 
 export const actions = {
   create: v.record({
@@ -47,10 +48,10 @@ export const actions = {
 } as const
 
 const employeeRole = Lens.fromProp<Employee>()('role')
-const employees = Lens.fromProp<Company>()('employees')
+const employees = Lens.fromProp<CompanyAggregate>()('employees')
 const employeeTraversal = fromTraversable(array)<Employee>()
 const employeePrism = (id: string): Prism<Employee, Employee> => Prism.fromPredicate(child => child.id === id)
-const nameLens = Lens.fromProp<Company>()('name')
+const nameLens = Lens.fromProp<CompanyAggregate>()('name')
 
 export const create = aggregateFactory({
   aggregateFrom: v.undefinedCodec,
@@ -62,7 +63,7 @@ export const create = aggregateFactory({
       id: command.id,
       name: command.name,
       employees: [{
-        id: command.principalId,
+        id: v4(),
         userId: command.principalId,
         role: 'manager' as const
       }]
@@ -84,7 +85,7 @@ export const addEmployee = useCase({
   execute: ({ aggregate, command: action }) => ({
     ...aggregate,
     employees: uniqueBy('userId', [{
-      id: action.personId,
+      id: v4(),
       userId: action.personId,
       role: 'employee' as const
     }, ...aggregate.employees])
