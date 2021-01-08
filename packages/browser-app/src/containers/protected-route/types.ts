@@ -10,6 +10,7 @@ export type StatePropsType = {
 
 export type DispatchPropsType = {
   sideEffect: UnpackThunk<typeof getAuthenticatedUser>
+  refreshToken: () => void
 }
 
 export type OrganismPropsType = OwnPropsType & StatePropsType & Omit<DispatchPropsType, 'sideEffect'>;

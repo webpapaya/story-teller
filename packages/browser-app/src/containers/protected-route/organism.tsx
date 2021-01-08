@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react'
 import { Route, Redirect } from 'react-router-dom'
-import { OrganismPropsType } from "./types";
-import Loading from '../../components/loading';
+import { OrganismPropsType } from './types'
+import Loading from '../../components/loading'
 
-const Organism = ({ isAuthenticated, isLoading, ...props }: OrganismPropsType) => {
+const Organism = ({ isAuthenticated, isLoading, refreshToken, ...props }: OrganismPropsType) => {
+  useEffect(() => {
+    const intervalId = setInterval(() => refreshToken(), 10000)
+    return () => clearInterval(intervalId)
+  }, [])
+
   if (isAuthenticated) {
     return <Route {...props} />
   } else if (isLoading) {

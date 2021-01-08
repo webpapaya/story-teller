@@ -16,7 +16,6 @@ const defaultState: State = {
 const reducer = (state = defaultState, action: Actions): State => {
   switch (action.type) {
     case 'USER/SESSION/SUCCESS':
-      cache.clear()
       return {
         state: 'authenticated' as const,
         id: action.payload.id,
