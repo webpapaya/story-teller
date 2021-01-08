@@ -2,6 +2,7 @@ import fastify from 'fastify'
 import fastifyCookie from 'fastify-cookie'
 import fastifyCors from 'fastify-cors'
 import * as authentication from './authentication/use-cases-via-http'
+import * as company from './company/use-cases-via-http'
 
 const app = fastify({
   logger: true
@@ -17,7 +18,11 @@ app.register(fastifyCors, {
 
 const port = parseInt(process.env.API_PORT ?? '3000')
 
-Object.entries(authentication).forEach(([_, endpoint]) => {
+Object.values(authentication).forEach((endpoint) => {
+  endpoint.register(app)
+})
+
+Object.values(company).forEach((endpoint) => {
   endpoint.register(app)
 })
 

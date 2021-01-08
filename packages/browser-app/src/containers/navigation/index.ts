@@ -13,7 +13,7 @@ const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = () => {
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => {
   return {
     sideEffect: () => Promise.resolve(),
-    onSignOut: () => dispatch(signOut())
+    onSignOut: () => dispatch(signOut({}))
   }
 }
 

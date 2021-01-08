@@ -9,5 +9,5 @@ export type Action<Type extends string, Payload> = {
 }
 
 export type Actions =
-  | Action<'USER/SESSION/SUCCESS', AuthenticatedUser>
-  | Action<'USER/SIGN_OUT/SUCCESS', void>
+  | Action<'AUTHENTICATION/SIGN_IN/SUCCESS', AuthenticatedUser>
+  | Action<'AUTHENTICATION/SIGN_OUT/SUCCESS', void>

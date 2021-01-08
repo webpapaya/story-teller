@@ -6,7 +6,7 @@ export const fetch = (
   options = { simulate: false }) => {
   const jwtToken = store.getState()?.authentication?.jwtToken
 
-  return window.fetch(`${process.env.REACT_APP_SERVER_URL}/${url}`, {
+  return window.fetch(url, {
     ...request,
     ...(request.rawBody ? { body: JSON.stringify(request.rawBody) } : {}),
     headers: {

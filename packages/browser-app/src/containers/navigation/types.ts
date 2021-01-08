@@ -1,6 +1,4 @@
 import { History } from 'history'
-import { UnpackThunk } from '../../domain/types'
-import { signOut } from '../../domain/authentication/actions'
 
 export type OwnPropsType = {
   history: History
@@ -11,7 +9,7 @@ export type StatePropsType = {
 
 export type DispatchPropsType = {
   sideEffect: () => Promise<any>
-  onSignOut: UnpackThunk<typeof signOut>
+  onSignOut: () => void
 }
 
 export type OrganismPropsType = OwnPropsType & StatePropsType & Omit<DispatchPropsType, 'sideEffect'>;

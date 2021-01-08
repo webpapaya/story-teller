@@ -1,14 +1,4 @@
-import { v4 } from 'uuid'
-import { ActionCreator } from '../types'
-import { Actions } from './types'
-import { fetch } from '../fetch'
+import { Company } from '@story-teller/shared'
+import fetchViaHTTP from '../fetch-via-http'
 
-export const createCompany: ActionCreator<{name: string}, void, Actions> = (params) => async () => {
-  await fetch('company', {
-    method: 'POST',
-    rawBody: {
-      id: v4(),
-      name: params.name
-    }
-  })
-}
+export const createCompany = fetchViaHTTP(Company.actions.createCompany)

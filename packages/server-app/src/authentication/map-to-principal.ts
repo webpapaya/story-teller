@@ -3,7 +3,11 @@ import { Request } from 'express'
 import jsonwebtoken from 'jsonwebtoken'
 
 export const mapToPrincipal = (request: Request) => {
-  const token = (request.headers.authorization ?? '').replace('Bearer ', '')
+  return mapToFastifyPrincipal(request.headers.authorization ?? '')
+}
+
+export const mapToFastifyPrincipal = (header: string) => {
+  const token = (header ?? '').replace('Bearer ', '')
   const secret = process.env.SECRET_KEY_BASE ?? ''
   const decoded = principal.decode(jsonwebtoken.verify(token, secret))
 

@@ -15,13 +15,13 @@ const defaultState: State = {
 
 const reducer = (state = defaultState, action: Actions): State => {
   switch (action.type) {
-    case 'USER/SESSION/SUCCESS':
+    case 'AUTHENTICATION/SIGN_IN/SUCCESS':
       return {
         state: 'authenticated' as const,
         id: action.payload.id,
         jwtToken: action.payload.jwtToken
       }
-    case 'USER/SIGN_OUT/SUCCESS':
+    case 'AUTHENTICATION/SIGN_OUT/SUCCESS':
       cache.clear()
       return defaultState
 
