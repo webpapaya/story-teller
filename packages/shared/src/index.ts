@@ -8,7 +8,7 @@ import {
   nonEmptyString,
   localDateTime,
   literal,
-  union
+  union, undefinedCodec
 } from './lib'
 import * as _v from './lib/index'
 import { positiveInteger } from './lib/primitives'
@@ -51,6 +51,16 @@ export namespace Company {
     name: nonEmptyString,
     employees: array(employeeEntity)
   })
+
+  export const queries = {
+    where: buildCommandDefinition({
+      verb: 'get',
+      model: 'company',
+      action: '',
+      validator: undefinedCodec,
+      response: aggregate
+    })
+  }
 
   export const actions = {
     createCompany: buildCommandDefinition({

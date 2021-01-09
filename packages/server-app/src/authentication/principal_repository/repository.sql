@@ -5,7 +5,7 @@ SELECT json_build_object(
   'employedIn', (
     select json_agg(
       json_build_object(
-        'companyId', company_employee.id,
+        'companyId', company_employee.company_id,
         'role', company_employee.role
       )
     )

@@ -229,6 +229,39 @@ export const connectUseCase = <UseCaseConfig extends AnyUseCaseConfigType, Fetch
   return { useCase: config.useCase, raw, execute, simulate }
 }
 
+export interface AnyConnectedQuery<
+  QueryParams extends AnyCodec,
+  Aggregate extends AnyCodec,
+> {
+  execute: (params: QueryParams['O']) => Promise<Array<Aggregate['O']>>
+  config: {
+    queryParams: QueryParams
+    aggregate: Aggregate
+    fetchAggregates: (args: QueryParams['O'], clients: { pgClient: DBClient }) => Promise<Array<Aggregate['O']>>
+  }
+}
+
+export const connectedQuery = <
+  QueryParams extends AnyCodec,
+  Aggregate extends AnyCodec,
+>(config: {
+  queryParams: QueryParams
+  aggregate: Aggregate
+  fetchAggregates: (args: QueryParams['O'], clients: { pgClient: DBClient }) => Promise<Array<Aggregate['O']>>
+}) => {
+  const execute = async (params: QueryParams['O']) => {
+    return await withinTransaction(async ({ client }) => {
+      const decodedParams = config.queryParams.decode(params)
+        .mapError((error) => { throw new CommandInvalid(error) })
+        .get()
+
+      return await config.fetchAggregates(decodedParams, { pgClient: client })
+    })
+  }
+
+  return { execute, config }
+}
+
 export const useCase = <
   Command extends AnyCodec,
   Aggregate extends AnyCodec,

@@ -2,7 +2,7 @@ import * as queries from './repository.types'
 import { CompanyAggregate, companyAggregate } from './use-cases'
 import { buildRecordRepository, buildRepository } from '../lib/build-repository'
 
-const toDomain = (dbResult: queries.IWhereIdResult) => {
+const toDomain = (dbResult: queries.IWhereIdsResult) => {
   const decoded = companyAggregate.decode(dbResult?.jsonBuildObject?.valueOf())
   if (!decoded.isOk()) {
     throw new Error(JSON.stringify(decoded.get()))
@@ -23,8 +23,16 @@ export const ensure = buildRepository({
 })
 
 export const whereId = buildRecordRepository({
-  dbFunction: queries.whereId,
+  dbFunction: queries.whereIds,
   toRepository: (params: {id: CompanyAggregate['id']}) => {
+    return { ids: [params.id] }
+  },
+  toDomain
+})
+
+export const whereIds = buildRepository({
+  dbFunction: queries.whereIds,
+  toRepository: (params: {ids: Array<CompanyAggregate['id']>}) => {
     return params
   },
   toDomain

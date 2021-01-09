@@ -63,23 +63,23 @@ const ensureCompanyIR: any = {"name":"ensureCompany","params":[{"name":"employee
 export const ensureCompany = new PreparedQuery<IEnsureCompanyParams,IEnsureCompanyResult>(ensureCompanyIR);
 
 
-/** 'whereId' parameters type */
-export interface IWhereIdParams {
-  id: string | null | void;
+/** 'whereIds' parameters type */
+export interface IWhereIdsParams {
+  ids: Array<string | null | void>;
 }
 
-/** 'whereId' return type */
-export interface IWhereIdResult {
+/** 'whereIds' return type */
+export interface IWhereIdsResult {
   jsonBuildObject: Json;
 }
 
-/** 'whereId' query type */
-export interface IWhereIdQuery {
-  params: IWhereIdParams;
-  result: IWhereIdResult;
+/** 'whereIds' query type */
+export interface IWhereIdsQuery {
+  params: IWhereIdsParams;
+  result: IWhereIdsResult;
 }
 
-const whereIdIR: any = {"name":"whereId","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1183,"b":1184,"line":48,"col":24},{"a":1221,"b":1222,"line":50,"col":20}]}}],"usedParamSet":{"id":true},"statement":{"body":"select json_build_object(\n  'id', company.id,\n  'name', company.name,\n  'employees', (\n    select json_agg(\n      json_build_object(\n        'id', company_employee.id,\n        'userId', company_employee.user_id,\n        'role', company_employee.role\n      )\n    )\n    from company_employee\n    where company_id = :id))\nfrom company\nwhere company.id = :id","loc":{"a":869,"b":1222,"line":36,"col":0}}};
+const whereIdsIR: any = {"name":"whereIds","params":[{"name":"ids","codeRefs":{"defined":{"a":876,"b":878,"line":35,"col":9},"used":[{"a":1207,"b":1209,"line":49,"col":25},{"a":1247,"b":1249,"line":51,"col":21}]},"transform":{"type":"array_spread"}}],"usedParamSet":{"ids":true},"statement":{"body":"select json_build_object(\n  'id', company.id,\n  'name', company.name,\n  'employees', (\n    select json_agg(\n      json_build_object(\n        'id', company_employee.id,\n        'userId', company_employee.user_id,\n        'role', company_employee.role\n      )\n    )\n    from company_employee\n    where company.id in :ids))\nfrom company\nwhere company.id in :ids","loc":{"a":892,"b":1249,"line":37,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -96,12 +96,12 @@ const whereIdIR: any = {"name":"whereId","params":[{"name":"id","transform":{"ty
  *       )
  *     )
  *     from company_employee
- *     where company_id = :id))
+ *     where company.id in :ids))
  * from company
- * where company.id = :id
+ * where company.id in :ids
  * ```
  */
-export const whereId = new PreparedQuery<IWhereIdParams,IWhereIdResult>(whereIdIR);
+export const whereIds = new PreparedQuery<IWhereIdsParams,IWhereIdsResult>(whereIdsIR);
 
 
 /** 'deleteCompanyById' parameters type */
@@ -118,7 +118,7 @@ export interface IDeleteCompanyByIdQuery {
   result: IDeleteCompanyByIdResult;
 }
 
-const deleteCompanyByIdIR: any = {"name":"deleteCompanyById","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1291,"b":1292,"line":56,"col":32}]}}],"usedParamSet":{"id":true},"statement":{"body":"delete from company where id = :id","loc":{"a":1259,"b":1292,"line":56,"col":0}}};
+const deleteCompanyByIdIR: any = {"name":"deleteCompanyById","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1318,"b":1319,"line":57,"col":32}]}}],"usedParamSet":{"id":true},"statement":{"body":"delete from company where id = :id","loc":{"a":1286,"b":1319,"line":57,"col":0}}};
 
 /**
  * Query generated from SQL:

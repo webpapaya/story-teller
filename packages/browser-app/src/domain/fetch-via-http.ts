@@ -32,6 +32,7 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _,
     definition.model,
     definition.action
   ])
+  console.log(route)
 
   dispatch({
     type: buildType([

@@ -1,7 +1,7 @@
 import * as useCases from './use-cases-connected'
 import { mapToFastifyPrincipal, Principal } from '../authentication/map-to-principal'
 import { principal } from '../authentication/domain'
-import { useCaseViaHTTP } from '../lib/http-adapter/use-case-via-http'
+import { queryViaHTTP, useCaseViaHTTP } from '../lib/http-adapter/use-case-via-http'
 import { Company } from '@story-teller/shared'
 import { v4 } from 'uuid'
 import { CompanyAggregate } from './use-cases'
@@ -83,4 +83,17 @@ export const setEmployeeRole = useCaseViaHTTP({
   mapToResponse: identity,
   authenticateBefore: managerInCompany,
   useCase: useCases.setEmployeeRole
+})
+
+export const whereCompanies = queryViaHTTP({
+  apiDefinition: Company.queries.where,
+  authorization: {
+    principal: principal,
+    mapToPrincipal: mapToFastifyPrincipal
+  },
+  mapToCommand: (_, principal) => {
+    return { ids: principal.employedIn.map((employment) => employment.companyId) }
+  },
+  mapToResponse: identity,
+  query: useCases.whereCompanies
 })

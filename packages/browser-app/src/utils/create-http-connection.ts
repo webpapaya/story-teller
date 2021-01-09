@@ -5,7 +5,7 @@ const joinURL = (...parts: string[]) =>
   parts
     .join('/')
     .replace(/([^:]\/)\/+/g, '$1')
-    .replace(/\?$/, '')
+    .replace(/\/\?$/, '')
     .replace('/?', '?')
 
 const parseResponse = (res: Response) => {

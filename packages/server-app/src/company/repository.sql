@@ -31,7 +31,8 @@ WITH company_insert as (
 from company_insert;
 
 /*
-  @name whereId
+  @name whereIds
+  @param ids -> (...)
 */
 select json_build_object(
   'id', company.id,
@@ -45,9 +46,9 @@ select json_build_object(
       )
     )
     from company_employee
-    where company_id = :id))
+    where company.id in :ids))
 from company
-where company.id = :id;
+where company.id in :ids;
 
 
 /*
