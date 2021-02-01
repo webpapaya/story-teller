@@ -3,11 +3,15 @@ import ReduxThunk from 'redux-thunk'
 import createMemoizeMiddleware from 'redux-memoize'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import authenticationReducer from './authentication/reducer'
+import companyReducer from './company/reducer'
+import permissionReducer from './permission/reducer'
 import createHTTPInstance from '../utils/create-http-connection'
 import { cache } from './cache'
 
 export const rootReducer = combineReducers({
-  authentication: authenticationReducer
+  authentication: authenticationReducer,
+  company: companyReducer,
+  permission: permissionReducer
 })
 
 export const store = createStore(rootReducer, composeWithDevTools(
