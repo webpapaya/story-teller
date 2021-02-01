@@ -380,7 +380,7 @@ describe('build', () => {
     dateInPast,
     dateToday,
     array(union([literal(1), literal('hallo')]))
-  ].map((validator: AnyCodec) => {
+  ].forEach((validator: AnyCodec) => {
     it(validator.name, () => {
       const values = validator.build()
       assertThat(values.map((y) => validator.is(y())),

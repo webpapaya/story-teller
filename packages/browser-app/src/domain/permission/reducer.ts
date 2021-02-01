@@ -16,7 +16,6 @@ const reducer = (state = initialState, action: Actions): State => {
         .reduce((result, item) => {
           result[item.payload.id] = item.links
           return result
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         }, {} as State)
     }
   }

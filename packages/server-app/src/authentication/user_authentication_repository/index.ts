@@ -10,24 +10,26 @@ const toDomain = (response: repository.IEnsureUserAuthenticationResult): UserAut
     password: response.password,
     confirmation: response.confirmationToken
       ? {
-        state: 'active' as const,
-        token: response.confirmationToken,
-        createdAt: response.confirmationTimestamp,
-        plainToken: undefined
-      } : {
-        state: 'inactive',
-        usedAt: response.confirmationTimestamp
-      },
+          state: 'active' as const,
+          token: response.confirmationToken,
+          createdAt: response.confirmationTimestamp,
+          plainToken: undefined
+        }
+      : {
+          state: 'inactive',
+          usedAt: response.confirmationTimestamp
+        },
     passwordReset: response.passwordResetToken
       ? {
-        state: 'active' as const,
-        token: response.passwordResetToken,
-        createdAt: response.passwordResetTimestamp,
-        plainToken: undefined
-      } : {
-        state: 'inactive',
-        usedAt: response.passwordResetTimestamp
-      }
+          state: 'active' as const,
+          token: response.passwordResetToken,
+          createdAt: response.passwordResetTimestamp,
+          plainToken: undefined
+        }
+      : {
+          state: 'inactive',
+          usedAt: response.passwordResetTimestamp
+        }
   }
 
   if (userAuthentication.is(mappedResponse)) { return mappedResponse }

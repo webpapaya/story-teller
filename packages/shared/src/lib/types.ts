@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-member-accessibility */
 import { Result } from 'space-lift'
 
 export { Ok, Err, Result } from 'space-lift'

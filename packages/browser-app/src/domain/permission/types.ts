@@ -11,9 +11,7 @@ export type Link = {
   route: string
 }
 
-export type State = {
-  [id in string]: Link
-}
+export type State = Record<string, Link>
 
 export type Actions =
   | Action<string, Array<{ payload: { id: string }, links: Link }>>

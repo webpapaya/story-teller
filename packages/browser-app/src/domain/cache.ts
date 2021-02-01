@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-member-accessibility */
-
 export class ClearableWeakMap {
   _wm: WeakMap<any, any>
 

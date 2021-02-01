@@ -5,12 +5,12 @@ export const reactionsToTree = (
   fromProp = 'useCaseFrom',
   toProp = 'useCaseTo'
 ): Array<ReactionNode<string>> => {
-  var tree = []
-  var mappedArr = {}
-  var arrElem
-  var mappedElem
+  const tree = []
+  const mappedArr = {}
+  let arrElem
+  let mappedElem
 
-  for (var i = 0, len = arr.length; i < len; i++) {
+  for (let i = 0, len = arr.length; i < len; i++) {
     arrElem = arr[i]
     // @ts-ignore
     mappedArr[arrElem[fromProp]] = arrElem
@@ -18,7 +18,7 @@ export const reactionsToTree = (
     mappedArr[arrElem[fromProp]].sideEffects = []
   }
 
-  for (var id in mappedArr) {
+  for (const id in mappedArr) {
     if (Object.prototype.hasOwnProperty.call(mappedArr, id)) {
       // @ts-ignore
       mappedElem = mappedArr[id]

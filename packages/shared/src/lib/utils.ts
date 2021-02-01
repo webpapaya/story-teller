@@ -4,8 +4,8 @@ export const randBetween = (lower: number, upper: number) =>
 export const cartesianProduct = <T>(...array: T[][]): T[][] => {
   let results = [[]]
   for (let i = 0; i < array.length; i++) {
-    let currentSubArray: T[] = array[i]
-    let temp: T[] = []
+    const currentSubArray: T[] = array[i]
+    const temp: T[] = []
     for (let j = 0; j < results.length; j++) {
       for (let k = 0; k < currentSubArray.length; k++) {
         // @ts-ignore

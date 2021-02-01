@@ -1,0 +1,10 @@
+{
+    "root": true,
+    "extends": [
+        "../../.eslintrc.json"
+        
+    ],
+    "parserOptions": {
+        "project": "./packages/browser-app/tsconfig.json"
+    }
+}

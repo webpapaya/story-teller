@@ -12,6 +12,7 @@
   "dependencies": {},
   "devDependencies": {
     "cypress": "^6.2.0",
+    "eslint-plugin-cypress": "^2.11.2",
     "hamjest": "^3.7.1",
     "typescript": "^4.1.3"
   }

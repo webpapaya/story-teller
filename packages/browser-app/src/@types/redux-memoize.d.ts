@@ -6,14 +6,7 @@ declare module 'redux-memoize' {
     cache?: any
   }
 
-  export default createMemoizeMiddleware = (options: Options) => Middleware
-
-  export function memoize<T>(
-    options: Options,
-    action: T
-  ): T & { unmemoized: T }
-
-  export function memoize<T extends function>(
-    action: T
-  ): T & { unmemoized: T }
+  export default function createMemoizeMiddleware(options: Options): Middleware
+  export function memoize<T>(options: Options, action: T): T & { unmemoized: T }
+  export function memoize<T>(action: T): T & { unmemoized: T }
 }

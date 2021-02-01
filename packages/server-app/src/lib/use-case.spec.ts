@@ -197,7 +197,7 @@ describe('reactToUseCaseSync', () => {
       channel: externalDependencies.channel
     })
 
-    connectedUseCaseB.raw('test', externalDependencies) // eslint-disable-line @typescript-eslint/no-floating-promises
+    connectedUseCaseB.raw('test', externalDependencies)
 
     await promise
   }))
@@ -210,7 +210,7 @@ it.skip('verifies types', () => {
     aggregateTo: v.string,
     events: [],
     // @ts-expect-error
-    execute: ({ aggregate }) => {} // eslint-disable-line @typescript-eslint/no-unused-vars
+    execute: ({ aggregate }) => {}
   })
 
   useCase({
@@ -218,14 +218,14 @@ it.skip('verifies types', () => {
     aggregate: v.string,
     events: [],
     // @ts-expect-error
-    execute: ({ aggregate }) => {} // eslint-disable-line @typescript-eslint/no-unused-vars
+    execute: ({ aggregate }) => {}
   })
 
   const useCaseA = useCase({
     command: v.string,
     aggregate: v.string,
     events: [],
-    execute: ({ aggregate }) => aggregate // eslint-disable-line @typescript-eslint/no-unused-vars
+    execute: ({ aggregate }) => aggregate
   })
   const connectedUseCaseA = connectUseCase({
     useCase: useCaseA,
@@ -244,7 +244,6 @@ it.skip('verifies types', () => {
 
   connectUseCase({
     useCase: useCaseA,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     fetchAggregate: async (test: string) => 'string',
     ensureAggregate: async () => 'string',
     // @ts-expect-error

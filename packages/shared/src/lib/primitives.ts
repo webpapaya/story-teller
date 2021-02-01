@@ -38,7 +38,7 @@ const buildRecord = (name: string) => <T extends RecordSchema>(schema: T) => {
       const result: Partial<O> = {}
       const errors: Error[] = []
 
-      for (let key of objectKeys(schema)) {
+      for (const key of objectKeys(schema)) {
         // @ts-ignore
         const value = input[key]
         const propertyContext = { ...context, path: getContextPath(key as string, context.path) }
@@ -57,7 +57,7 @@ const buildRecord = (name: string) => <T extends RecordSchema>(schema: T) => {
     },
     encode: (value) => {
       const result: Partial<A> = {}
-      for (let key of objectKeys(schema)) {
+      for (const key of objectKeys(schema)) {
         result[key] = schema[key].encode(value[key])
       }
       return result as A
@@ -174,7 +174,7 @@ export const union = <Validator extends AnyCodec>(validators: Validator[]) => {
         .find((validator) => validator.is(input))!
         .encode(input)
     },
-    toJSON: () => ({ 'oneOf': validators }),
+    toJSON: () => ({ oneOf: validators }),
     build: () => {
       const result: Array<() => typeof validators[number]['O']> = []
       for (const validator of validators) {
@@ -193,7 +193,7 @@ export const literal = <Value extends Literal>(value: Value) => new Validation<V
     : Err([{ message: `must be literal ${value}`, context }]),
   toJSON: () => {
     if (typeof value === 'undefined') {
-      return ({ const: `undefined` })
+      return ({ const: 'undefined' })
     } else if (value === null) {
       return ({ const: 'null' })
     } else {
@@ -220,7 +220,7 @@ export const number = new Validation<number>({
   decode: (input, context) => {
     return typeof input === 'number' && !Number.isNaN(input)
       ? Ok(input)
-      : Err([{ message: `is not a number`, context }])
+      : Err([{ message: 'is not a number', context }])
   },
   build: () => [
     () => randBetween(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER) + Math.random(),
@@ -233,7 +233,7 @@ export const integer = new Validation<number>({
   decode: (input, context) => {
     return Number(input) === input && input % 1 === 0
       ? Ok(input)
-      : Err([{ message: `is not an integer`, context }])
+      : Err([{ message: 'is not an integer', context }])
   },
   build: () => [
     () => randBetween(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)

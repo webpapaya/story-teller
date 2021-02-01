@@ -1,0 +1,9 @@
+{
+    "plugins": [
+        "cypress"
+    ],
+    "extends": [
+        "../../.eslintrc.json",
+        "plugin:cypress/recommended"
+    ]
+}

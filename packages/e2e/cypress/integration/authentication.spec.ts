@@ -9,7 +9,7 @@ const signUp = (credentials = buildCredentials()) => {
   cy.visit(`${Cypress.env('CYPRESS_CLIENT_URL')}/sign-up`)
 
   cy.get('[name="userIdentifier"]')
-      .type(credentials.userIdentifier)
+    .type(credentials.userIdentifier)
 
   cy.get('[name="password"]')
     .type(credentials.password)
@@ -24,7 +24,7 @@ const signIn = (credentials = signUp()) => {
   cy.visit(`${Cypress.env('CYPRESS_CLIENT_URL')}/sign-in`)
 
   cy.get('[name="userIdentifier"]')
-      .type(credentials.userIdentifier)
+    .type(credentials.userIdentifier)
 
   cy.get('[name="password"]')
     .type(credentials.password)
@@ -39,17 +39,16 @@ const signOut = (credentials = signUp()) => {
   cy.visit(`${Cypress.env('CYPRESS_CLIENT_URL')}/app`)
 
   cy.get('[data-test-id="sign-out"]')
-      .click()
+    .click()
 
   return credentials
 }
-
 
 const requestPasswordReset = (credentials = signUp()) => {
   cy.visit(`${Cypress.env('CYPRESS_CLIENT_URL')}/request-password-reset`)
 
   cy.get('[name="userIdentifier"]')
-      .type(credentials.userIdentifier)
+    .type(credentials.userIdentifier)
 
   cy.get('[data-test-id="requestPasswordReset"]')
     .submit()
@@ -58,13 +57,12 @@ const requestPasswordReset = (credentials = signUp()) => {
 }
 
 const extractTokenFromMail = () => {
-  cy.wait(200)
+  cy.wait(200) // eslint-disable-line cypress/no-unnecessary-waiting
 
-  return  cy.request(`${Cypress.env('CYPRESS_MAIL_URL')}/messages`, {
+  return cy.request(`${Cypress.env('CYPRESS_MAIL_URL')}/messages`, {
     headers: { 'content-type': 'application/json' }
   }).then((allMessages) => {
     const messageId = allMessages.body[allMessages.body.length - 1].id
-
 
     return cy
       .request(`${Cypress.env('CYPRESS_MAIL_URL')}/messages/${messageId}.html`)
@@ -104,8 +102,8 @@ context('Authentication', () => {
     const credentials = buildCredentials()
     signUp(credentials)
     requestPasswordReset(credentials)
-    resetPassword({...credentials, password: 'updated' })
-    signIn({...credentials, password: 'updated' })
+    resetPassword({ ...credentials, password: 'updated' })
+    signIn({ ...credentials, password: 'updated' })
     cy.location('pathname').should('equal', '/app')
   })
 
