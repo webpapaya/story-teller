@@ -2,18 +2,28 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "lint": "lerna run --stream --parallel lint",
+    "lint": "eslint --ext js,ts --ignore-path .gitignore .",
     "start": "ENV_FILE=.env.dev lerna run start --parallel",
     "test": "lerna run --stream --concurrency=1 test",
     "test:types": "lerna run test:types",
     "build": "lerna run build --parallel"
   },
   "devDependencies": {
+    "@typescript-eslint/parser": "^4.14.2",
+    "eslint": "^7.19.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.22.0",
     "lerna": "^3.16.4",
     "pre-commit": "^1.2.2"
   },
   "pre-commit": [
     "lint",
     "test:types"
-  ]
+  ],
+  "dependencies": {
+    "@types/mocha": "^8.2.0"
+  }
 }
