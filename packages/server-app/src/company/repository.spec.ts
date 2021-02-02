@@ -8,7 +8,10 @@ describe('invitation repository', () => {
   const company: CompanyAggregate = {
     id: uuid(),
     name: 'Some company',
-    employees: [{ id: uuid(), userId: uuid(), role: 'employee' }]
+    employees: [
+      { id: uuid(), userId: uuid(), role: 'employee' },
+      { id: uuid(), userId: uuid(), role: 'employee' }
+    ]
   }
 
   describe('whereId', () => {
@@ -36,6 +39,12 @@ describe('invitation repository', () => {
           const result = await ensure(company, clients)
           assertThat(companyAggregate.is(result[0]), truthy())
         })
+      }))
+
+      it.only('saving record twice works', t(async (clients) => {
+        const company1 = await ensure(company, clients)
+        const company2 = await ensure({ ...company1[0], name: 'changed' }, clients)
+        assertThat(company1[0], hasProperty('employees', equalTo(company2[0].employees)))
       }))
     })
 

@@ -79,7 +79,7 @@ export interface IWhereIdsQuery {
   result: IWhereIdsResult;
 }
 
-const whereIdsIR: any = {"name":"whereIds","params":[{"name":"ids","codeRefs":{"defined":{"a":876,"b":878,"line":35,"col":9},"used":[{"a":1207,"b":1209,"line":49,"col":25},{"a":1247,"b":1249,"line":51,"col":21}]},"transform":{"type":"array_spread"}}],"usedParamSet":{"ids":true},"statement":{"body":"select json_build_object(\n  'id', company.id,\n  'name', company.name,\n  'employees', (\n    select json_agg(\n      json_build_object(\n        'id', company_employee.id,\n        'userId', company_employee.user_id,\n        'role', company_employee.role\n      )\n    )\n    from company_employee\n    where company.id in :ids))\nfrom company\nwhere company.id in :ids","loc":{"a":892,"b":1249,"line":37,"col":0}}};
+const whereIdsIR: any = {"name":"whereIds","params":[{"name":"ids","codeRefs":{"defined":{"a":876,"b":878,"line":35,"col":9},"used":[{"a":1269,"b":1271,"line":51,"col":21}]},"transform":{"type":"array_spread"}}],"usedParamSet":{"ids":true},"statement":{"body":"select json_build_object(\n  'id', company.id,\n  'name', company.name,\n  'employees', (\n    select json_agg(\n      json_build_object(\n        'id', company_employee.id,\n        'userId', company_employee.user_id,\n        'role', company_employee.role\n      )\n    )\n    from company_employee\n    where company.id = company_employee.company_id))\nfrom company\nwhere company.id in :ids","loc":{"a":892,"b":1271,"line":37,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -96,7 +96,7 @@ const whereIdsIR: any = {"name":"whereIds","params":[{"name":"ids","codeRefs":{"
  *       )
  *     )
  *     from company_employee
- *     where company.id in :ids))
+ *     where company.id = company_employee.company_id))
  * from company
  * where company.id in :ids
  * ```
@@ -118,7 +118,7 @@ export interface IDeleteCompanyByIdQuery {
   result: IDeleteCompanyByIdResult;
 }
 
-const deleteCompanyByIdIR: any = {"name":"deleteCompanyById","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1318,"b":1319,"line":57,"col":32}]}}],"usedParamSet":{"id":true},"statement":{"body":"delete from company where id = :id","loc":{"a":1286,"b":1319,"line":57,"col":0}}};
+const deleteCompanyByIdIR: any = {"name":"deleteCompanyById","params":[{"name":"id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1340,"b":1341,"line":57,"col":32}]}}],"usedParamSet":{"id":true},"statement":{"body":"delete from company where id = :id","loc":{"a":1308,"b":1341,"line":57,"col":0}}};
 
 /**
  * Query generated from SQL:

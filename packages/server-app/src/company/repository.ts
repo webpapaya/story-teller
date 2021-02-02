@@ -33,7 +33,7 @@ export const whereId = buildRecordRepository({
 export const whereIds = buildRepository({
   dbFunction: queries.whereIds,
   toRepository: (params: {ids: Array<CompanyAggregate['id']>}) => {
-    return params
+    return { ids: [...params.ids, '00000000-0000-0000-0000-000000000000'] }
   },
   toDomain
 })

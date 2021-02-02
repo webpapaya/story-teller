@@ -46,7 +46,7 @@ select json_build_object(
       )
     )
     from company_employee
-    where company.id in :ids))
+    where company.id = company_employee.company_id))
 from company
 where company.id in :ids;
 
