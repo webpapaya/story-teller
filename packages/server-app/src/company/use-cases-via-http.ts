@@ -11,9 +11,11 @@ const identity = <T>(value: T) => value
 const employedInCompany = ({ principal, aggregate: company }: { principal: Principal, aggregate: CompanyAggregate }) =>
   principal.employedIn.some((employment) => employment.companyId === company.id)
 
-const managerInCompany = ({ principal, aggregate: company }: { principal: Principal, aggregate: CompanyAggregate }) =>
-  employedInCompany({ principal, aggregate: company }) &&
-    principal.employedIn.some((employment) => employment.role === 'manager')
+const managerInCompany = ({ principal, aggregate: company }: { principal: Principal, aggregate: CompanyAggregate }) => {
+  return employedInCompany({ principal, aggregate: company }) &&
+    principal.employedIn.some((employment) =>
+      employment.companyId === company.id && employment.role === 'manager')
+}
 
 export const createCompany = useCaseViaHTTP({
   apiDefinition: Company.actions.createCompany,

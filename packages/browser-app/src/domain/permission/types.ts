@@ -11,8 +11,8 @@ export type Link = {
   route: string
 }
 
-export type State = Record<string, Link>
+export type State = Record<string, Link[]>
 
 export type Actions =
-  | Action<string, Array<{ payload: { id: string }, links: Link }>>
-  | Action<string, { payload: { id: string }, links: Link }>
+  | Action<string, Array<{ payload: { id: string }, links: Link[] }>>
+  | Action<string, { payload: { id: string }, links: Link[] }>

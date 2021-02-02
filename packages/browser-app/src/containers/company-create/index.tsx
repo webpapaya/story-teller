@@ -7,10 +7,12 @@ import { refreshToken } from '../../domain/authentication/actions'
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => ({
   onSubmit: async (values) => {
-    await dispatch(createCompany(values))
+    const company = await dispatch(createCompany(values))
     await dispatch(refreshToken())
     await dispatch(whereCompanies({}))
+    return company;
   }
 })
+
 
 export default connect(null, mapDispatchToProps)(Organism)

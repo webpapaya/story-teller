@@ -8,5 +8,6 @@ export type Action<Type extends string, Payload> = {
 }
 
 export type Actions =
-  | Action<'COMPANY/CREATED', Company>
-  | Action<'COMPANY/FETCH/SUCCESS', Array<{ payload: Company }>>
+  | Action<'COMPANY/CREATE/SUCCESS', Company>
+  | Action<'COMPANY/RENAME/SUCCESS', { payload: Company }>
+  | Action<'COMPANY/FETCH/SUCCESS', Array<{ payload: Company }> | { payload: Company }>

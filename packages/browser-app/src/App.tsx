@@ -10,6 +10,7 @@ import ResetPassword from './containers/user-reset-password'
 import CompanyCreate from './containers/company-create'
 import Navigation from './containers/navigation'
 import CompanyList from './containers/company-list'
+import CompanyRename from './containers/company-rename'
 
 import ProtectedRoute from './containers/protected-route'
 import CenteredPanel from './components/centered-panel'
@@ -57,9 +58,14 @@ const App = () => (
               <Navigation />
               <CompanyCreate />
               <CompanyList />
+
+                <Route path={"/app/company-rename/:id"} render={(props) => (
+                    <CompanyRename id={props.match.params.id} />
+                )} />
             </>
           )}
         />
+
       </Switch>
     </Provider>
   </BrowserRouter>

@@ -32,7 +32,6 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _,
     definition.model,
     definition.action
   ])
-  console.log(route)
 
   dispatch({
     type: buildType([
@@ -53,10 +52,11 @@ const fetchViaHTTP: FetchViaHTTP = (definition) => (body) => async (dispatch, _,
         definition.action || 'FETCH',
         'SUCCESS'
       ]),
-      payload: definition.verb === 'get' ? payload : body
+      payload: payload
     })
     return payload
   } catch (e) {
+    console.log(e)
     dispatch({
       type: buildType([
         definition.model,

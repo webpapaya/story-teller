@@ -22,6 +22,7 @@ export type MapDispatchToProps<ReturnValue, OwnPropsType> = (
   ownProps: OwnPropsType,
 ) => ReturnValue;
 
-export type UnpackThunk<ActionCreator extends (...args: any) => any> = (
-  ...args: Parameters<ActionCreator>
+// TODO: fix types
+export type UnpackThunk<ActionCreator extends (...args: any[]) => any> = (
+  ...args: any[]
 ) => ReturnType<ReturnType<ActionCreator>>;

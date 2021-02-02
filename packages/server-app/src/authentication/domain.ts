@@ -43,7 +43,7 @@ export const principal = v.record({
   id: v.uuid,
   employedIn: v.array(v.record({
     companyId: v.uuid,
-    role: v.union([v.literal('user'), v.literal('manager')])
+    role: v.union([v.literal('employee'), v.literal('manager')])
   }))
 })
 

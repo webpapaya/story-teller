@@ -1,16 +1,16 @@
-
 import { UnpackThunk } from '../../domain/types'
-import { whereCompanies } from '../../domain/company/actions'
+import { renameCompany } from '../../domain/company/actions'
 import { Company } from '../../domain/company/types'
 
-export type OwnPropsType = {}
+export type OwnPropsType = {
+  id: string
+}
 export type StatePropsType = {
-  companies: Company[],
-  canRename: (company: Company) => boolean
+  company?: Company
 }
 
 export type DispatchPropsType = {
-  sideEffect: UnpackThunk<typeof whereCompanies>,
+  onSubmit: UnpackThunk<typeof renameCompany>
 }
 
 export type OrganismPropsType = OwnPropsType & StatePropsType & Omit<DispatchPropsType, 'sideEffect'>;

@@ -7,9 +7,15 @@ import { refreshToken } from '../../domain/authentication/actions'
 import hasSideEffect from '../../has-side-effect'
 
 const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state) => {
+
   return {
-    companies: state.company
-  }
+    companies: state.company,
+    canRename: (company) => {
+      return Boolean(company.id
+          && state.permission[company.id].some(permission =>
+              permission.actionName === 'rename' &&
+              permission.aggregateName === 'company'))
+    }  }
 }
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => ({

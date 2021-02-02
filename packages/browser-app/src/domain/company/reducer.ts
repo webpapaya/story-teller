@@ -9,7 +9,16 @@ const reducer = (state = initialState, action: Actions): Company[] => {
     case 'COMPANY/FETCH/SUCCESS':
       return uniqueBy(['id'], [
         ...state,
-        ...action.payload.map((response) => response.payload)
+        // @ts-ignore
+        ...(Array.isArray(action.payload) ? action.payload : [action]).map((response) => response.payload)
+      ])
+    case 'COMPANY/CREATE/SUCCESS':
+    case 'COMPANY/RENAME/SUCCESS':
+      return uniqueBy(['id'], [
+        ...state,
+
+        // @ts-ignore
+        action.payload.payload
       ])
     default:
       return state
