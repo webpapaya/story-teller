@@ -2,20 +2,14 @@ import { connect } from 'react-redux'
 import { DispatchPropsType, OwnPropsType, StatePropsType } from './types'
 import { MapDispatchToProps, MapStateToProps } from '../../domain/types'
 import Organism from './organism'
-import { createCompany, whereCompanies } from '../../domain/company/actions'
-import { refreshToken } from '../../domain/authentication/actions'
+import {canRenameCompany, createCompany, whereCompanies} from '../../domain/company/actions'
 import hasSideEffect from '../../has-side-effect'
 
 const mapStateToProps: MapStateToProps<StatePropsType, OwnPropsType> = (state) => {
-
   return {
     companies: state.company,
-    canRename: (company) => {
-      return Boolean(company.id
-          && state.permission[company.id].some(permission =>
-              permission.actionName === 'rename' &&
-              permission.aggregateName === 'company'))
-    }  }
+    canRename: canRenameCompany(state.permission)
+  }
 }
 
 const mapDispatchToProps: MapDispatchToProps<DispatchPropsType, OwnPropsType> = (dispatch, props) => ({
